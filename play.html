@@ -14402,7 +14402,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
   <div class="hm-grid">
     ${homeTile('hm-recent','最近の出来事', recent.length?`<ul class="hm-list">${recent.map(r=>`<li class="${r.big?'big':''}"><span class="hm-a">${r.age}歳</span>${esc(r.t)}</li>`).join('')}</ul>`:'<p class="tiny muted">まだ出来事はありません。</p>', `<button class="linkish" type="button" data-go="life">続きを読む</button>`)}
     ${homeTile('hm-heart','心のうつりかわり', homeMoodSVG(L,age)+(egsNow?`<p class="hm-egs">いまの感情の段階　<b>${egsNow}</b>／22　${esc(egsName(egsNow))}</p>`:''), '<span class="tiny muted">感情の段階は、エイブラハムの感情の22段階によります。</span>')}
-    ${homeTile('hm-people',`出会った人たち<span class="hm-n">${pplAll.length}人</span>`, ppl.length?`<div class="hm-chips">${ppl.map(p=>`<span class="hm-chip"><small>${esc(p.label||'')}</small>${esc(p.name)}</span>`).join('')}</div>`:'<p class="tiny muted">まだ、家族のほかに出会った人はいません。</p>')}
+    ${homeTile('hm-people',`出会った人たち<span class="hm-n">${pplAll.length}人</span>`, ppl.length?`<p class="tiny muted">家族 ${pplAll.filter(p=>['father','mother','sibling','partner','child','grandma','grandpa'].includes(p.role)).length}人・家族のほか ${pplAll.filter(p=>!['father','mother','sibling','partner','child','grandma','grandpa'].includes(p.role)).length}人</p><div class="hm-chips">${ppl.map(p=>`<span class="hm-chip"><small>${esc(p.label||'')}</small>${esc(p.name)}</span>`).join('')}</div>`:'<p class="tiny muted">まだ、家族のほかに出会った人はいません。</p>')}
     ${homeTile('hm-album',`思い出のアルバム<span class="hm-n">${photos.length}枚</span>`, photos.length?`<div class="hm-photos">${photos.slice(-3).map(ph=>photoHTML(P,L,ph,true)).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。</p>', photos.length?`<button class="linkish" type="button" id="hmAlbum">アルバムをひらく</button>`:'')}
     ${homeTile('hm-belief','心に生まれた観念', bel.length?`<ul class="hm-list">${bel.map(b=>`<li><span class="hm-a">${b.age}歳</span>「${esc(b.core||b.text||'')}」</li>`).join('')}</ul>`:'<p class="tiny muted">まだ、心に残る思い込みは生まれていません。</p>', arc.length?`<button class="linkish" type="button" id="hmKmap">本棚の人生とくらべる（観念の地図）</button>`:'')}
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
@@ -14648,8 +14648,11 @@ function bindIntro(){
 function profileFacts(P,age){
   const famTxt=(P.structure==='ひとり親'&&P.single&&age!==undefined&&age<P.single.age)?'両親のもとで育つ':{ 両親:'両親のもとで育つ', ひとり親:'ひとり親の家庭', 祖父母:'祖父母のもとで育つ', 親戚:'親戚の家で育つ' }[P.structure];
   const Ly=cur&&cur.P===P?cur.L:null; const yy=Ly&&age!=null?Ly.years.find(y=>y.age===age):null;
+  // きょうだいは、いま生まれている人数（あとから生まれる弟や妹は、生まれた時に増える）
+  const sibNow=Ly&&age!=null?(Ly.persons||[]).filter(p=>p.role==='sibling'&&p.metAge!=null&&p.metAge<=age).length:null;
+  const sibTxt=sibNow==null?(P.siblings?`きょうだい${P.siblings}人`:'一人っ子'):(sibNow?`きょうだい${sibNow}人`:(P.siblings?'いまは、きょうだいなし':'一人っ子'));
   const incTxt=yy&&yy.inc?`年収 ${fmtMoney(yy.inc,Ly.incUnit,yy.year)}`:null;
-  return [`${P.year}年${P.month}月${P.day}日 ${P.hour}時${String(P.minute).padStart(2,'0')}分生まれ`, `${P.country.name}・${P.city}`, ECON_LABEL[P.econ], famTxt, P.siblings?`きょうだい${P.siblings}人`:'一人っ子', P.gender, incTxt].filter(Boolean);
+  return [`${P.year}年${P.month}月${P.day}日 ${P.hour}時${String(P.minute).padStart(2,'0')}分生まれ`, `${P.country.name}・${P.city}`, ECON_LABEL[P.econ], famTxt, sibTxt, P.gender, incTxt].filter(Boolean);
 }
 
 function seasonLabel(i,cid){ const cl=climateOf(cid); return cl==='n'?SEASON_NAME[i]:cl==='s'?['秋','冬','春','夏'][i]:['1〜3月ごろ','4〜6月ごろ','7〜9月ごろ','10〜12月ごろ'][i]; }
@@ -15161,8 +15164,9 @@ function refSecHTML(){
 //    自分の「いまの主人公」（s,c,f,ch）と呼び名 by を書く。主人公が変わったら書き直す。
 //  ・自分の受け箱 ids/{myId}/inbox を見張り、届いたら receiveFriend() に渡す。初めての相手なら「つながりました」と知らせる。
 // 預かるもの：ランダムな記号（myId）・呼び名・主人公の種。本名・メール・位置は預からない。
-// FB_CONFIG が null のあいだは何もしない（ゲームはこれまでどおり端末の中だけで動く）。
-const FB_CONFIG=null; // ← Firebase の「ウェブアプリの設定」（apiKey など。公開してよい値）を入れる
+// サーバーにつながらないときは何もしない（ゲームはこれまでどおり端末の中だけで動く）。
+// Firebase の「ウェブアプリの設定」（公開してよい値。アナリティクスは使わない）
+const FB_CONFIG={ apiKey:'AIzaSyAIRsa8yqxJAQymZYMShzFxGCjOhidhMTs', authDomain:'lifebook-dcae9.firebaseapp.com', projectId:'lifebook-dcae9', storageBucket:'lifebook-dcae9.firebasestorage.app', messagingSenderId:'707474989249', appId:'1:707474989249:web:d44ee7d10b4a658fd73440' };
 const FB_VER='10.14.1';
 const KEY_MYIDK='hitotsu.myidk', KEY_FBREG='hitotsu.fbreg', KEY_FBPUSH='hitotsu.fbpush';
 let FB=null, _fbBusy=false, _fbAgain=false;
