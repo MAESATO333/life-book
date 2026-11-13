@@ -483,6 +483,7 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .mp-wrap{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}.mp-main{flex:1 1 260px;min-width:0}.mp-main svg{width:100%;height:auto;display:block;background:linear-gradient(#DDF1FB,#F4FBFF);border-radius:14px}
 .mp-side{flex:0 0 130px;text-align:center}.mp-globe{width:130px;height:auto;display:block;margin:0 auto}.mp-cap{margin:.3em 0 0;font-size:.9em;line-height:1.5}
 .nm-mean{font-size:.86em;line-height:1.6;margin:.35em 0 0}
+.ev.k-dream{ background:#F3F0FF; border-left:4px solid #9B87E8; border-radius:10px; padding:10px 12px; } .ev.k-dream .t::before{ content:'夢 '; color:#6E57C8; font-weight:700; font-size:.85em; } .ev.k-dream .rs{ color:#4E3FA0; font-weight:600; }
 </style>
 
 <div class="wrap">
@@ -10320,6 +10321,93 @@ function meetOverlay(P,L,c){ if(document.getElementById('mtOv')) return; const u
   d.addEventListener('click',e=>{ if(e.target===d) close(); }); setTimeout(()=>{ const b=d.querySelector('#mtGo'); b&&b.focus(); },50); }
 // 出会いのお知らせの数（ナビのバッジ）
 function meetBadgeCount(){ try{ if(!cur||viewing) return 0; return meetUnseen(cur.P,cur.L,clock()).length; }catch(e){ return 0; } }
+// ===== 夢の中で、ほかの人の人生を生きる =====
+// 一生のうち5〜6回（短い一生では少なめ）。夢の中身・目がさめたときの気持ち・頭に浮かんだ言葉・そこからの気づきを、ひとつの出来事として置く。
+// 物語の乱数は使わない（種から決まる）。
+// 夢の型：{誰}=夢の中の人、{国}=その人の国、{名}=主人公
+const DREAM_POOL=[
+ { min:5, text:'遠い海辺の小さな村で、毎朝まだ暗いうちに舟を出す{誰}として、一生を生きる夢を見た。網は重く、手はひび割れ、それでも浜で待つ子どもたちの顔を見ると、また海へ出られた。',
+   feel:['目がさめても、潮のにおいが鼻の奥に残っていた。胸の中が、しんと静かだった。','知らない海なのに、なつかしくて、少し泣きそうになった。'],
+   inner:['あの人は、毎日あれを続けていたんだ','だれかのために朝早く起きるって、こういうことか'],
+   learn:['ふだん食べている魚の向こうにも、だれかの一生があると気づいた。','毎日同じことを続けること自体が、だれかを支えているのだと感じた。'] },
+ { min:6, kid:1, text:'遠い昔の、どこかの国の古い町で、戦争の時代に子ども時代を過ごす{誰}になる夢を見た。空を見上げるたびに体がこわばり、配られる小さなパンを、妹と半分ずつ分けた。',
+   feel:['目がさめて、ふとんの中で自分の手をにぎった。こわさと、ほっとした気持ちが、まざっていた。','朝ごはんが、いつもより重く、あたたかく感じた。'],
+   inner:['あれが、本当にあった時代なんだ','いまの静かな朝は、あたりまえじゃない'],
+   learn:['平和な一日は、だれかが守ってきたものだと気づいた。','分け合うことのあたたかさを、夢の中の自分から教わった。'] },
+ { min:8, text:'{国}の山あいの村で、年老いた親の世話をしながら畑を耕す{誰}として暮らす夢を見た。だれにもほめられない毎日だったが、夕方、親が「ありがとう」と小さく言った。',
+   feel:['目がさめると、なぜか自分の家族の顔が浮かんだ。胸の奥が、じんわりとあたたかかった。','うれしいのに、少しさびしい、ふしぎな気持ちが残った。'],
+   inner:['ありがとうって、言えているかな','見えないところで、だれかが支えている'],
+   learn:['身近な人に、ちゃんと気持ちを言葉で伝えようと思った。','目立たない役目にも、大きな意味があると気づいた。'] },
+ { min:10, text:'{国}の大きな町で、言葉の通じない国から働きに来た{誰}の一生を生きる夢を見た。最初の冬はひとりぼっちで、見知らぬ人がくれた温かいスープの味を、ずっと忘れなかった。',
+   feel:['目がさめても、あのスープの湯気が目に浮かんでいた。心細さと、ありがたさが、両方残っていた。','知らない土地のさびしさが、自分のことのように胸にしみた。'],
+   inner:['ひと言かけるだけで、救われる人がいる','あのときのスープみたいな人になれたら'],
+   learn:['困っている人に、小さくても声をかけようと思った。','ちがう国から来た人の気持ちを、前より想像できるようになった。'] },
+ { min:12, text:'{国}で、夢を追って何度も失敗する{誰}として生きる夢を見た。笑われ、借金をかかえ、それでも四十歳を過ぎて、ようやく自分の店を開いた。',
+   feel:['目がさめて、しばらく天井を見ていた。くやしさと、晴れやかさが、胸の中で入れかわった。','なぜか体に力がわいてきて、早く起きたくなった。'],
+   inner:['遅すぎることなんて、ないのかもしれない','失敗しても、人生は終わらない'],
+   learn:['うまくいかない時期も、道の途中なのだと思えるようになった。','人と比べずに、自分の速さで進めばいいと気づいた。'] },
+ { min:14, text:'{国}で、大切な人を早くに亡くした{誰}の一生を生きる夢を見た。悲しみは消えなかったが、その人の好きだった歌を、年をとってもずっと口ずさんでいた。',
+   feel:['目がさめると、ほおがぬれていた。悲しいのに、どこかやさしい気持ちだった。','胸がしめつけられて、しばらく起き上がれなかった。'],
+   inner:['会えるうちに、会っておきたい','いなくなっても、その人は消えないんだ'],
+   learn:['いま一緒にいる人との時間を、大切にしようと思った。','悲しみは、愛した分だけ深いのだと知った。'] },
+ { min:9, kid:1, text:'{国}の学校で、みんなの輪に入れない{誰}として過ごす夢を見た。休み時間はいつも図書室にいて、ある日、同じ本を手に取った子と、初めて目が合った。',
+   feel:['目がさめて、少しほっとした。ひとりのさびしさも、目が合ったうれしさも、まだ胸に残っていた。','あの子の気持ちが、手に取るようにわかった。'],
+   inner:['教室のすみに、あの子みたいな子がいるかもしれない','ひとりでいる時間も、むだじゃなかった'],
+   learn:['ひとりでいる人に、自分から話しかけてみようと思った。','人とつながるきっかけは、小さなことなのだと気づいた。'] },
+ { min:16, text:'{国}で、毎日病院で人を看取る仕事をする{誰}として生きる夢を見た。最後に手をにぎると、どの人も、だれかの名前を呼んだ。',
+   feel:['目がさめて、自分の手のひらをじっと見た。重たいけれど、こわくはない気持ちだった。','心が深いところまで、しずかになった。'],
+   inner:['最後に呼ぶのは、だれの名前だろう','人は最後に、人を思い出すんだ'],
+   learn:['お金や肩書きより、だれと生きたかが大事なのだと感じた。','いまの人間関係を、もっとていねいにしようと思った。'] },
+ { min:18, text:'{国}で、子どもを育てながら、ひとりで家族を支える{誰}の一生を生きる夢を見た。夜おそく帰ると、子どもが描いた絵が机の上に置いてあった。',
+   feel:['目がさめて、なぜか自分の親のことを思った。ありがたさと、申しわけなさが、いっしょにこみ上げた。','疲れているはずの夢なのに、あたたかさで目がさめた。'],
+   inner:['あの人も、こんなふうにがんばっていたのかもしれない','小さな絵一枚で、人はまた立ち上がれる'],
+   learn:['親や、育ててくれた人の苦労を、前より想像できるようになった。','だれかを喜ばせる小さなことの力に気づいた。'] },
+ { min:20, text:'{国}で、まわりの期待どおりの道を選び、本当にやりたかったことを最後まで言えなかった{誰}の一生を生きる夢を見た。年をとってから、古い日記を読み返していた。',
+   feel:['目がさめて、胸がざわざわした。他人の夢なのに、自分のことのように悔しかった。','しばらく、言葉にならない気持ちが続いた。'],
+   inner:['自分は、本当は何がしたいんだろう','言わなかったことは、ずっと残る'],
+   learn:['自分の気持ちに、正直になってみようと思った。','人の期待と、自分の願いを、分けて考えるようになった。'] },
+ { min:25, text:'{国}で、けんか別れした兄弟と、何十年も口をきかなかった{誰}になる夢を見た。年老いてから、駅のホームで偶然すれちがい、どちらからともなく頭を下げた。',
+   feel:['目がさめて、だれかに電話したくなった。胸の中のかたいものが、少しほどけた。','ほっとしたのと同時に、時間のもったいなさが胸に残った。'],
+   inner:['意地を張っている時間は、もったいない','ごめんね、は早いほうがいい'],
+   learn:['こじれた関係も、自分から一歩ゆずれば変わるかもしれないと思った。','ゆるすことは、自分を軽くすることでもあると気づいた。'] },
+ { min:30, text:'{国}で、百年近く生きた{誰}として、ひ孫に囲まれる最後の日の夢を見た。思い出すのは、大きな成功ではなく、若いころに友だちと笑い合った、なんでもない夕方だった。',
+   feel:['目がさめると、なぜか笑っていた。おだやかで、満たされた気持ちだった。','切なさと、うれしさが、ゆっくりと胸に広がった。'],
+   inner:['なんでもない日が、いちばんの宝物なんだ','今日の夕方も、いつか思い出すのかな'],
+   learn:['特別な日だけでなく、ふつうの一日をていねいに過ごそうと思った。','人生のよさは、出来事の大きさでは決まらないと気づいた。'] },
+ { min:35, text:'{国}で、だれにも知られずに、町の子どもたちに毎朝あいさつをし続けた{誰}の一生を生きる夢を見た。亡くなったあと、大人になった子どもたちが、その人の話をしていた。',
+   feel:['目がさめて、胸があたたかかった。少し照れくさいような、誇らしいような気持ちだった。','静かな感動が、朝のあいだずっと続いた。'],
+   inner:['だれかの記憶に残るのは、小さなことなのかもしれない','自分は、どんなふうに覚えていてもらえるだろう'],
+   learn:['目立たなくても、毎日の小さなやさしさが人を育てると気づいた。','今日会う人に、ちゃんとあいさつしようと思った。'] },
+ { min:45, text:'{国}で、自分とまったく反対の考えを持つ{誰}として生きる夢を見た。夢の中では、その考えがとても自然で、その人なりの理由と、守りたいものがあった。',
+   feel:['目がさめて、少しとまどった。でも、いやな気持ちではなかった。','頭の中が、ひと回り広くなったような感じがした。'],
+   inner:['あの人にも、あの人の理由があったんだ','正しさは、ひとつじゃないのかもしれない'],
+   learn:['意見のちがう人の話を、最後まで聞いてみようと思った。','人を決めつける前に、その人の背景を想像するようになった。'] },
+ { min:55, text:'{国}で、若いころの自分と同じ年ごろの{誰}として、迷いながら生きる夢を見た。夢の中の若者は、いまの自分が知っている答えを、まだ何も知らなかった。',
+   feel:['目がさめて、若いころの自分を、そっと抱きしめたくなった。','なつかしさと、いとおしさで、胸がいっぱいになった。'],
+   inner:['あのころの自分も、よくがんばっていた','迷っていた時間も、ちゃんと意味があった'],
+   learn:['若い人の迷いを、あたたかく見守ろうと思った。','これまでの自分を、前よりゆるせるようになった。'] } ];
+// 家族の夢（実在の家族の、自分が知らない若いころ）
+const DREAM_FAMILY=[
+ { who:'father', min:10, text:'夢の中で、{名}は、まだ若いころの父・{親}になっていた。仕事に行く前に鏡の前で深呼吸をし、家族のために、こわい気持ちを隠していた。',
+   feel:'目がさめて、父の背中を思い出した。知らなかった顔を見たようで、胸がいっぱいになった。', inner:'お父さんも、こわかったんだ', learn:'親も一人の人間で、迷いながら生きてきたのだと気づいた。' },
+ { who:'mother', min:10, text:'夢の中で、{名}は、少女だったころの母・{親}になっていた。好きな人のことで悩み、将来の夢をノートにこっそり書いていた。',
+   feel:'目がさめて、母にも自分と同じような時間があったのだと思うと、くすぐったくて、うれしかった。', inner:'お母さんにも、夢があったんだ', learn:'身近な人のことを、まだ知らないことがたくさんあると気づいた。' } ];
+function dreamOtherCountry(P,h){ const cs=(typeof COUNTRIES!=='undefined'?COUNTRIES:[]).filter(c=>c.id!==P.countryId); if(!cs.length) return null; return cs[h%cs.length]; }
+function dreamWho(C,h,kid){ const g=h%2?'男性':'女性'; const pool=(g==='男性'?C.male:C.female)||[]; const n=pool[(h>>>5)%Math.max(1,pool.length)]; const role=kid?(g==='男性'?'男の子':'女の子'):(g==='男性'?'男の人':'女の人');
+  if(!n) return role; const k=n[1]&&n[1]!==n[0]?n[1]:n[0]; return `${k}という${role}`; }
+function dreamApply(P,L){ if(!L||L._dream) return; L._dream=1; const D=L.deathAge; if(D<6) return;
+  // 一生を6つの時期に分け、それぞれで1回（短い一生では、届く時期だけ）
+  const spans=[[5,11],[12,19],[20,33],[34,49],[50,64],[65,95]]; const used=new Set();
+  const fam=[]; if(P.father&&P.father.name) fam.push(DREAM_FAMILY[0]); if(P.mother&&P.mother.name) fam.push(DREAM_FAMILY[1]);
+  const famAt=fam.length?(nbHash('dfam|'+P.seed)%3)+1:-1; // 2〜4番目の夢のどれかを家族の夢にする
+  spans.forEach(([a,b],si)=>{ const hi=Math.min(b,D-1); if(hi<a) return; const h=nbHash('dream|'+P.seed+'|'+si); const age=a+(h%(hi-a+1));
+    const y=L.years.find(x=>x.age===age); if(!y) return; let ev;
+    if(si===famAt){ const F=fam[h%fam.length]; const par=F.who==='father'?P.father:P.mother;
+      ev={ kind:'dream', big:true, d:2, text:F.text.replace(/\{名\}/g,P.given).replace(/\{親\}/g,par.name), feel:F.feel, inner:F.inner, result:'気づき：'+F.learn, season:(h>>>7)%4 }; }
+    else { const ok=DREAM_POOL.filter(x=>x.min<=age); let k=(h>>>3)%ok.length; for(let t=0;t<ok.length&&used.has(ok[k]);t++) k=(k+1)%ok.length; const T=ok[k]; used.add(T);
+      const C=dreamOtherCountry(P,h>>>11)||P.country; const who=dreamWho(C,h>>>13,T.kid); const v=(h>>>17)&1, w=(h>>>18)&1, z=(h>>>19)&1;
+      ev={ kind:'dream', big:true, d:2, text:`ある夜、${P.given}は、`+T.text.replace(/\{国\}/g,C.name).replace(/\{誰\}/g,who).replace(/\{名\}/g,P.given), feel:T.feel[v], inner:T.inner[w], result:'気づき：'+T.learn[z], season:(h>>>7)%4 }; }
+    const i=y.events.findIndex(e=>e.kind==='death'); if(i>=0) y.events.splice(i,0,ev); else y.events.push(ev); y._to=null; }); }
 // ===== 生まれた時の状況（約300の場面）=====
 // 生まれた日の物語（infant.js）に、さらに「家族の背景・その時期の家の事情・お産の処置・その日の偶然・知らせ方・儀式・最初の一週間」を重ねる。
 // 割合の目安：母親の年齢（20歳未満の出産は世界で約1割、日本は約1%。35歳以上は日本で約3割：人口動態統計 2021）、
@@ -13497,7 +13585,7 @@ let viewing=null;     // 過去の人生のレポートを読んでいる時 { s
 function load(){
   if(!st){ cur=null; return; }
   const P=makeBirth(st.seed,{country:st.country||null,force:st.force||null});
-  const L=simulate(P, st.choice||undefined); if(typeof birthSitApply==='function'){ if(!st.bs&&st.bsNew){ st.bs=bsChoose(P,L); delete st.bsNew; save(); } birthSitApply(P,L,st.bs||null); } if(typeof momentsApply==='function') momentsApply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(typeof friendMeet==='function') friendMeet(P,L);
+  const L=simulate(P, st.choice||undefined); if(typeof birthSitApply==='function'){ if(!st.bs&&st.bsNew){ st.bs=bsChoose(P,L); delete st.bsNew; save(); } birthSitApply(P,L,st.bs||null); } if(typeof momentsApply==='function') momentsApply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(typeof dreamApply==='function') dreamApply(P,L); if(typeof friendMeet==='function') friendMeet(P,L);
   cur={P,L};
   // 速さを変えた前から続いている人生は、今の年齢を保ったまま新しい速さに切りかえる
   if(st.spd!==2){ const t=Date.now()+(st.shift||0)-st.birthTime-(st.pause||0); const a=Math.max(0,t/oldMpy(P)); st.birthTime=Date.now()+(st.shift||0)-(st.pause||0)-a*msPerYear(P); st.spd=2; save(); }
@@ -13575,7 +13663,7 @@ let RUBY_PL=null, VIEW_CACHE=null;
 function render1(){
   const app=$('#app'); if(typeof navSync==='function') navSync();
   if(!viewing&&st&&page==='home'&&cur){ app.innerHTML=homeHTML(); bindHome(); $('#mastmeta').textContent=''; renderDev(); return; }
-  if(viewing){ const vk=JSON.stringify([viewing.seed,viewing.country,viewing.force,viewing.choice,viewing.bs,viewing.loan]); let P,L; if(VIEW_CACHE&&VIEW_CACHE.k===vk){ P=VIEW_CACHE.P; L=VIEW_CACHE.L; } else { P=makeBirth(viewing.seed,{country:viewing.country||null,force:viewing.force||null}); L=simulate(P,viewing.choice||undefined); VIEW_CACHE={ k:vk, P, L }; } if(typeof birthSitApply==='function') birthSitApply(P,L,viewing.bs||null); if(typeof momentsApply==='function') momentsApply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(viewing.loan==null&&typeof friendMeet==='function') friendMeet(P,L); RUBY_PL=[P,L]; app.innerHTML=reportHTML(P,L,true)+loanReportHTML(P,L); bindReport(P,L); bindLoanReport(P,L); $('#mastmeta').textContent='過去の人生'; renderDev(); return; }
+  if(viewing){ const vk=JSON.stringify([viewing.seed,viewing.country,viewing.force,viewing.choice,viewing.bs,viewing.loan]); let P,L; if(VIEW_CACHE&&VIEW_CACHE.k===vk){ P=VIEW_CACHE.P; L=VIEW_CACHE.L; } else { P=makeBirth(viewing.seed,{country:viewing.country||null,force:viewing.force||null}); L=simulate(P,viewing.choice||undefined); VIEW_CACHE={ k:vk, P, L }; } if(typeof birthSitApply==='function') birthSitApply(P,L,viewing.bs||null); if(typeof momentsApply==='function') momentsApply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(typeof dreamApply==='function') dreamApply(P,L); if(viewing.loan==null&&typeof friendMeet==='function') friendMeet(P,L); RUBY_PL=[P,L]; app.innerHTML=reportHTML(P,L,true)+loanReportHTML(P,L); bindReport(P,L); bindLoanReport(P,L); $('#mastmeta').textContent='過去の人生'; renderDev(); return; }
   if(!st){ app.innerHTML=introHTML(); bindIntro(); $('#mastmeta').textContent=''; renderDev(); return; }
   if(st.stage==='funeral'){ app.innerHTML=funeralHTML(cur.P,cur.L); bindFuneral(); $('#mastmeta').textContent='葬儀'; renderDev(); return; }
   if(st.stage==='report'){ app.innerHTML=reportHTML(cur.P,cur.L,false); bindReport(cur.P,cur.L); $('#mastmeta').textContent='振り返り'; renderDev(); return; }
@@ -13640,7 +13728,7 @@ function profileFacts(P,age){
 
 function seasonLabel(i,cid){ const cl=climateOf(cid); return cl==='n'?SEASON_NAME[i]:cl==='s'?['秋','冬','春','夏'][i]:['1〜3月ごろ','4〜6月ごろ','7〜9月ごろ','10〜12月ごろ'][i]; }
 function evHTML(e){
-  return `<div class="ev ${e.fresh?'ev-new':''} ${e.big?'big':''} ${e.kind==='death'?'death':''} k-${e.kind}"><p class="t">${esc(e.text)}</p>${e.feel?`<p class="f">${esc(e.feel)}</p>`:''}${e.result?`<p class="rs">${esc(e.result)}</p>`:''}${e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:''}${e.fr?`<p class="fr-tag">紹介でつながった人：${esc(e.fr)}さんの人生の主人公</p>`:''}</div>`;
+  return `<div class="ev ${e.fresh?'ev-new':''} ${e.big?'big':''} ${e.kind==='death'?'death':''} k-${e.kind}"><p class="t">${esc(e.text)}</p>${e.feel?`<p class="f">${esc(e.feel)}</p>`:''}${e.kind==='dream'?(e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:'')+(e.result?`<p class="rs">${esc(e.result)}</p>`:''):(e.result?`<p class="rs">${esc(e.result)}</p>`:'')+(e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:'')}${e.fr?`<p class="fr-tag">紹介でつながった人：${esc(e.fr)}さんの人生の主人公</p>`:''}</div>`;
 }
 function yearHTML(y, isNew){
   return `<div class="year ${isNew?'fade':''}"><div class="yage">${y.age===0?'0':y.age}<small>${ageSpan(cur&&cur.P?cur.P:{year:y.year-y.age,month:1},y.age)}</small></div><div>${isNew?'<div class="new-badge">あたらしい出来事</div>':''}${cur&&cur.P?yearArt(cur.P,cur.L,y):''}${(()=>{ let last=null, o=''; const cid=cur&&cur.P?cur.P.countryId:'jp'; for(const e of y.events){ if(e._mo!=null && e.kind!=='death' && e.kind!=='birth' && e.kind!=='birthsit' && e._mo!==last){ o+=`<div class="season-h">${e._mo}月</div>`; last=e._mo; } else if(e._mo==null && e.season!=null && e.kind!=='death' && e.kind!=='birth' && e.season!==last){ o+=`<div class="season-h">${seasonLabel(e.season,cid)}</div>`; last=e.season; } o+=evHTML(e); } return o; })()}${y.mood&&!y.events.some(e=>e.kind==='death')?`<p class="mood">${esc(y.mood)}</p>`:''}${y.egs?egsTagHTML(y.egs):''}</div></div>`;
