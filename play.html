@@ -494,11 +494,23 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .born-sub{ font-size:.75rem; letter-spacing:.06em; opacity:.95; }
 @keyframes bornBeat{ 0%,60%,100%{ transform:scale(1); } 15%{ transform:scale(1.18); } 30%{ transform:scale(.96); } 45%{ transform:scale(1.1); } }
 @media (prefers-reduced-motion:reduce){ .born-heart{ animation:none; } .born-btn{ transition:none; } }
+.lb-logo{ display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:var(--ink); }
+.lb-isle{ display:block; width:52px; height:60px; } .lb-isle svg{ width:100%; height:100%; display:block; animation:lbFloat 5s ease-in-out infinite; }
+.lb-word{ font-family:'Varela Round',var(--sans),sans-serif; font-weight:800; font-size:21px; letter-spacing:.12em; -webkit-text-stroke:.4px currentColor; }
+.lb-logo:focus-visible{ outline:3px solid #FFD1DC; outline-offset:4px; border-radius:8px; }
+@keyframes lbFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-3px); } }
+@media (prefers-reduced-motion:reduce){ .lb-isle svg{ animation:none; } }
+@media (max-width:640px){ .lb-isle{ width:42px; height:48px; } .lb-word{ font-size:17px; } }
+.lb-word{ display:inline-flex; align-items:center; gap:3px; -webkit-text-stroke:0; letter-spacing:0; }
+.lb-t{ --c:#6DB84A; display:inline-grid; place-items:center; width:26px; height:27px; border-radius:6px; background:var(--c); color:#fff; font-family:'Varela Round',var(--sans),sans-serif; font-weight:800; font-size:16px; line-height:1;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.12), 0 3px 0 color-mix(in srgb,var(--c) 72%,#000); text-shadow:0 1px 0 rgba(0,0,0,.12); }
+.lb-gap{ width:7px; }
+@media (max-width:640px){ .lb-t{ width:21px; height:22px; font-size:13px; border-radius:5px; } .lb-word{ gap:2px; } .lb-gap{ width:5px; } }
 </style>
 
 <div class="wrap">
   <header class="masthead">
-    <div class="name">LIFE BOOK<small>試作版</small></div>
+    <a class="name lb-logo" href="#" aria-label="LIFE BOOK"><span class="lb-isle" id="lbIsle" aria-hidden="true"></span><span class="lb-word" aria-hidden="true"><span class="lb-t" style="--c:#E8667E">L</span><span class="lb-t" style="--c:#F2B630">I</span><span class="lb-t" style="--c:#6DB84A">F</span><span class="lb-t" style="--c:#5BA7DD">E</span><span class="lb-gap"></span><span class="lb-t" style="--c:#9B7FD9">B</span><span class="lb-t" style="--c:#EE7A92">O</span><span class="lb-t" style="--c:#F2B630">O</span><span class="lb-t" style="--c:#5DAE44">K</span></span></a>
     <div class="mast-r"><nav class="mastnav" id="mastnav" aria-label="ページ"></nav><div class="meta" id="mastmeta"></div><button class="fr-top fr-open" type="button">友だちに紹介</button></div>
   </header>
   <main id="app"></main>
@@ -11288,6 +11300,14 @@ function P_NAME_OF(id){ try{ return (COUNTRIES.find(x=>x.id===id)||{}).name||'';
 function birthMapHTML(P){ const id=P.countryId; if(typeof GEO==='undefined'||!GEO.cs[id]) return '';
   return `<div class="mp-wrap"><div class="mp-main">${mapIslandSVG(id)}</div><div class="mp-side">${mapGlobeSVG(id,150)}<p class="mp-cap"><b>${esc(P.country.name)}</b>の<br>${esc(P.city||'')}で生まれた</p></div></div>
     <p class="tiny muted">旗は国のまんなかあたりに立てています（生まれた町の正確な位置ではありません）。地図のもと：Natural Earth</p>`; }
+// ロゴ：空に浮かぶ小さなブロックの島（木と家）
+function lbIsleSVG(){ let S; try{ S=bkScene(); }catch(e){ return ''; }
+  S.box(.3,.3,-1.6,2.4,2.4,.8,'#8E6A4C'); S.box(0,0,-.8,3,3,.8,'#B08463');
+  for(let i=0;i<3;i++) for(let j=0;j<3;j++) S.box(i,j,0,1,1,.3,(i+j)%2?'#8FD16B':'#A6DC8E');
+  S.box(.4,1.9,.3,.3,.3,1,'#8A5A3B'); S.box(-.05,1.45,1.2,1.2,1.2,1,'#5FB84A'); S.box(.15,1.65,2.2,.8,.8,.5,'#7FCB5E');
+  S.box(1.4,.2,.3,1.3,1.2,1.1,'#FFE7B8'); S.box(1.3,.1,1.4,1.5,1.4,.35,'#E9705A'); S.box(1.5,.3,1.75,1.1,1,.3,'#F08A72');
+  const sv=S.render(); return `<svg viewBox="128 30 104 120">${sv}</svg>`; }
+setTimeout(()=>{ try{ const el=document.getElementById('lbIsle'); if(el&&!el.innerHTML) el.innerHTML=lbIsleSVG(); const a=el&&el.closest('a'); if(a) a.onclick=ev=>{ ev.preventDefault(); try{ if(typeof cur!=='undefined'&&cur&&typeof goHome==='function') goHome(); else window.scrollTo(0,0); }catch(_){} }; }catch(e){} },0);
 // ===== ホームを毎日たのしく：今日のひとこと・今日の小さな場面・身近な人のいま・世界のいま・図鑑・見守りスタンプ・時間帯で変わる空 =====
 // どれも表示だけ。人生の流れ（乱数）は変えない。日付で変わるので、毎日ちがうものが見られる。
 const KEY_STAMP='hitotsu.stamps';
