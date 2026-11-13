@@ -14485,11 +14485,12 @@ function load(){
   const L=simulate(P, st.choice||undefined); if(typeof birthSitApply==='function'){ if(!st.bs&&st.bsNew){ st.bs=bsChoose(P,L); delete st.bsNew; save(); } birthSitApply(P,L,st.bs||null); } if(typeof momentsApply==='function') momentsApply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(typeof dreamApply==='function') dreamApply(P,L); if(typeof friendMeet==='function') friendMeet(P,L);
   cur={P,L};
   // 速さを変えた前から続いている人生は、今の年齢を保ったまま新しい速さに切りかえる
-  if(st.spd!==2){ const t=Date.now()+(st.shift||0)-st.birthTime-(st.pause||0); const a=Math.max(0,t/oldMpy(P)); st.birthTime=Date.now()+(st.shift||0)-(st.pause||0)-a*msPerYear(P); st.spd=2; save(); }
+  if(st.spd!==3){ const t=Date.now()+(st.shift||0)-st.birthTime-(st.pause||0); const a=Math.max(0,t/(st.spd===2?mpy2(P):oldMpy(P))); st.birthTime=Date.now()+(st.shift||0)-(st.pause||0)-a*msPerYear(P); st.spd=3; save(); }
 }
 function save(){ store.set(KEY_CUR,st); }
-// 80歳まで生きる人生を、現実の約9か月で（1歳＝約3.4日）。13歳より前に終わる人生は、全体を約50日で。
-function msPerYear(P){ return P.deathAge>=13 ? 3.4*DAY : 51*DAY/(P.deathAge+.5); }
+// 80歳まで生きる人生を、現実の約6か月半で（1歳＝約2.5日）。13歳より前に終わる人生は、全体を約38日で。（2026-11-13 9か月→6か月半）
+function msPerYear(P){ return P.deathAge>=13 ? 2.5*DAY : 37.5*DAY/(P.deathAge+.5); }
+function mpy2(P){ return P.deathAge>=13 ? 3.4*DAY : 51*DAY/(P.deathAge+.5); }
 function oldMpy(P){ return P.deathAge>=13 ? 2*DAY : 30*DAY/(P.deathAge+.5); }
 const PAUSE_BIG=3, PAUSE_SMALL=1.5;
 function nowT(){ return Date.now()+(st?st.shift:0); }
@@ -14542,7 +14543,7 @@ function deathYearOf(P,L){ const D=L.deathAge; if(D===0){ const mo=(L.death&&L.d
 // --- 誕生 ---
 function born(country,force){
   const seed=((Math.random()*2**31)>>>0)+2147483648;
-  st={ spd:2, force:force||null, seed, country:country||null, birthTime:Date.now(), shift:0, choice:'~', pause:0, lastSeen:-1, stage:'life', bsNew:1 };
+  st={ spd:3, force:force||null, seed, country:country||null, birthTime:Date.now(), shift:0, choice:'~', pause:0, lastSeen:-1, stage:'life', bsNew:1 };
   save(); load(); sinceAge=-1; viewing=null; page='life'; render();
   window.scrollTo(0,0);
 }
@@ -14579,7 +14580,7 @@ function introHTML(){
       <p class="ih-fr">友だちを誘うと、ふたりの主人公が人生のどこかで出会います。<button class="fr-open" type="button">友だちに紹介する</button></p>
     </div><div class="hero">${bkHeroSVG()}</div></div>
     <div class="body"><p>国も、家族も、家の暮らし向きも、生まれた日時も、名前も、すべて世界の統計に沿って偶然に決まります。その人は、自分で考え、自分で選んで生きていきます。あなたにできるのは、迷っているその人に、一生で2〜3回だけ「インスピレーション」を贈ること。届くかどうかは、その時のその人の心しだいです。</p>
-    <p style="margin-top:10px">人生は、現実の約3日半で1歳ずつ進みます（80歳まで生きる人生なら、約9か月）。ひらくたびに、前に見た時から今までに起きた出来事と、その時の気持ちが読めます。人生が終わると、葬儀のあとに、その人生を読み解く振り返りが届きます。生き終えた人生は、章立てのある一冊の本になって、あなたの本棚に並びます。</p></div>
+    <p style="margin-top:10px">人生は、現実の約2日半で1歳ずつ進みます（80歳まで生きる人生なら、約6か月半）。ひらくたびに、前に見た時から今までに起きた出来事と、その時の気持ちが読めます。人生が終わると、葬儀のあとに、その人生を読み解く振り返りが届きます。生き終えた人生は、章立てのある一冊の本になって、あなたの本棚に並びます。</p></div>
     <div class="cta2"><button class="born-btn" id="bornBtn2" type="button"><svg class="born-heart" viewBox="0 0 28 24" shape-rendering="crispEdges" aria-hidden="true">${typeof frHeart==='function'?frHeart(0,0,4,'#FFFFFF'):''}</svg><span class="born-txt">生まれる</span><span class="born-sub">あたらしい いのちが、はじまります</span></button></div>
     <p class="tiny muted">世界189か国の中から、その年の出生数の比率に沿って生まれる国が決まります。</p>
     ${arc.length?`<div class="shelf-wrap"><h3>わたしの本棚</h3><p class="tiny muted">生き終えた人生が、一冊ずつ並びます。背表紙を押すと、その人生の振り返りが読めます。</p><div class="shelf">${arc.map((a,i)=>spineHTML(a,i)).join('')}</div><div class="reels"><span class="tiny muted">思い出の動画</span>${arc.map((a,i)=>`<button type="button" class="reel" data-mov="${i}" aria-label="${esc(a.name)}の思い出の動画を再生"><span class="reel-ic" aria-hidden="true"></span><span>${esc(a.name)}</span></button>`).join('')}</div><div class="obi-btns"><button class="btn ghost small" id="kmapBtn" type="button">観念の地図をひらく</button></div><div id="kmapOut"></div></div>`:''}
