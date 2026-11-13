@@ -41,6 +41,7 @@ img{max-width:100%; display:block}
 :focus-visible{outline:2px solid var(--accent); outline-offset:3px}
 .wrap{max-width:1080px; margin:0 auto; padding-left:var(--gutter-l); padding-right:var(--gutter-r)}
 
+.inapp{background:var(--ember-soft); color:var(--ink); border-bottom:1px solid var(--ember); font-size:14px; line-height:1.7; padding-block:12px; padding-left:var(--gutter-l); padding-right:var(--gutter-r)}
 /* ヘッダー */
 .top{border-bottom:1px solid var(--line)}
 .top .wrap{display:flex; align-items:center; justify-content:space-between; gap:12px; padding-block:14px}
@@ -274,6 +275,19 @@ footer .wrap{padding-block:22px 30px; display:flex; flex-wrap:wrap; gap:8px 18px
 <body>
 
 
+<script>
+/* LINE などアプリの中のブラウザで開いたら、いつものブラウザ（Safari・Chrome）で開き直す。
+   アプリの中では記録の置き場所が別になり、ゲームで別の人が生まれてしまうため。 */
+(function(){
+  var ua=navigator.userAgent||'', inLine=/\bLine\//i.test(ua), inApp=inLine||/FBAN|FBAV|Instagram|MicroMessenger|KAKAOTALK/i.test(ua);
+  if(!inApp) return;
+  var tried=/openExternalBrowser=1/.test(location.search);
+  if(inLine&&!tried){ var u=location.href, i=u.indexOf('#'), b=i<0?u:u.slice(0,i), h=i<0?'':u.slice(i); location.replace(b+(b.indexOf('?')<0?'?':'&')+'openExternalBrowser=1'+h); return; }
+  document.addEventListener('DOMContentLoaded',function(){ var d=document.createElement('div'); d.className='inapp'; d.setAttribute('role','note');
+    d.innerHTML='<b>いつものブラウザで開いてください</b><br>アプリの中のブラウザでは、ゲームの記録が別の場所に保存されます。右上や下の「…」から「ブラウザで開く」を選んでください。';
+    document.body.insertBefore(d,document.body.firstChild); });
+})();
+</script>
 <header class="top">
   <div class="wrap">
     <a class="mark" href="#top">LIFE BOOK<small>試作版</small></a>
