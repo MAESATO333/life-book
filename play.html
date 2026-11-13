@@ -199,6 +199,7 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .end{ text-align:center; padding:48px 0 20px; display:grid; gap:16px; justify-items:center; }
 
 /* 制作用 */
+.devbtn[hidden]{ display:none; }
 .devbtn{ position:fixed; right:calc(12px + env(safe-area-inset-right, 0px)); bottom:calc(12px + env(safe-area-inset-bottom, 0px)); z-index:20; background:var(--surface); border:1px solid var(--line); color:var(--muted); padding:8px 12px; font-size:12px; }
 .dev{ position:fixed; left:0; right:0; bottom:0; z-index:19; background:var(--surface); border-top:1px solid var(--ink); max-height:70vh; overflow:auto;
   padding:14px max(16px, env(safe-area-inset-right, 0px)) calc(56px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
@@ -438,6 +439,7 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .hm-move{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; padding:14px 16px; border-radius:18px; border:2px dashed #8EC3E6; background:#EEF7FF; color:#13324A; }
 .hm-move h3{ margin:0 0 4px; font-family:var(--serif); font-size:16px; } .hm-move p{ margin:0; }
 .mv-qr{ display:flex; flex-direction:column; align-items:center; gap:6px; margin:4px 0 14px; } .mv-qr svg{ width:220px; height:220px; background:#fff; border-radius:12px; padding:6px; border:2px solid #F3D3DC; }
+.inapp{ position:sticky; top:0; z-index:70; display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:12px 16px; background:#FFF0D6; color:#5A3A10; font-size:13px; line-height:1.6; border-bottom:2px solid #FFC98A; } .inapp p{ margin:0; flex:1 1 220px; }
 </style>
 
 <div class="wrap">
@@ -447,7 +449,7 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
   </header>
   <main id="app"></main>
 </div>
-<button class="devbtn" id="devbtn" type="button">制作用</button>
+<button class="devbtn" id="devbtn" type="button" hidden>制作用</button>
 <div class="dev" id="dev" hidden></div>
 <script>
 // ===== データ1：国・名前 =====
@@ -7477,7 +7479,7 @@ function infantPlan(P,S){
   const order=r.chance(.5)?[open+where,lab,babyLine,fam,sibL,nameL,homeL,econL]:[where+'それは'+open.replace(/だった。$/,'のことだった。'),babyLine,lab,nameL,fam,homeL,sibL,econL];
   // 発達の時期（WHO の幅の中で、その子だけの月齢）
   const ms={ smile:r.int(1,3), neck:r.int(2,5), roll:r.int(3,7), sit:r.int(4,9), crawl:r.chance(.06)?null:r.int(6,12), stand:r.int(7,12), walk:clamp(Math.round(r.normal(12.5,2)),9,18), word:r.int(9,16), tooth:r.int(4,12), two:r.int(18,26) }; ms.stand=Math.min(ms.stand,ms.walk-1); ms.sit=Math.min(ms.sit,ms.stand-1); if(ms.crawl!=null) ms.crawl=Math.min(ms.crawl,ms.stand); ms.roll=Math.min(ms.roll,ms.sit); ms.neck=Math.min(ms.neck,ms.roll);
-  S.inf={ temp, birth:order.filter(Boolean).join(''), ms, seen:[], rural, home, fatherAway, motherAway, gp };
+  S.inf={ temp, birth:order.filter(Boolean).join(''), ms, seen:[], rural, home, fatherAway, motherAway, gp, cs, lbw };
   return S.inf;
 }
 // 月齢を「その年の季節」に直す（生まれた月から数える）
@@ -8675,7 +8677,7 @@ function simulate(P, choice){
       const fam = P.structure==='両親'||P.structure==='ひとり親'&&P.single.cause!=='unknown' ? '父と母' : (P.structure==='ひとり親' ? (P.single.who==='father'?'母':'父') : '父と母');
       const sibT = P.siblings? `${P.siblings}人のきょうだいがいる家だった。` : '一人っ子だった。';
       add({ kind:'birth', big:true, d:0, text:`${P.year}年${P.month}月${P.day}日、${P.hour}時${P.minute}分。${C.name}・${P.city}${natureInit(P,S).rural?'の近くの、'+S.nat.place+'の':'の'}${ECON_LABEL[P.econ]}に、${P.full}は生まれた。`,
-        feel:infantPlan(P,S).birth , memo:'' });
+        feel:infantPlan(P,S).birth , memo:'', inf:(()=>{ const I=infantPlan(P,S); return { home:!!I.home, cs:!!I.cs, lbw:!!I.lbw, rural:!!I.rural, fatherAway:!!I.fatherAway }; })() });
     }
     if(sib&&sibGap&&age===sibGap){ sib.metAge=age; add({ kind:'life', big:true, d:3, text:`${sib.label}の${sib.name}が生まれた。小さな手が、${P.given}の指をぎゅっとにぎった。`, feel:age<=3?'不思議そうに、何度も顔をのぞきこんだ。':'「お兄ちゃん」「お姉ちゃん」と呼ばれる日が、急に来た。'.replace('「お兄ちゃん」「お姉ちゃん」',P.gender==='男性'?'「お兄ちゃん」':'「お姉ちゃん」'), memo:'' }).inner=age<=3?'ちっちゃいなあ':(P.gender==='男性'?'ぼくが、まもってあげる':'わたしが、まもってあげる'); }
     // --- 家族の事情 ---
@@ -9384,7 +9386,7 @@ function myId(){ let id=store.get(KEY_MYID,''); if(!id){ id=Math.random().toStri
 function myHero(){ if(typeof st!=='undefined'&&st&&st.seed!=null) return { s:st.seed, c:st.country||null, f:st.force||null, ch:st.choice||null };
   const a=store.get(KEY_ARC,[])[0]; return a?{ s:a.seed, c:a.country||null, f:a.force||null, ch:a.choice||null }:null; }
 function friendCode(){ const h=myHero(); if(!h) return null; return 'LIFEFRIEND1.'+b64e(JSON.stringify(Object.assign({ id:myId(), by:store.get(KEY_ME,'')||'' },h,{ t:Date.now() }))); }
-function friendLink(){ const c=friendCode(); if(!c) return null; const base=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; return base+'#friend='+c.replace('LIFEFRIEND1.',''); }
+function friendLink(){ const c=friendCode(); if(!c) return null; const base=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; const u=base+'#friend='+c.replace('LIFEFRIEND1.',''); return typeof extURL==='function'?extURL(u):u; }
 function readFriend(txt){ const m=(txt||'').match(/(?:LIFEFRIEND1\.|#friend=)([A-Za-z0-9_-]+)/); if(!m) return null; try{ const o=JSON.parse(b64d(m[1])); if(typeof o.s!=='number'||!o.id) return null; return o; }catch(e){ return null; } }
 function receiveFriend(o){ if(o.id===myId()) return 'self'; const L=store.get(KEY_FRIEND,[]); const i=L.findIndex(x=>x.id===o.id); const rec=Object.assign({},o,{ got:(i>=0?L[i].got:Date.now()) });
   if(i>=0){ L[i]=rec; store.set(KEY_FRIEND,L); return 'update'; } L.unshift(rec); store.set(KEY_FRIEND,L.slice(0,20)); return 'ok'; }
@@ -9432,7 +9434,7 @@ function friendMeet(P,L){
 // 画面：紹介する・紹介を受け取る（どの画面にもある「友だちに紹介」ボタン → 紹介の窓）
 const FR_LEAD='紹介した人と、紹介された人。ふたりの主人公は、それぞれの人生のどこかで、出会います。';
 function friendShareText(link){ return `LIFE BOOK で、世界のどこかに生まれた一人の人生を見守っています。\nこのリンクから始めると、わたしの主人公と、あなたの主人公が、人生のどこかで出会います。\n${link}`; }
-function friendPlainLink(){ return /github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; }
+function friendPlainLink(){ const u=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; return typeof extURL==='function'?extURL(u):u; }
 // 画面の中に置く案内（大きなボタンつき）
 function friendHTML(){ const fr=store.get(KEY_FRIEND,[]);
   return `<section class="friend-card"><div class="fc-art">${frArtSVG()}</div><div class="fc-body"><h3>友だちに紹介する</h3><p>${FR_LEAD}</p>
@@ -9500,6 +9502,417 @@ function alertFriend(t){ if(typeof render==='function') render(); setTimeout(()=
 // リンクで開いたとき
 function friendFromHash(){ try{ const h=location.hash||''; if(!/friend=/.test(h)) return; const o=readFriend(h); history.replaceState(null,'',location.pathname+location.search); if(!o) return; const r=receiveFriend(o); setTimeout(()=>afterFriend(o,r),300); }catch(e){} }
 window.addEventListener('hashchange',()=>{ if(typeof friendFromHash==='function') friendFromHash(); });
+// ===== 生まれた時の状況（約300の場面）=====
+// 生まれた日の物語（infant.js）に、さらに「家族の背景・その時期の家の事情・お産の処置・その日の偶然・知らせ方・儀式・最初の一週間」を重ねる。
+// 割合の目安：母親の年齢（20歳未満の出産は世界で約1割、日本は約1%。35歳以上は日本で約3割：人口動態統計 2021）、
+//   体外受精などの生殖補助医療（日本は2021年に約11.6人に1人：日本産科婦人科学会）、無痛分娩（日本 約1割・2023年 JSOAP、アメリカ 約7割、フランス 約8割）、
+//   新生児集中治療室への入院（アメリカで約1割）、光線療法が要る黄疸（数%〜1割）、吸引・鉗子分娩（豊かな国で約5〜10%）、
+//   産後うつ（約1割強：WHO）、男性の育児休業（日本は2010年ごろ約1〜2%、2023年 約30%：厚生労働省）。
+// 選んだ場面は、生まれたときに記録する。本棚の人生や、紹介・貸し借りでつながった人の人生と同じ場面は、選ばれにくい。
+const BS_REFS=[['生まれた時の状況','母親の年齢、生殖補助医療、無痛分娩、黄疸の治療、産後のこころの不調などは、国や時代によって割合が大きくちがう。日本では、体外受精などで生まれる子が約11.6人に1人（2021年）。','厚生労働省「人口動態統計」、日本産科婦人科学会、WHO']];
+// [番号, 種類, 重み, 条件, 文]
+const BS=[];
+const bs=(dim,w,cond,text)=>BS.push([BS.length+1,dim,w,cond,text]);
+const T=()=>true;
+// --- 1. 父と母のこと ---
+bs(1,1,C=>C.teenP,'母は、まだ十代だった。周りの大人たちの心配をよそに、母は「この子は、わたしが育てる」と言った。');
+bs(1,1,C=>C.teenP,'母は十八歳だった。同級生たちが進学や就職の話をしているころ、母は小さな服をたたんでいた。');
+bs(1,1,C=>C.teenP&&C.poor,'母は、十六歳で嫁いだ翌年に、この子を産んだ。');
+bs(1,1,C=>C.teenP,'若すぎる、と言う人もいた。それでも祖母は、毎日、母の背中をさすりに来た。');
+bs(1,1,C=>C.old35,'母は三十八歳だった。「高齢出産」という言葉に、少しだけ傷ついていた。');
+bs(1,1,C=>C.old35,'母は、仕事で忙しい年月を過ごしたあと、三十代の終わりにこの子を授かった。');
+bs(1,1,C=>C.old40,'母は四十二歳だった。上の子たちとは、ずいぶん年の離れた末っ子になった。');
+bs(1,1,C=>C.old40&&!C.olderSib,'四十歳をすぎてからの、初めての子だった。母は、何度もお腹に手を当てて話しかけていた。');
+bs(1,1,C=>C.art,'両親は、何年も不妊治療に通っていた。体外受精の三回目で、やっと授かった子だった。');
+bs(1,1,C=>C.art,'病院の培養室で育った小さな命が、母のお腹に戻されて、十か月後にこの子になった。');
+bs(1,1,C=>C.art,'治療の注射の跡が、母のお腹にまだ残っていた。父はそれを見て、何も言わずに母の手を握った。');
+bs(1,.8,C=>!C.olderSib,'その前に、一度、お腹の中で亡くなった子がいた。だからこそ、無事に生まれた泣き声に、家族は息をのんだ。');
+bs(1,.8,T,'予定していなかった妊娠だった。驚きのあとで、両親はゆっくりと覚悟を決めていった。');
+bs(1,.8,T,'結婚して五年目に授かった子だった。親戚の集まりで、もう何も聞かれなくなるのだと、母はほっとしていた。');
+bs(1,.6,C=>!C.single,'父は、母より十歳以上年上だった。「孫みたいだな」と、近所の人にからかわれた。');
+bs(1,.6,C=>!C.single,'両親は、同じ職場で出会った。お腹が大きくなるまで、母は同じ机で働き続けた。');
+bs(1,.6,C=>!C.single,'両親は、幼なじみだった。同じ病院で生まれた二人の、子どもだった。');
+bs(1,.5,C=>!C.single&&C.y>=1990,'両親は、国のちがう者どうしだった。家の中では、二つの言葉が飛びかっていた。');
+bs(1,.6,C=>!C.single,'両親は、結婚式を挙げる前にこの子を授かった。式は、お腹の目立たないうちに、急いで挙げた。');
+bs(1,.7,C=>C.single,'父は、この子が生まれることを知らないまま、どこかへ行ってしまっていた。');
+bs(1,.7,C=>C.single,'母は、ひとりで育てると決めていた。病院の書類の「父」の欄は、空いたままだった。');
+bs(1,.6,T,'母は、つわりがひどく、妊娠中の半分を寝て過ごした。');
+bs(1,.6,T,'母は、生まれる前の日まで、ふだんどおりに働いていた。');
+bs(1,.5,C=>C.poor&&C.rural,'母は、生まれる前の日も、畑で草取りをしていた。');
+bs(1,.5,T,'妊娠中、母は急に甘いものばかり欲しがった。父は夜中に、何度も店へ走った。');
+bs(1,.5,T,'お腹の中で、よく動く子だった。母は「サッカー選手になるかも」と笑っていた。');
+bs(1,.5,T,'お腹の中で、おとなしい子だった。動かない日が続くと、母は心配になって、そっとお腹を押した。');
+bs(1,.5,C=>C.y>=1985&&C.rich,'超音波の写真では、男の子か女の子か、最後まで分からなかった。');
+bs(1,.5,C=>C.y>=1985,'超音波の画面に、小さな手が映った。父は、その写真を財布にしまって持ち歩いた。');
+bs(1,.4,C=>C.y<1975,'男の子か女の子かは、生まれるまで誰にも分からなかった。祖母は、お腹の形から「男の子だ」と言いはっていた。');
+bs(1,.5,C=>C.olderSib,'上の子のときとはちがって、母は落ち着いていた。「二人目は、ぜんぜんちがうね」と言った。');
+bs(1,.5,C=>C.olderSib,'上の子が、毎晩、母のお腹に耳を当てて「まだ？」と聞いていた。');
+bs(1,.4,T,'母は、妊娠中に大きな病気をして、一時は無事に生まれるかどうか分からなかった。');
+bs(1,.4,T,'母は、妊娠中に好きな音楽を毎日お腹に聞かせていた。');
+bs(1,.4,T,'母は、生まれてくる子のために、毎晩少しずつ日記を書いていた。');
+bs(1,.4,C=>C.mid||C.poor,'妊娠中、母は一度も健診に行けなかった。お金も、時間もなかった。');
+bs(1,.4,C=>C.jp,'母は、戌の日に、神社で安産祈願の腹帯を巻いてもらった。');
+bs(1,.4,C=>C.rich&&C.y>=1990,'母は、両親学級に、父をむりやり連れていった。父は、沐浴の人形を、こわごわ抱いていた。');
+bs(1,.3,T,'名前の候補を書いた紙が、冷蔵庫に何枚も貼られていた。');
+bs(1,.3,T,'母は、生まれる前に、手作りの小さな帽子を編み上げた。');
+bs(1,.3,C=>C.y>=2000,'母は、妊娠中にスマートフォンのアプリで、お腹の子の大きさを毎週たしかめていた。「今週は、レモンくらい」');
+bs(1,.3,C=>C.rich&&C.y>=2005,'母は、育児休業を取って、少し早めに仕事を休んだ。');
+bs(1,.3,C=>C.y<1965,'母は、生まれる日まで、井戸の水くみと洗濯を続けていた。');
+// --- 2. その時期の家の事情 ---
+bs(2,1,T,'家族は、生まれる一か月前に引っ越したばかりで、部屋にはまだ段ボール箱が積まれていた。');
+bs(2,1,T,'父は、ちょうど仕事を失ったばかりだった。家計簿をにらむ父の横で、母は「なんとかなるよ」と言った。');
+bs(2,1,T,'父は、ちょうど新しい仕事を始めたばかりで、休みが取れなかった。');
+bs(2,.8,T,'祖父が、その年の春に亡くなっていた。祖母は「生まれ変わりだね」と、何度もつぶやいた。');
+bs(2,.8,T,'祖母が病気で入院していて、家族は病院を行ったり来たりしていた。');
+bs(2,.8,T,'家を建てたばかりで、借金を返し始めたところだった。');
+bs(2,.8,T,'両親は、小さな店を開いたばかりだった。母は、店の奥で休みながら、レジに立った。');
+bs(2,.8,C=>C.rural,'ちょうど農作業のいちばん忙しい時期だった。家族の誰もが、くたくただった。');
+bs(2,.8,C=>C.rural,'その年は、ひどい日照りで、作物がほとんど育たなかった。');
+bs(2,.6,C=>C.rural,'その年は、豊作だった。祖父は「この子は、運を持ってきた」と言った。');
+bs(2,.8,C=>C.poor||C.mid,'父は、家族を養うために、遠くの町へ出稼ぎに出ていた。');
+bs(2,.6,C=>C.poor||C.mid,'父は、外国へ働きに出ていた。生まれたことは、何日もたってから届いた手紙で知った。');
+bs(2,.8,T,'家には、祖父母とおじ・おばも暮らしていて、大家族だった。');
+bs(2,.8,T,'家族は、狭い部屋に身を寄せ合って暮らしていた。赤ちゃんの寝る場所は、たんすの引き出しの中だった。');
+bs(2,.6,C=>C.rich,'家族は、生まれる前に、少し広い部屋に住みかえていた。');
+bs(2,.7,C=>C.olderSib,'上の子が、ちょうど同じころに、はしかにかかって寝こんでいた。');
+bs(2,.7,C=>C.olderSib,'上の子は、ちょうど小学校に入ったばかりだった。');
+bs(2,.6,T,'家では、子犬を一匹飼っていた。犬は、赤ちゃんのにおいを、そっとかいでいた。');
+bs(2,.6,T,'家では、猫を飼っていた。猫は、ゆりかごのそばから、なかなか離れなかった。');
+bs(2,.6,T,'父は、夜勤の多い仕事だった。生まれた日も、夜勤明けで駆けつけた。');
+bs(2,.6,T,'母は、生まれたあとも仕事に戻るつもりでいた。預け先を探して、何軒も電話をかけていた。');
+bs(2,.6,T,'両親は、ちょうどその年、大きなけんかを何度もしていた。赤ちゃんの泣き声が、二人を少しだけ黙らせた。');
+bs(2,.6,T,'家には、病気で寝たきりの曾祖母がいた。曾祖母は、赤ちゃんの手を握って、静かに涙をこぼした。');
+bs(2,.5,T,'いとこが、ひと月ちがいで生まれていた。親戚の集まりでは、二人が並んで寝かされた。');
+bs(2,.5,T,'母の妹も、同じ年に子どもを産む予定だった。');
+bs(2,.5,T,'家族は、その年、借金の返済に追われていた。祝いの席は、ささやかなものだった。');
+bs(2,.5,C=>C.rich||C.mid,'父は、その年に昇進したばかりだった。');
+bs(2,.5,T,'父は、長い病気からようやく回復したところだった。');
+bs(2,.5,T,'母は、仕事を辞めて、育児に専念することに決めていた。');
+bs(2,.5,C=>C.y>=1995,'母は、育児休業が終わったら、元の職場に戻ると決めていた。');
+bs(2,.5,C=>C.jp&&C.y>=2010,'父は、育児休業を一か月取った。職場で、その年いちばん最初の男性の育休だった。');
+bs(2,.5,C=>C.jp&&C.y<2005,'父は、生まれた次の日も、朝から会社に出かけた。');
+bs(2,.5,C=>C.y>=1975,'里帰りしていた母の実家で、しばらく祖父母と暮らした。');
+bs(2,.4,T,'近所の人たちが、毎日のように、おかずを持ってきてくれた。');
+bs(2,.4,T,'家の前の道が工事中で、朝から晩まで、重機の音がしていた。');
+bs(2,.4,T,'家の近くに、ちょうど新しい学校ができるところだった。');
+bs(2,.4,C=>C.city,'家は、駅のすぐ近くで、電車が通るたびに窓が小さくふるえた。');
+bs(2,.4,C=>C.rural,'家は、村のいちばん端にあり、夜になると、家の明かりのほかは真っ暗だった。');
+bs(2,.4,T,'家の庭では、ちょうど柿の木が実をつけていた。');
+bs(2,.4,T,'家族は、その冬、暖房の燃料を節約して、ひと部屋に集まって過ごした。');
+bs(2,.4,C=>C.poor,'家には、電気がまだ来ていなかった。夜の授乳は、ランプの明かりの下だった。');
+bs(2,.4,C=>C.poor,'家族は、その年、食べものに困るほど苦しかった。母は、自分の分を減らして乳を出した。');
+bs(2,.4,T,'家には、まだ電話がなかった。');
+bs(2,.3,T,'同じ月に、隣の家でも赤ちゃんが生まれた。');
+bs(2,.3,T,'家の大掃除をしていた最中に、陣痛が始まった。');
+bs(2,.3,T,'家族旅行の予定が、生まれる日と重なって、取りやめになった。');
+bs(2,.3,T,'祖父は、生まれた日に、記念の木を庭に植えた。');
+bs(2,.3,T,'母の兄は、遠い国に住んでいて、赤ちゃんの写真を見るまで、何か月もかかった。');
+bs(2,.3,T,'家族は、その年に新しい車を買ったばかりで、最初の遠出は病院だった。');
+// --- 3. お産の処置と、生まれてすぐの体 ---
+bs(3,1,C=>!C.home&&!C.cs&&C.epi,'母は、無痛分娩を選んだ。痛みの少ない中で、母は、生まれてくる瞬間をはっきりと覚えていた。');
+bs(3,.8,C=>!C.home&&!C.cs&&C.epi,'麻酔が効いて、母は、陣痛の合間に少し眠ることさえできた。');
+bs(3,.8,C=>!C.home&&!C.cs&&C.y>=1960,'お産が長引き、最後は吸引で取り出された。頭が、少しとがった形になっていた。');
+bs(3,.5,C=>!C.home&&!C.cs&&C.y<2000,'お産が長引き、最後は鉗子で取り出された。');
+bs(3,.8,T,'へその緒が首に巻きついていて、取り上げた人が、すばやくほどいた。');
+bs(3,.8,C=>!C.home&&C.y>=1970,'生まれてすぐ、呼吸が少し苦しそうで、新生児の集中治療室で数日を過ごした。');
+bs(3,.8,C=>C.lbw&&!C.home,'保育器の小さな窓から、母は指を一本だけ入れて、赤ちゃんの手に触れた。');
+bs(3,.8,C=>!C.home&&C.y>=1970,'生まれて数日で、黄疸が強く出た。青い光の下で、目隠しをして眠った。');
+bs(3,.6,T,'生まれて三日目に、肌がうっすらと黄色くなった。「よくあることですよ」と言われた。');
+bs(3,.6,T,'生まれてすぐ、体温が下がりやすく、毛布で何重にもくるまれた。');
+bs(3,.6,C=>!C.home,'生まれた直後、母の胸の上にそのまま乗せられた。小さな体は、温かかった。');
+bs(3,.5,C=>!C.home&&C.y>=1990,'生まれてすぐ、母の胸の上で、自分から乳を探して吸いついた。');
+bs(3,.6,T,'生まれたとき、体じゅうが白い脂でおおわれていた。');
+bs(3,.5,T,'生まれたとき、手のひらと足の裏が、少し紫色だった。すぐに、赤みがさした。');
+bs(3,.5,T,'生まれたばかりの頭には、産毛が少しだけ、ふわりとのっていた。');
+bs(3,.5,T,'背中に、うすい青いあざがあった。「大きくなると消えるよ」と言われた。');
+bs(3,.5,T,'首の後ろに、小さな赤いあざがあった。');
+bs(3,.4,T,'生まれたとき、片方の耳が少し折れ曲がっていた。数日で、きれいにのびた。');
+bs(3,.5,T,'お産の途中で、母が大量に出血し、母子ともにしばらく医師に見守られた。');
+bs(3,.5,C=>C.cs,'帝王切開の傷が痛み、母は、しばらく赤ちゃんを自分で抱き上げられなかった。');
+bs(3,.5,C=>C.cs,'手術のあと、母が目を覚ましたとき、最初に見たのは、父が抱いた赤ちゃんの顔だった。');
+bs(3,.5,C=>C.home,'取り上げた女性は、何十人もの赤ちゃんを取り上げてきた人だった。「いい子だよ」と、一言だけ言った。');
+bs(3,.5,C=>C.home&&C.poor,'へその緒は、煮沸したはさみで切られた。');
+bs(3,.5,C=>C.home,'産湯は、たらいに張ったお湯だった。祖母が、ひじで温度をたしかめた。');
+bs(3,.5,C=>!C.home&&!C.cs,'お産は、思っていたより、ずっと早く進んだ。病院に着いて一時間で生まれた。');
+bs(3,.5,C=>!C.home&&!C.cs,'陣痛が始まってから生まれるまで、二日近くかかった。');
+bs(3,.4,C=>!C.home,'病院が混んでいて、母は、廊下のベッドで陣痛に耐えた。');
+bs(3,.4,C=>!C.home&&C.y>=1980,'生まれてすぐ、かかとから少し血をとって、生まれつきの病気がないかを調べた。');
+bs(3,.4,C=>C.y>=1990&&!C.home,'生まれて数日のうちに、耳の聞こえの検査を受けた。');
+bs(3,.4,C=>!C.home,'足の裏に名前を書いたテープが貼られ、母の手首にも同じ番号の札が巻かれた。');
+bs(3,.4,C=>!C.home&&C.y<1990,'新生児室のガラス窓の向こうに、同じ日に生まれた赤ちゃんたちが、ずらりと並んでいた。');
+bs(3,.4,C=>!C.home&&C.y>=1990,'母子同室で、生まれた夜から、母のベッドのとなりの小さなベッドで眠った。');
+bs(3,.4,T,'母は、なかなか乳が出なかった。助産師が、何度も根気よく手伝ってくれた。');
+bs(3,.4,T,'母は、乳がよく出た。「この子は、ごはんに困らないね」と、看護師に笑われた。');
+bs(3,.4,C=>C.y>=1960,'母は、乳が足りず、粉ミルクを足した。哺乳びんを持つ父の手は、ぎこちなかった。');
+bs(3,.4,C=>!C.home,'退院の日、母は、病院の玄関で、生まれた日の空をもう一度見上げた。');
+bs(3,.4,T,'生まれて数日、母は眠れないほど不安で、理由もなく涙が出た。');
+bs(3,.4,T,'お産のあと、母は数週間、こころがふさいで、うまく笑えなかった。周りの人が、交代で赤ちゃんを抱いた。');
+bs(3,.3,T,'生まれたとき、しゃっくりをしていた。');
+bs(3,.3,T,'生まれて最初のうんちは、真っ黒だった。父は、驚いて看護師を呼んだ。');
+bs(3,.3,T,'くしゃみを、立て続けに三回した。');
+// --- 4. その日の偶然・その日の世の中 ---
+bs(4,1,C=>C.m===1&&C.d===1,'元日に生まれた。初日の出と同じ日の生まれだと、親戚じゅうに喜ばれた。');
+bs(4,1,C=>C.m===2&&C.d===29,'四年に一度しかない、二月二十九日の生まれだった。');
+bs(4,1,C=>C.m===12&&C.d>=24&&C.d<=25,'クリスマスの日の生まれだった。病院のロビーには、大きなツリーが飾られていた。');
+bs(4,1,C=>C.m===12&&C.d===31,'大みそかの夜の生まれだった。除夜の鐘が鳴り始めるころ、最初の泣き声が上がった。');
+bs(4,.8,T,'その日は、満月だった。「満月の日はお産が多い」と、助産師が言った。');
+bs(4,.8,T,'その日、病院では、ほかにも何人もの赤ちゃんが生まれた。');
+bs(4,.8,T,'その日、生まれた赤ちゃんは、病院でただ一人だった。');
+bs(4,.8,T,'その日、町では停電があった。懐中電灯の明かりの中で、生まれた。');
+bs(4,.8,T,'その日は、大雪だった。父は、雪をかき分けて、病院まで歩いた。');
+bs(4,.8,T,'その日は、台風が近づいていた。窓をたたく雨の音の中で、生まれた。');
+bs(4,.8,T,'その日は、町の祭りの日だった。遠くから、太鼓の音が聞こえていた。');
+bs(4,.8,T,'その日は、祖母の誕生日だった。祖母は「いちばんの贈りものだ」と言った。');
+bs(4,.8,C=>C.olderSib,'その日は、上の子の誕生日の、ちょうど一週間後だった。');
+bs(4,.7,T,'その日は、父と母の結婚記念日だった。');
+bs(4,.7,T,'その日、町では選挙があった。父は、投票所から病院へ駆けつけた。');
+bs(4,.7,T,'その日の朝、庭の花がひとつだけ咲いた。');
+bs(4,.7,T,'その日の夕方、空に大きな虹がかかった。父は、それを見て名前を決めかけた。');
+bs(4,.7,T,'その日、テレビでは、大きなスポーツの試合が中継されていた。待合室では、誰もが画面を見ていた。');
+bs(4,.7,T,'その日は、雲ひとつない、よく晴れた日だった。');
+bs(4,.7,T,'その日は、一日じゅう、霧が立ちこめていた。');
+bs(4,.7,T,'その日は、日曜日で、病院は静かだった。');
+bs(4,.7,T,'その日は、平日のいちばん忙しい時間で、病院はばたばたしていた。');
+bs(4,.6,T,'生まれたのは、ちょうど時計の針が十二時を指したときだった。');
+bs(4,.6,T,'生まれたとき、病院のどこかでラジオが、古い歌を流していた。');
+bs(4,.6,T,'生まれた日、窓の外で、鳥が一羽、ずっと鳴いていた。');
+bs(4,.6,T,'生まれた日、近くの教会か寺から、鐘の音が聞こえた。');
+bs(4,.6,T,'その日、遠い国で大きな事件があり、大人たちは、ニュースを気にしながら、赤ちゃんを見守った。');
+bs(4,.6,T,'その日、父は、生まれる瞬間に間に合おうと、走って転んで、ひざをすりむいていた。');
+bs(4,.6,T,'その日、母を乗せた車は、病院へ向かう途中で渋滞に巻きこまれた。');
+bs(4,.6,T,'その日は、とても暑く、病院の扇風機がずっと回っていた。');
+bs(4,.6,T,'その日は、とても寒く、病院の窓ガラスに、霜の模様ができていた。');
+bs(4,.5,T,'その日、病院の隣のベッドでも、同じ時間に赤ちゃんが生まれた。母どうしは、そのまま長い友だちになった。');
+bs(4,.5,T,'予定日より、ちょうど一か月早い日だった。');
+bs(4,.5,T,'予定日ぴったりの日だった。「時間を守る子だね」と笑われた。');
+bs(4,.5,T,'予定日を、十日以上すぎてからの日だった。');
+bs(4,.5,C=>C.y>=2020&&C.y<=2022,'感染症が広がっていた年で、父は病院に入れなかった。生まれた顔を、スマートフォンの画面で見た。');
+bs(4,.5,C=>C.y>=2020&&C.y<=2022,'病院では、母も看護師も、マスクをつけていた。赤ちゃんが最初に見た大人の顔は、半分しか見えなかった。');
+bs(4,.5,C=>C.y===2011&&C.jp,'大きな地震のあった年で、病院の棚には、まだ揺れの跡が残っていた。');
+bs(4,.5,C=>C.y===1964&&C.jp,'東京でオリンピックが開かれた年で、家族はテレビの前に集まっていた。');
+bs(4,.5,C=>C.y===2000,'新しい千年が始まった年の生まれだった。');
+bs(4,.4,T,'その日、遠くの親戚が、偶然、近くを旅していて、病院に立ち寄った。');
+bs(4,.4,T,'その日の朝、母は、なぜか急に家じゅうを掃除し始めた。夕方に、陣痛が来た。');
+bs(4,.4,T,'その日、病院の庭で、桜でも梅でもない、名前を知らない花が咲いていた。');
+// --- 5. 知らせと祝い ---
+bs(5,1,C=>C.y<1970,'生まれた知らせは、電報で親戚に届いた。「ウマレタ　ブジ」の六文字だった。');
+bs(5,1,C=>C.y<1985,'父は、病院の公衆電話から、十円玉を何枚も入れて、親戚に順番に電話をかけた。');
+bs(5,1,C=>C.y>=1993&&C.y<=1999&&C.jp,'父は、ポケベルで母の実家に知らせた。数字の暗号は「0840」だった。');
+bs(5,1,C=>C.y>=1999&&C.y<2012,'父は、携帯電話で写真を撮り、親戚じゅうにメールで送った。画面の写真は、少しぼやけていた。');
+bs(5,1,C=>C.y>=2012,'生まれて一時間後には、家族のグループのメッセージに、写真が届いていた。たくさんの絵文字が、次々に返ってきた。');
+bs(5,.8,C=>C.y>=2008&&C.rich,'父は、生まれた写真をSNSに載せようとして、母に止められた。');
+bs(5,.8,C=>C.y<1990,'父は、生まれた知らせを聞いて、近所じゅうにお菓子を配って回った。');
+bs(5,.8,T,'祖父は、知らせを聞いて、その夜、ひとりで静かに酒を飲んだ。');
+bs(5,.8,T,'祖母は、知らせを聞くと、すぐに汽車やバスを乗りついで駆けつけた。');
+bs(5,.8,T,'遠くに住む祖父母は、写真が届くのを、毎日郵便受けをのぞいて待った。');
+bs(5,.8,T,'近所の人が、赤ちゃんを見に、入れかわり立ちかわりやって来た。');
+bs(5,.7,T,'お祝いに、手編みのおくるみが届いた。');
+bs(5,.7,T,'お祝いに、銀のスプーンが届いた。');
+bs(5,.7,T,'父の職場から、大きな花束が届いた。');
+bs(5,.7,C=>C.poor,'お祝いに、近所の人が、鶏を一羽持ってきてくれた。');
+bs(5,.7,C=>C.poor,'お祝いに、村の人たちが、米や豆を少しずつ持ち寄った。');
+bs(5,.7,T,'お祝いの席で、祖父が、子どものころの話を長々と始めた。');
+bs(5,.6,T,'生まれた日の新聞を、父は記念にとっておいた。');
+bs(5,.6,T,'父は、生まれた日のことを、手帳に細かく書きとめた。');
+bs(5,.6,C=>C.y>=1980,'生まれたときの写真が、何十枚も撮られた。どれも、ほとんど同じ顔をしていた。');
+bs(5,.6,C=>C.y<1975,'生まれたときの写真は、一枚もなかった。最初の写真は、半年後に写真館で撮ったものだった。');
+bs(5,.6,C=>C.y>=1985,'病院で、手形と足形をとってもらった。小さな足の裏の線まで、紙に写っていた。');
+bs(5,.5,C=>C.y>=1995,'父は、生まれた瞬間をビデオに撮ろうとして、手がふるえて、天井ばかり映っていた。');
+bs(5,.5,T,'お祝いに来た親戚の誰もが、「父親似だ」「いや母親似だ」と言い合った。');
+bs(5,.5,T,'生まれたことを知らせる手紙を、母は二十通も書いた。');
+bs(5,.5,T,'お祝いのお返しに、母は、赤ちゃんの名前を入れた小さなお菓子を配った。');
+bs(5,.5,T,'仲のよくなかった親戚が、赤ちゃんを見に来て、ようやく笑い合った。');
+bs(5,.5,T,'父の古い友人が、遠くから、歌を一曲、電話ごしに歌ってくれた。');
+bs(5,.4,T,'お祝いに、木のおもちゃが届いた。つけられたカードには、「ようこそ」とだけ書いてあった。');
+bs(5,.4,T,'近所の子どもたちが、窓の外から、赤ちゃんをのぞきこんでいた。');
+bs(5,.4,T,'生まれたことは、しばらく誰にも知らせなかった。家族だけで、静かに迎えたかった。');
+// --- 6. 文化と信仰の儀式 ---
+bs(6,1,C=>C.jp,'生まれて七日目のお七夜に、命名書が神棚の下に貼られた。');
+bs(6,1,C=>C.jp,'へその緒は、桐の小さな箱に入れられ、たんすの奥にしまわれた。');
+bs(6,.8,C=>C.jp,'お宮参りの日、祖母が、赤ちゃんに祝い着をかけて抱いた。');
+bs(6,.8,C=>C.jp&&C.y>=1970,'生後百日に、お食い初めの小さなお膳が、写真に残された。');
+bs(6,.7,C=>C.jp&&C.y<1975,'産湯のあと、祖母が、赤ちゃんのおでこに、魔よけの印を墨で書いた。');
+bs(6,1,C=>C.muslim,'生まれてすぐ、父が、赤ちゃんの右の耳もとで、礼拝の呼びかけ（アザーン）をささやいた。');
+bs(6,1,C=>C.muslim,'生まれて七日目に、アキーカの儀式が行われ、羊の肉が、親戚や近所の貧しい人たちに分けられた。');
+bs(6,.8,C=>C.muslim,'生まれて七日目に、赤ちゃんの髪がそられ、その重さと同じだけの銀の値が、施しとして分けられた。');
+bs(6,.8,C=>C.muslim,'祖父が、なつめやしを少しかんでやわらかくし、赤ちゃんの口にそっとふれさせた。');
+bs(6,1,C=>C.christ,'生まれて数週間後、教会で洗礼を受けた。冷たい水がかかると、大きな声で泣いた。');
+bs(6,.8,C=>C.christ,'洗礼式で、白い長い服を着せられた。母も、祖母も、同じ服で洗礼を受けたのだった。');
+bs(6,.8,C=>C.christ,'名付け親になった父の友人が、小さな十字架のペンダントを贈ってくれた。');
+bs(6,1,C=>C.hindu,'生まれて十二日目の命名式（ナームカラン）で、祖母が、赤ちゃんの耳もとで名前をささやいた。');
+bs(6,.8,C=>C.hindu,'生まれてすぐ、蜂蜜とギーを混ぜたものを、金の匙で口にふれさせる儀式が行われた。');
+bs(6,.8,C=>C.hindu,'生まれた時刻をもとに、占星術師がホロスコープを作った。家族は、それを大切に箱にしまった。');
+bs(6,1,C=>C.cn,'生後一か月の満月酒に、親戚が集まり、赤く染めたゆで卵が配られた。');
+bs(6,.8,C=>C.cn,'母は、生まれてから一か月、家から出ずに体を休める「坐月子」を過ごした。');
+bs(6,1,C=>C.kr,'生まれた家の門に、唐辛子と炭をさげた縄（クムジュル）が張られ、しばらく人の出入りが控えられた。');
+bs(6,.8,C=>C.kr,'生後百日に、白い餅を百人に分けると長生きする、と祖母が言い、近所じゅうに餅を配った。');
+bs(6,.8,C=>C.kr,'母は、産後、毎日わかめのスープを飲んだ。');
+bs(6,1,C=>C.ng,'生まれて八日目の命名式で、家族や親戚が、それぞれの思いをこめた名前をいくつも贈った。');
+bs(6,.8,C=>C.af,'命名式の日、塩や蜂蜜、水などが、ひとつずつ赤ちゃんの唇にふれさせられた。人生のさまざまな味を知るように、という意味だった。');
+bs(6,1,C=>C.jew,'生まれて八日目に、親戚が集まり、割礼の儀式が行われた。');
+bs(6,.6,C=>C.secular&&C.rich,'宗教の儀式はしなかった。かわりに、家族だけの小さなパーティーで、名前を発表した。');
+bs(6,.6,C=>C.buddhist&&!C.jp,'生まれて一か月後、寺の僧侶が家に来て、手首に白い糸を結んでくれた。');
+bs(6,.6,C=>C.latin,'生まれてすぐ、祖母が、赤ちゃんの手首に、魔よけの赤い糸を結んだ。');
+bs(6,.6,C=>C.ru,'生まれてしばらくは、家族以外の人には、赤ちゃんを見せなかった。それが昔からの習わしだった。');
+bs(6,.5,T,'生まれたときの髪の毛の一房が、小さな封筒に入れてとっておかれた。');
+bs(6,.5,T,'生まれた日に、祖母が、赤ちゃんの将来の幸せを祈って、小さなお守りを枕もとに置いた。');
+bs(6,.5,T,'生まれたときに着た服は、のちに弟や妹、いとこへと、次々に受けつがれた。');
+bs(6,.5,C=>C.rural,'生まれた子の将来を祈って、家族は、近くの大きな木に手を合わせた。');
+bs(6,.4,T,'名前を決める前に、父と母は、それぞれの祖先の名前を、紙にすべて書き出した。');
+// --- 7. 最初の一週間 ---
+bs(7,1,T,'最初の夜、ほとんど眠らずに泣き続けた。両親は交代で抱き、窓の外が白むのを見た。');
+bs(7,1,T,'最初の一週間は、驚くほどよく眠った。母は、何度も息をしているか確かめた。');
+bs(7,1,T,'夜中の三時になると、きまって目を覚ました。父は、それを「三時の目ざまし」と呼んだ。');
+bs(7,.8,T,'抱いて歩くと泣きやみ、座ると泣いた。父は、部屋の中を何キロも歩いた。');
+bs(7,.8,T,'父の低い声で歌う子守歌を聞くと、すっと眠った。');
+bs(7,.8,T,'母の心臓の音が聞こえるように、胸の上で抱くと、すぐに眠った。');
+bs(7,.8,T,'洗濯機の音を聞くと、ふしぎと泣きやんだ。');
+bs(7,.8,T,'車に乗せると、すぐに眠った。父は、夜中に何度も、家のまわりを車で回った。');
+bs(7,.8,T,'初めてのお風呂で、目をまんまるにして、両手を広げた。');
+bs(7,.8,T,'初めてのお風呂で、火がついたように泣いた。');
+bs(7,.7,T,'小さな手で、父の指を握ったまま、離さなかった。');
+bs(7,.7,T,'眠りながら、ときどき、ふっと笑った。家族は、その一瞬を見のがすまいと、顔をのぞきこんだ。');
+bs(7,.7,T,'眠りながら、両手をぱっと広げて、びくっとした。');
+bs(7,.7,T,'口をとがらせて、乳を探すしぐさをした。');
+bs(7,.7,T,'鼻の頭に、小さな白いつぶつぶがあった。');
+bs(7,.7,T,'生まれて一週間で、体重が少し減った。「すぐ戻りますよ」と言われ、ほんとうに戻った。');
+bs(7,.6,T,'くしゃみをすると、自分で驚いて泣いた。');
+bs(7,.6,T,'光のほうへ、じっと顔を向けていた。');
+bs(7,.6,T,'祖母の歌う古い歌を聞くと、ぴたりと泣きやんだ。');
+bs(7,.6,C=>C.olderSib,'上の子が、赤ちゃんの小さな足を、こっそり数えていた。「ちゃんと十本ある」');
+bs(7,.6,C=>C.olderSib,'上の子は、赤ちゃんが泣くたびに、母を呼びに走った。');
+bs(7,.6,C=>C.olderSib,'上の子は、母をとられたようで、しばらく赤ちゃん返りをした。');
+bs(7,.6,T,'最初の一週間、父は、おむつを替えるたびに、何度も向きをまちがえた。');
+bs(7,.6,C=>C.y<1985,'布おむつが、庭の物干しに、毎日何十枚もはためいた。');
+bs(7,.6,C=>C.y>=1985&&!C.poor,'紙おむつの袋が、部屋の隅にどんどん積み上がっていった。');
+bs(7,.6,T,'しゃっくりが止まらず、母は背中をとんとんとたたき続けた。');
+bs(7,.5,T,'泣くと、顔じゅうが真っ赤になった。');
+bs(7,.5,T,'泣き声は、思ったより小さく、子猫のようだった。');
+bs(7,.5,T,'泣き声が大きく、アパートの隣の人が、お祝いのついでに笑っていった。');
+bs(7,.5,T,'足の裏をくすぐると、指をぎゅっと丸めた。');
+bs(7,.5,T,'目の色は、生まれたばかりのころ、深い青みがかった色をしていた。');
+bs(7,.5,T,'母は、赤ちゃんの寝顔を、何時間でも見ていられた。');
+bs(7,.5,T,'母は、疲れきって、赤ちゃんを抱いたまま、座って眠ってしまった。');
+bs(7,.5,T,'夜、父と母は、赤ちゃんの寝息を聞きながら、小さな声で将来の話をした。');
+bs(7,.5,T,'最初に覚えたのは、母のにおいだった。ほかの人に抱かれると、顔をそむけた。');
+bs(7,.5,T,'祖父が抱くと、なぜかすぐに泣きやんだ。祖父は、得意そうだった。');
+bs(7,.4,T,'よく、こぶしを口に入れて、ちゅうちゅう吸っていた。');
+bs(7,.4,T,'生まれて五日目、初めて家の外の風にあたった。');
+bs(7,.4,T,'家に帰った最初の日、部屋の中が、急に小さく感じられた。');
+bs(7,.4,T,'家族の誰もが、赤ちゃんの前では、声が一段高くなった。');
+const BS_DIM_P={1:.6,2:.65,3:.55,4:.55,5:.7,6:.65,7:.85};
+// 条件に使う情報
+function bsCtx(P,birthText,inf){ inf=inf||{}; const W=WSTAT[P.countryId]||{}; const inc=W.inc||''; const c=P.countryId, y=P.year, rel=P.religion||'';
+  const rich=inc==='high_income', poor=inc==='low_income'||inc==='lower_middle_income', mid=!rich&&!poor; const t=birthText||'';
+  const hk=(k)=>{ let x=(P.seed*2654435761+k*40503)>>>0; x^=x>>>15; x=Math.imul(x,2246822519)>>>0; x=(x^(x>>>13))>>>0; return (x%100000)/100000; };
+  const teenRate=c==='jp'?.01:rich?.03:poor?.15:.08, r35=c==='jp'?(y>=2010?.28:y>=1990?.12:.07):rich?(y>=2000?.2:.1):.08, r40=c==='jp'?(y>=2015?.06:y>=1995?.02:.01):rich?.04:.02;
+  const art=c==='jp'?(y>=2020?.087:y>=2010?.03:y>=1990?.005:0):rich?(y>=2010?.04:y>=1990?.01:0):0;
+  const epi=c==='us'?(y>=1990?.7:y>=1970?.3:.1):c==='fr'?(y>=1995?.8:.2):c==='jp'?(y>=2020?.1:y>=2005?.05:.01):rich?(y>=1990?.35:.1):mid?.08:.01;
+  const a=hk(1); const ageCat=a<teenRate?'teen':a<teenRate+r40?'40':a<teenRate+r35?'35':'mid';
+  return { jp:c==='jp', cid:c, y, rich, poor, mid, rural:!!inf.rural, city:!inf.rural, m:P.month, d:P.day, h:P.hour,
+    single:!!inf.fatherAway, olderSib:!!(P.sib&&P.sib.older),
+    teenP:ageCat==='teen', old35:ageCat==='35'||ageCat==='40', old40:ageCat==='40', art:hk(2)<art&&ageCat!=='teen', epi:hk(3)<epi,
+    cs:!!inf.cs, home:!!inf.home, lbw:!!inf.lbw,
+    muslim:rel==='muslim', christ:/christian|catholic|orthodox/.test(rel), hindu:rel==='hindu', buddhist:/buddhist/.test(rel), secular:rel==='secular', jew:/jew/.test(rel),
+    cn:c==='cn'||c==='tw'||c==='sg', kr:c==='kr', ng:c==='ng', af:['ng','gh','ke','et','tz','ug','sn','ci','cm'].includes(c), latin:['mx','br','ar','co','pe','cl','ve','ec','gt','cu','bo','do','hn','py','sv','ni','cr','pa','uy'].includes(c), ru:['ru','ua','by','kz'].includes(c) };
+}
+// 生まれた日の物語（家で生まれた・帝王切開・父がいない・暮らし向き・時代）と食いちがう場面は使わない
+function bsOK(b,C){ const t=b[4], f=String(b[3]); if(!b[3](C)) return false;
+  if(C.home&&/病院|看護師|新生児室|待合室|退院|手術|麻酔/.test(t)) return false;
+  if(C.single&&/(^|[^祖])父/.test(t)&&!/C\.single/.test(f)) return false;
+  if(C.cs&&/陣痛|無痛|吸引|鉗子|お産は、思って/.test(t)) return false;
+  if(C.poor&&/銀のスプーン|新しい車|家族旅行|両親学級|職場から|ビデオ|SNS|電話ごし|紙おむつ|木のおもちゃ/.test(t)) return false;
+  if(C.y<1960&&/テレビ|粉ミルク|超音波|紙おむつ|車に乗せ/.test(t)) return false;
+  if(C.y<1975&&/電話ごし|ビデオ|洗濯機/.test(t)) return false;
+  return true; }
+// 生まれたときに場面を選ぶ（avoid：知り合いや本棚の人生で使われた番号）
+function bsPick(P,inf,avoid){ const C=bsCtx(P,'',inf); const r=new Rng(P.seed*7451+29); const av=new Set(avoid||[]); const out=[];
+  for(const dim of [1,2,3,4,5,6,7]){ if(!r.chance(BS_DIM_P[dim])) continue; const L=BS.filter(b=>b[1]===dim&&bsOK(b,C)); if(!L.length) continue;
+    // 父母の年齢や治療は、統計で当たった人だけ（当たった人は必ずその場面）
+    const strong=L.filter(b=>b[3]!==T&&/teenP|old35|old40|art|epi/.test(String(b[3])));
+    const pool=strong.length&&dim<=3&&r.chance(.8)?strong:L;
+    const pick=r.wpick(pool,b=>b[2]*(av.has(b[0])?.08:1)); if(pick) out.push(pick[0]);
+    if(dim===7&&r.chance(.5)){ const L2=L.filter(b=>b[0]!==pick[0]); const p2=r.wpick(L2,b=>b[2]*(av.has(b[0])?.08:1)); if(p2) out.push(p2[0]); } }
+  return out; }
+function bsText(ids){ return (ids||[]).map(i=>BS[i-1]).filter(Boolean).map(b=>b[4]).join(''); }
+// 表示：生まれた年に「生まれた日のこと」を足す
+function birthSitApply(P,L,ids){ if(!L||!L.years.length||L._bs) return; L._bs=1; const y0=L.years[0]; const b=y0.events.find(e=>e.kind==='birth'); if(!b) return;
+  if(!ids){ ids=bsPick(P,b.inf||{},[]); }
+  const t=bsText(ids); if(!t) return; const i=y0.events.indexOf(b); y0.events.splice(i+1,0,{ kind:'birthsit', d:0, text:t, feel:'', season:b.season }); }
+
+// 知り合い（紹介でつながった人・借りた本）と、本棚の人生で使われた場面は、選ばれにくくする
+function bsAvoid(P){ const out=[]; const add=(seed,country,force)=>{ if(seed==null||seed===P.seed) return; try{ const Q=makeBirth(seed,{country:country||null,force:force||null}); out.push(...bsPick(Q,bsInfOf(Q),[])); }catch(e){} };
+  try{ (store.get(KEY_ARC,[])||[]).slice(0,12).forEach(a=>{ if(a.bs) out.push(...a.bs); else add(a.seed,a.country,a.force); }); }catch(e){}
+  try{ (store.get(KEY_FRIEND,[])||[]).slice(0,12).forEach(f=>add(f.s,f.c,f.f)); }catch(e){}
+  try{ (store.get(KEY_LOAN,[])||[]).slice(0,12).forEach(o=>add(o.s,o.c,o.f)); }catch(e){}
+  return out; }
+const _bsInfCache={};
+function bsInfOf(Q){ if(_bsInfCache[Q.seed]) return _bsInfCache[Q.seed]; let inf={}; try{ const L=simulate(Q,'~'); const b=L.years[0].events.find(e=>e.kind==='birth'); inf=(b&&b.inf)||{}; }catch(e){} return _bsInfCache[Q.seed]=inf; }
+// 生まれた時に一度だけ選んで、記録する
+function bsChoose(P,L){ const b=L.years[0]&&L.years[0].events.find(e=>e.kind==='birth'); return bsPick(P,(b&&b.inf)||{},bsAvoid(P)); }
+// ===== ホームを毎日たのしく：今日のひとこと・今日の小さな場面・身近な人のいま・世界のいま・図鑑・見守りスタンプ・時間帯で変わる空 =====
+// どれも表示だけ。人生の流れ（乱数）は変えない。日付で変わるので、毎日ちがうものが見られる。
+const KEY_STAMP='hitotsu.stamps';
+function dayKey(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function dHash(...a){ let x=2166136261>>>0; const s=a.join('|'); for(let i=0;i<s.length;i++){ x^=s.charCodeAt(i); x=Math.imul(x,16777619)>>>0; } x=(x^(x>>>15))>>>0; x=Math.imul(x,2246822519)>>>0; x=(x^(x>>>13))>>>0; return x; }
+const dPick=(arr,...k)=>arr.length?arr[dHash(...k)%arr.length]:null;
+// --- 時間帯（見ている人の、いまの時刻） ---
+function todNow(){ const h=new Date().getHours(); return h<5?['night','夜ふけ']:h<9?['morning','朝']:h<16?['day','昼']:h<19?['evening','夕方']:['night','夜']; }
+function todOverlay(){ const [k]=todNow(); if(k==='day') return ''; const stars=k==='night'?Array.from({length:14},(_,i)=>{ const x=dHash('st',i)%360, y=dHash('sy',i)%90; return `<rect x="${x}" y="${y}" width="3" height="3" fill="#FFF6C8" opacity="${.5+(i%3)*.2}"><animate attributeName="opacity" values="1;.3;1" dur="${2+(i%4)}s" repeatCount="indefinite"/></rect>`; }).join(''):'';
+  return `<svg class="tod-ov tod-${k}" viewBox="0 0 360 220" preserveAspectRatio="none" aria-hidden="true">${stars}</svg>`; }
+// --- 今日のひとこと（主人公の心の声） ---
+const HITO={
+  child:{ hi:['きょうは、なんだかいいことがありそうな気がする。','{n}は、空の雲が動物に見えて、ひとりで笑った。','あしたも、あそべるといいな。','おなかがすいた。きょうのごはん、なにかな。','ポケットに、きれいな石をひとつ入れて歩いた。','{n}は、だれかに「すごいね」と言われたくて、もう一回やってみた。','はやく大きくなりたい、と思った。','秘密の基地のことは、まだだれにも言っていない。'],
+    mid:['{n}は、窓の外をぼんやり見ていた。','きょうは、ふつうの日だった。でも、ふつうの日も悪くない。','どうして空は青いんだろう、と思った。','{n}は、靴のひもを自分で結べた。だれも見ていなかった。','なんとなく、しりとりの続きを考えていた。','ねむる前に、きょうあったことを思い出していた。','{n}は、アリの行列を長いあいだ見ていた。','大人って、なんでいつも忙しそうなんだろう。'],
+    lo:['{n}は、だれにも言えないことを、ひとつ持っていた。','きょうは、ちょっとだけ泣きたかった。','{n}は、布団の中で小さく丸くなった。','だれかに、ぎゅっとしてほしかった。','{n}は、平気なふりをするのが上手になってきた。','あしたは、いい日になるといいな。'] },
+  teen:{ hi:['今なら、なんでもできる気がする。','{n}は、好きな歌を口ずさみながら歩いた。','友だちと、くだらないことで、ずっと笑っていた。','{n}は、ノートのすみに、将来の自分を描いてみた。','風が気持ちよくて、少し遠回りして帰った。','だれかの一言で、一日じゅう機嫌がよかった。'],
+    mid:['{n}は、鏡の前で、髪型をもう一度直した。','大人になるって、どういうことだろう。','{n}は、夜おそくまで、天井を見つめて考えごとをしていた。','自分のことが、自分でもよく分からない日があった。','{n}は、ほんとうの気持ちを、日記にだけ書いた。','みんなと同じでいたい。でも、同じだけじゃいやだ。'],
+    lo:['{n}は、イヤホンで音楽を聞いて、世界から少しだけ離れた。','どうせ、だれも分かってくれない、と思った。','{n}は、送りかけた言葉を、消した。','明日なんて来なければいいのに、と一瞬だけ思った。','{n}は、平気な顔をして、教室の席に座っていた。','ひとりでいるほうが、楽な日もある。'] },
+  adult:{ hi:['{n}は、帰り道に見た夕焼けを、しばらく覚えていた。','今日は、自分を少しほめてもいい気がする。','{n}は、だれかの役に立てたことが、うれしかった。','いい人たちに囲まれている、と{n}は思った。','{n}は、久しぶりに、心から笑った。','がんばってきてよかった、と思える日だった。'],
+    mid:['{n}は、コーヒーが冷めるまで、窓の外を見ていた。','やることは山ほどある。でも、まずは一つずつ。','{n}は、昔の友だちのことを、ふと思い出した。','このままでいいのかな、と考えることがある。','{n}は、少しだけ早起きして、静かな朝を過ごした。','毎日は同じようで、少しずつちがう。'],
+    lo:['{n}は、だれにも弱音をはけずにいた。','疲れた、と声に出したら、少しだけ楽になった。','{n}は、眠れない夜に、天井の模様を数えた。','がんばっているのに、と思う日がある。','{n}は、だれかに「大丈夫？」と聞いてほしかった。','今日は、自分にやさしくしよう、と決めた。'] },
+  elder:{ hi:['{n}は、日なたで、ゆっくりお茶を飲んだ。','いろいろあったけれど、いい人生だ、と{n}は思った。','孫の声が聞こえると、それだけで一日が明るくなる。','{n}は、庭の花が咲いたことを、だれかに話したかった。','今日も目がさめた。それだけで、ありがたい。','{n}は、若いころの写真を見て、少し笑った。'],
+    mid:['{n}は、昔のことを、昨日のことのように思い出す。','ゆっくり歩けば、見える景色もある。','{n}は、ラジオから流れる古い歌を、口ずさんだ。','時間が、前よりゆっくり流れている気がする。','{n}は、先に行った人たちのことを、静かに思った。','季節がまた一つ、めぐっていく。'],
+    lo:['{n}は、ひとりの夕食に、少しだけさびしさを感じた。','体が思うように動かない日が増えた。','{n}は、もう会えない人の名前を、小さく呼んでみた。','忘れたくないことが、たくさんある。','{n}は、だれかが訪ねてくるのを、窓辺で待っていた。','それでも、明日の朝を楽しみにしている。'] } };
+function hitokoto(P,L,age){ const st2=age<=12?'child':age<=19?'teen':age<=64?'adult':'elder'; const y=[...L.years].reverse().find(y=>y.age<=age&&y.h!=null); const h=y?y.h:60;
+  const band=h>=68?'hi':h>=45?'mid':'lo'; const pool=HITO[st2][band]; const own=[]; L.years.filter(y=>y.age<=age&&y.age>=age-1).forEach(y=>y.events.forEach(e=>{ if(e.inner&&e.kind!=='death') own.push(e.inner); }));
+  const k=dayKey(); const t=own.length&&dHash(P.seed,k,'own')%3===0?`「${dPick(own,P.seed,k,'o')}」`:dPick(pool,P.seed,k).replace(/\{n\}/g,P.given);
+  return t; }
+// --- 今日の小さな場面（オノマトペの文から、季節と年齢と気持ちに合うもの） ---
+function todayScene(P,L,age,egs){ if(typeof ONO_DATA==='undefined') return null; const k=dayKey();
+  const now=new Date(); const m=now.getMonth(); const north=(typeof climateOf!=='function')||climateOf(P.countryId)!=='s'; const se=north?(m<2||m===11?3:m<5?0:m<8?1:2):(m<2||m===11?1:m<5?2:m<8?3:0);
+  const okCat=c=>{ const d=ONO_CAT[c]; if(!d) return false; if(d[1]&&!d[1].includes(se)) return false; return age>=d[2]&&age<=d[3]; };
+  const safe=['rain','sun','wind','night','sleep','body','run','insect','spring','summer','autumn','winter','snow','eat','house','city'];
+  const pool=ONO_DATA.filter(r=>safe.includes(r[0])&&okCat(r[0])&&!/ここ|学校|会社|給食/.test(r[2])); const emo=egs?ONO_DATA.filter(r=>r[0]==='e'+egs):[];
+  const r=dHash(P.seed,k,'sc')%4===0&&emo.length?dPick(emo,P.seed,k,'e'):dPick(pool,P.seed,k,'p'); return r?{ w:r[1], t:r[2] }:null; }
+// --- 身近な人のいま ---
+const NEAR_DO={ father:['新聞をたたみながら、{n}のことを話していた。','仕事から帰って、玄関で大きく息をついた。','古いラジオを直そうとしていた。','だれもいない台所で、こっそりおやつを食べていた。'],
+  mother:['洗濯物をたたみながら、鼻歌をうたっていた。','{n}の好物を、多めに作っていた。','窓辺で、遠くを見ていた。','電話で、だれかと長話をしていた。'],
+  sibling:['自分の部屋で、音楽を聞いていた。','{n}のものを、こっそり借りていった。','ひさしぶりに、昔の話で笑った。','何か言いたそうにして、やめた。'],
+  friend:['{n}に、おもしろい話を聞かせたくて、うずうずしていた。','最近のことを、手紙やメッセージで知らせてきた。','同じ空を、別の場所で見上げていた。','{n}の名前を、ふと口にした。'],
+  partner:['{n}の帰りを待ちながら、お茶をいれていた。','{n}の寝顔を見て、少し笑った。','「今日、どうだった？」と聞いた。','二人で行きたい場所の話をしていた。'],
+  child:['{n}のまねをして、大人ぶっていた。','新しくできるようになったことを、見せたがった。','{n}のひざで、うとうとしていた。','「ねえ、聞いて」と、話しかけてきた。'],
+  other:['{n}のことを、ときどき思い出していた。','いつもの道を、いつものように歩いていた。','{n}に会ったら話そうと思うことが、一つあった。','元気にしていた。'] };
+function nearNow(P,L,age){ const k=dayKey(); const roleOf=p=>/father/.test(p.role)?'father':/mother/.test(p.role)?'mother':/sib|brother|sister/.test(p.role)?'sibling':/friend/.test(p.role)?'friend':/partner|spouse|lover/.test(p.role)?'partner':/child/.test(p.role)?'child':'other';
+  const ppl=(L.persons||[]).filter(p=>p.name&&p.metAge!=null&&p.metAge<=age&&!(p.deathAge!=null&&p.deathAge<=age));
+  const picks=[...ppl].sort((a,b)=>dHash(P.seed,k,a.id)-dHash(P.seed,k,b.id)).slice(0,3);
+  return picks.map(p=>({ who:(p.label?p.label+'の':'')+p.name, t:dPick(NEAR_DO[roleOf(p)],P.seed,k,p.id).replace(/\{n\}/g,P.given) })); }
+// --- 世界のいま（物語の中の年の、ほかの国のくらし） ---
+function worldNow(P,year){ const k=dayKey(); const ids=Object.keys(WSTAT).filter(c=>c!==P.countryId&&WSTAT[c].lex);
+  const picks=[...ids].sort((a,b)=>dHash(k,a)-dHash(k,b)).slice(0,3); const f=(v,d)=>v==null?'—':(+v).toFixed(d);
+  return picks.map(c=>{ const W=WSTAT[c]; return { name:W.n, lex:f(wsAt(W.lex,year),1), tfr:f(wsAt(W.tfr,year),1), cell:wsAt(W.cell,year), net:wsAt(W.net,year), urb:f(wsAt(W.urb,year),0) }; }); }
+// --- 図鑑（あつめたもの） ---
+function zukan(P,L,age){ const arc=store.get(KEY_ARC,[]); const cs=new Set([P.countryId]); const bel=new Set(Object.values(L.beliefs||{}).filter(b=>b.age<=age).map(b=>b.id)); let met=(L.persons||[]).filter(p=>p.metAge!=null&&p.metAge<=age).length;
+  for(const a of arc.slice(0,30)){ try{ const Q=makeBirth(a.seed,{country:a.country||null,force:a.force||null}); cs.add(Q.countryId); } catch(e){} }
+  const egsSeen=new Set(L.years.filter(y=>y.age<=age&&y.egs).map(y=>y.egs));
+  return [['生まれた国',cs.size,Object.keys(WSTAT).length,'か国'],['この人生の観念',bel.size,Object.keys(BELIEFS).length,'こ'],['感じた感情の段階',egsSeen.size,22,'段'],['出会った人',met,null,'人'],['本棚の本',arc.length,null,'冊']]; }
+// --- 見守りスタンプ（ホームをひらいた日に、ひとつ押される） ---
+function stampToday(){ const s=store.get(KEY_STAMP,[]); const k=dayKey(); if(!s.includes(k)){ s.push(k); store.set(KEY_STAMP,s.slice(-400)); } return s; }
+function stampHTML(){ const s=new Set(store.get(KEY_STAMP,[])); const days=[]; const d=new Date(); for(let i=13;i>=0;i--){ const x=new Date(d); x.setDate(d.getDate()-i); days.push(x); }
+  let streak=0; for(let i=0;i<400;i++){ const x=new Date(d); x.setDate(d.getDate()-i); if(s.has(dayKey(x))) streak++; else break; }
+  const W='日月火水木金土';
+  return `<div class="stp-row">${days.map(x=>{ const on=s.has(dayKey(x)); const today=dayKey(x)===dayKey(); return `<span class="stp ${on?'on':''} ${today?'today':''}" title="${x.getMonth()+1}月${x.getDate()}日"><small>${W[x.getDay()]}</small>${on?'<i aria-hidden="true"></i>':x.getDate()}</span>`; }).join('')}</div>
+  <p class="tiny">${streak>=2?`${streak}日つづけて、見守っています。`:'ひらいた日に、スタンプがひとつ押されます。'}全部で${s.size}日。</p>`; }
 //---------------------------------------------------------------------
 //
 // QR Code Generator for JavaScript
@@ -11800,12 +12213,21 @@ var qrcode = function() {
 // ===== ほかの端末で続ける（携帯とパソコンで、同じ人生を） =====
 // サーバーを使わず、この端末の記録（今の人生・本棚・紹介でつながった人・呼び名）をリンクにまとめて、別の端末で開く。
 const MOVE_PRE='LIFEMOVE1.';
+// LINE などのアプリの中のブラウザは、記録の置き場所が、いつものブラウザ（Safari・Chrome）と別になる。
+// そのため、LINEで開いたら、いつものブラウザで開き直す（LINE は ?openExternalBrowser=1 をつけたリンクを外のブラウザで開く）。
+const IN_LINE=/\bLine\//i.test(navigator.userAgent||''), IN_APP=IN_LINE||/FBAN|FBAV|Instagram|MicroMessenger|KAKAOTALK/i.test(navigator.userAgent||'');
+function extURL(u){ const i=u.indexOf('#'); const base=i<0?u:u.slice(0,i), h=i<0?'':u.slice(i); if(/openExternalBrowser=1/.test(base)) return u; return base+(base.includes('?')?'&':'?')+'openExternalBrowser=1'+h; }
+function inAppGuard(){ if(!IN_APP) return; const tried=/openExternalBrowser=1/.test(location.search);
+  if(IN_LINE&&!tried){ location.replace(extURL(location.href)); return true; }
+  const b=document.createElement('div'); b.className='inapp'; b.setAttribute('role','note');
+  b.innerHTML=`<p><b>いつものブラウザで開いてください</b><br>アプリの中のブラウザでは、人生の記録が別の場所に保存されるため、ほかの画面とは別の人が生まれてしまいます。右上や下の「…」から「ブラウザで開く」を選んでください。</p><button type="button" class="hm-btn" id="inappGo">ブラウザで開く</button>`;
+  document.body.prepend(b); const g=document.getElementById('inappGo'); if(g) g.onclick=()=>{ location.href=extURL(location.href); }; return false; }
 async function moveZip(s){ try{ if(typeof CompressionStream==='undefined') throw 0; const cs=new Blob([new TextEncoder().encode(s)]).stream().pipeThrough(new CompressionStream('deflate-raw')); const u=new Uint8Array(await new Response(cs).arrayBuffer()); let b=''; u.forEach(x=>b+=String.fromCharCode(x)); return 'z'+btoa(b).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }catch(e){ return 'p'+b64e(s); } }
 async function moveUnzip(t){ const k=t[0], body=t.slice(1); const bin=atob(body.replace(/-/g,'+').replace(/_/g,'/')); const u=Uint8Array.from(bin,c=>c.charCodeAt(0));
   if(k==='p') return new TextDecoder().decode(u);
   const ds=new Blob([u]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new TextDecoder().decode(await new Response(ds).arrayBuffer()); }
 function moveData(){ return { v:1, id:myId(), me:store.get(KEY_ME,''), cur:st||null, arc:store.get(KEY_ARC,[]), fr:store.get(KEY_FRIEND,[]), at:Date.now() }; }
-async function moveLink(){ const z=await moveZip(JSON.stringify(moveData())); const base=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; return base+'#move='+z; }
+async function moveLink(){ const z=await moveZip(JSON.stringify(moveData())); const base=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; return extURL(base+'#move='+z); }
 function moveQR(text){ try{ const q=qrcode(0,'L'); q.addData(text,'Byte'); q.make(); return q.createSvgTag({ cellSize:4, margin:2, scalable:true }); }catch(e){ return ''; } }
 function moveDialogHTML(){ return `<div class="frd-in mv-in"><button class="frd-x" type="button" aria-label="閉じる">×</button>
   <h2>ほかの端末で続ける</h2>
@@ -11917,7 +12339,7 @@ function bindHome(){ bindFriend(); if(typeof bindLoanShelf==='function') bindLoa
   document.querySelectorAll('[data-go="life"]').forEach(b=>b.onclick=goLife);
   const a=$('#hmAlbum'); if(a) a.onclick=()=>{ albumOpen=true; goLife(); setTimeout(()=>{ const al=document.querySelector('.album'); if(al) al.scrollIntoView({ block:'start' }); },60); };
   const k=$('#hmKmap'); if(k) k.onclick=()=>{ st&&(page='home'); const tmp=document.createElement('div'); k.disabled=true; k.textContent='読み解いています…'; setTimeout(()=>{ tmp.innerHTML=kannenMapHTML(); k.closest('.hm-tile').appendChild(tmp); k.remove(); },30); };
-  document.querySelectorAll('.hm-shelf-row [data-arc]').forEach(b=>b.onclick=()=>{ const a=store.get(KEY_ARC,[])[+b.dataset.arc]; viewing={ seed:a.seed, country:a.country, force:a.force||null, choice:a.choice }; render(); window.scrollTo(0,0); });
+  document.querySelectorAll('.hm-shelf-row [data-arc]').forEach(b=>b.onclick=()=>{ const a=store.get(KEY_ARC,[])[+b.dataset.arc]; viewing={ seed:a.seed, country:a.country, force:a.force||null, choice:a.choice, bs:a.bs||null }; render(); window.scrollTo(0,0); });
 }
 // ===== 画面 =====
 const DAY=86400000;
@@ -11938,7 +12360,7 @@ let viewing=null;     // 過去の人生のレポートを読んでいる時 { s
 function load(){
   if(!st){ cur=null; return; }
   const P=makeBirth(st.seed,{country:st.country||null,force:st.force||null});
-  const L=simulate(P, st.choice||undefined); if(typeof friendMeet==='function') friendMeet(P,L);
+  const L=simulate(P, st.choice||undefined); if(typeof birthSitApply==='function'){ if(!st.bs&&st.bsNew){ st.bs=bsChoose(P,L); delete st.bsNew; save(); } birthSitApply(P,L,st.bs||null); } if(typeof friendMeet==='function') friendMeet(P,L);
   cur={P,L};
   // 速さを変えた前から続いている人生は、今の年齢を保ったまま新しい速さに切りかえる
   if(st.spd!==2){ const t=Date.now()+(st.shift||0)-st.birthTime-(st.pause||0); const a=Math.max(0,t/oldMpy(P)); st.birthTime=Date.now()+(st.shift||0)-(st.pause||0)-a*msPerYear(P); st.spd=2; save(); }
@@ -11998,13 +12420,13 @@ function deathYearOf(P,L){ const D=L.deathAge; if(D===0){ const mo=(L.death&&L.d
 // --- 誕生 ---
 function born(country,force){
   const seed=(Math.random()*2**31)>>>0;
-  st={ spd:2, force:force||null, seed, country:country||null, birthTime:Date.now(), shift:0, choice:'~', pause:0, lastSeen:-1, stage:'life' };
+  st={ spd:2, force:force||null, seed, country:country||null, birthTime:Date.now(), shift:0, choice:'~', pause:0, lastSeen:-1, stage:'life', bsNew:1 };
   save(); load(); sinceAge=-1; viewing=null; page='life'; render();
   window.scrollTo(0,0);
 }
 function reincarnate(){
   const arc=store.get(KEY_ARC,[]);
-  arc.unshift({ seed:st.seed, country:st.country, force:st.force||null, choice:st.choice, name:cur.P.full, nation:cur.P.country.name, age:cur.L.deathAge, at:Date.now() });
+  arc.unshift({ seed:st.seed, country:st.country, force:st.force||null, choice:st.choice, bs:st.bs||null, name:cur.P.full, nation:cur.P.country.name, age:cur.L.deathAge, at:Date.now() });
   store.set(KEY_ARC,arc.slice(0,30));
   store.del(KEY_CUR); st=null; cur=null; viewing=null; page='home'; render(); window.scrollTo(0,0);
 }
@@ -12013,7 +12435,7 @@ function reincarnate(){
 function render(){
   const app=$('#app'); if(typeof navSync==='function') navSync();
   if(!viewing&&st&&page==='home'&&cur){ app.innerHTML=homeHTML(); bindHome(); $('#mastmeta').textContent=''; renderDev(); return; }
-  if(viewing){ const P=makeBirth(viewing.seed,{country:viewing.country||null,force:viewing.force||null}); const L=simulate(P,viewing.choice||undefined); if(viewing.loan==null&&typeof friendMeet==='function') friendMeet(P,L); app.innerHTML=reportHTML(P,L,true)+loanReportHTML(P,L); bindReport(P,L); bindLoanReport(P,L); $('#mastmeta').textContent='過去の人生'; renderDev(); return; }
+  if(viewing){ const P=makeBirth(viewing.seed,{country:viewing.country||null,force:viewing.force||null}); const L=simulate(P,viewing.choice||undefined); if(typeof birthSitApply==='function') birthSitApply(P,L,viewing.bs||null); if(viewing.loan==null&&typeof friendMeet==='function') friendMeet(P,L); app.innerHTML=reportHTML(P,L,true)+loanReportHTML(P,L); bindReport(P,L); bindLoanReport(P,L); $('#mastmeta').textContent='過去の人生'; renderDev(); return; }
   if(!st){ app.innerHTML=introHTML(); bindIntro(); $('#mastmeta').textContent=''; renderDev(); return; }
   if(st.stage==='funeral'){ app.innerHTML=funeralHTML(cur.P,cur.L); bindFuneral(); $('#mastmeta').textContent='葬儀'; renderDev(); return; }
   if(st.stage==='report'){ app.innerHTML=reportHTML(cur.P,cur.L,false); bindReport(cur.P,cur.L); $('#mastmeta').textContent='振り返り'; renderDev(); return; }
@@ -12033,7 +12455,7 @@ function introHTML(){
     <div class="body"><p>国も、家族も、家の暮らし向きも、生まれた日時も、名前も、すべて世界の統計に沿って偶然に決まります。その人は、自分で考え、自分で選んで生きていきます。あなたにできるのは、迷っているその人に、一生で2〜3回だけ「インスピレーション」を贈ること。届くかどうかは、その時のその人の心しだいです。</p>
     <p style="margin-top:10px">人生は、現実の約3日半で1歳ずつ進みます（80歳まで生きる人生なら、約9か月）。ひらくたびに、前に見た時から今までに起きた出来事と、その時の気持ちが読めます。人生が終わると、葬儀のあとに、その人生を読み解く振り返りが届きます。生き終えた人生は、章立てのある一冊の本になって、あなたの本棚に並びます。</p></div>
     <div class="cta2"><button class="btn" id="bornBtn2" type="button">生まれる</button></div>
-    <p class="tiny muted">世界189か国の中から、その年の出生数の比率に沿って生まれる国が決まります。右下の「制作用」から早送りできます。</p>
+    <p class="tiny muted">世界189か国の中から、その年の出生数の比率に沿って生まれる国が決まります。</p>
     ${arc.length?`<div class="shelf-wrap"><h3>わたしの本棚</h3><p class="tiny muted">生き終えた人生が、一冊ずつ並びます。背表紙を押すと、その人生の振り返りが読めます。</p><div class="shelf">${arc.map((a,i)=>spineHTML(a,i)).join('')}</div><div class="reels"><span class="tiny muted">思い出の動画</span>${arc.map((a,i)=>`<button type="button" class="reel" data-mov="${i}" aria-label="${esc(a.name)}の思い出の動画を再生"><span class="reel-ic" aria-hidden="true"></span><span>${esc(a.name)}</span></button>`).join('')}</div><div class="obi-btns"><button class="btn ghost small" id="kmapBtn" type="button">観念の地図をひらく</button></div><div id="kmapOut"></div></div>`:''}
     ${loanShelfHTML()}
     ${friendHTML()}
@@ -12066,7 +12488,7 @@ function bindIntro(){
   bindLoanShelf(); bindFriend();
   $('#bornBtn').onclick=()=>born(null); const b2=$('#bornBtn2'); if(b2) b2.onclick=()=>born(null);
   const km=$('#kmapBtn'); if(km) km.onclick=()=>{ km.disabled=true; km.textContent='読み解いています…'; setTimeout(()=>{ $('#kmapOut').innerHTML=kannenMapHTML(); km.textContent='観念の地図'; },30); };
-  document.querySelectorAll('[data-arc]').forEach(b=>b.onclick=()=>{ const a=store.get(KEY_ARC,[])[+b.dataset.arc]; viewing={ seed:a.seed, country:a.country, force:a.force||null, choice:a.choice }; render(); window.scrollTo(0,0); });
+  document.querySelectorAll('[data-arc]').forEach(b=>b.onclick=()=>{ const a=store.get(KEY_ARC,[])[+b.dataset.arc]; viewing={ seed:a.seed, country:a.country, force:a.force||null, choice:a.choice, bs:a.bs||null }; render(); window.scrollTo(0,0); });
 }
 
 function profileFacts(P,age){
@@ -12528,7 +12950,9 @@ function alertBox(t){ const m=document.createElement('p'); m.className='tiny'; m
 function fallbackCopy(txt){ const d=$('#dev'); const ta=document.createElement('textarea'); ta.value=txt; ta.style.width='100%'; ta.style.height='160px'; d.appendChild(ta); ta.select(); const m=$('#devMsg'); if(m) m.textContent='自動でコピーできなかったので、下の欄を選択してコピーしてください'; }
 
 $('#devbtn').onclick=()=>{ devOpen=!devOpen; renderDev(); };
-function start(){ load(); render(); if(typeof friendFromHash==='function') friendFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
+// 「制作用」は、アドレスの最後に ?dev か #dev をつけた時だけ出す
+if(/[?&#]dev\b/.test(location.search+location.hash)||(()=>{ try{ return localStorage.getItem('hitotsu.dev')==='1'; }catch(e){ return false; } })()){ $('#devbtn').hidden=false; try{ localStorage.setItem('hitotsu.dev','1'); }catch(e){} }
+function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); render(); if(typeof friendFromHash==='function') friendFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
 start();
 setInterval(()=>{ if(st && st.stage==='life' && !viewing && !inspAnim && document.visibilityState==='visible' && !document.activeElement.matches('textarea')) render(); }, 30000);
 
