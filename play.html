@@ -15230,4 +15230,41 @@ function fbListen(){ const { collection, onSnapshot }=FB.D;
 (function(){ const _rf=receiveFriend; receiveFriend=function(o){ const r=_rf(o); if(r!=='self') setTimeout(()=>fbPush(),50); return r; }; })();
 if(document.readyState==='complete') setTimeout(fbStart,800); else window.addEventListener('load',()=>setTimeout(fbStart,800));
 </script>
+<script>
+// ===== 運営用の数（管理者ページ用） =====
+// 遊んだ人の数・生まれた国・寿命・迷う場面での判断を、Firebase の ev に「数えるためだけの記録」として送る。
+// 送るもの：種類 t（o=その日にひらいた / b=生まれた / d=一生を終えた / v=迷う場面の判断）、国の記号 c と国名 n、
+//          亡くなった年齢 a、場面の記号 q、判断 p（I=贈った .=見守った）、届いたか h、端末の匿名ログイン u、時刻 ts（サーバーの時刻）。
+// 名前・呼び名・メールは送らない。サーバーにつながらないときは端末にためておき、つながったときに送る（最大60件）。
+const KEY_STATQ='hitotsu.statq', KEY_STATO='hitotsu.stato', KEY_STATD='hitotsu.statd';
+function stQ(o){ const q=store.get(KEY_STATQ,[]); q.push(o); store.set(KEY_STATQ,q.slice(-60)); setTimeout(stFlush,300); }
+let _stBusy=false;
+async function stFlush(){ if(!FB||!FB.uid||_stBusy) return; _stBusy=true;
+  try{ const { collection, addDoc, serverTimestamp }=FB.D;
+    for(let g=0; g<60; g++){ const q=store.get(KEY_STATQ,[]); if(!q.length) break;
+      const o=Object.assign({},q[0],{ u:FB.uid, ts:serverTimestamp() }); delete o.n_try;
+      try{ await addDoc(collection(FB.db,'ev'),o); }
+      catch(e){ // 送れなかったら残して、次の機会にもう一度（20回だめなら捨てる）
+        const q2=store.get(KEY_STATQ,[]); if(q2[0]){ q2[0].n_try=(q2[0].n_try||0)+1; if(q2[0].n_try>=20) q2.shift(); store.set(KEY_STATQ,q2); } break; }
+      const q2=store.get(KEY_STATQ,[]); q2.shift(); store.set(KEY_STATQ,q2); }
+  }finally{ _stBusy=false; } }
+function stDay(){ const d=new Date(Date.now()+9*3600000); return d.toISOString().slice(0,10); }
+function stCountry(){ try{ const C=cur&&cur.P&&cur.P.country; return C?{ c:String(C.id||'').slice(0,8), n:String(C.name||'').slice(0,20) }:{}; }catch(_){ return {}; } }
+// その日はじめてひらいたとき
+function stOpen(){ const d=stDay(); if(store.get(KEY_STATO,'')===d) return; store.set(KEY_STATO,d); stQ({ t:'o' }); }
+// 生まれたとき
+(function(){ if(typeof born!=='function') return; const _b=born; born=function(){ const r=_b.apply(this,arguments); try{ if(cur&&st) stQ(Object.assign({ t:'b' },stCountry())); }catch(_){} return r; }; })();
+// 迷う場面で、贈った／見守った
+(function(){ if(typeof commitInsp!=='function') return; const _c=commitInsp; commitInsp=function(letter){ let pd=null; try{ pd=cur&&cur.L&&cur.L.pending; }catch(_){}
+  const r=_c.apply(this,arguments);
+  try{ if(pd&&(letter==='I'||letter==='.')){ const res=(cur.L.choices||[]).find(c=>c.k===pd.k)||{}; const o={ t:'v', q:String(pd.id||'').slice(0,20), p:letter }; if(letter==='I') o.h=!!res.heard; stQ(o); } }catch(_){}
+  return r; }; })();
+// 一生を終えたとき（その人生で1回だけ）
+function stDeathCheck(){ try{ if(!cur||!st||viewing||isLegacy()) return; const c=clock(); if(!c.dead) return;
+  if(store.get(KEY_STATD,null)===st.seed) return; store.set(KEY_STATD,st.seed);
+  stQ(Object.assign({ t:'d', a:Math.max(0,Math.min(130,cur.L.deathAge|0)) },stCountry())); }catch(_){} }
+(function(){ if(typeof render!=='function') return; const _r=render; render=function(){ const r=_r.apply(this,arguments); stDeathCheck(); return r; }; })();
+// サーバーにつながったら送る
+(function(){ const t=setInterval(()=>{ if(FB&&FB.uid){ clearInterval(t); stOpen(); stDeathCheck(); stFlush(); setInterval(()=>{ stDeathCheck(); stFlush(); },60000); } },1000); setTimeout(()=>clearInterval(t),120000); })();
+</script>
 </body></html>
