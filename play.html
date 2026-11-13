@@ -3646,6 +3646,110 @@ NB_COUNTRY.il=[['he',.74],['ar',.21]]; NB_COUNTRY.ir=[['fa',1]]; NB_COUNTRY.af=[
 NB_COUNTRY.in=[['hi',.74],['bn',.09],['te',.09],['ta',.08]]; NB_COUNTRY.bd=[['bn',1]]; NB_COUNTRY.np=[['ne',1]]; NB_COUNTRY.lk=[['si',.75],['ta',.25]];
 NB_COUNTRY.et=[['am',.5],['om',.36],['ti',.06],['so',.06]]; NB_COUNTRY.er=[['ti',1]]; NB_COUNTRY.so=[['so',1]]; NB_COUNTRY.dj=[['so',1]];
 NB_COUNTRY.tz=[['sw_tz',1]]; NB_COUNTRY.cd=[['fr_cd',1]]; NB_COUNTRY.cg=[['fr_cd',1]];
+// ===== 名前表：東南アジアの島々・アフリカ西部と南部・カリブ・残りのヨーロッパと中央アジア =====
+const nbPatMs=(f,g)=>g==='女性'?['binti '+f[0],'ビンティ・'+f[1]]:['bin '+f[0],'ビン・'+f[1]];
+const nbFemTk=f=>/(ow|ew)$/.test(f[0])?[f[0]+'a', f[1].replace(/フ$/,'ワ')]:f;
+nbDef('id',{ male:'Budi=ブディ|Agus=アグス|Ahmad=アフマド=m|Muhammad=ムハンマド=m|Rizky=リズキ=m~恵み|Andi=アンディ|Dedi=デディ|Eko=エコ~一番目の子|Bambang=バンバン|Joko=ジョコ|Yohanes=ヨハネス=c|Putra=プトラ~息子',
+ female:'Siti=シティ=m|Dewi=デウィ~女神|Sri=スリ~輝き|Putri=プトゥリ~王女|Nur=ヌール=m~光|Ayu=アユ~美しい|Wulan=ウラン~月|Fitri=フィトリ=m|Indah=インダ~美しい|Maria=マリア=c|Rina=リナ|Lestari=レスタリ~永遠の',
+ family:'Santoso=サントソ|Wijaya=ウィジャヤ~勝利|Saputra=サプトラ|Hidayat=ヒダヤット=m~導き|Kurniawan=クルニアワン~恵まれた|Setiawan=スティアワン~誠実な|Nugroho=ヌグロホ~恵み|Pratama=プラタマ~一番目|Siregar=シレガル|Simanjuntak=シマンジュンタク=c|Hasibuan=ハシブアン|Lubis=ルビス' });
+nbDef('fil',{ male:'Jose=ホセ|Juan=フアン|Mark=マーク|John=ジョン|Michael=マイケル|Christian=クリスチャン|Jerome=ジェローム|Carlo=カルロ|Paolo=パオロ|Angelo=アンジェロ|Mohammad=モハマド=m',
+ female:'Maria=マリア|Ana=アナ|Kristine=クリスティン|Angelica=アンジェリカ|Jasmine=ジャスミン|Mary Grace=メアリー・グレース|Princess=プリンセス|Joy=ジョイ~喜び|Rosario=ロサリオ|Liza=リザ|Amina=アミナ=m',
+ family:'Santos=サントス|Reyes=レイエス|Cruz=クルス|Bautista=バウティスタ|Ocampo=オカンポ|Garcia=ガルシア|Mendoza=メンドーサ|Torres=トーレス|Tomas=トマス|Andres=アンドレス|Villanueva=ビリャヌエバ|Dela Cruz=デラ・クルス' });
+nbDef('ms',{ pat:true, patf:nbPatMs, male:'Ahmad=アフマド|Muhammad=ムハンマド|Amir=アミル~長|Hafiz=ハフィズ|Faiz=ファイズ|Syafiq=シャフィク|Aiman=アイマン|Iskandar=イスカンダル|Zulkifli=ズルキフリ|Hakim=ハキム~賢い|Ismail=イスマイル|Razak=ラザク',
+ female:'Aisyah=アイシャ~生きる|Nurul Huda=ヌルル・フダ|Siti Aminah=シティ・アミナ|Farah=ファラ~喜び|Nur Iman=ヌル・イマン|Syafiqah=シャフィカ|Aina=アイナ|Zara=ザラ|Fatimah=ファティマ|Nabilah=ナビラ~気高い', family:'' });
+nbDef('ha',{ male:'Abubakar=アブバカル|Musa=ムサ|Ibrahim=イブラヒム|Usman=ウスマン|Aliyu=アリユ|Sani=サニ|Bello=ベロ|Yusuf=ユスフ|Nasiru=ナシル|Umar=ウマル',
+ female:'Aisha=アイシャ|Fatima=ファティマ|Hauwa=ハウワ|Zainab=ザイナブ|Amina=アミナ|Hadiza=ハディザ|Maryam=マルヤム|Halima=ハリマ',
+ family:'Abdullahi=アブドゥラヒ|Mohammed=モハメド|Bello=ベロ|Ibrahim=イブラヒム|Sani=サニ|Garba=ガルバ|Danjuma=ダンジュマ|Lawal=ラワル' });
+nbDef('yo',{ male:'Olúwaṣeun=オルワシェウン~神に感謝します|Adébáyọ̀=アデバヨ~王冠が喜びとともに来た|Babátúndé=ババトゥンデ~父がまた来た|Olúwatóbi=オルワトビ~神は偉大|Ayọ̀délé=アヨデレ~喜びが家に来た|Tèmítọ́pẹ́=テミトペ~わたしのものは感謝に値する|Kúnlé=クンレ~家が満ちた|Fẹ́mi=フェミ~わたしを愛して',
+ female:'Adéọlá=アデオラ~王冠と富|Fúnmiláyọ̀=フンミラヨ~わたしに喜びをくれた|Títílayọ̀=ティティラヨ~喜びはいつまでも|Yétúndé=イェトゥンデ~母がまた来た|Bọ́lánlé=ボランレ~家で富に出会った|Ìyábọ̀=イヤボ~母が戻ってきた|Ayọ̀ká=アヨカ~喜びに囲まれる|Morẹ́nikẹ́=モレニケ~いとしむ人を見つけた',
+ family:'Ọláńrewájú=オランレワジュ~富が前へ進む|Adéyẹmí=アデイェミ~王冠はわたしにふさわしい|Ògúnbánjọ=オグンバンジョ|Babalọlá=ババロラ|Afọlábí=アフォラビ~富をもって生まれた|Akínwùmí=アキンウミ|Ajàyí=アジャイ|Adébáyọ̀=アデバヨ' });
+nbDef('ig',{ male:'Chukwuemeka=チュクウエメカ~神は偉大なことをした|Chinedu=チネドゥ~神が導く|Obinna=オビンナ~父の心|Ikenna=イケンナ~父の力|Emeka=エメカ|Chibuike=チブイケ~神はわが力|Nnamdi=ンナムディ~わが父は生きている|Uchenna=ウチェンナ~父の思い',
+ female:'Ngozi=ンゴジ~祝福|Chiamaka=チアマカ~神は美しい|Adaeze=アダエゼ~王の長女|Chioma=チオマ~よい神|Nneka=ンネカ~母はすぐれている|Ifeoma=イフェオマ~よいもの|Amarachi=アマラチ~神の恵み|Chinyere=チニェレ~神が与えた',
+ family:'Okafor=オカフォー|Okonkwo=オコンクォ|Eze=エゼ~王|Nwosu=ンウォス|Okeke=オケケ|Obi=オビ~心|Nwachukwu=ンワチュクウ~神の子|Onyeka=オニェカ' });
+nbDef('ak',{ male:'Kwame=クワメ|Kofi=コフィ|Kwaku=クワク|Yaw=ヤウ|Kwabena=クワベナ|Kwasi=クワシ|Kojo=コジョ|Emmanuel=エマニュエル=c|Samuel=サミュエル=c|Ibrahim=イブラヒム=m',
+ female:'Ama=アマ|Akosua=アコスア|Adwoa=アジョア|Abena=アベナ|Akua=アクア|Yaa=ヤア|Efua=エフア|Abigail=アビゲイル=c|Gifty=ギフティ=c|Fatima=ファティマ=m',
+ family:'Mensah=メンサ|Owusu=オウス|Boateng=ボアテング|Asante=アサンテ|Osei=オセイ~気高い|Agyeman=アジェマン|Appiah=アピア|Darko=ダルコ|Amoah=アモア|Addo=アド' });
+nbDef('en_ke',{ male:'Brian=ブライアン|Kevin=ケビン|Dennis=デニス|John=ジョン|Joseph=ジョセフ|Peter=ピーター|Samuel=サミュエル|David=デビッド|Daniel=ダニエル|Mohamed=モハメド=m',
+ female:'Faith=フェイス~信じる心|Mercy=マーシー~あわれみ|Esther=エスター~星|Grace=グレース~恵み|Mary=メアリー|Joyce=ジョイス|Ann=アン|Jane=ジェーン|Purity=ピュリティ~清らかさ|Fatuma=ファトゥマ=m',
+ family:'Otieno=オティエノ~夜に生まれた|Ochieng=オチェング~日中に生まれた|Kamau=カマウ|Njoroge=ンジョロゲ|Mwangi=ムワンギ|Kiprop=キプロプ~雨の中で生まれた|Cheruiyot=チェルイヨト|Kariuki=カリウキ|Onyango=オニャンゴ~朝に生まれた|Mutua=ムトゥア|Wafula=ワフラ~雨の季節に生まれた|Ali=アリ=m' });
+nbDef('en_ug',{ male:'Joseph=ジョセフ|John=ジョン|Moses=モーゼス|Isaac=アイザック|Ivan=アイヴァン|Brian=ブライアン|Ronald=ロナルド|Emmanuel=エマニュエル|Fred=フレッド|Hassan=ハッサン=m',
+ female:'Sarah=サラ|Grace=グレース|Ruth=ルース|Esther=エスター|Joan=ジョーン|Florence=フローレンス|Prossy=プロッシー|Mary=メアリー|Agnes=アグネス|Aisha=アイシャ=m',
+ family:'Okello=オケロ|Mugisha=ムギシャ~幸運|Kato=カト|Mukasa=ムカサ|Ssali=サリ|Lubega=ルベガ|Kasozi=カソジ|Opio=オピオ|Tumusiime=トゥムシイメ~神に感謝|Byaruhanga=ビャルハンガ~神のもの|Atuhaire=アトゥハイレ' });
+nbDef('rw',{ male:'Jean de Dieu=ジャン・ド・デュー|Eric=エリック|Emmanuel=エマニュエル|Jean Claude=ジャン・クロード|Patrick=パトリック|Olivier=オリヴィエ|Innocent=イノサン|Fabrice=ファブリス',
+ female:'Marie Claire=マリー・クレール|Diane=ディアンヌ|Alice=アリス|Claudine=クロディーヌ|Jeanne=ジャンヌ|Aline=アリーヌ|Divine=ディヴィーヌ|Clarisse=クラリス',
+ family:'Uwimana=ウウィマナ~神のもの|Habimana=ハビマナ~神はいる|Mukamana=ムカマナ|Nshimiyimana=ンシミイマナ~神をたたえよ|Uwase=ウワセ|Ndayishimiye=ンダイシミイェ~神に感謝する|Niyonzima=ニヨンジマ|Iradukunda=イラドゥクンダ~神の愛|Hakizimana=ハキジマナ~神が救う|Niyonsaba=ニヨンサバ' });
+nbDef('ss',{ pat:true, male:'Deng=デング~雨|Garang=ガラン|Majok=マジョク|Akol=アコル|Mabior=マビオル|John=ジョン|Peter=ピーター|James=ジェームズ',
+ female:'Nyandeng=ニャンデング|Achol=アチョル|Aluel=アルエル|Abuk=アブク|Nyibol=ニボル|Mary=メアリー|Rebecca=レベッカ|Martha=マーサ', family:'' });
+nbDef('zu',{ male:'Sipho=シポ~贈りもの|Thabo=タボ~喜び|Bongani=ボンガニ~感謝しなさい|Sibusiso=シブシソ~祝福|Mandla=マンドラ~力|Themba=テンバ~希望|Lwazi=ルワジ~知恵|Siyabonga=シヤボンガ~わたしたちは感謝する',
+ female:'Nomvula=ノムヴラ~雨の母|Thandiwe=タンディウェ~愛される人|Nokuthula=ノクトゥラ~おだやかさ|Zanele=ザネレ~十分にいる|Lindiwe=リンディウェ~待ち望まれた|Busisiwe=ブシシウェ~祝福された|Ayanda=アヤンダ~増える|Nomsa=ノムサ~思いやり',
+ family:'Dlamini=ドラミニ|Nkosi=ンコシ~王|Ndlovu=ンドロヴ~象|Khumalo=クマロ|Mthembu=ムテンブ|Zulu=ズールー~空|Mkhize=ムキゼ|Ngcobo=ンコボ|Buthelezi=ブテレジ|Shabalala=シャバララ' });
+nbDef('af',{ male:'Johan=ヨハン|Pieter=ピーテル|Willem=ヴィレム|Jan=ヤン|Hendrik=ヘンドリク|Francois=フランソワ|Gerhard=ヘルハルト|Riaan=リアン',
+ female:'Marike=マリケ|Elmarie=エルマリー|Annelie=アネリー|Liezl=リーズル|Maryke=マライケ|Elna=エルナ|Sanet=サネット|Anke=アンケ',
+ family:'Botha=ボタ|van der Merwe=ファン・デル・メルヴェ|Pretorius=プレトリウス|Steyn=ステイン|Venter=フェンター|Nel=ネル|du Plessis=デュ・プレシ|Coetzee=クッツェー|Fourie=フーリー|Joubert=ジュベール' });
+const PT_AF_M='João=ジョアン|António=アントニオ|Manuel=マヌエル|José=ジョゼ|Domingos=ドミンゴス|Francisco=フランシスコ|Paulo=パウロ|Mateus=マテウス|Adilson=アジルソン|Edson=エジソン', PT_AF_F='Maria=マリア|Ana=アナ|Isabel=イザベル|Joana=ジョアナ|Teresa=テレザ|Esperança=エスペランサ~希望|Graça=グラッサ~恵み|Rosa=ローザ~バラ|Luísa=ルイーザ|Celeste=セレステ~空の';
+nbDef('pt_ao',{ male:PT_AF_M, female:PT_AF_F, family:'dos Santos=ドス・サントス|da Silva=ダ・シルヴァ|Fernandes=フェルナンデス|Domingos=ドミンゴス|Neto=ネト|Kiala=キアラ|Lourenço=ロウレンソ|Pedro=ペドロ|Miguel=ミゲル|Sebastião=セバスティアン' });
+nbDef('pt_mz',{ male:PT_AF_M, female:PT_AF_F, family:'Machava=マシャヴァ|Cossa=コッサ|Sitoe=シトエ|Tembe=テンベ|Nhantumbo=ニャントゥンボ|Mondlane=モンドラーネ|Macuácua=マクアクア|Langa=ランガ|Muianga=ムイアンガ|Chilaule=シラウレ' });
+nbDef('mg',{ male:'Hery=ヘリ~力|Haja=ハジャ|Mamy=マミ|Faly=ファリ~うれしい|Tiana=ティアナ|Andry=アンジ~柱|Fetra=フェチャ|Rivo=リヴ',
+ female:'Voahangy=ヴアハンギ|Lalao=ララウ|Noro=ヌル|Fara=ファラ|Hanta=ハンタ|Volana=ヴラナ~月|Soa=スア~美しい|Mialy=ミアリ',
+ family:'Rakotomalala=ラクトゥマララ|Rasoanaivo=ラスアナイヴ|Razafindrakoto=ラザフィンジャクトゥ|Rakotoarisoa=ラクトゥアリスア|Andrianarisoa=アンジアナリスア|Rabemananjara=ラベマナンザラ|Randrianasolo=ランジアナスル|Rakotonirina=ラクトゥニリナ' });
+// フランス語圏の西・中部アフリカ：名前は共通、姓は国ごと
+const FRW_M='Moussa=ムサ=m|Mamadou=ママドゥ=m|Ibrahim=イブラヒム=m|Abdoulaye=アブドゥライ=m|Souleymane=スレイマン=m|Ousmane=ウスマン=m|Amadou=アマドゥ=m|Seydou=セイドゥ=m|Jean=ジャン=c|Paul=ポール=c|Serge=セルジュ=c|Didier=ディディエ=c|Emmanuel=エマニュエル=c|Koffi=コフィ|Yao=ヤオ';
+const FRW_F='Aminata=アミナタ=m|Fatoumata=ファトゥマタ=m|Mariam=マリアム=m|Awa=アワ=m|Kadiatou=カディアトゥ=m|Aïssatou=アイサトゥ=m|Marie=マリー=c|Christine=クリスティーヌ=c|Odile=オディール=c|Brigitte=ブリジット=c|Akissi=アキシ|Adjoa=アジョア';
+const FRW_FAM={ ci:'Kouassi=クアシ|Koné=コネ|Kouamé=クアメ|Konan=コナン|Yao=ヤオ|Coulibaly=クリバリ|Traoré=トラオレ|Ouattara=ワタラ|N’Guessan=ンゲサン|Bamba=バンバ',
+ ml:'Traoré=トラオレ|Coulibaly=クリバリ|Diarra=ディアラ|Keïta=ケイタ|Koné=コネ|Sangaré=サンガレ|Touré=トゥーレ|Diallo=ディアロ|Maïga=マイガ|Cissé=シセ',
+ bf:'Ouédraogo=ウエドラオゴ|Sawadogo=サワドゴ|Kaboré=カボレ|Zongo=ゾンゴ|Compaoré=コンパオレ|Traoré=トラオレ|Ouattara=ワタラ|Nikiéma=ニキエマ|Ilboudo=イルブド|Kiemtoré=キエムトレ',
+ sn:'Diop=ディオップ|Ndiaye=ンジャイ|Fall=ファル|Sow=ソウ|Ba=バ|Gueye=ゲイェ|Faye=ファイ|Diallo=ディアロ|Sarr=サール|Mbaye=ンバイ',
+ gn:'Diallo=ディアロ|Bah=バー|Barry=バリー|Camara=カマラ|Sylla=シラ|Condé=コンデ|Soumah=スマ|Touré=トゥーレ|Keïta=ケイタ|Sow=ソウ',
+ ne:'Issoufou=イスフ|Moussa=ムサ|Abdou=アブドゥ|Hamani=ハマニ|Maïga=マイガ|Garba=ガルバ|Souley=スレイ|Oumarou=ウマル|Idrissa=イドリサ|Harouna=ハルナ',
+ td:'Mahamat=マハマト|Abakar=アバカル|Hassan=ハッサン|Idriss=イドリス|Ahmat=アフマト|Moussa=ムサ|Djimadoum=ジマドゥム|Ngarlem=ンガルレム|Allamine=アラミン|Saleh=サレ',
+ cm:'Ngono=ンゴノ|Mballa=ムバラ|Fotso=フォツォ|Kamga=カムガ|Nkoulou=ンクル|Atangana=アタンガナ|Essomba=エソンバ|Ndjock=ンジョック|Bello=ベロ|Tchoumi=チュミ',
+ bj:'Houngbédji=ウンベジ|Adjovi=アジョヴィ|Dossou=ドス|Hounsou=ウンス|Agbossou=アグボス|Akpovi=アクポヴィ|Zinsou=ジンス|Gbaguidi=グバギディ',
+ tg:'Agbeko=アグベコ|Mensah=メンサ|Kodjo=コジョ|Amouzou=アムズ|Adjavon=アジャヴォン|Kpodar=クポダル|Lawson=ローソン|Akakpo=アカクポ',
+ ga:'Ondo=オンド|Nzé=ンゼ|Obiang=オビアン|Mba=ンバ|Nguema=ンゲマ|Moussavou=ムサヴ|Mabika=マビカ|Nzamba=ンザンバ',
+ cf:'Ngaba=ンガバ|Yakité=ヤキテ|Kossi=コシ|Gbado=グバド|Ndomby=ンドンビ|Zoumandé=ズマンデ|Yabanda=ヤバンダ|Ngoumbango=ングンバンゴ' };
+for(const id in FRW_FAM){ nbDef('frw_'+id,{ male:FRW_M, female:FRW_F, family:FRW_FAM[id] }); NB_COUNTRY[id]=[['frw_'+id,1]]; }
+nbDef('ht',{ male:'Jean=ジャン|Pierre=ピエール|Jean-Baptiste=ジャン＝バティスト|Wilson=ウィルソン|Frantz=フランツ|Ricardo=リカルド|Jacques=ジャック|Emmanuel=エマニュエル',
+ female:'Marie=マリー|Rose=ローズ|Nadège=ナデージュ|Guerline=ゲルリン|Fabiola=ファビオラ|Esther=エステル|Mirlande=ミルランド|Nathalie=ナタリー',
+ family:'Jean-Baptiste=ジャン＝バティスト|Pierre=ピエール|Joseph=ジョゼフ|Louis=ルイ|Charles=シャルル|Désir=デジール|Étienne=エティエンヌ|Augustin=オーギュスタン|Paul=ポール|Saint-Fleur=サンフルール' });
+const ES_M='Blessing=ブレッシング~祝福|Gift=ギフト~贈りもの|Tendai=テンダイ~感謝しなさい|Tatenda=タテンダ~ありがとう|Chikondi=チコンディ~愛|Kabelo=カベロ~贈りもの|Thabo=タボ~喜び|Lucky=ラッキー|Joseph=ジョセフ|John=ジョン|Peter=ピーター|Charles=チャールズ';
+const ES_F='Chipo=チポ~贈りもの|Rutendo=ルテンド~信じる心|Tsitsi=ツィツィ|Chisomo=チソモ~恵み|Thandiwe=タンディウェ~愛される人|Mpho=ンポ~贈りもの|Lerato=レラト~愛|Naledi=ナレディ~星|Grace=グレース|Mercy=マーシー|Memory=メモリー|Esther=エスター';
+const ES_FAM={ zw:'Moyo=モヨ~心|Ncube=ンクベ|Sibanda=シバンダ|Dube=ドゥベ|Ndlovu=ンドロヴ~象|Mpofu=ンポフ|Mutasa=ムタサ|Chikore=チコレ|Gumbo=グンボ|Marufu=マルフ',
+ zm:'Banda=バンダ|Phiri=ピリ|Mwale=ムワレ|Tembo=テンボ~象|Mulenga=ムレンガ|Zulu=ズールー|Lungu=ルング|Chanda=チャンダ|Mwanza=ムワンザ|Bwalya=ブワリャ',
+ mw:'Banda=バンダ|Phiri=ピリ|Mwale=ムワレ|Chirwa=チルワ|Kumwenda=クムウェンダ|Nyirenda=ニレンダ|Gondwe=ゴンドウェ|Kachingwe=カチングウェ|Msiska=ムシスカ|Mbewe=ンベウェ',
+ bw:'Molefe=モレフェ|Mosweu=モスウェウ|Kgosi=コシ~首長|Moagi=モアギ|Tau=タウ~ライオン|Sebina=セビナ|Mogale=モガレ|Motsumi=モツミ|Gaolathe=ガオラテ',
+ ls:'Mokoena=モコエナ|Mofokeng=モフォケン|Molapo=モラポ|Letsie=レツィエ|Nthako=ンタコ|Ramakatsa=ラマカツァ|Sekhonyana=セコニャナ|Lebona=レボナ|Mohapi=モハピ',
+ na:'Shikongo=シコンゴ|Amutenya=アムテニャ|Shilongo=シロンゴ|Haufiku=ハウフィク|Nangolo=ナンゴロ|Iipinge=イーピンゲ|Kandjii=カンジイ|Shipanga=シパンガ|Nekongo=ネコンゴ',
+ sz:'Dlamini=ドラミニ|Simelane=シメラネ|Nxumalo=ンシュマロ|Magagula=マガグラ|Mamba=マンバ|Shongwe=ションウェ|Mabuza=マブザ|Masilela=マシレラ' };
+for(const id in ES_FAM){ nbDef('ens_'+id,{ male:ES_M, female:ES_F, family:ES_FAM[id] }); NB_COUNTRY[id]=[['ens_'+id,1]]; }
+const EW_M='Mohamed=モハメド=m|Abu=アブ=m|Ibrahim=イブラヒム=m|Alhaji=アルハジ=m|Lamin=ラミン=m|Ousman=ウスマン=m|Samuel=サミュエル=c|Joseph=ジョセフ=c|James=ジェームズ=c|Emmanuel=エマニュエル=c';
+const EW_F='Fatmata=ファトゥマタ=m|Mariama=マリアマ=m|Isatou=イサトゥ=m|Aminata=アミナタ=m|Hawa=ハワ=m|Kadiatu=カディアトゥ=m|Mary=メアリー=c|Grace=グレース=c|Comfort=カンファト=c|Musu=ムス';
+const EW_FAM={ sl:'Kamara=カマラ|Koroma=コロマ|Sesay=セサイ|Conteh=コンテ|Bangura=バングラ|Turay=トゥライ|Kanu=カヌ|Jalloh=ジャロー',
+ lr:'Kollie=コリー|Johnson=ジョンソン|Kamara=カマラ|Flomo=フロモ|Toe=トー|Doe=ドウ|Kpoto=クポト|Kromah=クロマ',
+ gm:'Jallow=ジャロウ|Ceesay=シーセイ|Jobe=ジョブ|Touray=トゥーレイ|Njie=ンジエ|Bah=バー|Sanneh=サンネ|Darboe=ダルボエ' };
+for(const id in EW_FAM){ nbDef('enw_'+id,{ male:EW_M, female:EW_F, family:EW_FAM[id] }); NB_COUNTRY[id]=[['enw_'+id,1]]; }
+nbDef('tg_tj',{ fem:nbFemSlav, male:'Рустам=ルスタム|Фаридун=ファリドゥン|Шерзод=シェルゾド|Далер=ダレル~勇敢な|Бахтиёр=バフティヨル~幸運な|Сомон=ソモン|Исмоил=イスモイル|Муҳаммад=ムハンマド',
+ female:'Нигина=ニギナ~宝石|Мадина=マディナ|Шабнам=シャブナム~露|Фарзона=ファルゾナ~賢い|Гулнора=グルノラ|Зарина=ザリナ~金の|Парвина=パルヴィナ~すばる星|Меҳрона=メフロナ',
+ family:'Раҳимов=ラヒモフ|Каримов=カリモフ|Шарипов=シャリポフ|Назаров=ナザロフ|Сафаров=サファロフ|Қодиров=コディロフ|Ҳасанов=ハサノフ|Мирзоев=ミルゾエフ' });
+nbDef('ky',{ fem:nbFemSlav, male:'Айбек=アイベク|Нурлан=ヌルラン|Азамат=アザマト|Бакыт=バクト~幸せ|Эрлан=エルラン|Улан=ウラン|Талант=タラント|Чыңгыз=チンギス',
+ female:'Айгерим=アイゲリム|Айпери=アイペリ~月の妖精|Жылдыз=ジルディズ~星|Нурзат=ヌルザト|Гүлнара=グルナラ~ざくろの花|Айзада=アイザダ|Мээрим=メーリム~やさしさ|Асел=アセル~蜜',
+ family:'Асанов=アサノフ|Токтогулов=トクトグロフ|Жумабеков=ジュマベコフ|Абдыкадыров=アブディカディロフ|Мамытов=マムトフ|Осмонов=オスモノフ|Сыдыков=スディコフ|Бакиев=バキエフ' });
+nbDef('tk',{ fem:nbFemTk, male:'Myrat=ムイラト|Döwlet=ドゥヴレト~国|Serdar=セルダル|Merdan=メルダン~勇敢な|Batyr=バトゥル~英雄|Rahman=ラフマン|Aman=アマン|Ýusup=ユスプ',
+ female:'Aýna=アイナ~鏡|Bahar=バハル~春|Maýsa=マイサ|Gülşat=ギュルシャト|Jeren=ジェレン~ガゼル|Aýgül=アイギュル~月の花|Ogulgerek=オグルゲレク|Mähri=メフリ~やさしさ',
+ family:'Annaýew=アンナエフ|Orazow=オラゾフ|Berdiýew=ベルディエフ|Saparow=サパロフ|Atayew=アタエフ|Nurmuhammedow=ヌルムハンメドフ|Garaýew=ガラエフ|Hojaýew=ホジャエフ' });
+nbDef('sq',{ male:'Arben=アルベン|Besnik=ベスニク~誠実な|Dritan=ドリタン~光|Ermal=エルマル|Gentian=ゲンティアン|Klodian=クロディアン|Ardit=アルディト~金の日|Erion=エリオン|Luan=ルアン~ライオン|Arjan=アルヤン',
+ female:'Elira=エリラ~自由|Drita=ドリタ~光|Mimoza=ミモザ|Anjeza=アンイェザ|Blerta=ブレルタ~緑の|Ermira=エルミラ|Valbona=ヴァルボナ|Jonida=ヨニダ|Arta=アルタ~金|Fatjona=ファトヨナ~わたしたちの幸運',
+ family:'Hoxha=ホジャ|Shehu=シェフ|Leka=レカ|Krasniqi=クラスニチ|Gashi=ガシ|Berisha=ベリシャ|Dervishi=デルヴィシ|Çela=チェラ|Kola=コラ|Prifti=プリフティ~司祭' });
+nbDef('et',{ male:'Andres=アンドレス|Jaan=ヤーン|Mart=マルト|Toomas=トーマス|Rasmus=ラスムス|Martin=マルティン|Kristjan=クリスチャン|Markus=マルクス',
+ female:'Anna=アンナ|Maria=マリア|Kadri=カドリ|Liis=リース|Triin=トリーン|Kristiina=クリスティーナ|Mari=マリ|Sofia=ソフィア',
+ family:'Tamm=タム~樫|Saar=サール~島|Sepp=セップ~鍛冶屋|Mägi=マギ~丘|Kask=カスク~白樺|Kukk=クック~雄鶏|Rebane=レバネ~狐|Ilves=イルヴェス~山猫|Pärn=パルン~菩提樹|Koppel=コッペル' });
+nbDef('mt',{ male:'Joseph=ジョゼフ|John=ジョン|Paul=ポール|Mark=マーク|Matthew=マシュー|Luke=ルーク|Jake=ジェイク|Ġorġ=ジョルジ',
+ female:'Maria=マリア|Rita=リタ|Carmen=カルメン|Doris=ドリス|Nicole=ニコール|Martina=マルティナ|Elena=エレナ|Julia=ジュリア',
+ family:'Borg=ボルグ|Camilleri=カミッレーリ|Vella=ヴェッラ|Farrugia=ファッルージャ|Zammit=ザンミット|Galea=ガレア|Micallef=ミカレフ|Grech=グレフ|Attard=アッタルド|Spiteri=スピテーリ' });
+NB_COUNTRY.id=[['id',1]]; NB_COUNTRY.ph=[['fil',1]]; NB_COUNTRY.my=[['ms',.62],['zh_hk',.23],['ta',.07]]; NB_COUNTRY.sg=[['zh_cn',.74],['ms',.135],['ta',.09]]; NB_COUNTRY.bn=[['ms',1]]; NB_COUNTRY.tl=[['pt',1]];
+NB_COUNTRY.ng=[['ha',.32],['yo',.25],['ig',.22]]; NB_COUNTRY.gh=[['ak',1]]; NB_COUNTRY.ke=[['en_ke',1]]; NB_COUNTRY.ug=[['en_ug',1]]; NB_COUNTRY.rw=[['rw',1]]; NB_COUNTRY.bi=[['rw',1]]; NB_COUNTRY.ss=[['ss',1]];
+NB_COUNTRY.za=[['zu',.7],['af',.2],['en_gb',.1]]; NB_COUNTRY.ao=[['pt_ao',1]]; NB_COUNTRY.mz=[['pt_mz',1]]; ['st','cv','gw'].forEach(id=>NB_COUNTRY[id]=[['pt',1]]); NB_COUNTRY.mg=[['mg',1]];
+NB_COUNTRY.ht=[['ht',1]]; NB_COUNTRY.tj=[['tg_tj',1]]; NB_COUNTRY.kg=[['ky',.75],['ru',.1]]; NB_COUNTRY.tm=[['tk',1]]; NB_COUNTRY.al=[['sq',1]]; NB_COUNTRY.ee=[['et',.7],['ru',.25]]; NB_COUNTRY.mt=[['mt',1]];
+NB_COUNTRY.mu=[['hi',.5],['fr',.35]]; NB_COUNTRY.sc=[['fr',1]]; NB_COUNTRY.km=[['ar',1]];
 // ===== 新しく加えた国の、学校の長い休みと習い事（生まれる人の多い国から） =====
 // 学年暦は各国の教育省の公開している暦のおおよそ（例：韓国は夏と冬の「放学」、イランは新年ノウルーズの休み、タイは3〜5月の長い休み）。
 // season：0春 1夏 2秋 3冬（南半球の国は画面の表示で季節名が入れかわる）
