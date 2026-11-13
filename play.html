@@ -535,6 +535,18 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .wl-learn{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(242,182,48,.12)}
 .wl-more{margin-top:8px}.wl-more summary{cursor:pointer;color:#7a62c4;padding:6px 0}
 .wl-h2{font-weight:700;margin:0 0 4px}
+.btn{ background:linear-gradient(180deg,#FF9AB3,#FF6F92); border:1px solid #FF6F92; color:#fff; border-radius:14px; box-shadow:0 4px 0 #E0577B; font-family:var(--sans); font-weight:700; letter-spacing:.06em; }
+.btn:active{ transform:translateY(3px); box-shadow:0 1px 0 #E0577B; }
+.btn.ghost{ background:#fff; color:#C2456A; border-color:#FFB3C6; box-shadow:0 3px 0 #FFD1DC; }
+.intro .brand.bh-word, .bh-word{ font-family:'Varela Round',var(--sans),sans-serif; font-size:clamp(17px,5.8vw,52px); font-size:min(52px,calc(100cqi / 12.6)); letter-spacing:0; margin:14px 0 10px; max-width:100%; font-weight:800; }
+.ih-text{ container-type:inline-size; }
+.bh-in{ display:inline-flex; align-items:center; gap:.12em; flex-wrap:nowrap; }
+.bh-t{ --c:#6DB84A; display:inline-grid; place-items:center; width:1.18em; height:1.24em; border-radius:.2em; background:var(--c); color:#fff; line-height:1;
+  box-shadow:inset 0 -.08em 0 rgba(0,0,0,.12), 0 .12em 0 color-mix(in srgb,var(--c) 72%,#000), 0 .28em .45em -.2em rgba(34,48,77,.35); text-shadow:0 .04em 0 rgba(0,0,0,.15);
+  animation:bhbob 3.2s ease-in-out infinite; animation-delay:calc(var(--i) * -.37s); }
+.bh-gap{ width:.32em; }
+@keyframes bhbob{ 0%,100%{ transform:translateY(0) rotate(0) } 25%{ transform:translateY(-.1em) rotate(-2deg) } 50%{ transform:translateY(-.04em) rotate(0) } 75%{ transform:translateY(-.12em) rotate(2deg) } }
+@media (prefers-reduced-motion:reduce){ .bh-t{ animation:none; } }
 </style>
 
 <div class="wrap">
@@ -14536,7 +14548,7 @@ function introHTML(){
   const arc=store.get(KEY_ARC,[]);
   return `<section class="intro fade">
     <div class="intro-hero"><div class="ih-text">
-      <h1 class="brand">LIFE BOOK</h1>
+      <h1 class="brand bh-word" aria-label="LIFE BOOK"><span aria-hidden="true" class="bh-in"><span class="bh-t" style="--c:#E8667E;--i:0">L</span><span class="bh-t" style="--c:#F2B630;--i:1">I</span><span class="bh-t" style="--c:#6DB84A;--i:2">F</span><span class="bh-t" style="--c:#5BA7DD;--i:3">E</span><span class="bh-gap"></span><span class="bh-t" style="--c:#9B7FD9;--i:4">B</span><span class="bh-t" style="--c:#EE7A92;--i:5">O</span><span class="bh-t" style="--c:#F2B630;--i:6">O</span><span class="bh-t" style="--c:#5DAE44;--i:7">K</span></span></h1>
       <p class="brand-sub">${SUBTITLE}</p>
       <p class="lead">世界のどこかに、<br><em>ひとりの人間</em>として生まれる。</p>
       <div class="ih-cta"><button class="born-btn" id="bornBtn" type="button"><svg class="born-heart" viewBox="0 0 28 24" shape-rendering="crispEdges" aria-hidden="true">${typeof frHeart==='function'?frHeart(0,0,4,'#FFFFFF'):''}</svg><span class="born-txt">生まれる</span><span class="born-sub">あたらしい いのちが、はじまります</span></button></div>
@@ -14544,7 +14556,7 @@ function introHTML(){
     </div><div class="hero">${bkHeroSVG()}</div></div>
     <div class="body"><p>国も、家族も、家の暮らし向きも、生まれた日時も、名前も、すべて世界の統計に沿って偶然に決まります。その人は、自分で考え、自分で選んで生きていきます。あなたにできるのは、迷っているその人に、一生で2〜3回だけ「インスピレーション」を贈ること。届くかどうかは、その時のその人の心しだいです。</p>
     <p style="margin-top:10px">人生は、現実の約3日半で1歳ずつ進みます（80歳まで生きる人生なら、約9か月）。ひらくたびに、前に見た時から今までに起きた出来事と、その時の気持ちが読めます。人生が終わると、葬儀のあとに、その人生を読み解く振り返りが届きます。生き終えた人生は、章立てのある一冊の本になって、あなたの本棚に並びます。</p></div>
-    <div class="cta2"><button class="btn" id="bornBtn2" type="button">生まれる</button></div>
+    <div class="cta2"><button class="born-btn" id="bornBtn2" type="button"><svg class="born-heart" viewBox="0 0 28 24" shape-rendering="crispEdges" aria-hidden="true">${typeof frHeart==='function'?frHeart(0,0,4,'#FFFFFF'):''}</svg><span class="born-txt">生まれる</span><span class="born-sub">あたらしい いのちが、はじまります</span></button></div>
     <p class="tiny muted">世界189か国の中から、その年の出生数の比率に沿って生まれる国が決まります。</p>
     ${arc.length?`<div class="shelf-wrap"><h3>わたしの本棚</h3><p class="tiny muted">生き終えた人生が、一冊ずつ並びます。背表紙を押すと、その人生の振り返りが読めます。</p><div class="shelf">${arc.map((a,i)=>spineHTML(a,i)).join('')}</div><div class="reels"><span class="tiny muted">思い出の動画</span>${arc.map((a,i)=>`<button type="button" class="reel" data-mov="${i}" aria-label="${esc(a.name)}の思い出の動画を再生"><span class="reel-ic" aria-hidden="true"></span><span>${esc(a.name)}</span></button>`).join('')}</div><div class="obi-btns"><button class="btn ghost small" id="kmapBtn" type="button">観念の地図をひらく</button></div><div id="kmapOut"></div></div>`:''}
     ${loanShelfHTML()}
@@ -14960,7 +14972,7 @@ function reportHTML(P,L,isPast){
     <div class="persons">${ps.map(p=>`<div class="person"><div class="muted">${esc(p.label)}</div><div><span style="font-family:var(--serif)">${esc(p.name)}</span>　<span class="tiny muted">${relWord(p)}${p.deathAge!=null&&p.deathAge<=L.deathAge?`・${name}が${p.deathAge}歳の時に死去`:''}</span></div></div>`).join('')}</div>
     ${secrets.length?`<div class="lock"><p class="tiny muted">相手の側から見た人生（会員向け・第2段階で体験できます）</p>${secrets.slice(0,3).map(s=>`<p class="q">${esc(s.teaser)}</p>`).join('')}<p class="tiny muted">同じ出来事を、反対側から生き直すことができます。</p></div>`:''}</section>`;
   const endSec=isPast?`<div class="end"><button class="btn ghost" id="backIntro" type="button">はじめの画面へ</button></div>`
-    :`<div class="end"><p style="font-family:var(--serif)">${name}の人生は、これで本当に終わりです。</p><button class="btn" id="reborn" type="button">次の人生に生まれる</button><p class="tiny muted">これまでの人生から受け継ぐものは、第2段階で加わります。</p></div>`;
+    :`<div class="end"><p style="font-family:var(--serif)">${name}の人生は、これで本当に終わりです。</p><button class="born-btn" id="reborn" type="button"><svg class="born-heart" viewBox="0 0 28 24" shape-rendering="crispEdges" aria-hidden="true">${typeof frHeart==='function'?frHeart(0,0,4,'#FFFFFF'):''}</svg><span class="born-txt">次の人生に生まれる</span></button><p class="tiny muted">これまでの人生から受け継ぐものは、第2段階で加わります。</p></div>`;
   return `<section class="report fade">
     <div class="odds"><p class="pre">${esc(P.full)}　${P.year}年〜${deathYearOf(P,L)}年　${esc(P.country.name)}</p><p class="pre">この人生が生まれる確率は</p><p class="num">約${odds}<span>分の1</span></p><p class="tiny muted">国、家庭、生まれた日時、名前、寿命などが、この組み合わせになる確率です。</p></div>
     ${ch1}${traitSecHTML(P,L)}${ch2}${ch3}${ch4}${typeof worldsHTML==='function'?worldsHTML(P,L):''}${ch5}${ch6}${ch7}${petSec}${egsSecHTML(P,L)}${albumHTML(P,L,L.deathAge,'思い出のアルバム')}${personsSec}${bookSecHTML(P,L)}${refSecHTML()}${endSec}</section>`;
