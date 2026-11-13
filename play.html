@@ -11547,9 +11547,15 @@ const VOTE_Q={ child:[['きょうの放課後','友だちと公園へ行く','�
 function voteQ(P,age,k){ const st=age<13?'child':age<20?'teen':age<65?'adult':'elder'; return dPick(VOTE_Q[st],P.seed,k,'vq'); }
 function voteResult(P,L,age,k,pick){ if(pick==null) return null; const q=voteQ(P,age,k); const y=[...L.years].reverse().find(y=>y.age<=age&&y.h!=null); const h=y?y.h:60;
   const reach=(dHash(P.seed,k,'reach')%100)<(35+Math.round(h*.4)); const own=dHash(P.seed,k,'own')%2; const chose=reach?pick:own; return { q, chose, reach, same:chose===pick }; }
+// 一票は10歳から。毎日ではなく、だいたい4日に1回、迷う日が来る
+function voteDay(P,age,k){ return age>=10 && dHash(P.seed,k||dayKey(),'vday')%4===0; }
+function voteTileHTML(P,L,age){ const k=dayKey(); const y=new Date(); y.setDate(y.getDate()-1); const yk=dayKey(y); const v=d2Get(KEY_VOTE,{});
+  const hasPrev=v[yk]&&v[yk].seed===P.seed, hasMine=v[k]&&v[k].seed===P.seed; if(!voteDay(P,age,k)&&!hasMine&&!hasPrev) return '';
+  return `<section class="hm-tile hm-vote"><h3>ふたつの選択に一票</h3><div class="hm-body">${voteHTML(P,L,age)}</div></section>`; }
 function voteHTML(P,L,age){ const k=dayKey(); const y=new Date(); y.setDate(y.getDate()-1); const yk=dayKey(y); const v=d2Get(KEY_VOTE,{}); const q=voteQ(P,age,k);
   let prev=''; if(v[yk]&&v[yk].seed===P.seed){ const r=voteResult(P,L,v[yk].age,yk,v[yk].pick); if(r) prev=`<p class="vt-prev">きのうの一票（${esc(r.q[0])}）：${esc(P.given)}は「${esc(r.q[1+r.chose])}」を選んだ。${r.reach?'あなたの気持ちは、ちゃんと心に届いていたみたい。':'あなたの一票は届かなかったけれど、それも本人が選んだ道。'}</p>`; }
   const mine=v[k]&&v[k].seed===P.seed?v[k].pick:null;
+  if(mine==null&&!voteDay(P,age,k)) return prev;
   return `${prev}<p class="vt-q">${esc(P.given)}は、いま迷っています。<b>${esc(q[0])}</b>、どっちにしよう？</p>
     <div class="vt-btns">${[1,2].map(i=>`<button type="button" class="vt-b ${mine===i-1?'on':''}" data-vote="${i-1}" ${mine!=null?'disabled':''}>${esc(q[i])}</button>`).join('')}</div>
     <p class="tiny muted">${mine!=null?'一票を送りました。本人がどうしたかは、あしたわかります。':'送れるのは1日に1票だけ。決めるのは本人です。届くかどうかは、心しだい。'}</p>`; }
@@ -11602,7 +11608,7 @@ function dailyPlusHTML(P,L,age,c){ if(c.dead) return '';
     ${T('hm-letter','今日のひとこと手紙',letterHTML(P,L,age))}
     ${T('hm-now',`いま、何してる？`,nowDoingHTML(P,L,age))}
     ${tz?T('hm-tease','明日の予告',`<p class="tz-t">${esc(tz)}</p><p class="tiny muted">あしたまた、ひらいてみてください。</p>`):''}
-    ${T('hm-vote','ふたつの選択に一票',voteHTML(P,L,age))}
+    ${voteTileHTML(P,L,age)}
     ${gf?T('hm-gift','季節の小さな贈り物',gf):''}
     ${(()=>{ const sh=giftShelfHTML(P); return sh?T('hm-giftshelf',`もらった贈り物<span class="hm-n">${giftList().filter(x=>x.seed===P.seed).length}枚</span>`,sh):''; })()}
   </div>`; }
