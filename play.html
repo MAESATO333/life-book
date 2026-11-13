@@ -10720,30 +10720,73 @@ const FM_KIDS_DIFF=['家族旅行で出かけた先で、{相手の国}から来
 const FM_PAST=['古本屋で見つけた古い手紙の差出人が、{名}という人だった。{年}年に{相手の国}で生まれた人らしかった。なぜか、他人とは思えなかった。','祖父母の家の古いアルバムに、{名}という人が写っていた。{相手の国}で、{年}年に生まれた人だと聞いた。なぜか、他人とは思えなかった。'];
 function friendHeroes(){ const out=[]; for(const f of store.get(KEY_FRIEND,[]).slice(0,12)){ try{ const P=makeBirth(f.s,{country:f.c||null,force:f.f||null}); out.push({ f, P, end:P.year+P.deathAge }); }catch(e){} } return out; }
 let _fhCache=null;
+// 年が重ならなくても、かならずどこかで出会う（ネット・SNS・アルバム・うわさ話・夢・古い手紙など、間接的な出会いも）
+const FM_SNS=['SNSで、たまたま流れてきた{相手の国}の{名}という人の写真に、なぜか目がとまった。気づけば、毎日のように投稿を見るようになっていた。','SNSに載せた{自分の町}の写真に、{相手の国}の{名}という人が「すてきな町ですね」と書いてくれた。それから、ときどき言葉を交わすようになった。'];
+const FM_NET2=['インターネットの掲示板で、{名}という人の書きこみを読んだ。顔も知らないのに、自分のことのように胸にしみた。'];
+const FM_MEDIA=['ラジオから、{相手の国}に住む{名}という人の話が流れてきた。手を止めて、最後まで聞いた。','新聞の小さな記事に、{相手の国}の{名}という人のことが載っていた。切りぬいて、手帳にはさんだ。','テレビの旅番組に、{相手の国}の{名}という人が映っていた。笑った顔が、なぜか忘れられなかった。'];
+const FM_RUMOR=['近所の人から、{相手の国}に住む{名}という人のうわさ話を聞いた。会ったこともないのに、なぜか気になった。','知り合いの知り合いが、{相手の国}で{名}という人に世話になったという話を聞いた。世界は、思っているより小さいのかもしれない。'];
+const FM_BABYNEWS=['知り合いから、{相手の国}で{名}という子が生まれたと聞いた。会ったこともないのに、なぜか、元気に育ってほしいと思った。'];
+const FM_TINY_SAME=['{名}という人が、ベビーカーをのぞきこんで、にっこり笑いかけてくれた。'];
+const FM_TINY=['家族が、{相手の国}に住む{名}という人の話をしていた。小さな耳には、その名前の響きだけが残った。','家族のアルバムに、{名}という人の写真がまじっていた。だれなのか、まだよくわからなかった。'];
+const FM_TINY_PAST=['家族が、むかし{相手の国}にいた{名}という人の話をしていた。小さな耳には、その名前の響きだけが残った。','家族のアルバムに、{名}という、むかしの人の写真がまじっていた。だれなのか、まだよくわからなかった。'];
+const FM_PAST2=['図書館の古い新聞に、{年}年に{相手の国}で生まれた{名}という人のことが載っていた。会ったことのない人なのに、なつかしかった。','年配の人が、むかし{相手の国}にいた{名}という人の思い出話をしてくれた。聞いているうちに、会ったことがあるような気がしてきた。'];
+const FM_FUTURE=['夢の中で、{名}という名前の人に会った。まだどこにもいない人のような気がした。目がさめても、その名前を忘れられなかった。','{自分の町}の図書館に、自分の写真と短い手紙を残した。いつか、遠い国のだれかが見つけてくれるかもしれない。宛名には、なぜか{名}という名前を書いた。'];
+const FM_FUTURE_TINY=['ねむりながら、にっこり笑った。夢の中で、まだ生まれていない{名}という子に、会っていたのかもしれない。'];
+const FM_ECHO=['ふと、{名}のことを思い出した。今ごろ、どうしているだろう。','{名}に、手紙を書いた。長い返事が届いたのは、季節がひとつ変わったころだった。','{名}の近況を、人づてに聞いた。元気そうで、うれしくなった。'];
+const FM_ECHO_FAR=['{名}のことを、ときどき思い出した。会えなかった人なのに、ふしぎと心の支えになっていた。'];
+const KEY_FRMEET='hitotsu.frMeet';
+// いまの主人公なら、つながった時の年齢がわかる。出会いは、つながってから現実の時間で1〜2か月あと（すぐには答えを出さない）
+function frAgeAt(P,t){ try{ if(typeof st==='undefined'||!st||st.seed!==P.seed||!st.birthTime||typeof msPerYear!=='function') return null; return Math.max(0,(t+(st.shift||0)-st.birthTime-(st.pause||0))/msPerYear(P)); }catch(e){ return null; } }
+// 出会う年と形を決める（二人の種から。決めたら覚えておく）
+function fmPlan(P,Q,h,minAge,maxAge){ if(maxAge==null) maxAge=minAge?minAge+2:999;
+  const myEnd=P.year+P.deathAge; let year=null, kind='meet';
+  const a0=Math.max(P.year+3,Q.year+3), a1=Math.min(myEnd-1,h.end-1);
+  if(a1>=a0){ const b0=Math.max(P.year+18,Q.year+18), b1=Math.min(myEnd-1,h.end-1,P.year+75,Q.year+75);
+    if(b1>=b0) year=b0+Math.floor(pairHash(P.seed,Q.seed,1)*(b1-b0+1)); else year=a0+Math.floor(pairHash(P.seed,Q.seed,2)*(a1-a0+1)); }
+  else if(h.end<P.year+12&&P.deathAge>21){ kind='past'; year=P.year+20+Math.floor(pairHash(P.seed,Q.seed,3)*Math.max(1,Math.min(40,P.deathAge-21))); }
+  if(year!=null){ const age=year-P.year; if(age>=minAge&&age<=Math.min(maxAge,P.deathAge)) return { age, mode:kind, sync:kind==='meet'?1:0 }; }
+  // 自然には重ならない、または、もう過ぎた年だった → 少し先の年に、別の形で出会う
+  const lo=Math.min(Math.max(minAge, minAge?0:(P.deathAge>=14?10:0)), P.deathAge), hi=Math.min(P.deathAge, minAge?Math.max(lo,maxAge):lo+30);
+  const age=lo+Math.floor(pairHash(P.seed,Q.seed,8)*(hi-lo+1)); const y=P.year+age;
+  return { age, mode:y<Q.year?'future':y>h.end?'past':'alive', sync:0 }; }
+function fmPick(pool,P,Q,k){ return pool[Math.floor(pairHash(P.seed,Q.seed,k)*pool.length)%pool.length]; }
+function fmText(P,Q,plan){ const myA=plan.age, year=P.year+myA, thA=year-Q.year, same=P.countryId===Q.countryId, first=P.seed<Q.seed;
+  let pool, side=0;
+  if(plan.mode==='past') pool=myA<7?FM_TINY_PAST:FM_PAST.concat(FM_PAST2);
+  else if(plan.mode==='future') pool=myA<7?FM_FUTURE_TINY:FM_FUTURE;
+  else if(plan.mode==='meet'){ const r=pairHash(P.seed,Q.seed,4);
+    if(myA<13&&thA<13) pool=same?FM_KIDS:FM_KIDS_DIFF;
+    else if(myA<13||thA<13){ pool=FM_CHILD_PAIR; side=myA<13?0:1; }
+    else if(same) pool=FM_SAME_ADULT; else if(year>=1998&&r<.35) pool=FM_NET; else { pool=FM_DIFF_PAIR; const travA=pairHash(P.seed,Q.seed,7)<.5; side=(first===travA)?0:1; } }
+  else { // 同じ時代を生きているが、別の形で
+    if(myA<7) pool=(same&&thA>=10)?FM_TINY_SAME:FM_TINY;
+    else if(thA<7) pool=FM_BABYNEWS;
+    else if(myA<13&&thA<13) pool=same?FM_KIDS:FM_KIDS_DIFF;
+    else if(myA<13||thA<13){ pool=FM_CHILD_PAIR; side=myA<13?0:1; }
+    else if(myA>=18&&thA>=18&&pairHash(P.seed,Q.seed,11)<.5){ if(same) pool=FM_SAME_ADULT; else { pool=FM_DIFF_PAIR; side=(first===(pairHash(P.seed,Q.seed,7)<.5))?0:1; } }
+    else pool=[].concat(year>=2008?FM_SNS:[], year>=1996?FM_NET2:[], year>=1925?FM_MEDIA:[], FM_RUMOR); }
+  let tpl=fmPick(pool,P,Q,5); if(Array.isArray(tpl)) tpl=tpl[side];
+  const place=(first?P:Q).city;
+  return tpl.replace(/\{名\}/g,Q.full).replace(/\{場所\}/g,place).replace(/\{相手の町\}/g,Q.city).replace(/\{自分の町\}/g,P.city).replace(/\{相手の国\}/g,Q.country.name).replace(/\{年\}/g,Q.year); }
 function friendMeet(P,L){
   if(!L) return; L._fm=L._fm||{}; const fr=store.get(KEY_FRIEND,[]); if(!fr.length) return;
   const key=fr.map(f=>f.id+':'+f.s).join(','); if(!_fhCache||_fhCache.key!==key) _fhCache={ key, list:friendHeroes() };
-  const used=new Set();
-  for(const h of _fhCache.list){ const Q=h.P; if(Q.seed===P.seed&&Q.year===P.year) continue;
-    const myEnd=P.year+P.deathAge; const a0=Math.max(P.year+3,Q.year+3), a1=Math.min(myEnd-1,h.end-1);
-    let year=null, kind='meet';
-    if(a1>=a0){ const b0=Math.max(P.year+18,Q.year+18), b1=Math.min(myEnd-1,h.end-1, P.year+75, Q.year+75);
-      if(b1>=b0) year=b0+Math.floor(pairHash(P.seed,Q.seed,1)*(b1-b0+1)); else year=a0+Math.floor(pairHash(P.seed,Q.seed,2)*(a1-a0+1)); }
-    else if(h.end<P.year+12&&P.deathAge>21){ kind='past'; year=P.year+20+Math.floor(pairHash(P.seed,Q.seed,3)*Math.max(1,Math.min(40,P.deathAge-21))); }
-    if(year==null) continue; let age=year-P.year; while(used.has(age)&&age<P.deathAge-1) age++; used.add(age);
-    const y=L.years.find(x=>x.age===age); if(!y||L._fm[h.f.id]) continue; L._fm[h.f.id]=1;
-    const myA=age, thA=year-Q.year, same=P.countryId===Q.countryId, r=pairHash(P.seed,Q.seed,4);
-    const first=P.seed<Q.seed; let pool, side=0;
-    if(kind==='past') pool=FM_PAST;
-    else if(myA<13&&thA<13) pool=same?FM_KIDS:FM_KIDS_DIFF;
-    else if(myA<13||thA<13){ pool=FM_CHILD_PAIR; side=myA<13?0:1; }
-    else if(same) pool=FM_SAME_ADULT; else if(year>=1998&&r<.35) pool=FM_NET; else { pool=FM_DIFF_PAIR; const travA=pairHash(P.seed,Q.seed,7)<.5; side=(first===travA)?0:1; }
-    const place=(first?P:Q).city;
-    let tpl=pool[Math.floor(pairHash(P.seed,Q.seed,5)*pool.length)%pool.length]; if(Array.isArray(tpl)) tpl=tpl[side];
-    const text=tpl.replace(/\{名\}/g,Q.full).replace(/\{場所\}/g,place).replace(/\{相手の町\}/g,Q.city).replace(/\{自分の町\}/g,P.city).replace(/\{相手の国\}/g,Q.country.name).replace(/\{年\}/g,Q.year);
-    const ev={ kind:'meet', big:true, d:3, text, feel:'なぜか、ずっと前から知っている人のような気がした。', inner:kind==='past'?'どんな一生だったんだろう':'また、どこかで会えるかな', season:pairHash(P.seed,Q.seed,6)<.5?1:2, fr:h.f.by||'友だち', frName:Q.full };
+  const memo=store.get(KEY_FRMEET,{}); let dirty=false; const used=new Set();
+  for(const h of _fhCache.list){ const Q=h.P; if(Q.seed===P.seed&&Q.year===P.year) continue; if(L._fm[h.f.id]) continue;
+    const mk=P.seed+'|'+h.f.id; let plan=memo[mk];
+    if(!plan){ const ga=frAgeAt(P,h.f.got||Date.now()); let mn=0, mx=null; if(ga!=null){ const yd=86400000*30/msPerYear(P); mn=Math.ceil(ga+yd); mx=Math.max(mn,Math.floor(ga+2*yd)); } plan=fmPlan(P,Q,h,mn,mx); if(ga!=null){ memo[mk]=plan; dirty=true; } }
+    let age=Math.min(plan.age,P.deathAge); while(used.has(age)&&age<P.deathAge) age++; used.add(age);
+    const y=L.years.find(x=>x.age===age); if(!y) continue; L._fm[h.f.id]=1;
+    const text=fmText(P,Q,Object.assign({},plan,{age}));
+    const ev={ kind:'meet', big:true, d:3, text, feel:'なぜか、ずっと前から知っている人のような気がした。', inner:plan.mode==='past'?'どんな一生だったんだろう':plan.mode==='future'?'いつか、どこかで':'また、どこかで会えるかな', season:pairHash(P.seed,Q.seed,6)<.5?1:2, fr:h.f.by||'友だち', frName:Q.full, sync:plan.sync?1:0 };
     const i=y.events.findIndex(e=>e.kind==='death'); if(i>=0) y.events.splice(i,0,ev); else y.events.push(ev);
+    // そのあとも、ときどき縁がつづく
+    const ea=age+3+Math.floor(pairHash(P.seed,Q.seed,9)*6);
+    if(ea<P.deathAge&&ea>=7){ const ey=L.years.find(x=>x.age===ea); if(ey){ const yr=P.year+ea, alive=yr>=Q.year+7&&yr<=h.end&&plan.mode!=='future'&&plan.mode!=='past';
+      const et=fmPick(alive?FM_ECHO:FM_ECHO_FAR,P,Q,10).replace(/\{名\}/g,Q.full);
+      const ev2={ kind:'fecho', d:1, text:et, fr:h.f.by||'友だち', frName:Q.full }; const j=ey.events.findIndex(e=>e.kind==='death'); if(j>=0) ey.events.splice(j,0,ev2); else ey.events.push(ev2); } }
   }
+  if(dirty){ const ks=Object.keys(memo); if(ks.length>200) for(const k of ks.slice(0,ks.length-200)) delete memo[k]; store.set(KEY_FRMEET,memo); }
 }
 // 画面：紹介する・紹介を受け取る（どの画面にもある「友だちに紹介」ボタン → 紹介の窓）
 const FR_LEAD='紹介した人と、紹介された人。ふたりの主人公は、それぞれの人生のどこかで、出会います。出会ったときは、お互いに「出会った！」と通知されます。';
@@ -10839,7 +10882,7 @@ function meetOverlay(P,L,c){ if(document.getElementById('mtOv')) return; const u
   const d=document.createElement('div'); d.id='mtOv'; d.className='mt-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-labelledby','mtT');
   d.innerHTML=`<div class="mt-card"><p class="mt-kicker">${esc(m.e.fr||'友だち')}さんの主人公と</p><h2 id="mtT">出会った！</h2>${meetArtSVG()}
     <p class="mt-who"><b>${esc(P.given)}</b>（${m.age}歳）と <b>${esc(m.e.frName||'')}</b></p><p class="mt-text">${esc(String(m.e.text||'').replace(/\{名\}/g,P.given))}</p>
-    <p class="tiny muted">${esc(m.e.fr||'友だち')}さんの LIFE BOOK でも、同じ年に、この出会いが起きています。</p>
+    ${m.e.sync?`<p class="tiny muted">${esc(m.e.fr||'友だち')}さんの LIFE BOOK でも、同じ年に、この出会いが起きています。</p>`:''}
     <div class="mt-btns"><button type="button" class="fr-big" id="mtGo">出会いのページを読む</button><button type="button" class="mt-close" id="mtX">あとで</button></div></div>`;
   document.body.appendChild(d); try{ rubyApply(d,P,L); }catch(_){} const close=()=>{ meetMarkSeen([m.key]); d.remove(); navSync&&navSync(); };
   d.querySelector('#mtX').onclick=close; d.querySelector('#mtGo').onclick=()=>{ close(); if(typeof goLife==='function') goLife(); setTimeout(()=>{ const el=document.querySelector('.k-meet'); if(el) el.scrollIntoView({ behavior:'smooth', block:'center' }); },120); };
@@ -14406,7 +14449,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-album',`思い出のアルバム<span class="hm-n">${photos.length}枚</span>`, photos.length?`<div class="hm-photos">${photos.slice(-3).map(ph=>photoHTML(P,L,ph,true)).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。</p>', photos.length?`<button class="linkish" type="button" id="hmAlbum">アルバムをひらく</button>`:'')}
     ${homeTile('hm-belief','心に生まれた観念', bel.length?`<ul class="hm-list">${bel.map(b=>`<li><span class="hm-a">${b.age}歳</span>「${esc(b.core||b.text||'')}」</li>`).join('')}</ul>`:'<p class="tiny muted">まだ、心に残る思い込みは生まれていません。</p>', arc.length?`<button class="linkish" type="button" id="hmKmap">本棚の人生とくらべる（観念の地図）</button>`:'')}
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
-    ${homeTile('hm-friends',`紹介でつながった人<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの主人公が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m?(m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'人生のどこかで、出会う日が来ます。'):'この人生では、出会う年が重なりませんでした。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
+    ${homeTile('hm-friends',`紹介でつながった人<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの主人公が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
     ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は、一冊の本になってここに並びます。</p>')}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
     ${typeof birthMapHTML==='function'?homeTile('hm-map','生まれた場所',birthMapHTML(P)):''}
