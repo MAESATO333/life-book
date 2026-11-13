@@ -440,6 +440,28 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .hm-move h3{ margin:0 0 4px; font-family:var(--serif); font-size:16px; } .hm-move p{ margin:0; }
 .mv-qr{ display:flex; flex-direction:column; align-items:center; gap:6px; margin:4px 0 14px; } .mv-qr svg{ width:220px; height:220px; background:#fff; border-radius:12px; padding:6px; border:2px solid #F3D3DC; }
 .inapp{ position:sticky; top:0; z-index:70; display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:12px 16px; background:#FFF0D6; color:#5A3A10; font-size:13px; line-height:1.6; border-bottom:2px solid #FFC98A; } .inapp p{ margin:0; flex:1 1 220px; }
+.hm-art{ position:relative; }
+.tod-ov{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; border-radius:20px; }
+.tod-morning{ background:linear-gradient(180deg,rgba(255,200,150,.28),rgba(255,230,200,0)); }
+.tod-evening{ background:linear-gradient(180deg,rgba(255,130,90,.38),rgba(160,90,140,.18)); }
+.tod-night{ background:linear-gradient(180deg,rgba(20,30,80,.62),rgba(30,40,90,.38)); }
+.hm-bubble{ position:absolute; left:12px; right:12px; bottom:12px; padding:10px 14px; border-radius:16px; background:rgba(255,255,255,.94); color:#3A2A33; font-size:14px; line-height:1.7; box-shadow:0 4px 0 rgba(0,0,0,.08); }
+.hm-bubble small{ display:block; font-size:11px; color:#C9466A; font-weight:700; }
+.hm-today{ display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:14px; margin-bottom:14px; }
+.hm-scene{ --tc:#FFC98A; background:#FFFBF2; } .hm-stamp{ --tc:#A6DC8E; } .hm-world{ --tc:#7EC8E8; } .hm-zukan{ --tc:#C9B6F2; }
+.hm-ono{ margin:0 0 2px; font-size:22px; font-family:var(--serif); color:#C27A2C; } .hm-scene p{ margin:0 0 8px; line-height:1.8; }
+.hm-near{ list-style:none; padding:10px 0 0; margin:8px 0 6px; border-top:1px dashed var(--line); display:grid; gap:6px; font-size:13.5px; line-height:1.7; }
+.stp-row{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:8px; }
+.stp{ display:flex; flex-direction:column; align-items:center; justify-content:center; aspect-ratio:1; border-radius:8px; border:2px dashed var(--line); font-size:11px; color:var(--muted); }
+.stp small{ font-size:9px; } .stp.on{ border:2px solid #7CC36A; background:#E6F7DE; } .stp.on i{ width:14px; height:14px; background:#7CC36A; -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6' shape-rendering='crispEdges'%3E%3Cpath d='M1 0h2v1h1V0h2v1h1v2H6v1H5v1H4v1H3V5H2V4H1V3H0V1h1z'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6' shape-rendering='crispEdges'%3E%3Cpath d='M1 0h2v1h1V0h2v1h1v2H6v1H5v1H4v1H3V5H2V4H1V3H0V1h1z'/%3E%3C/svg%3E") center/contain no-repeat; }
+.stp.today{ outline:2px solid #E86A88; outline-offset:1px; }
+.hm-wl{ display:grid; gap:8px; } .hm-w{ display:flex; flex-wrap:wrap; gap:4px 10px; padding:8px 10px; border-radius:12px; background:var(--accent-soft); font-size:12.5px; } .hm-w b{ width:100%; font-size:14px; }
+.hm-zk{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .hm-z{ display:flex; flex-direction:column; gap:2px; } .hm-z b{ font-size:22px; font-family:var(--serif); } .hm-z b small{ font-size:12px; margin-left:2px; }
+.hm-zbar{ height:6px; border-radius:3px; background:var(--line); overflow:hidden; } .hm-zbar i{ display:block; height:100%; background:#C9B6F2; }
+@media (max-width:720px){ .hm-today{ grid-template-columns:1fr; } }
+.ev.k-moment{ padding-block:4px; } .ev.k-moment .t{ font-size:14.5px; line-height:1.8; color:var(--ink); opacity:.88; }
+.ev.ev-new{ border-left:3px solid #FFC98A; padding-left:10px; }
+.mo-more{ margin:-4px 0 18px 64px; font-size:13px; }
 </style>
 
 <div class="wrap">
@@ -9324,26 +9346,26 @@ const ymd=t=>{ const d=new Date(t); return `${d.getFullYear()}年${d.getMonth()+
 function receiveLoan(o){ const L=store.get(KEY_LOAN,[]); if(L.some(x=>x.s===o.s&&x.by===o.by)) return 'already'; L.unshift(Object.assign({ got:Date.now() },o)); store.set(KEY_LOAN,L.slice(0,40)); return 'ok'; }
 // 本棚：借りている本
 function loanShelfHTML(){ const L=store.get(KEY_LOAN,[]);
-  return `<div class="loan-wrap"><h3>借りている本</h3>
-    ${L.length?`<div class="shelf loans">${L.map((o,i)=>{ const late=o.due&&Date.now()>o.due+86400000; return `<button type="button" class="spine borrowed" data-loan="${i}" style="height:${Math.round(150+Math.min(100,o.a||60)*.9)}px;width:38px" aria-label="${esc(o.by||'友だち')}さんから借りた、${esc(o.n)}の人生を読む"><span class="sp-t">${esc(o.n)}</span><span class="sp-y">${esc(o.by||'友だち')}さんから${late?'・返す日をすぎています':''}</span></button>`; }).join('')}</div><div class="reels"><span class="tiny muted">借りている動画とアルバム</span>${L.map((o,i)=>`<button type="button" class="reel" data-lmov="${i}" aria-label="${esc(o.n)}の思い出の動画を再生"><span class="reel-ic" aria-hidden="true"></span><span>${esc(o.n)}</span></button>`).join('')}</div>`:'<p class="tiny muted">友だちから借りた本は、ここに並びます。思い出のアルバムと動画も、いっしょに届きます。</p>'}
-    <details class="loan-in"><summary>友だちから本を借りる</summary>
+  return `<div class="loan-wrap"><h3>借りているLIFE BOOK（前世）</h3>
+    ${L.length?`<div class="shelf loans">${L.map((o,i)=>{ const late=o.due&&Date.now()>o.due+86400000; return `<button type="button" class="spine borrowed" data-loan="${i}" style="height:${Math.round(150+Math.min(100,o.a||60)*.9)}px;width:38px" aria-label="${esc(o.by||'友だち')}さんから借りた、${esc(o.n)}の人生を読む"><span class="sp-t">${esc(o.n)}</span><span class="sp-y">${esc(o.by||'友だち')}さんから${late?'・返す日をすぎています':''}</span></button>`; }).join('')}</div><div class="reels"><span class="tiny muted">借りている動画とアルバム</span>${L.map((o,i)=>`<button type="button" class="reel" data-lmov="${i}" aria-label="${esc(o.n)}の思い出の動画を再生"><span class="reel-ic" aria-hidden="true"></span><span>${esc(o.n)}</span></button>`).join('')}</div>`:'<p class="tiny muted">友だちから借りたLIFE BOOK（前世）は、ここに並びます。思い出のアルバムと動画も、いっしょに届きます。</p>'}
+    <details class="loan-in"><summary>友だちからLIFE BOOK（前世）を借りる</summary>
       <p class="tiny muted">友だちから届いた「貸し出しコード」をはりつけるか、本のファイルを選んでください。</p>
       <textarea id="loanCode" rows="3" placeholder="LIFEBOOK1. からはじまるコード"></textarea>
       <div class="obi-btns"><button class="btn small" id="loanGet" type="button">本棚に並べる</button><label class="btn ghost small loan-file">ファイルから<input type="file" id="loanFile" accept=".txt,.lifebook,text/plain" hidden></label></div>
       <p class="tiny" id="loanMsg" role="status"></p></details></div>`; }
 function bindLoanShelf(){
   const msg=t=>{ const m=$('#loanMsg'); if(m) m.textContent=t; };
-  const take=txt=>{ const o=readLoan(txt); if(!o) return msg('コードが読み取れませんでした。最初から最後まで、まるごとはりつけてください。'); const r=receiveLoan(o); if(r==='already') return msg('この本は、もう本棚にあります。'); render(); setTimeout(()=>{ const m=$('#loanMsg'); if(m){ m.closest('details').open=true; m.textContent=`${o.by||'友だち'}さんから「${o.n}」の本を借りました。`; } },30); };
+  const take=txt=>{ const o=readLoan(txt); if(!o) return msg('コードが読み取れませんでした。最初から最後まで、まるごとはりつけてください。'); const r=receiveLoan(o); if(r==='already') return msg('このLIFE BOOK（前世）は、もう本棚にあります。'); render(); setTimeout(()=>{ const m=$('#loanMsg'); if(m){ m.closest('details').open=true; m.textContent=`${o.by||'友だち'}さんから「${o.n}」のLIFE BOOK（前世）を借りました。`; } },30); };
   const g=$('#loanGet'); if(g) g.onclick=()=>take($('#loanCode').value);
   const f=$('#loanFile'); if(f) f.onchange=()=>{ const fl=f.files&&f.files[0]; if(!fl) return; fl.text().then(take).catch(()=>msg('ファイルを読めませんでした。')); };
   document.querySelectorAll('[data-loan]').forEach(b=>b.onclick=()=>{ const o=store.get(KEY_LOAN,[])[+b.dataset.loan]; if(!o) return; viewing={ seed:o.s, country:o.c, force:o.f, choice:o.ch, loan:+b.dataset.loan }; render(); window.scrollTo(0,0); });
 }
-// 読んでいる本の終わりに：自分の本なら「貸す」、借りた本なら「返す」
+// 読んでいる本の終わりに：自分の本なら「貸す」、借りたLIFE BOOK（前世）なら「返す」
 function loanReportHTML(P,L){
   if(!viewing) return '';
   if(viewing.loan!=null){ const o=store.get(KEY_LOAN,[])[viewing.loan]; if(!o) return '';
     const late=o.due&&Date.now()>o.due+86400000;
-    return `<section class="chap loan-sec"><div class="no">借りた本</div><h2>${esc(o.by||'友だち')}さんから借りた本</h2>
+    return `<section class="chap loan-sec"><div class="no">借りたLIFE BOOK（前世）</div><h2>${esc(o.by||'友だち')}さんから借りたLIFE BOOK（前世）</h2>
       <div class="prose"><p>${ymd(o.got)}に借りました。${o.due?`返す日は${ymd(o.due)}です。${late?'もう、すぎています。':''}`:''}</p>
       ${o.ab?`<p class="tiny muted">${esc(o.by||'友だち')}さんが書いたあとがき</p><blockquote class="loan-ab">${esc(o.ab)}</blockquote>`:''}</div>
       <label class="tiny muted" for="retNote">返すときに添えるひと言</label><textarea id="retNote" rows="3" placeholder="読んで感じたこと、ありがとうの言葉"></textarea>
@@ -9366,7 +9388,7 @@ function bindLoanReport(P,L){
     const arc=store.get(KEY_ARC,[]); const a=arc.find(x=>x.seed===P.seed)||{ seed:P.seed, country:viewing.country, force:viewing.force, choice:viewing.choice, name:P.full, nation:P.country.name, age:L.deathAge };
     const code=loanCode(a,by,due,store.get(KEY_ANS+P.seed,{}));
     const lent=store.get(KEY_LENT,[]); lent.push({ s:P.seed, at:Date.now(), due }); store.set(KEY_LENT,lent.slice(-60));
-    $('#lendOut').innerHTML=`<p class="tiny muted">このコードを、メッセージで友だちに送ってください。受け取った人は、LIFE BOOK の最初の画面の「友だちから本を借りる」にはりつけます。</p><textarea class="loan-code" rows="3" readonly>${esc(code)}</textarea><div class="obi-btns"><button class="btn small" id="lendCopy" type="button">コードをコピー</button><button class="btn ghost small" id="lendFile" type="button">ファイルにする</button></div><div id="lendFileOut"></div>`;
+    $('#lendOut').innerHTML=`<p class="tiny muted">このコードを、メッセージで友だちに送ってください。受け取った人は、LIFE BOOK の最初の画面の「友だちからLIFE BOOK（前世）を借りる」にはりつけます。</p><textarea class="loan-code" rows="3" readonly>${esc(code)}</textarea><div class="obi-btns"><button class="btn small" id="lendCopy" type="button">コードをコピー</button><button class="btn ghost small" id="lendFile" type="button">ファイルにする</button></div><div id="lendFileOut"></div>`;
     $('#lendCopy').onclick=e=>copyText(code,e.target);
     $('#lendFile').onclick=()=>saveText(`${P.given}_LIFEBOOK.txt`,`LIFE BOOK 貸し出しコード\n「${P.full}」の一生（${by||'友だち'}さんより）\n\n${code}\n`,$('#lendFileOut')); };
   const rt=$('#loanReturn'); if(rt) rt.onclick=()=>{ const Ls=store.get(KEY_LOAN,[]); const o=Ls[viewing.loan]; if(!o) return; const note=($('#retNote').value||'').trim();
@@ -9850,6 +9872,70 @@ const _bsInfCache={};
 function bsInfOf(Q){ if(_bsInfCache[Q.seed]) return _bsInfCache[Q.seed]; let inf={}; try{ const L=simulate(Q,'~'); const b=L.years[0].events.find(e=>e.kind==='birth'); inf=(b&&b.inf)||{}; }catch(e){} return _bsInfCache[Q.seed]=inf; }
 // 生まれた時に一度だけ選んで、記録する
 function bsChoose(P,L){ const b=L.years[0]&&L.years[0].events.find(e=>e.kind==='birth'); return bsPick(P,(b&&b.inf)||{},bsAvoid(P)); }
+// ===== 小さな日々：一年の中の、ささやかな場面を増やす（表示だけ。人生の流れ・乱数は変えない） =====
+// 時・場所・していたこと・まわりの様子・心の動きを組み合わせる。同じ人生の中で、同じ文は二度と出さない。
+const MO_TIME=[ // [文, 季節(null=いつでも)]
+ ['春の朝',[0]],['桜の散るころ',[0],'jp'],['春の夕方',[0]],['風のあたたかい午後',[0]],['新学期が始まったばかりのころ',[0],'school'],['花の咲きはじめた週末',[0]],
+ ['夏の朝',[1]],['蒸し暑い昼すぎ',[1]],['夕立のあと',[1]],['夏の夜',[1]],['蝉の声のする午後',[1]],['日の長い夕方',[1]],['夏休みのある日',[1],'school'],
+ ['秋の朝',[2]],['空の高い午後',[2]],['日が短くなってきた夕方',[2]],['落ち葉の舞う日',[2]],['涼しくなった夜',[2]],['秋の長い夜',[2]],
+ ['冬の朝',[3]],['息の白い朝',[3]],['日の暮れの早い夕方',[3]],['冷えこんだ夜',[3]],['よく晴れた冬の昼',[3]],['年の暮れ',[3]],
+ ['ある朝',null],['ある日の昼すぎ',null],['ある日の夕方',null],['ある晩',null],['雨の朝',null],['雨の午後',null],['週のはじめの朝',null],['週末の朝',null],['休みの日の昼',null],['夕飯のあと',null],['寝る前',null],['いつもより早く目がさめた朝',null],['風の強い日',null],['くもり空の日',null],['なんでもない平日',null],['よく晴れた日',null],['静かな日曜日',null]];
+const MO_PLACE={
+ kid:['家の前の道','台所のすみ','近くの公園','庭','部屋の窓辺','家の裏','近所の空き地','祖母の家','階段の下','食卓のそば','玄関','川べり','坂の上','畑のあぜ道','路地'],
+ school:['教室','校庭','図書室','帰り道','通学路','体育館のすみ','友だちの家','廊下の窓のそば','近所の公園','部屋'],
+ teen:['自分の部屋','帰り道','駅のホーム','図書館','友だちの家の前','近所のコンビニの前','屋上','川沿いの道','バス停','公園のベンチ','部活のあと','教室の窓際'],
+ adult:['職場','台所','帰りの電車','バス停','ベランダ','近所の店','市場','駅前','公園','家の居間','職場の休憩室','車の中','近くの道','洗濯物を干す庭'],
+ elder:['縁側','庭','近所の道','台所','病院の待合室','公園のベンチ','窓辺','商店の前','寺や教会の帰り道','居間の椅子','畑','バス停'] };
+const MO_DO={ // {p}=身近な人の呼び名
+ baby:['{p}の作る{f}のにおいに、鼻をくんくんさせた','{s}に、びくっとして目をあけた','{p}が見せてくれた{o}を、目で追った','{p}の腕の中で、指をしゃぶっていた','天井の光の模様を、じっと見つめていた','{p}の歌う声を聞きながら、まぶたが重くなった','自分の手を見つけて、ふしぎそうに動かしていた','{p}の顔を見て、声を立てて笑った','何かを言おうとするように、口をもぐもぐさせた','毛布のはしを、ぎゅっとにぎっていた','{p}に抱かれて、外の風にあたった','おなかがすいて、顔を真っ赤にして泣いた','{p}の髪を、小さな手でつかんだ','足をばたばたさせて、はしゃいだ','知らない人の顔を見て、べそをかいた','鈴の音のほうへ、首を回した','{p}のひざの上で、うとうとした','お風呂のお湯を、手でぱしゃりとたたいた','ころんと寝返りをうって、自分で驚いた','{p}が戻ってくると、手足を動かして喜んだ'],
+ kid:['{o}を見つけて、宝物の箱にしまった','{f}を、ほっぺたいっぱいにほおばった','{s}が聞こえて、耳をすませた','{p}に、{o}をあげた','{f}が苦手で、そっとお皿のはしによけた','{p}と、{s}のまねをして遊んだ','{o}を、何に使うのか、ずっと考えていた','{p}に、なぞなぞを出して困らせた','しゃぼん玉を、どこまでも追いかけた','{p}の手伝いで、{f}を運んだ','転んでひざをすりむいたが、泣かなかった','{p}の大きな靴をはいて、歩いてみた','ありの行列を、しゃがんでずっと見ていた','{p}と手をつないで歩いた','水たまりをわざと踏んで、しかられた','どんぐりを、ポケットいっぱいに集めた','{p}のまねをして、大人のふりをした','段ボールで、秘密の家を作った','ひとりで、知らない歌を作って歌っていた','{p}に、今日あったことを一生けんめい話した','雲の形が、何に見えるか考えていた','石けりをしながら、家まで帰った','{p}のひざに乗って、絵本を読んでもらった','落ちていた鳥の羽を、宝物にした','かくれんぼで、なかなか見つけてもらえなかった','{p}の背中に、こっそり飛びついた','虫を手にのせて、{p}に見せに行った','はじめて、ひとりでおつかいに行った','おもちゃの取り合いで、泣いた','{p}のつくったおやつを、半分こした','ひもを結ぶ練習を、何度もした','暗くなるまで、外で遊んでいた','布団の中で、{p}に怖い話をせがんだ','影ふみをして、走り回った','花の名前を、{p}に教えてもらった','いすを並べて、電車ごっこをした','自分の名前を、大きく書いてみた','{p}といっしょに、洗濯物をたたんだ','夕焼けの色を、絵に描こうとした','雨の音を聞きながら、窓に指で絵を描いた'],
+ school:['{o}を拾って、{p}に見せた','{f}を食べながら、{p}と明日の話をした','{s}を聞きながら、宿題をした','{p}と、交換日記をつけた','授業中、{s}が気になって外ばかり見ていた','{p}に、{o}を貸した','{p}の家で、{f}をごちそうになった','教科書のすみに、{p}の似顔絵を描いた','忘れものに気づいて、走って取りに帰った','{p}と、帰り道の坂を競争した','{o}を、机の中にしまっておいた','はじめて、ひとりで電車やバスに乗った','休み時間に、{p}と校庭を走った','宿題を、ぎりぎりまでやらずにいた','給食やお弁当のおかずを、{p}と交換した','先生に名前を呼ばれて、どきっとした','帰り道に、{p}と寄り道をした','図書室で、好きな本を何度も借りた','テストの点を、どう伝えるか考えながら帰った','{p}とけんかして、口をきかなかった','{p}と仲直りして、また笑った','鉛筆を、何本もとがらせてそろえた','友だちの家で、遅くまでゲームや遊びに夢中になった','運動場の砂で、大きな山を作った','{p}に、秘密の話をうちあけた','ノートのすみに、落書きをした','体育で、少しだけ速く走れた','大事な消しゴムを、なくしてしまった','家で、{p}に勉強を見てもらった','自転車で、少し遠くまで行ってみた','クラスの係の仕事を、まじめにこなした','新しい言葉を覚えて、何度も使ってみた'],
+ teen:['{s}を聞きながら、窓の外を見ていた','{p}と、{f}を分けあった','{o}を見つけて、子どものころを思い出した','{p}からの返事を、ずっと待っていた','{p}の誕生日を、こっそり祝う計画を立てた','夜中に、{f}をこっそり食べた','{p}と、だれにも言えない話をした','知らない町の地図を、ながめていた','{p}の歌う声に、聞きほれた','自分の将来について、{p}に聞いてみた','{s}で、目がさめた','{o}を、ずっと捨てられずにいた','好きな歌を、何度もくり返し聴いた','{p}と、夜おそくまで話しこんだ','鏡の前で、髪型を何度も直した','{p}の言葉が気になって、眠れなかった','帰り道、わざと遠回りした','ノートに、だれにも見せない詩を書いた','{p}と、くだらないことで大笑いした','進路のことを考えて、ため息をついた','{p}に、そっけない返事をしてしまった','部活や習いごとの練習で、くたくたになった','好きな人の姿を、遠くから目で追った','{p}とおそろいのものを買った','ひとりで、少し遠くの町まで出かけてみた','テスト前の夜、机に向かったまま、うとうとした','{p}に、本音を少しだけ話した','新しい服を、何度も試着した','ラジオや音楽番組を、夜ふけまで聴いていた','{p}と、将来の夢を話した','家の手伝いを、しぶしぶした','自分の部屋の模様替えをした'],
+ adult:['{f}を食べながら、{p}の話を聞いた','{s}を聞きながら、手を動かしていた','{o}を見つけて、手を止めた','{p}に、{f}を持っていった','{p}と、{f}を囲んだ','{s}で、ふと昔を思い出した','{p}の言葉に、救われた','{p}に、言いすぎたと思って、あやまった','職場で、{p}の失敗をかばった','{o}を、やっと片づけた','{p}の好きな{f}を、買って帰った','{p}と、黙ったまま並んで歩いた','はじめての店に、思いきって入った','{p}の相談に、夜おそくまでつきあった','{p}と、短い電話をした','仕事の段取りを、頭の中で何度もくり返した','{p}のために、ささやかな料理を作った','帰りに、少しだけ寄り道をした','{p}と、昔の話で笑った','たまった洗濯物を、まとめて片づけた','新しい仕事の手順を覚えるのに、苦労した','{p}の話を、最後まで聞いた','疲れて、服のまま眠ってしまった','家計のことを、ノートにつけた','{p}に、ありがとうと言いそびれた','古い友だちから、ひさしぶりに連絡が来た','{p}と、つまらないことで言い合いになった','ひとりで、静かにお茶を飲んだ','{p}の誕生日の贈りものを、選んだ','職場で、小さな失敗をして、頭を下げた','職場で、だれかに助けられた','{p}と、近くまで散歩に出かけた','部屋の掃除をしていて、古い写真を見つけた','明日の支度をして、早めに寝た','{p}の寝顔を見ながら、一日をふり返った','買いものの帰りに、重い荷物を何度も持ちかえた','慣れない道で、少し迷った','{p}と、次の休みの計画を立てた'],
+ elder:['{f}を、ゆっくり味わった','{s}を聞いて、子どものころを思い出した','{o}を手に取って、しばらくながめた','{p}に、{f}を送った','{p}の声を、電話ごしに聞いた','{p}の手を、そっと握った','昔の友だちの名前を、ひとりずつ思い出した','{s}に、耳をすませた','{p}に、昔の歌を教えた','{o}を、{p}にゆずることにした','{p}のことを思いながら、お茶をいれた','庭の草花に、水をやった','古い写真を、一枚ずつながめた','{p}から、元気かと連絡が来た','近所の人と、天気の話をした','ゆっくり、近くまで散歩に出た','{p}の小さかったころを、思い出していた','ラジオから流れる古い歌に、耳をかたむけた','針に糸を通すのに、時間がかかった','{p}に、昔の話を聞かせた','日なたで、うとうとした','薬の時間を、うっかり忘れかけた','{p}の好物を、たくさん作りすぎた','若いころに歩いた道を、思い出した','読みかけの本を、少しずつ読んだ','{p}と、ゆっくり食卓を囲んだ','手紙を書こうとして、何度も書き直した','鳥のさえずりで、目がさめた'] };
+const MO_OBJ=['古いボタン','まるい小石','色のきれいな葉っぱ','なくしたと思っていた鍵','ちびた鉛筆','空きびん','鳥の羽','古い手紙','ビー玉','ほつれた手袋','小さな貝がら','錆びたスプーン','折り紙の鶴','切れたひも','色あせた写真','欠けたコップ','使いかけのノート','小さな鈴','押し花','昔のおもちゃ','ひと粒の種','片方だけの靴下','木の実','古い地図','小さな箱'];
+const MO_FOOD=['あたたかいスープ','焼きたてのパン','甘い果物','ゆでた卵','豆の煮もの','炊きたてのごはん','香ばしい焼き魚','野菜の炒めもの','あまいお菓子','冷たい水','熱いお茶','とうもろこし','いもの煮っころがし','温かいミルク','少しこげた料理','ひと切れのケーキ','しょっぱいせんべい','具だくさんの汁もの','よく冷えた果物','焼いたいも'];
+const MO_SOUND=['遠くの汽笛','雨どいを流れる水の音','近所の子どもの笑い声','風鈴の音','鍋のふたが鳴る音','木の葉のこすれる音','どこかの家のピアノ','虫の声','車の行きかう音','鳥のさえずり','時計の秒針','食器のふれあう音','祭りの太鼓','工事の音','波の音'];
+const MO_DETAIL=[ // [文, 季節]
+ ['風が、少しつめたかった。',null],['どこかで、犬が鳴いていた。',null],['遠くで、ラジオの音がしていた。',null],['雲の影が、ゆっくり動いていた。',null],['台所から、いいにおいがしていた。',null],['窓の外を、鳥が横切った。',null],['時計の音が、やけに大きく聞こえた。',null],['空が、うすい桃色に染まっていた。',null],['道ばたに、小さな花が咲いていた。',null],['外は、しんと静かだった。',null],['どこかの家から、笑い声が聞こえた。',null],['夕日が、部屋の奥まで差しこんでいた。',null],['雨のにおいがした。',null],['空気が、すんでいた。',null],['近くを、子どもたちが走っていった。',null],['だれかが、口笛を吹いていた。',null],
+ ['花のにおいが、風にまじっていた。',[0]],['日差しが、やわらかかった。',[0]],['若葉が、光っていた。',[0]],
+ ['汗が、首すじをつたった。',[1]],['蝉が、うるさいほど鳴いていた。',[1]],['夜になっても、むっと暑かった。',[1]],['どこかで、虫が鳴きはじめた。',[1,2]],
+ ['落ち葉が、足もとでかさかさと鳴った。',[2]],['空が、高かった。',[2]],['風に、少し冬のにおいがした。',[2]],
+ ['吐く息が、白かった。',[3]],['指先が、かじかんでいた。',[3]],['窓ガラスが、くもっていた。',[3]],['日だまりだけが、あたたかかった。',[3]]];
+const MO_FEEL={ hi:['なんだか、いい日だと思った。','ふふっと、ひとりで笑った。','胸の中が、ぽかぽかした。','明日も、こんな日だといい。','それだけのことが、うれしかった。','少し、元気が出た。','ずっと覚えていたい、と思った。'],
+ mid:['とくに何があったわけでもない日だった。','そのことは、すぐに忘れてしまった。','いつもと同じで、いつもと少しちがった。','ぼんやりと、時間が過ぎた。','なぜか、そのことが心に残った。',''],
+ lo:['なんとなく、さびしかった。','胸のどこかが、ちくりとした。','だれかに話したかったけれど、やめた。','ため息が、ひとつ出た。','早く、今日が終わればいいと思った。','それでも、少しだけ空を見上げた。'] };
+function moHash(...a){ let x=2166136261>>>0; const s=a.join('|'); for(let i=0;i<s.length;i++){ x^=s.charCodeAt(i); x=Math.imul(x,16777619)>>>0; } x=(x^(x>>>15))>>>0; x=Math.imul(x,2246822519)>>>0; return (x^(x>>>13))>>>0; }
+function moPeople(L,age,P){ const out=[]; for(const p of (L.persons||[])){ if(!p.name||p.metAge==null||p.metAge>age) continue; if(p.deathAge!=null&&p.deathAge<age) continue;
+  const lab=p.role==='father'?'父':p.role==='mother'?'母':p.label||''; out.push(/父|母/.test(lab)&&lab.length<=1?lab:`${lab?lab+'の':''}${p.name}`); }
+  if(!out.length) out.push('家族'); return out; }
+function moStage(age){ return age<=2?'baby':age<=5?'kid':age<=12?'school':age<=18?'teen':age<=64?'adult':'elder'; }
+function moOne(P,L,y,i,used,ctx){ const age=y.age, stg=moStage(age);
+  for(let t=0;t<8;t++){ const h=k=>moHash(P.seed,age,i,t,k);
+    const se=ctx.seasons[h('s')%ctx.seasons.length];
+    const times=MO_TIME.filter(x=>(!x[1]||x[1].includes(se))&&(!x[2]||(x[2]==='jp'?P.countryId==='jp':x[2]==='school'&&age>=6&&age<=18)));
+    const tm=times[h('t')%times.length][0];
+    const pls=stg==='baby'?MO_PLACE.kid.slice(0,8):(MO_PLACE[stg]||MO_PLACE.kid); const pl=pls[h('p')%pls.length];
+    const dos=MO_DO[stg]; let act=dos[h('a')%dos.length]; const ppl=ctx.ppl; act=act.replace(/\{p\}/g,ppl[h('w')%ppl.length]).replace('{o}',MO_OBJ[h('o')%MO_OBJ.length]).replace('{f}',MO_FOOD[h('fo')%MO_FOOD.length]).replace('{s}',MO_SOUND[h('so')%MO_SOUND.length]);
+    const nt=/夜|寝る前|夕飯のあと|晩/.test(tm), rn=/雨|くもり/.test(tm);
+    if(/週末|日曜|休みの日|夏休み/.test(tm)&&/授業|休み時間|給食|係|先生|教室|体育|職場|新しい仕事|宿題を、ぎりぎり/.test(act)) continue;
+    const dets=MO_DETAIL.filter(x=>(!x[1]||x[1].includes(se))&&!(nt&&/日差し|夕日|雲|空が|日だまり|若葉|空気|鳥|花が咲|子どもたち|蝉/.test(x[0]))&&!(rn&&/日差し|夕日|空が|日だまり|雲の影/.test(x[0]))); const det=h('d')%3===0?'':dets[h('dd')%dets.length][0];
+    const band=y.h>=68?'hi':y.h>=45?'mid':'lo'; const fl=h('f')%3===0?MO_FEEL[band][h('ff')%MO_FEEL[band].length]:'';
+    const who=stg==='baby'?'':(h('n')%4===0?P.given+'は、':'');
+    const night=/夜|寝る前|夕飯のあと|晩/.test(tm), outdoor=/道|公園|庭|空き地|校庭|川|坂|畑|路地|バス停|ホーム|屋上|ベンチ|前$|市場|駅前|通学路/.test(pl);
+    const selfLoc=/歩|走|帰り|乗|体育|職場|教室|家で|の家|外で|散歩|寄り道|出かけ|運動場|図書室|校庭|町まで|店|追いかけ|遠くまで|帰って|休み時間|授業中|電話/.test(act);
+    const usePl=!selfLoc&&!(night&&outdoor)&&h('u')%10<6;
+    const text=`${tm}、${usePl?(pl==='部活のあと'?'部活のあと':pl+'で')+'、':''}${who}${act}。${det}${fl}`.replace(/。。/g,'。');
+    const core=y.age+'|'+act; if(used.has(text)||used.has(core)) continue; used.add(text); used.add(core); return { kind:'moment', d:0, text, season:se }; }
+  return null; }
+function momentsApply(P,L,mult){ if(!L||L._mo) return; L._mo=1; mult=mult||4; const used=new Set();
+  for(const y of L.years){ if(y.age>L.deathAge) continue; const base=y.events.filter(e=>!['birth','death','birthsit'].includes(e.kind)).length; if(!base) continue;
+    const n=Math.min(180,Math.round(base*(y.age<=2?2:mult)));
+    const ss=[...new Set(y.events.map(e=>e.season).filter(s=>s!=null))]; const seasons=ss.length?ss:[0,1,2,3];
+    const ctx={ seasons, ppl:moPeople(L,y.age,P) }; const add={};
+    for(let i=0;i<n;i++){ const m=moOne(P,L,y,i,used,ctx); if(m) (add[m.season]=add[m.season]||[]).push(m); }
+    // 季節ごとに、その季節の最後の出来事のうしろへ（死の出来事より前に）
+    for(const s of Object.keys(add).map(Number).sort((a,b)=>b-a)){ let at=-1; y.events.forEach((e,j)=>{ if(e.season===s&&e.kind!=='death') at=j; }); if(at<0){ const d=y.events.findIndex(e=>e.kind==='death'); at=d<0?y.events.length-1:d-1; } y.events.splice(at+1,0,...add[s]); } } }
 // ===== ホームを毎日たのしく：今日のひとこと・今日の小さな場面・身近な人のいま・世界のいま・図鑑・見守りスタンプ・時間帯で変わる空 =====
 // どれも表示だけ。人生の流れ（乱数）は変えない。日付で変わるので、毎日ちがうものが見られる。
 const KEY_STAMP='hitotsu.stamps';
@@ -9905,7 +9991,7 @@ function worldNow(P,year){ const k=dayKey(); const ids=Object.keys(WSTAT).filter
 function zukan(P,L,age){ const arc=store.get(KEY_ARC,[]); const cs=new Set([P.countryId]); const bel=new Set(Object.values(L.beliefs||{}).filter(b=>b.age<=age).map(b=>b.id)); let met=(L.persons||[]).filter(p=>p.metAge!=null&&p.metAge<=age).length;
   for(const a of arc.slice(0,30)){ try{ const Q=makeBirth(a.seed,{country:a.country||null,force:a.force||null}); cs.add(Q.countryId); } catch(e){} }
   const egsSeen=new Set(L.years.filter(y=>y.age<=age&&y.egs).map(y=>y.egs));
-  return [['生まれた国',cs.size,Object.keys(WSTAT).length,'か国'],['この人生の観念',bel.size,Object.keys(BELIEFS).length,'こ'],['感じた感情の段階',egsSeen.size,22,'段'],['出会った人',met,null,'人'],['本棚の本',arc.length,null,'冊']]; }
+  return [['生まれた国',cs.size,(typeof COUNTRIES!=='undefined'&&COUNTRIES.length)||189,'か国'],['この人生の観念',bel.size,Object.keys(BELIEFS).length,'こ'],['感じた感情の段階',egsSeen.size,22,'段'],['出会った人',met,null,'人'],['本棚の本',arc.length,null,'冊']]; }
 // --- 見守りスタンプ（ホームをひらいた日に、ひとつ押される） ---
 function stampToday(){ const s=store.get(KEY_STAMP,[]); const k=dayKey(); if(!s.includes(k)){ s.push(k); store.set(KEY_STAMP,s.slice(-400)); } return s; }
 function stampHTML(){ const s=new Set(store.get(KEY_STAMP,[])); const days=[]; const d=new Date(); for(let i=13;i>=0;i--){ const x=new Date(d); x.setDate(d.getDate()-i); days.push(x); }
@@ -12288,7 +12374,7 @@ function homeMoodSVG(L,age){ const ys=L.years.filter(y=>y.age<=age&&y.h!=null); 
   <div class="hm-axis tiny muted"><span>0歳</span><span>${age}歳</span></div>`; }
 function homeTile(cls,title,body,foot){ return `<section class="hm-tile ${cls}"><h3>${title}</h3>${body}${foot?`<div class="hm-foot">${foot}</div>`:''}</section>`; }
 function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=cur; const age=c.age; egsLife(L);
-  const ys=L.years.filter(y=>y.age<=age).map(y=>({ ...y, events:y.events.filter(e=>e.kind!=='death'||c.dead) }));
+  const ys=L.years.filter(y=>y.age<=age).map(y=>({ ...y, events:revealEv(y,c) }));
   const newYears=ys.filter(y=>y.age>st.lastSeen&&y.events.length).length;
   let art=''; try{ art=c.dead?bkFarewellSVG(P):blockSceneSVG(P,sceneState(P,L,age)); }catch(e){}
   const egsNow=(()=>{ for(let i=ys.length-1;i>=0;i--) if(ys[i].egs) return ys[i].egs; return 0; })();
@@ -12309,10 +12395,11 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
   // 紹介でつながった人と、出会い
   const fr=store.get(KEY_FRIEND,[]); const meets=[]; L.years.forEach(y=>y.events.forEach(e=>{ if(e.kind==='meet') meets.push({ age:y.age, fr:e.fr, name:e.frName }); }));
   const arc=store.get(KEY_ARC,[]); const photos=albumPhotos(P,L,age,30);
+  stampToday(); const hk=hitokoto(P,L,age); const scn=todayScene(P,L,age,egsNow); const near=nearNow(P,L,age); const sy=storyNow(P,c.ageF||age).y; const wn=worldNow(P,sy); const zk=zukan(P,L,age); const tod=todNow();
   const kana=P.fullKana&&P.fullKana!==P.full?`<div class="kana">${esc(P.fullKana)}</div>`:'';
   return `<div class="home fade">
   <section class="hm-hero">
-    <div class="hm-art">${art}</div>
+    <div class="hm-art">${art}${todOverlay()}${c.dead?'':`<div class="hm-bubble" role="note"><small>今日の${esc(P.given)}</small>${esc(hk)}</div>`}</div>
     <div class="hm-id">
       <div class="hm-name">${esc(P.full)}</div>${kana}
       <div class="hm-age">${c.dead?L.deathAge:age}<small>歳</small></div>
@@ -12321,6 +12408,10 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
       <div class="hm-go"><button class="hm-btn" type="button" id="hmRead">${esc(go)}</button>${newYears?`<span class="hm-new">あたらしい出来事 ${newYears}年分</span>`:''}</div>
     </div>
   </section>
+  <div class="hm-today">
+    <section class="hm-tile hm-scene"><h3>今日の小さな場面<span class="hm-n">${dayKey().replace(/^\d+-0?(\d+)-0?(\d+)$/,'$1月$2日')}・${tod[1]}</span></h3>${scn?`<p class="hm-ono"><b>${esc(scn.w)}</b></p><p>${esc(scn.t)}</p>`:''}${near.length?`<ul class="hm-near">${near.map(n=>`<li><b>${esc(n.who)}</b>は、${esc(n.t)}</li>`).join('')}</ul>`:''}<p class="tiny muted">毎日、ちがう場面が届きます。</p></section>
+    <section class="hm-tile hm-stamp"><h3>見守りスタンプ</h3>${stampHTML()}</section>
+  </div>
   <div class="hm-grid">
     ${homeTile('hm-recent','さいきんの出来事', recent.length?`<ul class="hm-list">${recent.map(r=>`<li class="${r.big?'big':''}"><span class="hm-a">${r.age}歳</span>${esc(r.t)}</li>`).join('')}</ul>`:'<p class="tiny muted">まだ出来事はありません。</p>', `<button class="linkish" type="button" data-go="life">続きを読む</button>`)}
     ${homeTile('hm-heart','心のうつりかわり', homeMoodSVG(L,age)+(egsNow?`<p class="hm-egs">いまの感情の段階　<b>${egsNow}</b>／22　${esc(egsName(egsNow))}</p>`:''), '<span class="tiny muted">感情の段階は、エイブラハムの感情の22段階によります。</span>')}
@@ -12330,6 +12421,8 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
     ${homeTile('hm-friends',`紹介でつながった人<span class="hm-n">${fr.length}人</span>`, fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m?(m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'人生のどこかで、出会う日が来ます。'):'この人生では、出会う年が重なりませんでした。'}</li>`; }).join('')}</ul>`:'<p class="tiny">友だちを紹介すると、ふたりの主人公が人生のどこかで出会います。</p>', `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
     ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は、一冊の本になってここに並びます。</p>')}
+    ${homeTile('hm-world',`世界のいま<span class="hm-n">物語の中の${sy}年</span>`, `<p class="tiny muted">${esc(P.given)}が生きているこの年、ほかの国では。</p><div class="hm-wl">${wn.map(w=>`<div class="hm-w"><b>${esc(w.name)}</b><span>平均寿命 ${w.lex}歳</span><span>一人の女性が産む子 ${w.tfr}人</span>${w.urb!=='—'?`<span>都市に住む人 ${w.urb}%</span>`:''}${w.cell>0.5?`<span>携帯電話 100人に${Math.round(w.cell)}台</span>`:''}</div>`).join('')}</div>`, '<span class="tiny muted">出典：世界銀行・国連の統計。毎日、別の国に変わります。</span>')}
+    ${homeTile('hm-zukan','図鑑', `<div class="hm-zk">${zk.map(z=>`<div class="hm-z"><span class="tiny muted">${esc(z[0])}</span><b>${z[1]}<small>${z[3]}</small></b>${z[2]?`<span class="hm-zbar"><i style="width:${Math.max(2,Math.round(z[1]/z[2]*100))}%"></i></span><span class="tiny muted">全${z[2]}${z[3]}のうち</span>`:''}</div>`).join('')}</div>`)}
   </div>
   <section class="hm-move"><div><h3>携帯とパソコンで、同じ人生を</h3><p class="tiny">この端末の人生と本棚を、もう一方の端末に引き継げます。QRコードを読みとるだけです。</p></div><button class="hm-btn ghost" type="button" id="hmMove">ほかの端末で続ける</button></section>
   <section class="hm-loans">${loanShelfHTML()}</section>
@@ -12360,7 +12453,7 @@ let viewing=null;     // 過去の人生のレポートを読んでいる時 { s
 function load(){
   if(!st){ cur=null; return; }
   const P=makeBirth(st.seed,{country:st.country||null,force:st.force||null});
-  const L=simulate(P, st.choice||undefined); if(typeof birthSitApply==='function'){ if(!st.bs&&st.bsNew){ st.bs=bsChoose(P,L); delete st.bsNew; save(); } birthSitApply(P,L,st.bs||null); } if(typeof friendMeet==='function') friendMeet(P,L);
+  const L=simulate(P, st.choice||undefined); if(typeof birthSitApply==='function'){ if(!st.bs&&st.bsNew){ st.bs=bsChoose(P,L); delete st.bsNew; save(); } birthSitApply(P,L,st.bs||null); } if(typeof momentsApply==='function') momentsApply(P,L); if(typeof friendMeet==='function') friendMeet(P,L);
   cur={P,L};
   // 速さを変えた前から続いている人生は、今の年齢を保ったまま新しい速さに切りかえる
   if(st.spd!==2){ const t=Date.now()+(st.shift||0)-st.birthTime-(st.pause||0); const a=Math.max(0,t/oldMpy(P)); st.birthTime=Date.now()+(st.shift||0)-(st.pause||0)-a*msPerYear(P); st.spd=2; save(); }
@@ -12435,7 +12528,7 @@ function reincarnate(){
 function render(){
   const app=$('#app'); if(typeof navSync==='function') navSync();
   if(!viewing&&st&&page==='home'&&cur){ app.innerHTML=homeHTML(); bindHome(); $('#mastmeta').textContent=''; renderDev(); return; }
-  if(viewing){ const P=makeBirth(viewing.seed,{country:viewing.country||null,force:viewing.force||null}); const L=simulate(P,viewing.choice||undefined); if(typeof birthSitApply==='function') birthSitApply(P,L,viewing.bs||null); if(viewing.loan==null&&typeof friendMeet==='function') friendMeet(P,L); app.innerHTML=reportHTML(P,L,true)+loanReportHTML(P,L); bindReport(P,L); bindLoanReport(P,L); $('#mastmeta').textContent='過去の人生'; renderDev(); return; }
+  if(viewing){ const P=makeBirth(viewing.seed,{country:viewing.country||null,force:viewing.force||null}); const L=simulate(P,viewing.choice||undefined); if(typeof birthSitApply==='function') birthSitApply(P,L,viewing.bs||null); if(typeof momentsApply==='function') momentsApply(P,L); if(viewing.loan==null&&typeof friendMeet==='function') friendMeet(P,L); app.innerHTML=reportHTML(P,L,true)+loanReportHTML(P,L); bindReport(P,L); bindLoanReport(P,L); $('#mastmeta').textContent='過去の人生'; renderDev(); return; }
   if(!st){ app.innerHTML=introHTML(); bindIntro(); $('#mastmeta').textContent=''; renderDev(); return; }
   if(st.stage==='funeral'){ app.innerHTML=funeralHTML(cur.P,cur.L); bindFuneral(); $('#mastmeta').textContent='葬儀'; renderDev(); return; }
   if(st.stage==='report'){ app.innerHTML=reportHTML(cur.P,cur.L,false); bindReport(cur.P,cur.L); $('#mastmeta').textContent='振り返り'; renderDev(); return; }
@@ -12500,10 +12593,10 @@ function profileFacts(P,age){
 
 function seasonLabel(i,cid){ const cl=climateOf(cid); return cl==='n'?SEASON_NAME[i]:cl==='s'?['秋','冬','春','夏'][i]:['1〜3月ごろ','4〜6月ごろ','7〜9月ごろ','10〜12月ごろ'][i]; }
 function evHTML(e){
-  return `<div class="ev ${e.big?'big':''} ${e.kind==='death'?'death':''} k-${e.kind}"><p class="t">${esc(e.text)}</p>${e.feel?`<p class="f">${esc(e.feel)}</p>`:''}${e.result?`<p class="rs">${esc(e.result)}</p>`:''}${e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:''}${e.fr?`<p class="fr-tag">紹介でつながった人：${esc(e.fr)}さんの人生の主人公</p>`:''}</div>`;
+  return `<div class="ev ${e.fresh?'ev-new':''} ${e.big?'big':''} ${e.kind==='death'?'death':''} k-${e.kind}"><p class="t">${esc(e.text)}</p>${e.feel?`<p class="f">${esc(e.feel)}</p>`:''}${e.result?`<p class="rs">${esc(e.result)}</p>`:''}${e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:''}${e.fr?`<p class="fr-tag">紹介でつながった人：${esc(e.fr)}さんの人生の主人公</p>`:''}</div>`;
 }
 function yearHTML(y, isNew){
-  return `<div class="year ${isNew?'fade':''}"><div class="yage">${y.age===0?'0':y.age}<small>${ageSpan(cur&&cur.P?cur.P:{year:y.year-y.age,month:1},y.age)}</small></div><div>${isNew?'<div class="new-badge">あたらしい出来事</div>':''}${(()=>{ let last=null, o=''; const cid=cur&&cur.P?cur.P.countryId:'jp'; for(const e of y.events){ if(e.season!=null && e.kind!=='death' && e.kind!=='birth' && e.season!==last){ o+=`<div class="season-h">${seasonLabel(e.season,cid)}</div>`; last=e.season; } o+=evHTML(e); } return o; })()}${y.mood&&!y.events.some(e=>e.kind==='death')?`<p class="mood">${esc(y.mood)}</p>`:''}${y.egs?egsTagHTML(y.egs):''}</div></div>`;
+  return `<div class="year ${isNew?'fade':''}"><div class="yage">${y.age===0?'0':y.age}<small>${ageSpan(cur&&cur.P?cur.P:{year:y.year-y.age,month:1},y.age)}</small></div><div>${isNew?'<div class="new-badge">あたらしい出来事</div>':''}${(()=>{ let last=null, o=''; const cid=cur&&cur.P?cur.P.countryId:'jp'; for(const e of y.events){ if(e._mo!=null && e.kind!=='death' && e.kind!=='birth' && e.kind!=='birthsit' && e._mo!==last){ o+=`<div class="season-h">${e._mo}月</div>`; last=e._mo; } else if(e._mo==null && e.season!=null && e.kind!=='death' && e.kind!=='birth' && e.season!==last){ o+=`<div class="season-h">${seasonLabel(e.season,cid)}</div>`; last=e.season; } o+=evHTML(e); } return o; })()}${y.mood&&!y.events.some(e=>e.kind==='death')?`<p class="mood">${esc(y.mood)}</p>`:''}${y.egs?egsTagHTML(y.egs):''}</div></div>`;
 }
 
 
@@ -12546,14 +12639,42 @@ function albumHTML(P,L,upto,title){ const ps=albumPhotos(P,L,upto,30); if(!ps.le
     <div class="album-nav"><button class="btn ghost small" type="button" data-alb="-1" aria-label="前の写真へ">前へ</button><button class="btn ghost small" type="button" data-alb="1" aria-label="次の写真へ">めくる</button>${full?`<button class="btn small" type="button" data-movie="1">思い出の動画を見る</button>`:''}</div></section>`; }
 function bindAlbum(){ document.querySelectorAll('[data-alb]').forEach(b=>b.onclick=()=>{ const s=b.closest('.album').querySelector('.album-strip'); const f=s.querySelector('.photo'); s.scrollBy({ left:(+b.dataset.alb)*((f?f.offsetWidth:260)+16), behavior:'smooth' }); }); }
 let albumOpen=false;
+// いまの一年は、誕生日に全部ではなく、一年が進むのに合わせて少しずつ見えてくる
+const moOpen=new Set();
+function moreMoBtn(y){ return y.moreMo?`<div class="mo-more"><button type="button" class="linkish" data-moopen="${y.age}">${y.age}歳の小さな日々を、あと${y.moreMo}読む</button></div>`:''; }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-moopen]'); if(!b) return; const sy=window.scrollY; moOpen.add(+b.dataset.moopen); render(); window.scrollTo(0,sy); });
+// 一年の出来事を、誕生日から次の誕生日までの時間の順に並べ、一つずつに「何月」をつける
+function timeOrder(y,P){ if(y._to) return y._to; const bm=P.month; const bq=Math.floor((bm-1)/3);
+  const rk=e=>e.kind==='birth'?-2:e.kind==='birthsit'?-1:e.kind==='death'?99:(e.season==null?bq:((e.season-bq+4)%4));
+  const ev=y.events.map((e,i)=>({ e, i, r:rk(e) })).sort((a,b)=>a.r-b.r||a.i-b.i).map(x=>x.e);
+  // 季節ごとに、その季節の3か月へ均等に割りふる（誕生日の月より前には置かない）
+  const groups={}; ev.forEach(e=>{ const r=rk(e); (groups[r]=groups[r]||[]).push(e); });
+  const out=[]; for(const r of Object.keys(groups).map(Number).sort((a,b)=>a-b)){ const g=groups[r];
+    if(r<0){ g.forEach(e=>out.push(Object.assign({},e,{ _mo:bm, _t:0 }))); continue; }
+    if(r===99){ g.forEach(e=>out.push(Object.assign({},e,{ _t:1 }))); continue; }
+    const q=(bq+r)%4; let m0=q*3+1, span=3; if(r===0){ m0=bm; span=q*3+3-bm+1; }
+    g.forEach((e,j)=>{ const off=Math.min(span-1,Math.floor(j*span/g.length)); const mo=((m0-1+off)%12)+1; const t=(((mo-bm+12)%12)+(j*span/g.length-off))/12; out.push(Object.assign({},e,{ _mo:mo, _t:Math.min(.999,t) })); });
+    // 前の季節（誕生日の季節の、誕生日より前の月）は、一年の終わりに
+  }
+  const tail=out.filter(e=>e._t>=.999&&e.kind!=='death'); return y._to=out; }
+// いまの一年は、誕生日に全部ではなく、物語の時間が進んだぶんだけ、起きた順に見えてくる
+function revealEv(y,c){ const P=cur&&cur.P?cur.P:(viewing&&viewing._P)||null; let ev=P?timeOrder(y,P):y.events; ev=ev.filter(e=>e.kind!=='death'||c.dead);
+  if(!c||c.dead||c.pending||y.age!==c.age) return ev;
+  const frac=Math.max(0,Math.min(1,(c.ageF||c.age)-c.age)); const vis=ev.filter(e=>(e._t||0)<=frac);
+  return vis.length?vis:ev.slice(0,Math.min(ev.length,2)); }
 function lifeHTML(){
   const c=clock(); const {P,L}=cur; egsLife(L);
   if(sinceAge===null) sinceAge=st.lastSeen;
   const visible=L.years.filter(y=>y.age<=c.age && (!c.dead ? true : true));
   // その年の出来事のうち死は、死の時が来てから見せる
-  const yrs=visible.map(y=>({ ...y, events:y.events.filter(e=>e.kind!=='death'||c.dead) })).filter(y=>y.events.length);
-  const fresh=yrs.filter(y=>y.age>sinceAge);
-  const older=yrs.filter(y=>y.age<=sinceAge);
+  const yrs=visible.map(y=>({ ...y, events:revealEv(y,c) })).filter(y=>y.events.length);
+  const isCur=y=>!c.dead&&y.age===c.age;
+  // 過ぎた年の「小さな日々」は、はじめは12までにして、続きはボタンで
+  yrs.forEach(y=>{ if(isCur(y)||moOpen.has(y.age)) return; let k=0, hid=0; y.events=y.events.filter(e=>{ if(e.kind!=='moment') return true; k++; if(k<=12) return true; hid++; return false; }); y.moreMo=hid; });
+  const fresh=yrs.filter(y=>y.age>sinceAge||isCur(y));
+  const older=yrs.filter(y=>y.age<=sinceAge&&!isCur(y));
+  // いまの一年で、前に見た時より後に見えてきた出来事に印をつける
+  const cy=yrs.find(isCur); if(cy){ const seen=(st.curSeen&&st.curSeen.age===cy.age)?st.curSeen.n:0; cy.events=cy.events.map((e,i)=>i>=seen&&seen>0?{ ...e, fresh:1 }:e); if(!st.curSeen||st.curSeen.age!==cy.age||st.curSeen.n<cy.events.length){ st.curSeen={ age:cy.age, n:cy.events.length }; save(); } }
   if(c.age>st.lastSeen){ st.lastSeen=c.age; save(); }
   $('#mastmeta').textContent=c.dead?'この人生は終わりました':`${c.age}歳`;
   const ageTxt=(c.age===0 && P.deathAge===0)?'0':c.age;
@@ -12576,12 +12697,12 @@ function lifeHTML(){
     ${albumOpen?albumHTML(P,L,c.age):''}
     ${c.dead?`<section class="choice" style="border-color:var(--ink);background:var(--surface)"><p class="prompt">${esc(P.given)}の人生は、ここで終わりました。</p><div><button class="btn" id="toFuneral" type="button">葬儀へ</button></div></section>`:''}
     <div class="section-title"><h2>前にひらいた時から</h2><span class="tiny muted">${fresh.length?`${fresh.length}年分`:''}</span></div>
-    ${fresh.length?fresh.map(y=>yearHTML(y,true)).join(''):`<p class="empty">まだ新しい出来事はありません。${c.pending?`${esc(P.given)}は、いま迷っています。`:'人生は、ゆっくり進んでいます。'}</p>`}
+    ${fresh.length?fresh.map(y=>yearHTML(y,true)+moreMoBtn(y)).join(''):`<p class="empty">まだ新しい出来事はありません。${c.pending?`${esc(P.given)}は、いま迷っています。`:'人生は、ゆっくり進んでいます。'}</p>`}
     ${older.length?(()=>{ const chs=lifeChapters(older); const mark=st.mark||null; const lastNo=chs.length?chs[chs.length-1].no:null; const show=n=>showAll||n===openCh||(openCh==null&&n===(mark||lastNo));
       return `<div class="section-title"><h2>これまでの人生</h2><span class="tiny muted">全${chs.length}章・${older.length}年分</span></div>
       <nav class="toc" aria-label="目次"><div class="toc-h">目次</div>${chs.map(ch=>`<button type="button" class="toc-row ${show(ch.no)?'cur':''}" data-ch="${ch.no}"><span class="toc-no">第${KANJI_NO(ch.no)}章</span><span class="toc-t">${esc(ch.title)}</span><span class="toc-a">${ch.from===ch.to?ch.from:ch.from+'〜'+ch.to}歳${mark===ch.no?' ・栞':''}</span></button>`).join('')}
         <div class="toc-foot">${!showAll?`<button class="btn ghost small" id="showAll" type="button">最初から全部読む</button>`:''}</div></nav>
-      ${chs.filter(ch=>show(ch.no)).map(ch=>chapterHead(ch,mark===ch.no,chArt(P,L,ch))+ch.years.map(y=>yearHTML(y,false)).join('')).join('')}`; })():''}<div class="hm-back"><button class="hm-btn ghost" type="button" data-nav2="home">ホームにもどる</button></div>${friendHTML()}`;
+      ${chs.filter(ch=>show(ch.no)).map(ch=>chapterHead(ch,mark===ch.no,chArt(P,L,ch))+ch.years.map(y=>yearHTML(y,false)+moreMoBtn(y)).join('')).join('')}`; })():''}<div class="hm-back"><button class="hm-btn ghost" type="button" data-nav2="home">ホームにもどる</button></div>${friendHTML()}`;
 }
 function bindLife(){
   bindFriend(); document.querySelectorAll('[data-nav2="home"]').forEach(b=>b.onclick=goHome);
