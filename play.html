@@ -14406,7 +14406,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-album',`思い出のアルバム<span class="hm-n">${photos.length}枚</span>`, photos.length?`<div class="hm-photos">${photos.slice(-3).map(ph=>photoHTML(P,L,ph,true)).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。</p>', photos.length?`<button class="linkish" type="button" id="hmAlbum">アルバムをひらく</button>`:'')}
     ${homeTile('hm-belief','心に生まれた観念', bel.length?`<ul class="hm-list">${bel.map(b=>`<li><span class="hm-a">${b.age}歳</span>「${esc(b.core||b.text||'')}」</li>`).join('')}</ul>`:'<p class="tiny muted">まだ、心に残る思い込みは生まれていません。</p>', arc.length?`<button class="linkish" type="button" id="hmKmap">本棚の人生とくらべる（観念の地図）</button>`:'')}
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
-    ${homeTile('hm-friends',`紹介でつながった人<span class="hm-n">${fr.length}人</span>`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの主人公が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m?(m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'人生のどこかで、出会う日が来ます。'):'この人生では、出会う年が重なりませんでした。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
+    ${homeTile('hm-friends',`紹介でつながった人<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの主人公が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m?(m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'人生のどこかで、出会う日が来ます。'):'この人生では、出会う年が重なりませんでした。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
     ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は、一冊の本になってここに並びます。</p>')}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
     ${typeof birthMapHTML==='function'?homeTile('hm-map','生まれた場所',birthMapHTML(P)):''}
@@ -15163,15 +15163,27 @@ function refSecHTML(){
 //  ・紹介でつながった相手（KEY_FRIEND）ごとに、相手の受け箱 ids/{相手のid}/inbox/{myId} に、
 //    自分の「いまの主人公」（s,c,f,ch）と呼び名 by を書く。主人公が変わったら書き直す。
 //  ・自分の受け箱 ids/{myId}/inbox を見張り、届いたら receiveFriend() に渡す。初めての相手なら「つながりました」と知らせる。
+//  ・友だちの友だち：受け箱に書くとき、自分の友だちの呼び名とidも添える（fr）。受け取った側は「〇〇さんの友だち：△△さん」を候補に出し、
+//    「つながる」で相手の ids/{相手}/req/{自分} に申請を書く。相手がOKすると、相手から自分の受け箱に書かれて友だちになる。
+//    申請は共通の友だちがいるときだけ書ける（ルールで確かめる）。紹介リンクには招待の印 iv を入れ、印のない人は受け箱に書けない。
 // 預かるもの：ランダムな記号（myId）・呼び名・主人公の種。本名・メール・位置は預からない。
 // サーバーにつながらないときは何もしない（ゲームはこれまでどおり端末の中だけで動く）。
 // Firebase の「ウェブアプリの設定」（公開してよい値。アナリティクスは使わない）
 const FB_CONFIG={ apiKey:'AIzaSyAIRsa8yqxJAQymZYMShzFxGCjOhidhMTs', authDomain:'lifebook-dcae9.firebaseapp.com', projectId:'lifebook-dcae9', storageBucket:'lifebook-dcae9.firebasestorage.app', messagingSenderId:'707474989249', appId:'1:707474989249:web:d44ee7d10b4a658fd73440' };
 const FB_VER='10.14.1';
-const KEY_MYIDK='hitotsu.myidk', KEY_FBREG='hitotsu.fbreg', KEY_FBPUSH='hitotsu.fbpush';
+const KEY_MYIDK='hitotsu.myidk', KEY_FBREG='hitotsu.fbreg', KEY_FBPUSH='hitotsu.fbpush', KEY_FBIV='hitotsu.fbiv';
+const KEY_FOF='hitotsu.fof', KEY_FOFASK='hitotsu.fofAsk', KEY_FOFNO='hitotsu.fofNo', KEY_REQSEEN='hitotsu.reqSeen';
+let FB_REQS=[];
 let FB=null, _fbBusy=false, _fbAgain=false;
 function fbKey(){ let k=store.get(KEY_MYIDK,''); if(!k){ const a=new Uint8Array(16); (window.crypto||{}).getRandomValues?crypto.getRandomValues(a):a.forEach((_,i)=>a[i]=Math.random()*256|0); k=[...a].map(x=>x.toString(16).padStart(2,'0')).join(''); store.set(KEY_MYIDK,k); } return k; }
 function fbHeroSig(h,by){ return h?[h.s,h.c||'',h.f||'',h.ch||'',by||''].join('|'):''; }
+// 招待の印：合言葉 k から作る（端末を引き継いでも同じになる。k そのものは分からない）
+function fbIv(){ return store.get(KEY_FBIV,''); }
+async function fbMakeIv(){ try{ const k=fbKey(), want=store.get(KEY_FBIV+'.k',''); if(fbIv()&&want===k.slice(0,6)) return fbIv();
+  const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(k+'|lifebook-iv')); const iv=[...new Uint8Array(b)].slice(0,12).map(x=>x.toString(16).padStart(2,'0')).join('');
+  store.set(KEY_FBIV,iv); store.set(KEY_FBIV+'.k',k.slice(0,6)); return iv; }catch(e){ return ''; } }
+function fbFriends(){ return store.get(KEY_FRIEND,[]).filter(f=>f&&f.id); }
+function fbFrList(except){ return fbFriends().filter(f=>f.id!==except).slice(0,20).map(f=>({ i:String(f.id), b:String(f.by||'').slice(0,20) })); }
 async function fbStart(){
   if(!FB_CONFIG||FB||!/^https?:$/.test(location.protocol)) return;
   try{
@@ -15181,26 +15193,32 @@ async function fbStart(){
     if(window.FB_EMU){ U.connectAuthEmulator(auth,'http://127.0.0.1:'+FB_EMU.auth,{ disableWarnings:true }); D.connectFirestoreEmulator(db,'127.0.0.1',FB_EMU.fs); }
     const cred=await U.signInAnonymously(auth);
     FB={ U, D, auth, db, uid:cred.user.uid, seenOnce:false };
-    await fbRegister(); fbListen(); await fbPush();
+    await fbMakeIv(); await fbRegister(); fbListen(); fbListenReq(); await fbPush();
     setInterval(()=>fbPush(),60000);
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden) fbPush(); });
   }catch(e){ FB=null; try{ console.warn('[fbsync] サーバーにつながりませんでした',e&&e.code||e); }catch(_){} }
 }
 // 自分の myId に、この端末のログインを結びつける（1回だけ）
-async function fbRegister(){ const id=myId(), reg=store.get(KEY_FBREG,'');
-  if(reg===id+'|'+FB.uid) return;
-  const { doc, setDoc, arrayUnion }=FB.D;
-  await setDoc(doc(FB.db,'ids',id),{ k:fbKey(), uids:arrayUnion(FB.uid) },{ merge:true });
-  store.set(KEY_FBREG,id+'|'+FB.uid); }
+async function fbRegister(){ const id=myId(), iv=fbIv(), tag=id+'|'+FB.uid+'|'+iv, reg=store.get(KEY_FBREG,'');
+  if(reg===tag) return;
+  const { doc, setDoc, arrayUnion }=FB.D; const data={ k:fbKey(), uids:arrayUnion(FB.uid) }; if(iv) data.iv=iv;
+  await setDoc(doc(FB.db,'ids',id),data,{ merge:true });
+  store.set(KEY_FBREG,tag); }
 // つながっている相手の受け箱に、自分の主人公を書く（変わったときだけ）
 async function fbPush(){ if(!FB) return; if(_fbBusy){ _fbAgain=true; return; } _fbBusy=true;
-  try{ const h=myHero(); if(!h) return; const by=store.get(KEY_ME,'')||'', sig=fbHeroSig(h,by), me=myId();
-    const done=store.get(KEY_FBPUSH,{}); const { doc, setDoc }=FB.D;
-    for(const f of store.get(KEY_FRIEND,[])){ if(!f.id||f.id===me||done[f.id]===sig) continue;
-      try{ await setDoc(doc(FB.db,'ids',String(f.id),'inbox',me),{ from:me, by:String(by).slice(0,20), s:h.s, c:h.c||null, f:h.f||null, ch:h.ch||null, t:Date.now() });
-        done[f.id]=sig; store.set(KEY_FBPUSH,done); if(typeof frReplyDone==='function') try{ frReplyDone(f.id); }catch(_){} }catch(e){ /* 相手がまだサーバーに来ていない等。次の機会にもう一度 */ } }
+  try{ const h=myHero(); if(!h) return; const me=myId();
+    for(const f of fbFriends()){ if(f.id===me) continue; await fbPushOne(f,h); }
     fbSweep();
   }finally{ _fbBusy=false; if(_fbAgain){ _fbAgain=false; setTimeout(fbPush,500); } } }
+// ひとりの相手の受け箱に書く。書けたら true
+async function fbPushOne(f,h){ h=h||myHero(); if(!FB||!h||!f||!f.id) return false; const me=myId(), by=store.get(KEY_ME,'')||'';
+  const fr=fbFrList(f.id), sig=fbHeroSig(h,by)+'#'+fr.map(x=>x.i+':'+x.b).join(','), done=store.get(KEY_FBPUSH,{});
+  if(done[f.id]===sig) return true;
+  const data={ from:me, by:String(by).slice(0,20), s:h.s, c:h.c||null, f:h.f||null, ch:h.ch||null, t:Date.now(), fr };
+  if(f.iv) data.iv=String(f.iv);
+  try{ await FB.D.setDoc(FB.D.doc(FB.db,'ids',String(f.id),'inbox',me),data);
+    const d2=store.get(KEY_FBPUSH,{}); d2[f.id]=sig; store.set(KEY_FBPUSH,d2); if(typeof frReplyDone==='function') try{ frReplyDone(f.id); }catch(_){} return true;
+  }catch(e){ return false; /* 相手がまだサーバーに来ていない等。次の機会にもう一度 */ } }
 // サーバーで届けた相手は「〇〇さんに知らせる」の枠から外す
 function fbSweep(){ if(typeof frReplies!=='function'||typeof frReplyDone!=='function') return; const done=store.get(KEY_FBPUSH,{}); let n=0;
   for(const x of frReplies()) if(done[x.id]){ frReplyDone(x.id); n++; } if(n&&typeof render==='function'&&!document.getElementById('mtOv')) try{ const d=document.getElementById('frDlg'); if(!d||d.hidden) render(); }catch(_){} }
@@ -15210,21 +15228,78 @@ function fbOnline(){ return !!(FB&&FB.uid); }
 function fbListen(){ const { collection, onSnapshot }=FB.D;
   onSnapshot(collection(FB.db,'ids',myId(),'inbox'),snap=>{
     const fresh=[]; let changed=false;
+    const fof=store.get(KEY_FOF,{}); let fofCh=false, asked=store.get(KEY_FOFASK,[]); const accepted=[];
     snap.docChanges().forEach(ch=>{ if(ch.type==='removed') return; const d=ch.doc.data();
       if(typeof d.s!=='number'||!d.from) return;
       const o={ id:String(d.from), by:d.by||'', s:d.s, c:d.c||null, f:d.f||null, ch:d.ch||null, t:d.t||Date.now() };
+      if(Array.isArray(d.fr)){ fof[o.id]={ by:o.by, fr:d.fr.filter(x=>x&&x.i).slice(0,20).map(x=>({ i:String(x.i), b:String(x.b||'').slice(0,20) })) }; fofCh=true; }
       const old=store.get(KEY_FRIEND,[]).find(x=>x.id===o.id);
       if(old&&old.s===o.s&&(old.c||null)===o.c&&(old.by||'')===o.by) return; // 変わりなし
       const r=receiveFriend(o); if(r==='self') return; changed=true;
       if(typeof frReplyDone==='function') try{ frReplyDone(o.id); }catch(_){}
-      if(r==='ok') fresh.push(Object.assign({},o,{ re:1, sv:1 }));
+      if(r==='ok'){ if(asked.includes(o.id)){ accepted.push(o); asked=asked.filter(x=>x!==o.id); store.set(KEY_FOFASK,asked); } else fresh.push(Object.assign({},o,{ re:1, sv:1 })); }
     });
+    if(fofCh){ store.set(KEY_FOF,fof); fbDlgRefresh(); }
     if(!changed) return;
     try{ _fhCache=null; }catch(_){}
     fbPush(); // 新しい相手に、こちらの主人公も届ける
-    if(fresh.length){ const o=fresh[fresh.length-1]; afterFriend(o,'ok'); }
+    if(accepted.length){ const o=accepted[accepted.length-1]; alertFriend(`${o.by||'友だち'}さんが受けてくれました。${o.by||'友だち'}さんと、つながりました！ ふたりの主人公は、人生のどこかで出会います。`); }
+    else if(fresh.length){ const o=fresh[fresh.length-1]; afterFriend(o,'ok'); }
     else { try{ if(typeof load==='function'&&typeof st!=='undefined'&&st) load(); if(typeof render==='function') render(); }catch(_){} }
   },e=>{ try{ console.warn('[fbsync] 受け箱を読めませんでした',e&&e.code||e); }catch(_){} }); }
+// ===== 友だちの友だち =====
+// 届いている申請を見張る
+function fbListenReq(){ const { collection, onSnapshot }=FB.D;
+  onSnapshot(collection(FB.db,'ids',myId(),'req'),snap=>{
+    const fr=new Set(fbFriends().map(f=>f.id)); FB_REQS=[];
+    snap.forEach(d=>{ const x=d.data(); if(!x||!x.from||typeof x.s!=='number') return; if(fr.has(String(x.from))){ fbDelReq(String(x.from)); return; } FB_REQS.push(Object.assign({},x,{ from:String(x.from) })); });
+    const seen=store.get(KEY_REQSEEN,[]), nu=FB_REQS.filter(x=>!seen.includes(x.from+'|'+x.t));
+    if(nu.length){ store.set(KEY_REQSEEN,seen.concat(nu.map(x=>x.from+'|'+x.t)).slice(-100)); const x=nu[nu.length-1];
+      alertFriend(`${x.by||'だれか'}さん（${fbViaName(x.via)}さんの友だち）から、「つながりたい」と届きました。下で「つながる」を押すと、つながります。`); }
+    else fbDlgRefresh();
+  },e=>{ try{ console.warn('[fbsync] 申請を読めませんでした',e&&e.code||e); }catch(_){} }); }
+function fbViaName(id){ const f=fbFriends().find(x=>x.id===id); return (f&&f.by)||'友だち'; }
+async function fbDelReq(from){ try{ await FB.D.deleteDoc(FB.D.doc(FB.db,'ids',myId(),'req',from)); }catch(e){} }
+// 申請の数（ホームのバッジ用）
+function fbFofCount(){ return FB_REQS.length; }
+// 候補：友だちの友だちのうち、まだつながっていない人
+function fbCandidates(){ const me=myId(), fr=fbFriends(), mine=new Set(fr.map(f=>f.id)), no=new Set(store.get(KEY_FOFNO,[])), fof=store.get(KEY_FOF,{}), reqs=new Set(FB_REQS.map(x=>x.from)), out={};
+  for(const f of fr){ const e=fof[f.id]; if(!e) continue; for(const x of e.fr){ if(x.i===me||mine.has(x.i)||no.has(x.i)||reqs.has(x.i)) continue;
+    const c=out[x.i]||(out[x.i]={ id:x.i, by:x.b, via:[] }); if(!c.by&&x.b) c.by=x.b; c.via.push({ id:f.id, by:f.by||'友だち' }); } }
+  return Object.values(out).slice(0,30); }
+// 「つながる」を押した：相手に申請を書く
+async function fbAsk(id){ const c=fbCandidates().find(x=>x.id===id), h=myHero(); if(!FB||!c||!h) return false; const me=myId();
+  for(const v of c.via){ try{ await FB.D.setDoc(FB.D.doc(FB.db,'ids',id,'req',me),{ from:me, by:String(store.get(KEY_ME,'')||'').slice(0,20), via:v.id, s:h.s, c:h.c||null, f:h.f||null, ch:h.ch||null, t:Date.now() });
+    const a=store.get(KEY_FOFASK,[]); if(!a.includes(id)) store.set(KEY_FOFASK,a.concat([id]).slice(-50)); return true; }catch(e){} }
+  return false; }
+// 申請に OK した：相手を友だちに入れて、相手の受け箱に書き、申請を消す
+async function fbAccept(from){ const x=FB_REQS.find(r=>r.from===from); if(!FB||!x) return false;
+  const o={ id:from, by:x.by||'', s:x.s, c:x.c||null, f:x.f||null, ch:x.ch||null, t:x.t||Date.now() };
+  const r=receiveFriend(o); if(r==='self') return false; try{ _fhCache=null; }catch(_){}
+  const ok=await fbPushOne(fbFriends().find(f=>f.id===from)||o); if(ok){ await fbDelReq(from); FB_REQS=FB_REQS.filter(r=>r.from!==from); fbPush(); }
+  return ok; }
+async function fbDecline(from){ const n=store.get(KEY_FOFNO,[]); if(!n.includes(from)) store.set(KEY_FOFNO,n.concat([from]).slice(-200)); await fbDelReq(from); FB_REQS=FB_REQS.filter(r=>r.from!==from); fbDlgRefresh(); }
+// 紹介の窓に足す欄
+function fbFofHTML(){ if(!fbOnline()) return ''; const reqs=FB_REQS, cands=fbCandidates(), asked=store.get(KEY_FOFASK,[]), can=!!myHero(); if(!reqs.length&&!cands.length) return '';
+  let h='<div class="fof">';
+  if(reqs.length) h+=`<h3 class="fof-h">つながりたいと届いています</h3><ul class="fof-l">${reqs.map(x=>`<li><span class="fof-n"><b>${esc(x.by||'だれか')}さん</b><small>${esc(fbViaName(x.via))}さんの友だち</small></span><span class="fof-b"><button type="button" class="fof-ok" data-acc="${esc(x.from)}">つながる</button><button type="button" class="fof-no" data-dec="${esc(x.from)}">今はしない</button></span></li>`).join('')}</ul>`;
+  if(cands.length) h+=`<h3 class="fof-h">友だちの友だち</h3><p class="tiny muted">共通の友だちがいる人だけが出ます。「つながる」を押すと相手に届き、相手がOKするとつながります。</p><ul class="fof-l">${cands.map(c=>{ const v=c.via.map(x=>esc(x.by)+'さん').join('、');
+      return `<li><span class="fof-n"><small>${v}の友だち</small><b>${esc(c.by||'友だち')}さん</b></span><span class="fof-b">${asked.includes(c.id)?'<span class="fof-wait">返事を待っています</span>':`<button type="button" class="fof-ok" data-ask="${esc(c.id)}"${can?'':' disabled'}>つながる</button>`}</span></li>`; }).join('')}</ul>${can?'':'<p class="tiny muted">主人公が生まれると、「つながりたい」を送れます。</p>'}`;
+  h+='<p class="fof-note">つながっても、メッセージのやり取りは出来ません。</p>';
+  return h+'</div>'; }
+function fbDlgRefresh(msg){ const d=document.getElementById('frDlg'); if(!d||d.hidden) return; const m=msg||(($('#frMsg')||{}).textContent||''); try{ openFriend(m); }catch(_){} }
+(function(){ if(!document.getElementById('fofCss')){ const st=document.createElement('style'); st.id='fofCss'; st.textContent=`.fof{margin-top:14px;padding-top:12px;border-top:2px dashed #F6C9D4;text-align:left}.fof-h{font-size:15px;margin:8px 0 6px;color:#C2476B}.fof-l{list-style:none;margin:0;padding:0}.fof-l li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;margin:6px 0;border-radius:14px;background:#FFF1F5}.fof-n{display:flex;flex-direction:column;min-width:0}.fof-n small{font-size:11px;color:#8a6f78}.fof-b{display:flex;gap:6px;flex-shrink:0}.fof-ok{border:0;border-radius:999px;padding:8px 14px;background:#FF7E9A;color:#fff;font-weight:700;cursor:pointer}.fof-ok:disabled{opacity:.5;cursor:default}.fof-no{border:1.5px solid #F2B8C6;border-radius:999px;padding:7px 10px;background:#fff;color:#a35a70;cursor:pointer}.fof-wait{font-size:12px;color:#8a6f78}.fof-note{font-size:12px;color:#8a6f78;background:#FFF8E6;border-radius:12px;padding:8px 10px;margin:10px 0 0}`; document.head.appendChild(st); } })();
+(function(){ const _dh=friendDialogHTML; friendDialogHTML=function(){ const h=_dh.apply(this,arguments); const add=fbFofHTML(); if(!add) return h; const i=h.lastIndexOf('</div>'); return i<0?h+add:h.slice(0,i)+add+h.slice(i); }; })();
+(function(){ const _bf=bindFriend; bindFriend=function(){ const r=_bf.apply(this,arguments); const d=document.getElementById('frDlg'); if(!d||d.hidden) return r;
+  const say=t=>fbDlgRefresh(t);
+  d.querySelectorAll('[data-ask]').forEach(b=>{ b.onclick=async()=>{ b.disabled=true; const c=fbCandidates().find(x=>x.id===b.dataset.ask); const ok=await fbAsk(b.dataset.ask); say(ok?`${(c&&c.by)||'相手'}さんに「つながりたい」を送りました。OKが届いたら、お知らせします。`:'送れませんでした。少したってから、もう一度ためしてください。'); }; });
+  d.querySelectorAll('[data-acc]').forEach(b=>{ b.onclick=async()=>{ b.disabled=true; const x=FB_REQS.find(r=>r.from===b.dataset.acc); const ok=await fbAccept(b.dataset.acc); say(ok?`${(x&&x.by)||'相手'}さんと、つながりました！ ふたりの主人公は、人生のどこかで出会います。`:'うまくつながれませんでした。少したってから、もう一度ためしてください。'); }; });
+  d.querySelectorAll('[data-dec]').forEach(b=>{ b.onclick=()=>fbDecline(b.dataset.dec); });
+  return r; }; })();
+// 紹介リンクに招待の印を入れる
+(function(){ const _fc=friendCode; friendCode=function(){ const c=_fc.apply(this,arguments); const iv=fbIv(); if(!c||!iv) return c;
+  try{ const o=JSON.parse(b64d(c.replace('LIFEFRIEND1.',''))); o.iv=iv; return 'LIFEFRIEND1.'+b64e(JSON.stringify(o)); }catch(e){ return c; } }; })();
+fbMakeIv();
 // 紹介を受け取ったら（リンク・コード・どちらでも）、すぐ相手に届ける
 (function(){ const _af=afterFriend; afterFriend=function(o,r){ const x=_af(o,r); setTimeout(()=>fbPush(),400); return x; }; })();
 (function(){ const _rf=receiveFriend; receiveFriend=function(o){ const r=_rf(o); if(r!=='self') setTimeout(()=>fbPush(),50); return r; }; })();
