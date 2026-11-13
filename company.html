@@ -44,7 +44,15 @@ img{max-width:100%; display:block}
 .top{position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line)}
 .top .wrap{display:flex; align-items:center; justify-content:space-between; gap:12px; padding-block:10px}
 .mark{display:flex; align-items:center; gap:8px; font-weight:900; letter-spacing:.12em; font-size:16px; color:var(--ink); text-decoration:none; white-space:nowrap}
-.mark i{width:18px; height:18px; border-radius:5px; background:var(--grass); box-shadow:0 3px 0 var(--grass-edge); display:inline-block; margin-bottom:3px}
+.mark-isle{width:40px; height:46px; flex:none; display:block; margin:-4px 0 -2px; animation:float 5s ease-in-out infinite}
+.mark-isle .pp,.mark-isle .pet{animation:none}
+.mark-txt{display:grid; gap:3px; justify-items:start; line-height:1}
+.mark-tiles{display:flex; gap:2px; font-size:12px; font-family:"Varela Round",var(--round); font-weight:900; letter-spacing:0}
+.mark-tiles .lt{display:grid; place-items:center; width:1.6em; height:1.7em; border-radius:.38em; color:#fff; background:var(--c); box-shadow:inset 0 -3px 0 rgba(0,0,0,.12), 0 3px 0 var(--e)}
+.mark-tiles .gap{width:.3em}
+.mark-txt small{font-size:10px; margin-top:2px}
+@media (min-width:600px){ .mark-txt{display:flex; align-items:center; gap:10px} .mark-tiles{font-size:15px; gap:3px} .mark-txt small{font-size:11px; margin:0} }
+@media (max-width:400px){ .top .btn.small{font-size:12px; padding:7px 12px 6px 10px; letter-spacing:.06em} .mark-isle{width:38px} }
 .mark small{font-size:11px; letter-spacing:.06em; color:var(--muted); font-weight:500}
 
 /* ボタン：ゲームの「生まれる」とおそろいのピンク×ハート */
@@ -255,12 +263,19 @@ footer .wrap{padding-block:20px 28px; display:flex; flex-wrap:wrap; gap:8px 18px
 @keyframes sunglow{0%,100%{scale:1; opacity:.25} 50%{scale:1.25; opacity:.45}}
 .scene > g[transform="translate(0 18)"]{animation:islefloat 6s ease-in-out infinite}
 @keyframes islefloat{0%,100%{translate:0 0} 50%{translate:0 -4px}}
-.pp{animation:hop 2.6s ease-in-out infinite}
-.pp:nth-of-type(2n){animation-delay:-.9s; animation-duration:3.1s}
-.pp:nth-of-type(3n){animation-delay:-1.7s; animation-duration:2.2s}
-@keyframes hop{0%,62%,100%{translate:0 0} 70%{translate:0 -3px} 78%{translate:0 0} 84%{translate:0 -1.5px} 90%{translate:0 0}}
-.pet{animation:pethop 1.8s ease-in-out infinite}
-@keyframes pethop{0%,50%,100%{translate:0 0} 58%{translate:1px -2.5px} 66%{translate:2px 0} 80%{translate:1px 0}}
+.pp{animation:walk 7s ease-in-out infinite}
+.pp:nth-of-type(2n){animation-delay:-2.3s; animation-duration:8.5s; animation-direction:reverse}
+.pp:nth-of-type(3n){animation-delay:-4.1s; animation-duration:6.2s}
+/* 島の上を、斜めの道にそって行ったり来たり。歩くたびに小さく弾む */
+@keyframes walk{
+  0%{translate:0 0} 6%{translate:1.0px -1.2px} 12%{translate:2.1px 1.0px} 18%{translate:3.1px 0.6px} 24%{translate:4.2px 2.1px}
+  30%{translate:5.2px 1.6px} 36%{translate:6.3px 3.1px} 44%{translate:6.3px 3.1px}
+  50%{translate:5.2px 1.6px} 56%{translate:4.2px 2.1px} 62%{translate:3.1px 0.6px} 68%{translate:2.1px 1.0px} 74%{translate:1.0px -1.2px} 80%{translate:0 0}
+  86%{translate:0 -3px} 92%{translate:0 0} 100%{translate:0 0}}
+.pet{animation:petwalk 4.5s ease-in-out infinite}
+@keyframes petwalk{
+  0%,100%{translate:0 0} 10%{translate:-2px -2px} 20%{translate:-4px 2px} 30%{translate:-6px -1px} 40%{translate:-8px 4px} 50%{translate:-8px 4px}
+  60%{translate:-6px -1px} 70%{translate:-4px 2px} 80%{translate:-2px -2px} 90%{translate:0 0}}
 .shelf > g > g:nth-child(n+7):nth-child(-n+17){transform-box:fill-box; transform-origin:50% 100%; animation:bookwig 5s ease-in-out infinite}
 .shelf > g > g:nth-child(2n){animation-delay:-1.3s}
 .shelf > g > g:nth-child(3n){animation-delay:-2.6s; animation-duration:6.5s}
@@ -276,7 +291,7 @@ footer .wrap{padding-block:20px 28px; display:flex; flex-wrap:wrap; gap:8px 18px
 }
 @media (max-width:420px){ .fact span{font-size:11px} .btn{font-size:17px; padding:14px 26px 12px 22px} }
 @media (prefers-reduced-motion:reduce){
-  .island svg,.cloud,.bob,.bob2,.wn-txt b.pop,.orb,.drift,.isle svg,.pair .heart,.scene > g,.scene > rect,.pp,.pet,.shelf > g > g,.wn-ico svg,.title .lt,.btn .hrt,.note,.sun{animation:none}
+  .island svg,.cloud,.bob,.bob2,.wn-txt b.pop,.orb,.drift,.isle svg,.pair .heart,.scene > g,.scene > rect,.pp,.pet,.shelf > g > g,.wn-ico svg,.title .lt,.btn .hrt,.mark-isle,.note,.sun{animation:none}
   .worlds{overflow-x:auto}
   html{scroll-behavior:auto}
   .btn,.toc li a,.hero-meet{transition:none}
