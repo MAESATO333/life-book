@@ -11903,12 +11903,12 @@ function eaName(id){ try{ return (COUNTRIES.find(c=>c.id===id)||{}).name||id; }c
 // ホームの小さな欄
 function eaTileHTML(P){ const got=eaCollected(); const id=P&&P.countryId; const L=EA_LM[id]; const tod=(typeof localTod==='function'&&localTod(P))||'day';
   return `<div class="ea-tile">${L?`<figure class="ea-card ea-big"><div class="ea-art">${eaCardSVG(id,{tod})}</div><figcaption><b>${esc(L[0])}</b>（${esc(eaName(id))}）<span>${esc(L[3]||'')}</span></figcaption></figure>`:''}
-    <p class="ea-count">集めた絵はがき <b>${got.length}</b> / ${Object.keys(EA_LM).length} か国</p>
+    <p class="ea-count">集めた絵はがき <b>${got.length}</b> 枚</p>
     <button type="button" class="ea-open" id="eaOpen">地球アルバムをひらく</button></div>`; }
 function eaAlbumHTML(){ const got=new Set(eaCollected()); const ids=Object.keys(EA_LM);
   const cards=ids.filter(id=>got.has(id)).map(id=>{ const L=EA_LM[id]; return `<figure class="ea-card"><div class="ea-art">${eaCardSVG(id)}</div><figcaption><b>${esc(L[0])}</b><small>${esc(eaName(id))}</small></figcaption></figure>`; }).join('');
   const rest=ids.length-got.size;
-  return `<div class="ea-grid">${cards}</div><p class="tiny muted">まだの国が ${rest} か国あります。新しい人生がその国に生まれると、その国の絵はがきが1枚ふえます。</p>`; }
+  return `<div class="ea-grid">${cards}</div><p class="tiny muted">新しい人生が、まだ絵はがきのない国に生まれると、その国の絵はがきが1枚ふえます。</p>`; }
 function eaOpenDialog(){ if(document.getElementById('eaOv')) return; const d=document.createElement('div'); d.id='eaOv'; d.className='mt-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','地球アルバム');
   d.innerHTML=`<div class="mt-card ea-dlg"><h2>地球アルバム</h2><p class="tiny muted">これまでの人生が生まれた国の名所を、ブロックの絵はがきにして集めています。</p>${eaAlbumHTML()}<div class="mt-btns"><button type="button" class="mt-close" id="eaX">とじる</button></div></div>`;
   document.body.appendChild(d); const close=()=>d.remove(); d.querySelector('#eaX').onclick=close; d.addEventListener('click',e=>{ if(e.target===d) close(); }); }
@@ -14414,7 +14414,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${typeof relChartHTML==='function'?homeTile('hm-rel',`${esc(P.country.name)}の宗教の割合`,relChartHTML(P)):''}
     ${typeof newsHTML==='function'?homeTile('hm-news',`その年のニュース<span class="hm-n">物語の中の${sy}年</span>`,newsHTML(P,sy)):''}
     ${homeTile('hm-world',`世界のいま<span class="hm-n">物語の中の${sy}年</span>`, `<p class="tiny muted">${esc(P.given)}が生きているこの年、ほかの国では。</p><div class="hm-wl">${wn.map(w=>`<div class="hm-w"><b>${esc(w.name)}</b><span>平均寿命 ${w.lex}歳</span><span>一人の女性が産む子 ${w.tfr}人</span>${w.urb!=='—'?`<span>都市に住む人 ${w.urb}%</span>`:''}${w.cell>0.5?`<span>携帯電話 100人に${Math.round(w.cell)}台</span>`:''}</div>`).join('')}</div>`, '<span class="tiny muted">出典：世界銀行・国連の統計。毎日、別の国に変わります。</span>')}
-    ${homeTile('hm-zukan','図鑑', `<div class="hm-zk">${zk.map(z=>`<div class="hm-z"><span class="tiny muted">${esc(z[0])}</span><b>${z[1]}<small>${z[3]}</small></b>${z[2]?`<span class="hm-zbar"><i style="width:${Math.max(2,Math.round(z[1]/z[2]*100))}%"></i></span><span class="tiny muted">全${z[2]}${z[3]}のうち</span>`:''}</div>`).join('')}</div>`)}
+    ${homeTile('hm-zukan','図鑑', `<div class="hm-zk">${zk.map(z=>`<div class="hm-z"><span class="tiny muted">${esc(z[0])}</span><b>${z[1]}<small>${z[3]}</small></b></div>`).join('')}</div>`)}
   </div>
   <section class="hm-move"><div><h3>携帯とパソコンで、同じ人生を</h3><p class="tiny">この端末の人生と本棚を、もう一方の端末に引き継げます。QRコードを読みとるだけです。</p></div><button class="hm-btn ghost" type="button" id="hmMove">ほかの端末で続ける</button></section>
   <section class="hm-loans">${loanShelfHTML()}</section>
