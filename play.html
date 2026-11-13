@@ -11502,13 +11502,24 @@ function d2Get(k,d){ try{ return store.get(k,d); }catch(e){ return d; } } functi
 function d2Me(P,age){ return age<13?(P.gender==='女性'?'わたし':'ぼく'):(P.gender==='女性'?'わたし':age<20?'ぼく':'わたし'); }
 // --- 1. 今日のひとこと手紙（その日にひらいた人だけが読める） ---
 function letterToday(P,L,age){ const k=dayKey(); const me=d2Me(P,age);
-  if(age<4) return { body:`（${P.given}はまだ字が書けないので、心の声をそのまま届けます）\n${hitokoto(P,L,age)}`, sign:P.given };
+  // 年齢に合わせた言葉：赤ちゃんはひとこと、そこから少しずつ言葉が増える
+  const mo=new Date().getMonth()+1, cold=mo===12||mo<=2, hot=mo>=6&&mo<=8;
+  if(age<1){ const w=['あったかい…','おなか、すいた','ねむたい…','まぶしい','だっこ…','ふわふわ','くすぐったい','いい におい','あーう','すやすや'].concat(cold?['さむい…','さむい…']:[],hot?['あつい…','あつい…']:[]);
+    return { body:`（まだ言葉は話せないので、心の声をそのまま届けます）\n${dPick(w,P.seed,k,'b0')}`, sign:P.given }; }
+  if(age<2){ const w=['ママ、だっこ','パパ、いた','わんわん！','まんま、ちょうだい','ねんね、いや','おそと、いく','ないない','あった！','もっと、もっと','ばいばい'].concat(cold?['ちゃむい']:[],hot?['あちゅい']:[]);
+    return { body:`（まだ字が書けないので、心の声をそのまま届けます）\n${dPick(w,P.seed,k,'b1')}`, sign:P.given }; }
+  if(age<3){ const w=['ごはん、おいしかった','おそと、いきたい','くつ、じぶんで はく','ねんね、まだ いや','ママ、いっしょ','ころんだ。いたかった','おみず、つめたい','とり、とんでた','ジュース、もっと ちょうだい','だんご、つくった'].concat(cold?['さむいね。てぶくろ、した']:[],hot?['あついね。おみず、のむ']:[]);
+    return { body:`（まだ字が書けないので、心の声をそのまま届けます）\n${dPick(w,P.seed,k,'b2')}`, sign:P.given }; }
+  if(age<4){ const w=['きょう、こうえんで あそんだよ','どろだんご、ぴかぴかに なった','ころんだけど、なかなかった','おほしさま、きれいだった','おともだちと、なかよく したよ','あした、なにして あそぶ？','ぼく、もう おにいさん？','おやつ、はんぶんこ したよ'].map(x=>P.gender==='女性'?x.replace('ぼく、もう おにいさん？','わたし、もう おねえさん？'):x).concat(cold?['ゆき、ふるかな']:[],hot?['せみ、ないてたよ']:[]);
+    return { body:`（${P.given}が、おしゃべりで話してくれたこと）\n${dPick(w,P.seed,k,'b3')}`, sign:P.given }; }
+  if(age<7){ const w=['きょうね、おにごっこ したよ。いっぱい はしった。','えを かいたよ。じょうずって いわれた。','ないちゃった。でも、もう へいき。','すきな たべもの、ふえたよ。','おともだちと けんか した。でも、ごめんねって いえた。','じが すこし かけるように なったよ。','あしたも、あそぼうね。'].concat(cold?['さむいけど、そとで あそんだ。']:[],hot?['あつくて、みずあそび したよ。']:[]);
+    return { body:dPick(w,P.seed,k,'b4'), sign:P.given }; }
   const ev=[]; L.years.filter(y=>y.age<=age&&y.age>=age-1).forEach(y=>y.events.forEach(e=>{ if(e.kind!=='death'&&e.kind!=='birth'&&e.text&&!/亡くな|死|葬/.test(e.text)) ev.push(e); }));
   let body; if(ev.length){ const e=dPick(ev,P.seed,k,'lt'); let t=(e.text.split('。')[0]+'。').replace(/^\d+歳。/,'');
     t=t.split(P.given+'は、').join(me+'は、').split(P.given+'は').join(me+'は').split(P.given+'が').join(me+'が').split(P.given+'の').join(me+'の').split(P.given+'に').join(me+'に').split(P.given+'を').join(me+'を').split(P.given).join(me);
     const open=dPick(['ねえ、聞いて。','元気？　こっちは、まあまあ元気だよ。','きょうのこと、だれかに話したくて。','ひさしぶりに、手紙を書くね。'],P.seed,k,'op');
     const close=e.inner?`そのとき思ったこと。「${e.inner}」`:dPick(['それだけ。またね。','あした、また書くね。','読んでくれて、ありがとう。','なんでもない日だけど、残しておきたかった。'],P.seed,k,'cl');
-    body=`${open}\n${t}\n${close}`; }
+    body=age<10?`${t}\n${dPick(['またね。','きょうは、それだけ。','あしたも かくね。'],P.seed,k,'cl2')}`:`${open}\n${t}\n${close}`; }
   else body=hitokoto(P,L,age);
   return { body, sign:P.given }; }
 function letterHTML(P,L,age){ const k=dayKey(); const got=d2Get(KEY_LETTER,[]); const last=got[got.length-1];
