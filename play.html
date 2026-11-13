@@ -506,6 +506,35 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
   box-shadow:inset 0 -3px 0 rgba(0,0,0,.12), 0 3px 0 color-mix(in srgb,var(--c) 72%,#000); text-shadow:0 1px 0 rgba(0,0,0,.12); }
 .lb-gap{ width:7px; }
 @media (max-width:640px){ .lb-t{ width:21px; height:22px; font-size:13px; border-radius:5px; } .lb-word{ gap:2px; } .lb-gap{ width:5px; } }
+.ea-card{ margin:0; background:#fff; border-radius:12px; padding:6px 6px 8px; box-shadow:0 3px 0 rgba(0,0,0,.08), 0 6px 14px rgba(0,0,0,.06); }
+.ea-card .ea-art svg{ width:100%; height:auto; display:block; border-radius:8px; }
+.ea-card figcaption{ font-size:.82em; line-height:1.5; padding:6px 4px 0; } .ea-card figcaption small{ display:block; color:var(--muted); } .ea-card figcaption span{ display:block; color:var(--muted); font-size:.95em; }
+.ea-big{ transform:rotate(-1.2deg); max-width:420px; } .ea-count{ margin:.8em 0 .5em; } .ea-count b{ font-size:1.3em; color:#E0577B; }
+.ea-open{ border:0; border-radius:999px; padding:9px 18px; background:#5BA7DD; color:#fff; font-weight:700; box-shadow:0 4px 0 #3E80B5; cursor:pointer; font-family:inherit; }
+.ea-dlg{ max-width:760px; width:calc(100vw - 32px); max-height:86vh; overflow:auto; } .ea-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin:12px 0; }
+.hm-daily{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin:14px 0; }
+.lt-letter{ background:#FFFDF6; border:1px solid #F0E3C4; border-radius:10px; padding:14px 16px; background-image:repeating-linear-gradient(transparent 0 27px,#F3E9D2 27px 28px); line-height:28px; }
+.lt-letter p{ margin:0; } .lt-to{ color:#B07A55; font-size:.9em; } .lt-sign{ text-align:right; color:#B07A55; }
+.nd-art svg{ width:100%; height:auto; display:block; border-radius:10px; } .nd-t{ margin:.6em 0 0; } .nd-time{ display:inline-block; background:#EEF4FB; border-radius:999px; padding:1px 9px; margin-right:6px; font-size:.85em; }
+.tz-t{ font-size:1.15em; font-weight:700; color:#6E57C8; margin:.2em 0; }
+.vt-q{ margin:.2em 0 .6em; } .vt-btns{ display:flex; gap:8px; flex-wrap:wrap; } .vt-b{ flex:1 1 120px; border:2px solid #9B87E8; background:#fff; color:#4E3FA0; border-radius:12px; padding:10px; font-weight:700; cursor:pointer; font-family:inherit; }
+.vt-b.on{ background:#9B87E8; color:#fff; } .vt-b:disabled:not(.on){ opacity:.5; cursor:default; } .vt-prev{ background:#F3F0FF; border-radius:8px; padding:8px 10px; font-size:.92em; }
+.gf-card svg{ width:100%; height:auto; display:block; border-radius:12px; } .gf-card p{ margin:.5em 0 0; }
+.gs-lead{ margin:0 0 .3em; color:var(--muted); } .gs-list{ margin:0; padding-left:1.2em; } .gs-list li{ margin:.2em 0; font-weight:600; }
+.gf-shelf{ display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; } .gf-card.small{ margin:0; } .gf-card.small figcaption{ font-size:.8em; padding-top:4px; } .gf-card.small figcaption small{ display:block; color:var(--muted); }
+.nw-list{ list-style:none; margin:0; padding:0; } .nw-list li{ padding:7px 0; border-bottom:1px dashed var(--line,#ddd); line-height:1.6; } .nw-tag{ display:inline-block; font-size:.75em; background:#EEF4FB; color:#3E68B0; border-radius:999px; padding:1px 8px; margin-right:6px; } .nw-tag.nw-mine{ background:#FFE9EF; color:#C2456A; }
+.wl-item{border:1px solid var(--line,#e3dccf);border-radius:12px;margin:10px 0;background:var(--card,#fff)}
+.wl-item summary{cursor:pointer;padding:12px 14px;line-height:1.6}
+.wl-body{padding:0 14px 14px}
+.wl-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.wl-pair{grid-template-columns:1fr}}
+.wl-side{border-radius:10px;padding:10px 12px}
+.wl-mine{background:rgba(110,184,74,.12);border-left:4px solid #6DB84A}
+.wl-alt{background:rgba(155,127,217,.12);border-left:4px solid #9B7FD9}
+.wl-h{margin:0 0 6px;line-height:1.5}.wl-num{margin:4px 0}
+.wl-learn{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(242,182,48,.12)}
+.wl-more{margin-top:8px}.wl-more summary{cursor:pointer;color:#7a62c4;padding:6px 0}
+.wl-h2{font-weight:700;margin:0 0 4px}
 </style>
 
 <div class="wrap">
@@ -3762,6 +3791,208 @@ NB_COUNTRY.ng=[['ha',.32],['yo',.25],['ig',.22]]; NB_COUNTRY.gh=[['ak',1]]; NB_C
 NB_COUNTRY.za=[['zu',.7],['af',.2],['en_gb',.1]]; NB_COUNTRY.ao=[['pt_ao',1]]; NB_COUNTRY.mz=[['pt_mz',1]]; ['st','cv','gw'].forEach(id=>NB_COUNTRY[id]=[['pt',1]]); NB_COUNTRY.mg=[['mg',1]];
 NB_COUNTRY.ht=[['ht',1]]; NB_COUNTRY.tj=[['tg_tj',1]]; NB_COUNTRY.kg=[['ky',.75],['ru',.1]]; NB_COUNTRY.tm=[['tk',1]]; NB_COUNTRY.al=[['sq',1]]; NB_COUNTRY.ee=[['et',.7],['ru',.25]]; NB_COUNTRY.mt=[['mt',1]];
 NB_COUNTRY.mu=[['hi',.5],['fr',.35]]; NB_COUNTRY.sc=[['fr',1]]; NB_COUNTRY.km=[['ar',1]];
+// ===== 名前の意味を、できるかぎり説明する =====
+// 1) その言語の名前表にある意味 2) 漢字は一字ずつの意味（漢字そのものの意味。名づけた人の思いまでは断定しない）
+// 3) ヨーロッパ・中東・南アジアなどで広く使われる名前は、元になった言葉の意味（諸説ある名前は「〜とされる」）
+const KANJI_MEAN={ 伟:'偉い・立派な',偉:'偉い・立派な',强:'強い',強:'強い',磊:'石が積み重なる・心が大きくさっぱりした',军:'軍・力強い',涛:'大きな波',明:'明るい・かしこい',杰:'すぐれた人',傑:'すぐれた人',浩:'広く大きい',斌:'文武をかねそなえた',
+ 勇:'勇ましい',建:'たてる・きずく',国:'国',國:'国',志:'こころざし',晓:'夜明け・さとる',曉:'夜明け・さとる',东:'東',海:'海',子:'子・人',轩:'高く上がる・のき',軒:'高く上がる・のき',然:'そのとおり・自然な',宇:'大空・宇宙',俊:'すぐれた・かしこい',
+ 鹏:'伝説の大きな鳥',鑫:'金が多い・豊か',波:'波',刚:'かたく強い',剛:'かたく強い',平:'おだやか・たいら',辉:'かがやく',輝:'かがやく',华:'はなやか・中国',華:'はなやか・中国',文:'文・学問',博:'広く知っている',一:'ひとつ・はじめ',鸣:'鳴る・ひびく',鳴:'鳴る・ひびく',
+ 天:'天・空',静:'しずか',丽:'うるわしい',麗:'うるわしい',敏:'さとい・すばやい',燕:'つばめ',芳:'かおりがよい',娜:'しなやかで美しい',秀:'ひいでる',英:'すぐれた・花',桂:'かつら（香りのよい木）',玉:'たま・宝石',兰:'蘭の花',蘭:'蘭の花',婷:'しとやかで美しい',
+ 雪:'雪',欣:'よろこぶ',怡:'たのしい・なごやか',梓:'あずさの木',涵:'ひたす・心が広い',诗:'詩',詩:'詩',雨:'雨',桐:'きりの木',红:'赤い',紅:'赤い',霞:'かすみ・朝焼け',萍:'うき草',佳:'よい・美しい',倩:'美しい',颖:'穂先・すぐれた',穎:'穂先・すぐれた',慧:'かしこい',
+ 丹:'赤・まごころ',琳:'美しい玉',淑:'しとやか',珍:'めずらしい・大切な',思:'思う',妍:'美しい',家:'家',豪:'すぐれて強い',宏:'広く大きい',承:'受けつぐ',恩:'恩・めぐみ',冠:'かんむり・いちばん',宗:'おおもと',翰:'筆・文章',柏:'かしわ・ひのきの仲間',
+ 翔:'空を高くとぶ',雄:'おす・勇ましい',金:'金',龙:'竜',龍:'竜',信:'まこと・信じる',彥:'すぐれた男子',彦:'すぐれた男子',廷:'朝廷・役所',品:'品・人がら',睿:'深くかしこい',振:'ふるいおこす',芬:'よいかおり',美:'美しい',玲:'玉の鳴る美しい音',
+ 雅:'みやびやか',君:'君・きみ',宜:'よろしい・ふさわしい',蓁:'草木がしげる',惠:'めぐみ',恵:'めぐみ',雯:'あやのある雲',妤:'美しい',心:'心',筱:'細い竹',郁:'かおりが高い',嘉:'よい・めでたい',永:'ながい・とこしえ',健:'すこやか',卓:'すぐれた',
+ 賢:'かしこい',贤:'かしこい',樂:'たのしい',乐:'たのしい',邦:'国',業:'わざ・仕事',业:'わざ・仕事',佑:'たすける',詠:'うたう',琪:'美しい玉',儀:'作法・のり',凱:'勝ちどき',彤:'赤い',寶:'宝',宝:'宝',蓮:'はす',芷:'よろいぐさ（香草）',晴:'晴れ',悅:'よろこぶ',悦:'よろこぶ',
+ 太:'太い・大きい',大:'大きい',輔:'たすける',拓:'ひらく',也:'〜である（名前の止め字）',誠:'まこと',二:'ふたつ・二番目',直:'まっすぐ',樹:'木',亮:'あきらか',和:'なごやか',隆:'さかん・高い',悠:'はるか・ゆったり',斗:'ひしゃく・北斗星',修:'おさめる・学ぶ',
+ 咲:'花が咲く',由:'よりどころ',陽:'太陽・ひなた',彩:'いろどり',真:'まこと',千:'千・たくさん',尋:'たずねる',香:'かおり',織:'おる',智:'ちえ',奈:'からなし（名前の万葉がな）',理:'ことわり・すじみち',
+ 翼:'つばさ',蓮:'はす',陸:'陸・大地',結:'むすぶ',葵:'あおい',凛:'りりしい',花:'花',愛:'愛',美:'美しい',優:'やさしい・すぐれた',菜:'菜の花',希:'のぞみ',健:'すこやか',一:'ひとつ・はじめ',郎:'男子',子:'子',恵:'めぐみ',裕:'ゆたか',幸:'しあわせ',
+ 正:'ただしい',博:'広く知る',明:'明るい',清:'きよい',春:'春',秋:'秋',夏:'夏',冬:'冬',光:'ひかり',月:'月',星:'星',空:'空',風:'風',山:'山',川:'川',林:'林',森:'森',
+ 王:'王',李:'すもも',张:'はる・ひろげる',張:'はる・ひろげる',刘:'まさかり（古代の武器）',劉:'まさかり（古代の武器）',陈:'ならべる・古い国の名',陳:'ならべる・古い国の名',杨:'やなぎ',楊:'やなぎ',黄:'黄色',黃:'黄色',赵:'古い国の名',趙:'古い国の名',吴:'古い国の名',吳:'古い国の名',周:'めぐる・古い王朝',
+ 徐:'ゆっくり',孙:'まご',孫:'まご',马:'馬',馬:'馬',朱:'朱色',胡:'えびす・ひげ',郭:'城のそとがわ',何:'なに',高:'高い',罗:'あみ',羅:'あみ',郑:'古い国の名',鄭:'古い国の名',梁:'はし・はり',谢:'感謝する',謝:'感謝する',
+ 宋:'古い王朝の名',唐:'古い王朝の名',许:'ゆるす',許:'ゆるす',邓:'古い国の名',鄧:'古い国の名',冯:'馬が速く走る',馮:'馬が速く走る',韩:'古い国の名',韓:'古い国の名',曹:'役所・仲間',曾:'かつて',彭:'古い国の名',萧:'よもぎ',蕭:'よもぎ',蔡:'大きな亀・古い国の名',潘:'米のとぎ汁',
+ 田:'田んぼ',董:'ただす',袁:'衣が長いさま',于:'〜に',余:'あまり・われ',叶:'かなう',葉:'葉',蒋:'まこも（草）',蔣:'まこも（草）',杜:'やまなし',苏:'よみがえる',蘇:'よみがえる',魏:'高い',程:'ほど・道のり',吕:'背骨・古い国の名',呂:'背骨・古い国の名',丁:'若者・働き手',沈:'しずむ',
+ 任:'まかせる',姚:'美しい',卢:'黒い',盧:'黒い',傅:'教えさとす',钟:'鐘',鍾:'あつまる',姜:'しょうが',崔:'高く大きい',谭:'深い話',譚:'深い話',廖:'空しい・古い国の名',范:'のり・手本',汪:'水が深く広い',陆:'陸',金:'金',石:'石',戴:'いただく',贾:'あきなう',賈:'あきなう',韦:'なめし革',韋:'なめし革',夏:'夏',邱:'丘',方:'方角・四角',侯:'諸侯',邹:'古い国の名',鄒:'古い国の名',熊:'くま',孟:'はじめ・長男',秦:'古い王朝の名',白:'白',江:'大きな川',闫:'村の門',閻:'村の門',薛:'よもぎの一種',尹:'治める',段:'だん',雷:'かみなり',黎:'多くの・夜明け',史:'歴史',龚:'うやうやしい',龔:'うやうやしい',陶:'焼き物',毛:'毛',郝:'古い地名',顾:'かえりみる',顧:'かえりみる',邵:'古い地名',覃:'深い',洪:'大水',
+ 佐:'たすける',藤:'ふじ',鈴:'すず',木:'木',渡:'わたる',辺:'あたり',伊:'かれ・これ',小:'小さい',中:'なか',村:'村',加:'くわえる',吉:'めでたい',井:'井戸',上:'上',松:'松',本:'もと',野:'野原',斎:'ものいみ',清:'きよい',水:'水',池:'池',橋:'橋',阿:'くま・そば',部:'まとまり',谷:'谷',長:'ながい',岡:'おか',後:'うしろ',近:'ちかい',坂:'坂',遠:'とおい',青:'青',西:'西',原:'はら',竹:'竹',内:'うち',福:'しあわせ',島:'島',前:'まえ',藤:'ふじ',宮:'宮',崎:'みさき',
+ 阮:'古い楽器の名・古い国名' };
+function kanjiMeaning(name){ const cs=[...name].filter(ch=>/[㐀-鿿]/.test(ch)); if(!cs.length) return null; const parts=cs.map(ch=>KANJI_MEAN[ch]?`「${ch}」は${KANJI_MEAN[ch]}`:null).filter(Boolean);
+  if(!parts.length) return null; return parts.join('、')+(parts.length<cs.length?'（ほかの字は調べ中）':''); }
+// 元になった言葉が同じ名前の仲間（つづりや読みが国ごとに変わる）
+const ETYM=[
+ ['アラビア語で「慈悲深い神のしもべ」','عبد الرحمن','Abdirahman','Abdurrahman','Abdul Rahman','アブドゥルラフマーン','アブドゥッラフマーン'],
+ ['ゲルマン語のふるい言葉で「働く」とされる','Ida','イーダ','イダ'],
+ ['聖書に出てくるレアの名前で、意味は諸説あるとされる','Lea','Leah','Léa','レア','リア'],
+ ['シェイクスピアの劇『ヴェニスの商人』で広まった名前','Jessica','ジェシカ'],
+ ['古代ローマの家の名前セルギウスから生まれた名前','Sergio','Sergey','Sergei','Сергей','Сергій','Serge','セルヒオ','セルゲイ','セルジオ','セルジュ'],
+ ['スペイン語で「悲しみ」。「悲しみの聖母（マリア）」から生まれた名前','Dolores','ドロレス'],
+ ['イギリスの伝説のアーサー王の名前で、「熊」の意味とする説がある','Arturo','Arthur','Artur','Артур','アルトゥーロ','アーサー','アルトゥール'],
+ ['アイルランドの伝説の英雄の名前で、「鹿を愛する人」とされる','Óscar','Oscar','Oskar','オスカル','オスカー'],
+ ['ギリシャ神話のトロイの英雄ヘクトルの名前で、「守る人」','Heitor','Hector','Héctor','エイトル','ヘクター','エクトル'],
+ ['ギリシャの古い町の名前','Larissa','Larisa','Лариса','ラリッサ','ラリサ'],
+ ['ケルトの言葉で「岩」または「美しい」とされる','Alain','Alan','Allan','アラン'],
+ ['スペイン語で「ロザリオ（お祈りに使う数珠）」','Rosario','ロサリオ'],
+ ['ペルシャ語で「ジャスミンの花」','Jasmine','Yasmin','Yasmina','Yasemin','ياسمين','ジャスミン','ヤスミン','ヤセミン'],
+ ['英語で「王女・お姫さま」','Princess','プリンセス'],
+ ['古代ローマの家の名前ファビウス（「豆」の意味とされる）から','Fabiola','Fabio','Fabian','Fabienne','ファビオラ','ファビオ','ファビアン'],
+ ['ゲルマン語のふるい言葉で「豊かさ」とされる','Aude','Odile','Ottilie','Odette','オード','オディール','オティーリエ','オデット'],
+ ['ペルシャ語・テュルク系の言葉の「グル（花）」をふくむ名前','Гүлмира','Gulmira','Gülmira','グルミラ'],
+ ['ゲルマン語のふるい言葉で「旅」「勇敢な」などを組み合わせた名前とされる','Fernando','Fernanda','Ferdinand','Fernão','フェルナンド','フェルナンダ','フェルディナント'],
+ ['ラテン語で「貴族の生まれ」','Patricia','Patrick','Patrício','Pádraig','パトリシア','パトリック'],
+ ['ギリシャ語で「人々を守る者」（アレクサンダーの女性形）','Alejandra','Alexandra','Alessandra','Aleksandra','Александра','アレハンドラ','アレクサンドラ'],
+ ['ギリシャ語で「尊敬される人」','Sebastián','Sebastian','Sebastião','Sébastien','セバスティアン','セバスチャン'],
+ ['ローマ神話の月と狩りの女神の名前','Diana','Diane','ディアナ','ダイアナ','ディアーヌ'],
+ ['ローマ神話の戦いの神マルスから生まれた名前','Martín','Martin','Martina','Martino','Marcin','Мартин','マルティン','マルティナ','マーティン','マルタン','マルチン'],
+ ['ラテン語の「光」から生まれた名前','Luciana','Luciano','Lucien','ルシアナ','ルチアーノ'],
+ ['マリアと、アンナを合わせた名前とされる','Mariana','Marianne','Marianna','マリアナ','マリアンヌ'],
+ ['ラテン語で「フランク人の・自由な人」','Francisco','Francisca','Francesco','François','Françoise','Franz','Frantz','Frank','Franciszek','František','フランシスコ','フランシスカ','フランチェスコ','フランソワ','フランツ','フランク'],
+ ['ラテン語で「アドリア海の町ハドリアの人」','Adrian','Adriana','Adrián','Adriano','Adrien','エイドリアン','アドリアナ','アドリアン','アドリアーノ'],
+ ['ゲルマン語のふるい言葉で「名声で治める人」','Rodrigo','Roderick','Rui','Ruy','ロドリゴ','ルイ'],
+ ['古代ローマの名家ユリウス家から生まれた名前','Juliana','Julia','Julian','Julián','Julie','Giulia','Julien','Юлия','Юлія','Julio','ユリアナ','ジュリアナ','ユリア','ジュリア','フリアン','ジュリー','ジュリアン','フリオ'],
+ ['ヤコブ（ヘブライ語で「かかとをつかむ者」）のポルトガル語の形','Thiago','Tiago','Iago','チアゴ','ティアゴ'],
+ ['スウェーデン王の名前から広まった名前で、「ゴート人の杖」の意味とされる','Gustavo','Gustav','Gustave','グスタボ','グスタフ','ギュスターヴ'],
+ ['古代ローマの家の名前アントニウスから。意味ははっきりしないとされる','Anthony','Antonio','Antoine','Anton','António','Antônio','Antoni','Антон','アンソニー','アントニオ','アントワーヌ','アントン','アントニ'],
+ ['ギリシャ語で「真珠」から生まれた名前（マーガレットの仲間）','Megan','Margaret','Margarita','Marguerite','Małgorzata','Margit','Маргарита','メーガン','マーガレット','マルガリータ','マルグリット','マウゴジャタ'],
+ ['ギリシャ語で「キリストを運ぶ人」','Christopher','Cristóbal','Christophe','Kristof','Krzysztof','クリストファー','クリストバル','クリストフ','クシシュトフ'],
+ ['アイルランド語で「小さな王」とされる','Ryan','ライアン'],
+ ['ギリシャ神話の大地の女神デメテルから生まれた名前','Dmitry','Dmitri','Dimitri','Dimitar','Дмитрий','Дмитро','Димитър','Δημήτρης','ドミトリー','ドミトロ','ディミトリ','ディミタル','ディミトリス'],
+ ['ペルシャの王ダレイオス（「よいものを持つ人」とされる）から生まれた名前','Daria','Darya','Дарья','Дарія','ダリア','ダリヤ','ダーリヤ'],
+ ['ラテン語で「生まれた日（クリスマス）」','Natalia','Natalie','Nathalie','Наталья','Наталія','Natália','ナタリア','ナタリー','ナターリヤ','ナタリヤ'],
+ ['アラビア語で「強い・しっかりした」とされ、預言者ムハンマドのおじの名前','Hamza','Hamzah','حمزہ','حمزة','ハムザ'],
+ ['クルアーン（コーラン）に出てくる、聖母マリアの父の名前','Imran','Imron','عمران','イムラン'],
+ ['イスラム教の3代目のカリフ（指導者）の名前','Usman','Osman','Othman','Ousmane','Usmon','عثمان','ウスマン','オスマン','ウスマーン'],
+ ['預言者ムハンマドの娘の名前で、「香りのよい木」の意味とされる','Zainab','Zeynep','Zaynab','Zenabu','زينب','زینب','ザイナブ','ゼイネプ'],
+ ['ヘブライ語で「わが神は主」（預言者エリヤの名前）','Elias','Elijah','Ilyas','Ilia','Илья','إلياس','الیاس','エリアス','イリヤ','イルヤース','イリアス'],
+ ['ペルシャ語で「宝を守る人」とされる（東方の三博士のひとりの名前）','Kacper','Kaspar','Caspar','Gaspard','カツペル','カスパー','ガスパール'],
+ ['ラテン語で「主の日（日曜日）」','Domingos','Domingo','Dominic','Dominique','Dominik','ドミンゴス','ドミンゴ','ドミニク'],
+ ['ケルトの言葉で「高い・力のある」とされる','Brigitte','Bridget','Brigid','Birgitta','Brigida','ブリジット','ビルギッタ'],
+ ['古代ローマの家の名前クラウディウスから生まれた名前','Claudine','Claude','Claudia','Claudio','Klaudia','クロディーヌ','クロード','クラウディア','クラウディオ'],
+ ['アラビア文字の最初の字「アリフ」から。すらりとした姿を表すとされる','Elif','エリフ'],
+ ['メッカにある丘の名前','Merve','Marwa','مروة','メルヴェ','マルワ'],
+ ['アラビア語で「夜の旅」','Esra','Isra','إسراء','エスラ','イスラー'],
+ ['アラビア語の「サイイダ（女性の主人）」から生まれた、女性への敬いをこめた名前','Siti','シティ'],
+ ['ジャワ語で「騎士・戦士」とされる','Bambang','バンバン'],
+ ['8月（アウグストゥス）から生まれた名前で、「尊い」の意味','Agus','Agustus','Augusto','Augustin','Agustín','August','アグス','アウグスト','オーギュスタン','アグスティン'],
+ ['ガーナのアカン語で「火曜日に生まれた男の子」','Kwabena','Kobina','クワベナ'],
+ ['ガーナのアカン語で「月曜日に生まれた男の子」','Kojo','Kwadwo','コジョ','クワドォ'],
+ ['ガーナのアカン語で「日曜日に生まれた女の子」','Akosua','アコスア'],
+ ['ガーナのアカン語で「月曜日に生まれた女の子」','Adjoa','Adwoa','アジョア','アドジョア'],
+ ['ガーナのアカン語で「金曜日に生まれた男の子」','Kofi','Koffi','コフィ'],
+ ['ガーナのアカン語で「土曜日に生まれた男の子」','Kwame','Kwamé','クワメ'],
+ ['ペルシャの叙事詩『王書（シャー・ナーメ）』の英雄の名前','Rustam','Rostam','Rüstem','Рустам','ルスタム','ロスタム'],
+ ['サンスクリット語で「穏やかな」とされる','आरव','Aarav','アーラヴ','アーラブ'],
+ ['インドの叙事詩『ラーマーヤナ』の王女シーターの名前で、「畑のうね」の意味','सीता','Sita','シーター','シータ'],
+ ['サンスクリット語で「赤い」','रोहित','Rohit','ロヒト','ロヒット'],
+ ['ブッダ（お釈迦さま）の息子ラーフラの名前から','राहुल','Rahul','ラーフル','ラフル'],
+ ['サンスクリット語で「よく導かれた」','सुनीता','Sunita','スニータ','スニタ'],
+ ['アラビア語で「〜のしもべ」。神の名前と組み合わせて使う','আবদুল','Abdul','عبد','アブドゥル','アブドゥル'],
+ ['サンスクリット語で「よい心」','সুমন','Suman','スマン'],
+ ['サンスクリット語で「限りない」','অমিত','Amit','アミト','アミット'],
+ ['ヒンドゥー教のヴィシュヌ神の呼び名で、「幸運の女神の住まい」','శ్రీనివాస్','Srinivas','スリニヴァス','シュリニヴァース'],
+ ['インドの物語で、クリシュナ神が愛した女性の名前','రాధ','राधा','Radha','ラーダ','ラーダー'],
+ ['サンスクリット語で「神々の王」','సురేష్','सुरेश','Suresh','スレーシュ','スレシュ'],
+ ['南インドのヴェンカテーシュワラ神の名前から','వెంకట్','Venkat','ヴェンカト','ヴェンカット'],
+ ['インドの星の名前（うしかい座のアークトゥルス）','స్వాతి','Swati','スワーティ','スワティ'],
+ ['トルコ語・アゼルバイジャン語で「日のあたる場所」','Günay','ギュナイ'],
+ ['ウルドゥー語などで「ヘンナ（手や髪を染める植物）」','حنا','Hina'],
+ ['アラビア語で「呼びかける人」とされる','نادیہ','نادية','Nadia','ナディア'],
+ ['ヘブライ語で「神は恵み深い」','John','Jean','Juan','João','Giovanni','Johannes','Johan','Jan','Ján','Ivan','Иван','Іван','Ioan','Ion','Sean','Seán','Eoin','Jon','Jón','Hans','ジョン','ジャン','フアン','ジョアン','ヨハン','ヤン','イワン','イヴァン','ハンス','ショーン','ヨハネス','Yohanes','ዮሐንስ','ዮሃንስ','יוחנן','يوحنا','ユーハンナー'],
+ ['ヘブライ語で「神は恵み深い」の女性形','Jane','Joanna','Jeanne','Juana','Joana','Johanna','Joan','Hanna','Hannah','Anna','Ana','Anne','Ann','Annie','アンナ','アナ','アン','アンヌ','ハンナ','ジェーン','ジョーン','ジャンヌ','Анна','Ганна','Αννα','חנה','ハナ'],
+ ['ヘブライ語の名前で、意味は「海のしずく」「望まれた子」など諸説あるとされる','Mary','Maria','María','Marie','Mária','Marija','Мария','Марія','Марија','Мария','Μαρία','Maryam','Mariam','Miriam','Meryem','مريم','مریم','مریم','マリア','マリー','メアリー','マルヤム','マリアム','ミリアム','メルイェム'],
+ ['ヘブライ語で「神に似た者はだれか」','Michael','Michel','Miguel','Michele','Mikael','Mikkel','Michał','Mihai','Mikhail','Михаил','Mikko','ミカエル','マイケル','ミシェル','ミゲル','ミハイル','ミハウ','ミハイ','ミハリス','Μιχάλης','ሚካኤል'],
+ ['ヘブライ語で「愛されし者」','David','Davide','Dawit','Dávid','Davit','Dawud','Daud','Daudi','Դավիթ','დავით','ዳዊት','דוד','デイヴィッド','デビッド','ダヴィド','ダビド','ダウィット','ダヴィト','ダウディ','ダーヴィト'],
+ ['ヘブライ語で「神はわが裁き手」','Daniel','Daniele','Dániel','Danyal','Даниил','ダニエル'],
+ ['ヘブライ語で「神は加えてくださる」','Joseph','José','Josef','Josip','Jozef','Giuseppe','Yusuf','Yousef','Youssef','Yusupov','Ýusup','يوسف','יוסף','ヨセフ','ジョセフ','ジョゼフ','ホセ','ジョゼ','ユースフ','ユスフ','ヨーゼフ','ジュゼッペ','ヨシプ','ヨゼフ'],
+ ['ギリシャ語で「岩・石」','Peter','Pierre','Pedro','Pietro','Piotr','Petr','Peter','Pieter','Per','Petar','Петър','Пётр','Петар','Boutros','بطرس','ピーター','ピエール','ペドロ','ピョートル','ペトル','ペテル','ピーテル','ペール','ペタル','ブトロス','ペーター'],
+ ['ギリシャ語で「男らしい・勇敢な」','Andrew','André','Andrés','Andrea','Andreas','Andrei','Andrey','Андрей','Андрій','Andrzej','Ondřej','Andres','Andry','アンドルー','アンドレ','アンドレス','アンドレア','アンドレアス','アンドレイ','アンジェイ','アンドリー','オンドジェイ'],
+ ['ギリシャ語で「人々を守る者」','Alexander','Alexandre','Alejandro','Alessandro','Alexandru','Aleksandar','Александр','Олександр','Александар','Αλέξανδρος','Iskandar','アレクサンドル','アレクサンダー','アレハンドロ','アレッサンドロ','アレクサンダル','アレクサンドロス','オレクサンドル','イスカンダル','アレクサンドレ','ალექსანდრე'],
+ ['ギリシャ語で「知恵」','Sophia','Sofia','Sophie','Sofía','Zofia','Софья','Софія','Σοφία','ソフィア','ソフィー','ゾフィー','ゾフィア','ソフィヤ'],
+ ['ギリシャ語で「清らかな」とされる','Catherine','Katherine','Katharina','Caterina','Catarina','Katarzyna','Kateřina','Ekaterina','Екатерина','Катерина','Αικατερίνη','Katarina','Kaarina','Karin','Katie','Kate','Katrín','キャサリン','カタリーナ','カタリナ','カタジナ','カテジナ','エカテリーナ','カテリーナ','エカテリニ','カーリナ','カーリン','ケイティ','ケイト'],
+ ['ギリシャ語で「農夫・土を耕す人」','George','Georg','Georges','Jorge','Giorgio','Jürgen','Jerzy','Jiří','Juraj','Gheorghe','Georgi','Георги','Юрий','Юрій','Γιώργος','Giorgi','გიორგი','جورج','Jorge','ジョージ','ゲオルク','ジョルジュ','ホルヘ','ジョルジョ','ユルゲン','イジー','ゲオルゲ','ゲオルギ','ユーリー','ヨルゴス','ギオルギ','ジョルジ'],
+ ['ギリシャ語で「民の勝利」','Nicholas','Nicolas','Nicolás','Nicola','Nikola','Nikolai','Николай','Микола','Никола','Νίκος','Nikolaus','Klaus','Niels','Nils','ニコラス','ニコラ','ニコライ','ミコラ','ニコス','クラウス','ニールス','ニルス'],
+ ['ギリシャ語で「冠」','Stephen','Stefan','Stéphane','Esteban','Stefano','Štefan','Stjepan','István','Стефан','ステファン','シュテファン','ステファノ','イシュトヴァーン','スティエパン'],
+ ['ラテン語で「小さい・つつましい」','Paul','Paulo','Pablo','Paolo','Paweł','Pavel','Pavol','Павел','Пол','ポール','パウロ','パブロ','パオロ','パヴェウ','パヴェル','パーヴェル','パウル'],
+ ['ヘブライ語で「神の贈りもの」','Matthew','Mateo','Mateus','Matteo','Mathieu','Matthias','Mateusz','Matej','Matěj','Mattias','マシュー','マテオ','マテウス','マッテオ','マチュー','マテウシュ','マテイ'],
+ ['ギリシャ語で「ルカニア地方の人」とされる','Luke','Lucas','Luca','Lukas','Lukáš','Łukasz','Luka','ルーク','ルーカス','ルカ','リュカ','ルカーシュ','ウカシュ'],
+ ['ラテン語で「光」','Lucy','Lucia','Lucie','Lucía','Lucija','ルーシー','ルシア','ルツィエ','ルツィア','ルツィヤ'],
+ ['ヘブライ語で「神は誓い」','Elizabeth','Elisabeth','Isabel','Isabelle','Isabella','Elżbieta','Erzsébet','Elsa','Eliška','エリザベス','エリーザベト','イザベル','イサベル','イザベラ','エルジェーベト','エルサ','エリシュカ','Liezl','リーズル','Liza','リザ'],
+ ['ヘブライ語で「いのち」','Eve','Eva','Ewa','Hawa','Hawwa','Hauwa','حواء','イヴ','エヴァ','エバ','ハワ','ハウワ'],
+ ['ヘブライ語で「王女」','Sarah','Sara','Sára','Sarai','サラ','サーラ','サーラー','שרה','سارة','سارا'],
+ ['アラビア語で「ほめたたえられる者」。イスラム教の預言者の名前','Muhammad','Mohammed','Mohamed','Mohammad','Mehmet','Muhammed','Maxamed','محمد','মোহাম্মদ','मोहम्मद','ムハンマド','モハメド','モハンマド','メフメト','マハメド','モハマド','メハメド','መሐመድ','መሓመድ','Мухаммад','Муҳаммад','Məhəmməd','マハンマド'],
+ ['アラビア語で「最もほめられる者」','Ahmad','Ahmed','Ahmet','Axmed','أحمد','احمد','アフマド','アハメド','アフメト','アーメド','አህመድ','Ахмед'],
+ ['アラビア語で「高い・気高い」','Ali','Əli','Cali','علي','علی','アリ','アリー'],
+ ['アラビア語で「よい・美しい」','Hasan','Hassan','Xasan','Hassani','حسن','ハサン','ハッサン','ハッサニ'],
+ ['アラビア語で「小さなよい人（ハサンの小さな形）」','Husayn','Hussein','Hüseyin','Hüseyn','Hossein','حسين','حسین','フセイン','フサイン','ホセイン','ヒュセイン'],
+ ['アラビア語で「長生きする・栄える」とされる','Umar','Omar','Ömer','Cumar','عمر','ウマル','オマル','オメル'],
+ ['アラビア語で「生きる・元気な」','Aisha','Aïssatou','Aissatou','アイサトゥ','Ayşe','Aisyah','Aishath','Caasha','Asha','عائشة','عائشہ','アーイシャ','アイシャ','アイシェ','アエシャ','アーシャ','アシャ'],
+ ['アラビア語の名前で、預言者ムハンマドの娘の名前。「乳ばなれした子」の意味とされる','Fatima','Fatma','Fatimah','Fatuma','Fatoumata','Fatmata','Faadumo','فاطمة','فاطمه','فاطمہ','ファーティマ','ファティマ','ファトマ','ファトゥマ','ファトゥマタ','ファーテメ','ファードゥモ','ファテマ','ፋጡማ','ፋጥማ'],
+ ['アラビア語で「信頼できる・心やすらかな」','Amina','آمنہ','Aminata','Aminah','Amine','Emine','Aminath','آمنة','アミナ','アーミナ','アミナタ','エミネ'],
+ ['アラビア語の名前で、預言者ムハンマドの最初の妻の名前','Khadija','Hatice','Kadiatou','Kadiatu','Hadiza','خديجة','ハディージャ','ハティジェ','カディアトゥ','ハディザ'],
+ ['ヘブライ語・アラビア語で、預言者アブラハムの名前。「多くの民の父」とされる','Ibrahim','Abraham','İbrahim','إبراهيم','אברהם','イブラヒム','イブラーヒーム','アブラハム','アヴラハム'],
+ ['アラビア語で「神のしもべ」','Abdullah','Abdulla','Abdullahi','Abdoulaye','عبد الله','عبدالله','アブドゥッラー','アブドゥラヒ','アブドゥライ','アブドゥッラ'],
+ ['アラビア語で「選ばれた者」','Mustafa','Moustapha','مصطفى','ムスタファ','ムスタファー'],
+ ['アラビア語で「光」','Nur','Noor','Nour','نور','ヌール','ヌル'],
+ ['ペルシャ語で「夜」とされ、アラビアの古い恋物語の主人公の名前','Leila','Leyla','Layla','Lejla','Laila','ليلى','لیلا','レイラ','ライラ','レイラー'],
+ ['ヘブライ語で「神は救い」','Joshua','Josué','ジョシュア'],
+ ['ヘブライ語で「神は救い」の別の形','Jesus','Jesús','ヘスス'],
+ ['ラテン語で「神は我らと共に」（ヘブライ語のインマヌエルから）','Emmanuel','Manuel','Immanuel','Emanuele','エマニュエル','マヌエル','アマヌエル'],
+ ['ドイツ語のふるい言葉で「強い意志で守る人」','William','Wilhelm','Guillaume','Guillermo','Willem','Vilém','ウィリアム','ヴィルヘルム','ギヨーム','ギジェルモ','ウィレム','ヴィリアム'],
+ ['ドイツ語のふるい言葉で「輝く名声」','Robert','Roberto','Rupert','ロバート','ロベルト','ロベール'],
+ ['ドイツ語のふるい言葉で「自由な人」','Charles','Carlos','Carlo','Karl','Karel','Károly','Carl','チャールズ','カルロス','カルロ','カール','カレル','シャルル'],
+ ['ドイツ語のふるい言葉で「名高い戦士」','Louis','Luis','Luigi','Ludwig','Lewis','ルイ','ルイス','ルイージ','ルートヴィヒ'],
+ ['ラテン語で「オリーブの木」','Oliver','Olivier','Olivia','Oliwia','オリバー','オリヴィエ','オリヴィア','オリヴァー'],
+ ['ヘブライ語で「恵み」から生まれた名前（アンナ）の仲間','Anita','Annette','Anouk','アニタ','アネット','アヌーク'],
+ ['ラテン語で「恵み」','Grace','Grâce','Graça','グレース','グラース','グラッサ'],
+ ['ラテン語で「月桂樹（勝利のしるし）」','Laura','Lauren','Laurent','Lorenzo','Lawrence','Laurențiu','ラウラ','ローレン','ローラン','ロレンツォ'],
+ ['ヘブライ語で「神は癒やす」','Raphael','Rafael','Raphaël','Raffaele','ラファエル','ハファエル'],
+ ['ヘブライ語で「神は力」','Gabriel','Gabriele','Gabriela','Gabriella','Gabrielle','ガブリエル','ガブリエラ'],
+ ['ヘブライ語で「神は与える」とされる','Nathan','Nathaniel','ネイサン'],
+ ['ヘブライ語で「笑う」','Isaac','Isak','Itzhak','Ishaq','アイザック'],
+ ['ヘブライ語で「かかとをつかむ者」','Jacob','Jakob','Jakub','Jacques','Diego','Santiago','Yakub','ジェイコブ','ヤーコブ','ヤクブ','ジャック','ディエゴ','サンティアゴ'],
+ ['ヘブライ語の名前で、意味は「引き出された」とされる','Moses','Moshe','Musa','Moussa','موسى','モーゼス','モシェ','ムサ'],
+ ['ヘブライ語で「神は高められる」とされる','Jeremiah','Jérémie','Jeremy','ジェレミー'],
+ ['ヘブライ語で「父の喜び」','Abigail','アビゲイル','אביגיל'],
+ ['ヘブライ語で「雌羊」','Rachel','Raquel','Rahel','ラケル','ラヘル','レイチェル','ラシェル'],
+ ['ペルシャ語で「星」','Esther','Ester','Estera','エステル','エスター','アステル','ኣስቴር'],
+ ['ラテン語で「祝福された人」','Benedict','Benoît','Benedetto','Bénédicte','ベネディクト','ブノワ'],
+ ['ギリシャ語で「よみがえり」','Anastasia','Анастасия','Αναστασία','アナスタシア'],
+ ['ギリシャ語で「光・たいまつ」とされる','Helen','Helena','Elena','Hélène','Ελένη','Олена','Елена','Jelena','Елена','Ilona','ヘレン','ヘレナ','エレナ','エレーナ','オレーナ','エレニ','イェレナ','イロナ','ヘレン','ሄለን','エレネ','ელენე'],
+ ['ギリシャ語で「平和」','Irene','Irina','Ирина','Ірина','Eirene','アイリーン','イリーナ','イリナ'],
+ ['ラテン語で「勝利」','Victoria','Viktor','Victor','Víctor','Vittorio','ヴィクトリア','ヴィクトル','ビクトル'],
+ ['ラテン語で「幸運な・しあわせな」','Felix','Félix','Felice','フェリックス'],
+ ['ローマ神話の戦いの神マルスから生まれた名前とされる','Marcus','Mark','Marco','Marc','Marek','Marko','Marcos','Markus','マーク','マルコ','マルク','マレク','マルコス','マルクス'],
+ ['北欧の古い言葉で「神の助言で治める人」とされる','Ronald','ロナルド'],
+ ['ラテン語で「バラ」','Rose','Rosa','Rosie','Róisín','ローズ','ロサ','ローザ','ロシーン'],
+ ['サンスクリット語で「いとしい・愛する人」','Priya','प्रिया','பிரியா','プリヤー','プリヤ'],
+ ['サンスクリット語で「豊かさと幸運の女神」','Lakshmi','लक्ष्मी','லக்ஷ்மி','లక్ష్మి','ラクシュミー','ラクシュミ'],
+ ['サンスクリット語で「勝利」','Vijay','विजय','விஜய்','ヴィジャイ'],
+ ['サンスクリット語で「輝く・白い」','Arjun','अर्जुन','アルジュン'],
+ ['サンスクリット語で「太陽」','Aditya','Ravi','आदित्य','రవి','アーディティヤ','ラヴィ'],
+ ['サンスクリット語の名前で、インドの叙事詩「ラーマーヤナ」の王子ラーマの名前。「楽しませる人」とされる','Ram','Rama','राम','ラーム','ラーマ'] ];
+const ETYM_MAP=(()=>{ const m={}; for(const g of ETYM) for(const v of g.slice(1)) m[v]=g[0]; return m; })();
+function etymMeaning(name){ if(!name) return null; if(ETYM_MAP[name]) return ETYM_MAP[name]; const b=name.split(/[ ・\-]/)[0]; return ETYM_MAP[b]||null; }
+const LANG_JA={ en_gb:'英語',en_us:'英語',en_au:'英語',en_ie:'アイルランド',en_car:'カリブの英語',fr:'フランス語',fr_be:'フランス語',de:'ドイツ語',de_ch:'ドイツ語',de_at:'ドイツ語',it:'イタリア語',es:'スペイン語',es_mx:'スペイン語',es_la:'スペイン語',pt:'ポルトガル語',pt_br:'ポルトガル語',nl:'オランダ語',pl:'ポーランド語',cs:'チェコ語',sk:'スロバキア語',hu:'ハンガリー語',ro:'ルーマニア語',ru:'ロシア語',uk:'ウクライナ語',bg:'ブルガリア語',sr:'セルビア語',mk:'マケドニア語',hr:'クロアチア語',bs:'ボスニア語',sl:'スロベニア語',sv:'スウェーデン語',no:'ノルウェー語',da:'デンマーク語',fi:'フィンランド語',is:'アイスランド語',el:'ギリシャ語',tr:'トルコ語',ka:'ジョージア語',hy:'アルメニア語',az:'アゼルバイジャン語',uz:'ウズベク語',kk:'カザフ語',ar:'アラビア語',he:'ヘブライ語',fa:'ペルシャ語',fa_af:'ダリー語・パシュトー語',ur:'ウルドゥー語',hi:'ヒンディー語',bn:'ベンガル語',ta:'タミル語',te:'テルグ語',ne:'ネパール語',si:'シンハラ語',am:'アムハラ語',om:'オロモ語',ti:'ティグリニャ語',so:'ソマリ語',sw_tz:'スワヒリ語',fr_cd:'コンゴのフランス語',ko:'韓国語',ko_kp:'朝鮮語',zh_cn:'中国語',zh_tw:'中国語（台湾）',zh_hk:'広東語',vi:'ベトナム語',th:'タイ語',km:'クメール語',lo:'ラオ語',my:'ビルマ語',mn:'モンゴル語',id:'インドネシア語',fil:'フィリピン',ms:'マレー語',ha:'ハウサ語',yo:'ヨルバ語',ig:'イボ語',ak:'アカン語',en_ke:'ケニア',en_ug:'ウガンダ',rw:'ルワンダ語',ss:'南スーダン',zu:'ズールー語',af:'アフリカーンス語',pt_ao:'ポルトガル語',pt_mz:'ポルトガル語',mg:'マダガスカル語',ht:'ハイチ',tg_tj:'タジク語',ky:'キルギス語',tk:'トルクメン語',sq:'アルバニア語',et:'エストニア語',mt:'マルタ' };
+// 全部の言語の意味表から探す（同じつづりの名前）
+// カタカナで書かれた名前（古い人生など）を、元のつづりにつなぐ
+let KANA_NATIVE=null; function kanaNative(k){ if(!KANA_NATIVE){ KANA_NATIVE={}; for(const lg in NB){ const B=NB[lg]; for(const part of ['male','female','family']) for(const e of (B[part]||[])){ if(e[1]&&e[0]&&!(e[1] in KANA_NATIVE)) KANA_NATIVE[e[1]]=e[0]; } } }
+  return KANA_NATIVE[k]||null; }
+function nbAnyMean(name){ for(const k in NB_MEAN){ const m=NB_MEAN[k][name]; if(m) return m; } return null; }
+function nmSentence(nm,m){ m=String(m).replace(/。$/,'');
+  if(/とされる$/.test(m)) return `「${nm}」は、${m.replace(/とされる$/,'とされています')}。`;
+  if(/説がある$/.test(m)) return `「${nm}」は、${m.replace(/説がある$/,'説があります')}。`;
+  if(/。/.test(m)) return `「${nm}」は、${m}名前です。`;
+  if(/から$/.test(m)) return `「${nm}」は、${m}生まれた名前です。`;
+  if(/(名前|形|仲間)/.test(m)) return `「${nm}」は、${m}です。`; return `「${nm}」は、${m}という意味の名前です。`; }
+function nameMeaningFull(P,name,isFam){ if(!name) return null; const C=P.country||{};
+  let m=(C.lang&&NB_MEAN[C.lang]&&NB_MEAN[C.lang][name])||(C.id==='jp'&&typeof JP_NAME_MEAN!=='undefined'&&JP_NAME_MEAN[name])||null;
+  let et=etymMeaning(name); if(!m&&!et) m=nbAnyMean(name);
+  if(!m&&!et&&/^[\u30A0-\u30FF・]+$/.test(name)){ const nv=kanaNative(name)||kanaNative(name.split('・')[0]); if(nv){ et=etymMeaning(nv); if(!et) m=nbAnyMean(nv); } } const kj=kanjiMeaning(name); const out=[];
+  const main=et||m; if(main){ let t=nmSentence(name,main); if(isFam) t=t.replace(/という意味の名前です。$/,'という意味の姓です。'); out.push(t); }
+  if(kj&&([...name].length>1||!main)) out.push(`漢字の一字ずつの意味は、${kj}。`); return out.length?out:null; }
+function nbMeaningHTML(P){ if(!P||!P.given) return ''; const e=typeof esc==='function'?esc:(x=>String(x)); const C=P.country||{}; const lg=LANG_JA[C.lang]||'';
+  const ms=nameMeaningFull(P,P.given); const fm=P.family&&P.family!==P.given?nameMeaningFull(P,P.family,1):null; let h='';
+  if(ms) h+=`<div class="nm-mean">${e(ms.join(' '))}</div>`;
+  else h+=`<div class="nm-mean muted">「${e(P.given)}」は、${lg?e(lg)+'で':''}使われている名前です。言葉としての意味は、確かな資料ではまだ見つかっていません。</div>`;
+  if(fm) h+=`<div class="nm-mean muted">姓について：${e(fm.join(' '))}</div>`;
+  return h; }
 // ===== 新しく加えた国の、学校の長い休みと習い事（生まれる人の多い国から） =====
 // 学年暦は各国の教育省の公開している暦のおおよそ（例：韓国は夏と冬の「放学」、イランは新年ノウルーズの休み、タイは3〜5月の長い休み）。
 // season：0春 1夏 2秋 3冬（南半球の国は画面の表示で季節名が入れかわる）
@@ -9623,7 +9854,7 @@ function eto(year,m,d){ const y=(m<2||(m===2&&d<4))?year-1:year; const si=((y-4)
 
 // --- 人生のシミュレーション ---
 // choice: undefined=選択の前まで / 'A' / 'B' / 'none'
-function simulate(P, choice){
+function simulate(P, choice, FORCE){
   const rA=new Rng(P.seed*7+13), rB=new Rng(P.seed*13+7);
   let r=rA;
   const C=P.country;
@@ -9655,6 +9886,7 @@ function simulate(P, choice){
     const lean=lr.chance(.45+.35*ls+(S.h<35?.1:0))?fear:brave;
     let hp=.5+(age<13?.15:0)+(age>=62?.05:0)-.2*ls+(S.h>65?.1:S.h<35?-.1:0); hp=Math.round(clamp(hp,.2,.8)*20)/20;
     Object.assign(info,{ lean, leanLabel:info[lean], other:lean==='A'?'B':'A', otherLabel:info[lean==='A'?'B':'A'], hearP:hp, inspLeft:L.inspMax-L.inspUsed, inspMax:L.inspMax });
+    if(FORCE&&FORCE[info.k]){ if(L.inspUsed<L.inspMax&&picks[pickI]!==undefined){ info.pi=pickI; pickI++; } info.sent=false; info.forced=true; return FORCE[info.k]; }
     if(L.inspUsed>=L.inspMax){ info.sent=false; return lean; }
     const c=picks[pickI]; if(c===undefined) return undefined; info.pi=pickI; pickI++;
     if(c!=='I'&&c!=='F'){ info.sent=false; return lean; }
@@ -9919,7 +10151,7 @@ function simulate(P, choice){
       const est=S.estrangedParent(); const anyP=est||(mother.alive?mother:father); const cx={ 親: anyP?anyP.label:'親', 恋人: partner?partner.name:'恋人' };
       const info={ id:tpl.id, age, prompt:fmt(tpl.prompt,cx), A:fmt(tpl.A.label,cx), B:fmt(tpl.B.label,cx), Again:fmt(tpl.A.gain,cx), Alose:fmt(tpl.A.lose,cx), Bgain:fmt(tpl.B.gain,cx), Blose:fmt(tpl.B.lose,cx), linked, linkedText: linked?S.beliefs[linked].text:null };
       info.big=true; info.k=chosenK; info.stage='一生に一度の選択';
-      const pk=legacy?choice:decide(info,tpl,linked,age,add);
+      let pk=legacy?choice:decide(info,tpl,linked,age,add); if(FORCE&&FORCE[info.k]&&legacy) pk=FORCE[info.k];
       if(pk===undefined){ L.pending=info; pendingNow=true; }
       else {
         const choice_=pk; const opt=pk==='none'?null:tpl[pk];
@@ -9959,7 +10191,7 @@ function simulate(P, choice){
         const cx={ 親:pp?pp.label:'親', 級友:S.choiceMate||(S.choiceMate=(()=>{ const nm=cr.pick(fpool(cr.chance(.5)?'男性':'女性')); used.add(nm[0]); return nm[0]; })()), 子:o.kid?o.kid.name:'子ども', 兄弟:o.sib?`${o.sib.label}の${o.sib.name}`:'きょうだい',
           昔の人:o.est?o.est.label:(o.exPartner?`かつての${o.exPartner.label||'恋人'}の${o.exPartner.name}`:'昔の友だち') };
         const info={ id:tpl.id, age, big:false, k:chosenK, stage:stg.name, prompt:fmt(tpl.prompt,cx), A:fmt(tpl.A.label,cx), B:fmt(tpl.B.label,cx), Again:fmt(tpl.A.gain,cx), Alose:fmt(tpl.A.lose,cx), Bgain:fmt(tpl.B.gain,cx), Blose:fmt(tpl.B.lose,cx), linked, linkedText:linked?S.beliefs[linked].text:null };
-        const pk=legacy?(cr.chance(.5)?'A':'B'):decide(info,tpl,linked,age,add);
+        let pk=legacy?(cr.chance(.5)?'A':'B'):decide(info,tpl,linked,age,add); if(FORCE&&FORCE[info.k]&&legacy) pk=FORCE[info.k];
         if(pk===undefined){ L.pending=info; pendingNow=true; }
         else {
           const opt=pk==='none'?null:tpl[pk];
@@ -11251,6 +11483,160 @@ function relChartHTML(P){ const d=PEW2020[P.countryId]; if(!d) return '<p class=
   return `<div class="rel-bar" role="img" aria-label="${esc(P.country.name)}の宗教の割合。${items.map(x=>PEW_LABEL[x.i][0]+x.v+'%').join('、')}">${bar}</div>
   <ul class="rel-leg">${items.map(x=>`<li${x.i===mine?' class="me"':''}><span style="background:${PEW_LABEL[x.i][1]}"></span>${PEW_LABEL[x.i][0]}<b>${x.v}%</b>${x.i===mine?'<em>家の信仰</em>':''}</li>`).join('')}</ul>
   <p class="tiny muted">2020年の推計。出典：Pew Research Center（2025）</p>`; }
+// ===== 毎日ひらきたくなる仕掛け：ひとこと手紙・今なにしてる？・明日の予告・一票・季節の贈り物・成長のしるし =====
+// どれも表示だけ。人生の流れ（乱数）は変えない。
+const KEY_LETTER='hitotsu.letters', KEY_VOTE='hitotsu.votes', KEY_GIFT='hitotsu.gifts', KEY_SNAP='hitotsu.snap';
+function d2Get(k,d){ try{ return store.get(k,d); }catch(e){ return d; } } function d2Set(k,v){ try{ store.set(k,v); }catch(e){} }
+function d2Me(P,age){ return age<13?(P.gender==='女性'?'わたし':'ぼく'):(P.gender==='女性'?'わたし':age<20?'ぼく':'わたし'); }
+// --- 1. 今日のひとこと手紙（その日にひらいた人だけが読める） ---
+function letterToday(P,L,age){ const k=dayKey(); const me=d2Me(P,age);
+  if(age<4) return { body:`（${P.given}はまだ字が書けないので、心の声をそのまま届けます）\n${hitokoto(P,L,age)}`, sign:P.given };
+  const ev=[]; L.years.filter(y=>y.age<=age&&y.age>=age-1).forEach(y=>y.events.forEach(e=>{ if(e.kind!=='death'&&e.kind!=='birth'&&e.text&&!/亡くな|死|葬/.test(e.text)) ev.push(e); }));
+  let body; if(ev.length){ const e=dPick(ev,P.seed,k,'lt'); let t=(e.text.split('。')[0]+'。').replace(/^\d+歳。/,'');
+    t=t.split(P.given+'は、').join(me+'は、').split(P.given+'は').join(me+'は').split(P.given+'が').join(me+'が').split(P.given+'の').join(me+'の').split(P.given+'に').join(me+'に').split(P.given+'を').join(me+'を').split(P.given).join(me);
+    const open=dPick(['ねえ、聞いて。','元気？　こっちは、まあまあ元気だよ。','きょうのこと、だれかに話したくて。','ひさしぶりに、手紙を書くね。'],P.seed,k,'op');
+    const close=e.inner?`そのとき思ったこと。「${e.inner}」`:dPick(['それだけ。またね。','あした、また書くね。','読んでくれて、ありがとう。','なんでもない日だけど、残しておきたかった。'],P.seed,k,'cl');
+    body=`${open}\n${t}\n${close}`; }
+  else body=hitokoto(P,L,age);
+  return { body, sign:P.given }; }
+function letterHTML(P,L,age){ const k=dayKey(); const got=d2Get(KEY_LETTER,[]); const last=got[got.length-1];
+  if(last!==k){ got.push(k); d2Set(KEY_LETTER,got.slice(-400)); }
+  const y=new Date(); y.setDate(y.getDate()-1); const missedY=got.length>1&&!got.includes(dayKey(y));
+  const lt=letterToday(P,L,age);
+  return `<div class="lt-letter"><p class="lt-to">見守ってくれている、あなたへ</p>${lt.body.split('\n').map(s=>`<p>${esc(s)}</p>`).join('')}<p class="lt-sign">${esc(lt.sign)}より</p></div>
+    <p class="tiny muted">手紙は1日に1通。その日にひらかないと読めません。これまでに受け取った手紙：${got.length}通${missedY?'（きのうの手紙は、もう読めません）':''}</p>`; }
+// --- 2. 今、何してる？（その地域のいまの時刻に合わせる） ---
+function nowDoing(P,age){ const t=(typeof localNow==='function'&&localNow(P))||{ h:new Date().getHours() }; const h=t.h; const wd=new Date().getDay(); const off=wd===0||wd===6;
+  const st=age<1?'baby':age<3?'toddler':age<6?'kid':age<18?'school':age<65?'adult':'elder';
+  const T={ baby:[[0,6,'すやすや眠っている','room','night'],[6,9,'ミルクを飲んで、ごきげん','home','morning'],[9,12,'お昼寝中','room','day'],[12,17,'手足をばたばたさせて遊んでいる','home','day'],[17,20,'お風呂に入って、ほかほか','home','evening'],[20,24,'ぐっすり眠っている','room','night']],
+   toddler:[[0,6,'眠っている','room','night'],[6,9,'朝ごはんを、こぼしながら食べている','home','morning'],[9,12,'外で、何かを夢中で見つめている','park','day'],[12,15,'お昼寝中','room','day'],[15,19,'積み木で遊んでいる','home','evening'],[19,24,'眠っている','room','night']],
+   kid:[[0,6,'眠っている','room','night'],[6,9,'朝ごはんを食べている','home','morning'],[9,15,off?'友だちと遊んでいる':'園や学校で過ごしている',off?'park':'classroom','day'],[15,19,'外で遊んで、どろんこ','park','evening'],[19,21,'晩ごはんを食べている','home','night'],[21,24,'眠っている','room','night']],
+   school:[[0,6,'眠っている','room','night'],[6,8,'朝ごはんを、急いで食べている','home','morning'],[8,9,off?'まだ布団の中':'学校へ向かっている',off?'room':'town','morning'],[9,16,off?'友だちと出かけている':'学校で授業を受けている',off?'town':'classroom','day'],[16,19,'放課後、友だちと話している','park','evening'],[19,21,'晩ごはんのあと、宿題をしている','room','night'],[21,24,'ベッドでスマホや本を見ている','room','night']],
+   adult:[[0,6,'眠っている','room','night'],[6,8,'朝の支度をしている','home','morning'],[8,9,off?'ゆっくり朝ごはん':'仕事へ向かっている',off?'home':'station','morning'],[9,12,off?'買い物に出かけている':'働いている',off?'market':'office','day'],[12,13,'お昼ごはんを食べている','town','day'],[13,18,off?'のんびり過ごしている':'働いている',off?'park':'office','day'],[18,20,'晩ごはんを食べている','home','evening'],[20,23,'家でくつろいでいる','home','night'],[23,24,'眠りについた','room','night']],
+   elder:[[0,5,'眠っている','room','night'],[5,8,'早起きして、お茶を飲んでいる','home','morning'],[8,11,'近所を散歩している','park','morning'],[11,13,'お昼ごはんを食べている','home','day'],[13,17,'日なたで、うとうとしている','home','day'],[17,20,'晩ごはんを食べている','home','evening'],[20,24,'眠っている','room','night']] }[st];
+  const r=T.find(x=>h>=x[0]&&h<x[1])||T[0]; return { text:r[2], setting:r[3], tod:r[4], h, time:t.text||'' }; }
+function nowDoingHTML(P,L,age){ const d=nowDoing(P,age); let art=''; try{ const o=sceneState(P,L,age); o.setting=d.setting; o.tod=d.tod; o.text=''; o.v=dHash(P.seed,dayKey(),d.setting)%99999; art=blockSceneSVG(P,o,`${P.given}がいま、${d.text}ところ`); }catch(e){}
+  return `<div class="nd-art">${art}</div><p class="nd-t">${d.time?`<span class="nd-time">${esc(tzCityLabel?tzCityLabel(P):'')} ${esc(d.time)}</span>`:''}${esc(P.given)}は いま、<b>${esc(d.text)}</b>。</p>`; }
+// --- 3. 明日の予告（物語の時間で、次の数か月に起きる大きな出来事を、少しだけ） ---
+const TEASE=[[/出会|恋|告白|好きな人|付き合/,'大事な出会いがあるかも…'],[/引っ越|移り住|新しい町/,'住む場所が変わる予感がする…'],[/入学|学校|卒業|進学/,'新しい日々が始まりそう…'],[/結婚|式/,'人生の大きな節目が近づいている…'],[/生まれ|赤ちゃん|妊娠/,'家族がふえる予感…'],[/仕事|就職|会社|働/,'仕事のことで、何か動きがありそう…'],[/病|入院|けが/,'からだを大切にしてほしい日が来るかも…'],[/亡くな|別れ|お葬式/,'少しつらい知らせが届くかもしれない…'],[/旅|海外|飛行機/,'遠くへ出かけることになりそう…']];
+function teaser(P,L,c){ const T0=d2Get('hitotsu.tease',null); const k=dayKey();
+  if(T0&&T0.seed===P.seed&&T0.day===k) return T0.text;
+  if(T0&&T0.seed===P.seed&&(Date.now()-T0.t)<5*864e5) return null; // 予告は、多くても5日に1回
+  const t=teaser0(P,L,c); if(t){ d2Set('hitotsu.tease',{ seed:P.seed, day:k, t:Date.now(), text:t }); } return t; }
+function teaser0(P,L,c){ if(c.dead) return null; const a=c.ageF||c.age; const span=0.35; // 現実の1日 ≒ 物語の約0.3年
+  for(const y of L.years){ if(y.age<Math.floor(a)||y.age>a+span+1) continue; try{ timeOrder(y,P); }catch(e){} for(const e of y.events){ const t=y.age+(e._t||0); if(t<=a||t>a+span) continue; if(!(e.kind==='meet'||e.kind==='dream'||(e.big&&/出会|結婚|生まれ|引っ越|入学|卒業|就職/.test(e.text||'')))) continue;
+    if(e.kind==='dream') return 'ふしぎな夢を見る夜が、近づいている…'; if(e.kind==='meet') return '大事な出会いがあるかも…'; for(const [re,s] of TEASE) if(re.test(e.text||'')) return s; return '心に残る出来事が、近づいている…'; } }
+  return null; }
+// --- 4. ふたつの選択に一票（決めるのは本人。届くかは心しだい） ---
+const VOTE_Q={ child:[['きょうの放課後','友だちと公園へ行く','家で絵をかく'],['お手伝い','お皿洗いをする','洗たく物をたたむ'],['お小づかい','おかしを買う','ためておく'],['夏休みの宿題','先にやってしまう','あとでまとめてやる']],
+ teen:[['部活','続ける','やめて、ほかのことをする'],['気になる人に','話しかけてみる','もう少し様子を見る'],['週末','友だちと出かける','ひとりで好きなことをする'],['進路','やりたいことを選ぶ','安心できる道を選ぶ']],
+ adult:[['休みの日','遠くへ出かける','家でゆっくりする'],['仕事の誘い','新しいことに挑戦する','今の場所でがんばる'],['昔の友だちに','連絡してみる','そっとしておく'],['迷っている買い物','思い切って買う','やめておく']],
+ elder:[['きょうの午後','近所の人とお茶をする','庭の手入れをする'],['昔の写真','整理してみる','そのまま大切にしまっておく'],['孫や若い人に','昔の話をする','話を聞く側にまわる']] };
+function voteQ(P,age,k){ const st=age<13?'child':age<20?'teen':age<65?'adult':'elder'; return dPick(VOTE_Q[st],P.seed,k,'vq'); }
+function voteResult(P,L,age,k,pick){ if(pick==null) return null; const q=voteQ(P,age,k); const y=[...L.years].reverse().find(y=>y.age<=age&&y.h!=null); const h=y?y.h:60;
+  const reach=(dHash(P.seed,k,'reach')%100)<(35+Math.round(h*.4)); const own=dHash(P.seed,k,'own')%2; const chose=reach?pick:own; return { q, chose, reach, same:chose===pick }; }
+function voteHTML(P,L,age){ const k=dayKey(); const y=new Date(); y.setDate(y.getDate()-1); const yk=dayKey(y); const v=d2Get(KEY_VOTE,{}); const q=voteQ(P,age,k);
+  let prev=''; if(v[yk]&&v[yk].seed===P.seed){ const r=voteResult(P,L,v[yk].age,yk,v[yk].pick); if(r) prev=`<p class="vt-prev">きのうの一票（${esc(r.q[0])}）：${esc(P.given)}は「${esc(r.q[1+r.chose])}」を選んだ。${r.reach?'あなたの気持ちは、ちゃんと心に届いていたみたい。':'あなたの一票は届かなかったけれど、それも本人が選んだ道。'}</p>`; }
+  const mine=v[k]&&v[k].seed===P.seed?v[k].pick:null;
+  return `${prev}<p class="vt-q">${esc(P.given)}は、いま迷っています。<b>${esc(q[0])}</b>、どっちにしよう？</p>
+    <div class="vt-btns">${[1,2].map(i=>`<button type="button" class="vt-b ${mine===i-1?'on':''}" data-vote="${i-1}" ${mine!=null?'disabled':''}>${esc(q[i])}</button>`).join('')}</div>
+    <p class="tiny muted">${mine!=null?'一票を送りました。本人がどうしたかは、あしたわかります。':'送れるのは1日に1票だけ。決めるのは本人です。届くかどうかは、心しだい。'}</p>`; }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-vote]'); if(!b) return; try{ const v=d2Get(KEY_VOTE,{}); const k=dayKey(); const c=clock(); v[k]={ seed:cur.P.seed, pick:+b.dataset.vote, age:c.age };
+  const keys=Object.keys(v).sort().slice(-30); const nv={}; keys.forEach(x=>nv[x]=v[x]); d2Set(KEY_VOTE,nv); const box=b.closest('.hm-vote'); if(box) box.querySelector('.hm-body').innerHTML=voteHTML(cur.P,cur.L,c.age); }catch(_){} });
+// --- 5. 季節の小さな贈り物（誕生日・行事の日にひらくともらえる） ---
+const GIFT_DAYS=[['01-01','新年の贈り物','新しい一年のはじまりに'],['02-14','バレンタインの贈り物','大切な人を思う日に'],['03-20','春分の贈り物','昼と夜が同じ長さになる日に'],['06-21','夏至の贈り物','一年でいちばん昼が長いころに'],['09-22','秋分の贈り物','実りの季節に'],['10-31','ハロウィンの贈り物','ちょっとふしぎな夜に'],['12-21','冬至の贈り物','一年でいちばん夜が長いころに'],['12-24','クリスマス・イブの贈り物','あたたかな夜に'],['12-31','大みそかの贈り物','一年のおわりに']];
+function giftToday(P,c){ const td=d2Get(KEY_GIFT+'.today',null); if(td&&td.day===dayKey()&&td.seed===P.seed) return td.g; const g0=giftToday0(P,c); if(g0) d2Set(KEY_GIFT+'.today',{ day:dayKey(), seed:P.seed, g:g0 }); return g0; }
+function giftToday0(P,c){ const d=new Date(); const md=String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  if(d.getMonth()+1===P.month&&d.getDate()===P.day) return ['bday',`${P.given}の、本当の誕生日の贈り物`,`${P.month}月${P.day}日。${P.given}が生まれたのと同じ日付です`];
+  const g=GIFT_DAYS.find(x=>x[0]===md); if(g) return ['d'+md,g[1],g[2]];
+  const snap=d2Get(KEY_SNAP,null); if(snap&&snap.seed===P.seed&&snap.age!=null&&c.age>snap.age&&!c.dead) return ['age'+c.age,`${c.age}歳の誕生日の贈り物`,`物語の中で、${P.given}が${c.age}歳になりました`];
+  return null; }
+function giftArt(P,kind){ let S; try{ S=bkScene(); }catch(e){ return ''; } const top='#FFD1DC';
+  S.box(-2,-2,-.6,4,4,.6,'#B08463'); for(let i=0;i<4;i++) for(let j=0;j<4;j++) S.box(-2+i,-2+j,0,1,1,.01,(i+j)%2?'#FFE3EA':top);
+  if(/bday|age/.test(kind)){ S.box(-.9,-.9,0,1.8,1.8,.7,'#FFF4E0'); S.box(-.95,-.95,.7,1.9,1.9,.15,'#FF9FB2'); S.box(-.6,-.6,.85,1.2,1.2,.5,'#FFF4E0'); [[-.4,-.4],[.2,-.4],[-.1,.2]].forEach(([x,y])=>{ S.box(x,y,1.35,.12,.12,.4,'#8EC3E6'); S.box(x,y,1.75,.12,.12,.15,'#FFC94A'); }); }
+  else { S.box(-.8,-.8,0,1.6,1.6,1.2,'#8EC3E6'); S.box(-.85,-.1,0,1.7,.2,1.25,'#FF6F92'); S.box(-.1,-.85,0,.2,1.7,1.25,'#FF6F92'); S.box(-.4,-.1,1.25,.8,.2,.3,'#FF6F92'); }
+  return `<svg class="gf-svg" viewBox="0 0 360 200" aria-hidden="true"><rect width="360" height="200" rx="16" fill="#FFF0F4"/>${frHeart(40,30,4,'#FFB3C4')}${frHeart(296,24,3,'#FF9FB2')}<g transform="translate(180 120) scale(1.9) translate(-180 -78)">${S.render()}</g></svg>`; }
+function giftList(){ return d2Get(KEY_GIFT,[]).filter(x=>x&&typeof x==='object'); }
+function giftHTML(P,c){ const g=giftToday(P,c); const all=giftList();
+  if(!g) return '';
+  const key=P.seed+'|'+g[0]+'|'+dayKey().slice(0,4); if(!all.some(x=>x.key===key)){ all.push({ key, seed:P.seed, kind:g[0], title:g[1], note:g[2], day:dayKey() }); d2Set(KEY_GIFT,all.slice(-300)); }
+  return `<div class="gf-card">${giftArt(P,g[0])}<p><b>${esc(g[1])}</b><br><span class="tiny">${esc(g[2])}</span></p></div><p class="tiny muted">この絵は「もらった贈り物」に保管されました。</p>`; }
+// 個別ページに保管：この人生でもらった贈り物の絵
+function giftShelfHTML(P){ const mine=giftList().filter(x=>x.seed===P.seed); if(!mine.length) return '';
+  return `<div class="gf-shelf">${mine.slice().reverse().map(x=>`<figure class="gf-card small">${giftArt(P,x.kind)}<figcaption><b>${esc(x.title)}</b><small>${esc(x.day.replace(/^(\d+)-0?(\d+)-0?(\d+)$/,'$1年$2月$3日'))}</small></figcaption></figure>`).join('')}</div>
+    <p class="tiny muted">誕生日や、季節の行事の日にひらくと、1枚ずつふえていきます。</p>`; }
+// --- 6. 成長のしるし（前に見た日からの変化） ---
+function snapNow(P,L,c){ const age=c.age; const g=typeof growthAt==='function'&&age<18?growthAt(P,L,Math.min(c.ageF||age,L.deathAge)):null;
+  const ppl=(L.persons||[]).filter(p=>p.metAge!=null&&p.metAge<=age).length; const bel=Object.values(L.beliefs||{}).filter(b=>b.age<=age).length;
+  let ev=0; for(const y of L.years) if(y.age<age) ev+=y.events.length; return { seed:P.seed, day:dayKey(), t:Date.now(), age, h:g&&g.h?+(+g.h).toFixed(1):null, w:g&&g.w?+(+g.w).toFixed(1):null, ppl, bel, ev }; }
+function growthSignHTML(P,L,c){ const now=snapNow(P,L,c); let s=d2Get(KEY_SNAP,null); let base=d2Get(KEY_SNAP+'.base',null);
+  if(!s||s.seed!==P.seed){ d2Set(KEY_SNAP,now); d2Set(KEY_SNAP+'.base',null); return ''; }
+  if(s.day!==now.day){ base=s; d2Set(KEY_SNAP+'.base',base); }
+  d2Set(KEY_SNAP,now); if(!base||base.seed!==P.seed) return '';
+  const days=Math.max(1,Math.round((now.t-base.t)/864e5)); const ch=[];
+  if(now.age>base.age) ch.push(`${now.age-base.age}つ年をとって、${now.age}歳に`);
+  if(now.h&&base.h&&now.h>base.h) ch.push(`背が ${(now.h-base.h).toFixed(1)}cm のびた`);
+  if(now.ppl>base.ppl) ch.push(`出会った人が ${now.ppl-base.ppl}人 ふえた`);
+  if(now.bel>base.bel) ch.push(`心に新しい観念が ${now.bel-base.bel}こ 生まれた`);
+  if(now.ev>base.ev) ch.push(`出来事が ${now.ev-base.ev}こ 起きた`);
+  if(!ch.length) return `<p>前に見た日（${days}日前）から、まだ大きな変化はありません。</p>`;
+  return `<p class="gs-lead">前に見た日（${days}日前）から</p><ul class="gs-list">${ch.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`; }
+// ---- ホームにまとめて置く ----
+function dailyPlusHTML(P,L,age,c){ if(c.dead) return '';
+  const tz=teaser(P,L,c); const gf=giftHTML(P,c); const gs=growthSignHTML(P,L,c);
+  const T=(cls,h,b)=>`<section class="hm-tile ${cls}"><h3>${h}</h3><div class="hm-body">${b}</div></section>`;
+  return `<div class="hm-daily">
+    ${gs?T('hm-grow-sign','成長のしるし',gs):''}
+    ${T('hm-letter','今日のひとこと手紙',letterHTML(P,L,age))}
+    ${T('hm-now',`いま、何してる？`,nowDoingHTML(P,L,age))}
+    ${tz?T('hm-tease','明日の予告',`<p class="tz-t">${esc(tz)}</p><p class="tiny muted">あしたまた、ひらいてみてください。</p>`):''}
+    ${T('hm-vote','ふたつの選択に一票',voteHTML(P,L,age))}
+    ${gf?T('hm-gift','季節の小さな贈り物',gf):''}
+    ${(()=>{ const sh=giftShelfHTML(P); return sh?T('hm-giftshelf',`もらった贈り物<span class="hm-n">${giftList().filter(x=>x.seed===P.seed).length}枚</span>`,sh):''; })()}
+  </div>`; }
+// ===== その年のニュース：物語の中の年に、世界とその地域で起きた、よく知られた出来事 =====
+// 年と出来事は、百科事典や各国政府・国際機関の記録で広く確かめられるものだけ。地域は国のid（world は世界のニュース）。
+const NEWS=[
+ [1903,'world','アメリカのライト兄弟が、動力つき飛行機で初めて空を飛んだ'],[1912,'world','豪華客船タイタニック号が、北大西洋で氷山にぶつかって沈んだ'],
+ [1914,'world','第一次世界大戦が始まった'],[1918,'world','第一次世界大戦が終わった。スペインかぜが世界で流行した'],[1920,'world','国際連盟が発足した'],
+ [1923,'jp','関東大震災が起き、東京や横浜で大きな被害が出た'],[1928,'world','イギリスのフレミングが、ペニシリンを発見した'],[1929,'world','ニューヨークの株価が大暴落し、世界恐慌が始まった'],
+ [1936,'de','ベルリンでオリンピックが開かれた'],[1939,'world','第二次世界大戦が始まった'],[1945,'world','第二次世界大戦が終わった。国際連合（国連）ができた'],[1945,'jp','広島と長崎に原子爆弾が落とされた'],
+ [1947,'in','インドとパキスタンが、イギリスから独立した'],[1947,'pk','パキスタンが、イギリスから独立した'],[1948,'world','国連で、世界人権宣言が採択された'],[1948,'kr','大韓民国が成立した'],[1948,'kp','朝鮮民主主義人民共和国が成立した'],[1948,'il','イスラエルが建国を宣言した'],
+ [1949,'cn','中華人民共和国が成立した'],[1950,'kr','朝鮮戦争が始まった'],[1953,'kr','朝鮮戦争の休戦協定が結ばれた'],[1953,'world','エベレストに、ヒラリーとテンジンが初めて登頂した'],
+ [1956,'eg','エジプトがスエズ運河を国有化した'],[1957,'world','ソ連が、世界初の人工衛星スプートニク1号を打ち上げた'],[1957,'gh','ガーナが独立した。サハラ以南のアフリカで、植民地から早く独立した国のひとつ'],
+ [1959,'cu','キューバ革命が起きた'],[1960,'world','アフリカで17の国が独立し、「アフリカの年」と呼ばれた'],[1960,'ng','ナイジェリアがイギリスから独立した'],[1960,'cd','コンゴがベルギーから独立した'],
+ [1961,'world','ソ連のガガーリンが、人類で初めて宇宙を飛んだ'],[1961,'de','ベルリンの壁がつくられた'],[1962,'world','キューバ危機で、アメリカとソ連の緊張が高まった'],[1962,'dz','アルジェリアがフランスから独立した'],
+ [1963,'us','ワシントン大行進で、キング牧師が「私には夢がある」と演説した'],[1963,'us','ケネディ大統領が暗殺された'],[1963,'ke','ケニアがイギリスから独立した'],
+ [1964,'jp','東京オリンピックが開かれ、東海道新幹線が開業した'],[1964,'us','公民権法が成立した'],[1965,'sg','シンガポールがマレーシアから分かれて独立した'],
+ [1966,'cn','文化大革命が始まった'],[1967,'world','南アフリカで、世界初の心臓移植手術が行われた'],[1968,'mx','メキシコシティでオリンピックが開かれた'],
+ [1969,'world','アポロ11号が月に着陸し、人類が初めて月を歩いた'],[1970,'jp','大阪で日本万国博覧会が開かれた'],[1971,'bd','バングラデシュが独立した'],
+ [1972,'jp','沖縄が日本に返還された。札幌冬季オリンピックが開かれた'],[1972,'de','ミュンヘンでオリンピックが開かれた'],[1973,'world','石油危機が起き、世界で物価が上がった'],
+ [1975,'vn','ベトナム戦争が終わった'],[1975,'mz','モザンビークがポルトガルから独立した'],[1975,'ao','アンゴラがポルトガルから独立した'],[1976,'cn','唐山地震が起きた'],
+ [1978,'cn','中国で改革開放政策が始まった'],[1979,'ir','イラン革命が起きた'],[1980,'zw','ジンバブエが独立した'],[1980,'pl','ポーランドで独立自主管理労働組合「連帯」が生まれた'],
+ [1981,'world','エイズの最初の症例が報告された'],[1985,'mx','メキシコシティで大きな地震が起きた'],[1986,'world','チェルノブイリ原子力発電所で事故が起きた'],[1986,'ph','フィリピンでピープル・パワー革命が起きた'],
+ [1988,'kr','ソウルでオリンピックが開かれた'],[1989,'de','ベルリンの壁が崩れた'],[1989,'world','ベルリンの壁が崩れ、東ヨーロッパで民主化が進んだ'],[1989,'cz','チェコスロバキアでビロード革命が起きた'],
+ [1990,'de','東西ドイツが統一された'],[1990,'za','ネルソン・マンデラが27年ぶりに釈放された'],[1990,'na','ナミビアが南アフリカから独立した'],
+ [1991,'world','ソ連が解体し、15の国に分かれた'],[1991,'world','世界初のウェブサイトが公開された'],[1991,'ua','ウクライナが独立した'],[1991,'kz','カザフスタンが独立した'],
+ [1992,'es','バルセロナでオリンピックが開かれた'],[1993,'cz','チェコとスロバキアが、ふたつの国に分かれた'],[1993,'er','エリトリアがエチオピアから独立した'],
+ [1994,'za','南アフリカで、すべての人種が参加する初めての選挙が行われ、マンデラが大統領になった'],[1994,'rw','ルワンダで大虐殺が起きた'],
+ [1995,'jp','阪神・淡路大震災が起きた'],[1997,'hk','香港がイギリスから中国に返還された'],[1997,'world','アジア通貨危機が起きた'],[1998,'jp','長野冬季オリンピックが開かれた'],
+ [1999,'mo','マカオがポルトガルから中国に返還された'],[2000,'au','シドニーでオリンピックが開かれた'],[2001,'us','アメリカ同時多発テロが起きた'],
+ [2002,'tl','東ティモールが独立した'],[2002,'world','ヨーロッパの多くの国で、ユーロのお金が使われ始めた'],[2002,'jp','日本と韓国で、サッカーのワールドカップが開かれた'],[2002,'kr','日本と韓国で、サッカーのワールドカップが開かれた'],
+ [2003,'world','ヒトゲノム計画で、人の遺伝情報の読み取りが完了した'],[2004,'world','スマトラ島沖地震とインド洋大津波が起きた'],[2004,'gr','アテネでオリンピックが開かれた'],
+ [2007,'world','スマートフォンのiPhoneが発売された'],[2008,'cn','北京でオリンピックが開かれた。四川大地震が起きた'],[2008,'world','リーマン・ショックで、世界の経済が大きくゆれた'],
+ [2010,'ht','ハイチで大きな地震が起きた'],[2010,'za','南アフリカで、アフリカ初のサッカー・ワールドカップが開かれた'],[2011,'jp','東日本大震災が起きた'],[2011,'ss','南スーダンがスーダンから独立した'],
+ [2012,'gb','ロンドンでオリンピックが開かれた'],[2014,'br','ブラジルでサッカーのワールドカップが開かれた'],[2015,'world','国連で、持続可能な開発目標（SDGs）が決まった。気候変動のパリ協定が採択された'],
+ [2015,'np','ネパールで大きな地震が起きた'],[2016,'br','リオデジャネイロでオリンピックが開かれた'],[2018,'kr','平昌冬季オリンピックが開かれた'],[2018,'ru','ロシアでサッカーのワールドカップが開かれた'],
+ [2019,'jp','元号が平成から令和に変わった'],[2020,'world','新型コロナウイルス感染症が世界に広がった'],[2021,'jp','東京オリンピック・パラリンピックが、1年遅れて開かれた'],
+ [2022,'ua','ロシアがウクライナに侵攻した'],[2022,'qa','カタールでサッカーのワールドカップが開かれた'],[2023,'world','WHOが新型コロナの緊急事態の終わりを宣言した'],[2023,'tr','トルコ南東部とシリアで大きな地震が起きた'],[2023,'sy','トルコ南東部とシリアで大きな地震が起きた'],
+ [2024,'fr','パリでオリンピックが開かれた'],[2024,'jp','能登半島地震が起きた'] ];
+function newsFor(P,year){ const mine=NEWS.filter(n=>n[0]===year&&n[1]===P.countryId), world=NEWS.filter(n=>n[0]===year&&n[1]==='world');
+  const near=NEWS.filter(n=>n[0]===year&&n[1]!=='world'&&n[1]!==P.countryId); return { mine, world, near:near.slice(0,2) }; }
+function newsHTML(P,year){ const r=newsFor(P,year); const nm=id=>{ try{ return (COUNTRIES.find(c=>c.id===id)||{}).name||''; }catch(e){ return ''; } };
+  const li=(n,tag)=>`<li><span class="nw-tag ${tag==='mine'?'nw-mine':''}">${tag==='mine'?esc(P.country.name):tag==='world'?'世界':esc(nm(n[1]))}</span>${esc(n[2])}</li>`;
+  const items=[...r.mine.map(n=>li(n,'mine')),...r.world.map(n=>li(n,'world')),...r.near.map(n=>li(n,'near'))];
+  if(!items.length) return `<p class="tiny muted">${year}年の大きなニュースは、確かめられたものがまだ集まっていません。</p>`;
+  return `<ul class="nw-list">${items.join('')}</ul><p class="tiny muted">${esc(P.given)}が生きている物語の中の${year}年に、実際に起きた出来事です。</p>`; }
 // 地図のもと：Natural Earth（world-atlas 50m, パブリックドメイン）から作った、3度ごとの陸地のブロックと、国ごとの拡大図
 const GEO={W:120,H:50,LAT0:84,S:3,mask:"0a1F0E1I0}0b1H0B1P0K101B0V1B0r101B01B01C0C1P0]10K1D0i1C0B10101B0B1B0G1L0Y10F101I01C01B0D10S1B0N1C0B101G0E1H0S10L1B01\\0G1B0C1\\0101C0C1G0P1I0B1H01c0B10C1[0101B0E1D0F1B0I1C01s0F1X0E1B0H1B0P1D01m0101C0J10E1O0E1C010S10C101B01h0F10U1P0C1F0R10D1B0B1f0G1B0W1P01G0P101B01n0D10Z1S0U1q0_1S0U1K0101C0B1\\0a1R0T101C01B01D0C1C01\\0B10_1P0V1C0E1C0B1G01V01B0d1P0V1C0D10B101G0B1W010C10a1N0X1E0I1\\0D1B0c1L0X1H0B1B0B1]0C10g1E0D10W1T01X0k1D0[1V0C1T0m1B0F10U1Q01G0C1O0o1C0B10E10R1Q0B1E0E1D0C1D010r1D0X1R01D0F1C0D101C0D10q1B0V1V0I1B0G1B0w10C1C0Q1V0H1B0H10z1F0P1U0X10t1I0N10E1M0P10E1B0v1I0T1L0R1B01C0v1I01B0R1K0T10B1B0101010p1N0Q1I0U10J1C0m1O0P1I0W1B0H1C0m1N0Q1H0q10`1L0Q1J0B10Z1B0B10p1K0Q1I0B1B0X1G0q1J0Q1H0C10X1I0p1I0S1G0B1B0V1L0n1H0U1F0[1M0m1H0U1F0[1M0m1G0W1D0]1L0m1F0X10`10F1D0m1F0}0E1C0H10d1D0}0R10e1B0}0R10e1C0}0Q10f1B0}0y1B0}0}0}0}0}0}0}0}0}0N",cs:{"in":[79.5,22.8,[2005,2125,2244,2245,2246,2251,2364,2365,2366,2367,2368,2369,2370,2371,2483,2484,2485,2486,2487,2488,2489,2604,2605,2606,2607,2724,2725,2726,2845,2846,2965,2966],36,34,65.83,37.83,0.9402,0.9437,"1}1x212C1_2E1_2E1_2E1_2F1]2H1[2H1O2C1I2K1K2E1G2P1H2D1I2S12F1E01D2S1D2C1E0B12U1C2C1F0C2V1B2B1G0C2V1B021G0D2R0F1H0G2O0G1G0G2N0I1F0H2L0J1F0H2J0M1E0H2I0M1C01B0I2F0S1B0I2F0S1B0I2F0S1B0J2E0T10J2E0M20F10K2D0T10K2C0T10L2B0B10R1B0O1B0R10O1B0b10T"],"cn":[103.3,36.8,[1300,1301,1419,1420,1421,1422,1528,1529,1539,1540,1541,1542,1543,1544,1647,1648,1649,1650,1651,1657,1658,1659,1660,1661,1662,1663,1766,1767,1768,1769,1770,1771,1772,1773,1774,1775,1776,1777,1778,1779,1781,1885,1886,1887,1888,1889,1890,1891,1892,1893,1894,1895,1896,1897,1898,1899,1900,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2126,2127,2128,2129,2130,2131,2132,2133,2134,2135,2136,2137,2138,2139,2248,2249,2250,2252,2253,2254,2255,2256,2257,2258,2259,2260,2373,2374,2375,2376,2377,2378,2379,2493,2496,2497,2616],36,22,68.72,58.45,1.9702,1.958,"1}1I0B1}12C1_2F1O2B1O2H1I2D1M2I1B01F2H1H2J1B0B1E2M12K10E1C2W021B0F1C2W0C1B0E1D2V0C1B0C1G2U0J1E2V0D10D1G2T0I1I2C1C2L0I1O2K0J1O2J010I1K01C2B1B2D0O1G0C1G0S1F0E1F0G10K1D0G101E0F10I"],"id":[114,-0.2,[3212,3333,3336,3337,3338,3454,3457,3458,3460,3462,3464,3574,3585,3586,3696,3697,3706],36,31,107.91,5.37,0.3356,0.34,"0W1K0V1K0W1N0V1E2F10W1F2F0W1G2E0W1H2E0S1J2H0R1K2H0P1J2J0J210D1J2J0I2C1C01C2B1D2L0H2D1E2U0F2[0I2Z0K2Y0K2X0G20D2Y0F20E2W0G20F2T0H2B0F2T0H2B0F2S0I2B0G2S0G2D0F2R0H2D0G2B0B2M0H2C0L2C0B202E0I2C0T2E0J20T20C20J20c20c20b2B"],"us":[-98.8,39.9,[487,488,605,606,607,608,609,610,611,612,726,727,728,729,730,731,732,845,846,847,848,849,850,851,852,968,974,1095,1096,1459,1460,1461,1462,1463,1464,1465,1466,1467,1468,1469,1470,1471,1579,1580,1581,1582,1583,1584,1585,1586,1587,1588,1589,1590,1591,1592,1594,1595,1596,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1819,1820,1821,1822,1823,1824,1825,1826,1827,1828,1829,1830,1831,1832,1833,1834,1940,1941,1942,1943,1944,1945,1946,1947,1948,1949,1950,1951,1952,1953,2063,2065,2066,2067,2068,2069,2070,2071,2072,2187,2192],36,18,-129.33,53.99,1.86,1.8596,"1Z01I01c0B1P21N0B10C2T1L0D2V1G21C0C2V1C2D0B10D2]0G2[0I2Y0L2Y0L2W0O12R0Q101D2M0R1G2C0G20R101F20H20S101F0J10R101E0`1D0E10D10H"],"pk":[69.2,29.9,[2004,2123,2124,2241,2242,2243,2361,2362,2363],36,30,59.55,38.33,0.5222,0.5292,"1}1}1I2H1\\2I1[2J1Z2J1Y2E1]2H1]2G1[2I1[2K1V2M1U2O1T2O1U2N1L21G2O1N2V1O2S1R2R1R2N1W2L1V2O1T2P1P01C2H02H1O0N2H1N0O2E121N0Q1S0Q1S0U1O"],"br":[-53.2,-10.7,[3277,3279,3281,3282,3397,3398,3399,3400,3401,3403,3404,3516,3517,3518,3519,3520,3521,3522,3523,3524,3525,3526,3635,3636,3637,3638,3639,3640,3641,3642,3643,3644,3645,3646,3647,3756,3758,3759,3760,3761,3762,3763,3764,3765,3766,3767,3879,3880,3881,3882,3883,3884,3885,3886,4001,4002,4003,4004,4005,4006,4121,4122,4123,4124,4125,4126,4241,4242,4243,4244,4245,4362,4363,4481,4482,4483,4602],36,36,-77.14,8.39,1.2629,1.2575,"1N0V1O0U1S0Q1K2C1F20O1J2D1E2B0O1F2B1B2D12G0N1F2P0N1F2N02C0L1F2T0J1F2X0F1D2\\0D1C2^0C1C2_0B1C2^0C1D2]0C1I2W0D1J2U0F1L2Q0G1L2Q0I1J2Q0K1J2O0K1J2O0L1I2N0M1I2N0L1L2K0M1L2H0P1M2E0R1N2D0R1M2E0R1L2E0S1K2E0S1M2C0U1N20T1O0U1K0X1M0T"],"ng":[8.1,9.6,[2821,2824,2941,2942,2943,2944,3061,3062,3063],36,30,1.69,14.87,0.3873,0.3865,"1}1v2E1Q2B1K2G1B2B1D2F12D1J2Z1I2[1I2\\1H2\\1H2[1I2Z1J2Y1K2Y1J2Z1J2Y1J2Z1J2Y1K2X1L2X1L2W1M2W1M2R1C21K0H2K1Q0I2J1Q0J2H1R0J2H1R0J2G01R0S1Q0T1P0U1O"],"bd":[90.2,23.9,[2490],36,40,87.02,27.57,0.1836,0.1945,"1}1}1}1D21c2B1a2F1B21[2I1\\2H1]2G1_2E1]2T1O2W1L2V1N2V1P2S1R2P1T2N1V2N1V2J02C1D2B1P2I0B2C1C2C1Q2I02C1C2C1Q2S1Q2S1Q2J020C2E1Q2H020C202D1K01E2D02C02020C2D1Q2D0B20H2D1K01B01B2B0N2C1I0C10B10P2D1F0[2C1F0[21H0\\21G0]1G0]1G0^1F0a1C0a1C0`1B0B"],"mx":[-102.2,23.9,[2061,2062,2064,2183,2184,2185,2186,2304,2305,2306,2307,2425,2426,2545,2546,2547,2550,2667,2668,2669],36,24,-119.56,35.14,0.9781,0.9595,"1d0B1b0B1b0C2D1]0D20B2H1U0D20B2H1P0D10E20B2K1F0P2B0B2K1C0S2B0B2K1B0T20B2L10U20C2K0V20C2I0\\2H0\\2H0]2H0G2C0Q2I0G2C0R2I0E2D0S2I02F0W2J1C0Y2I1B0_21H0\\1H0^1F0a1C"],"ru":[95.5,65.9,[211,212,322,334,335,336,337,438,445,447,448,449,450,451,452,453,454,455,457,458,459,461,462,467,562,563,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,588,589,590,591,592,600,601,670,671,672,673,676,677,678,679,680,681,682,683,685,686,687,688,689,690,691,692,693,694,695,696,697,698,699,700,701,702,703,704,705,706,707,708,709,710,711,712,713,714,715,716,717,718,719,722,790,791,792,793,794,795,796,797,798,799,800,801,802,803,804,805,806,807,808,809,810,811,812,813,814,815,816,817,818,819,820,821,822,823,824,825,826,827,828,829,830,831,832,833,834,835,836,837,838,910,911,912,913,914,915,916,917,918,919,920,921,922,923,924,925,926,927,928,929,930,931,932,933,934,935,936,937,938,939,940,941,942,943,944,945,946,947,948,949,950,951,953,955,956,957,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040,1041,1042,1043,1044,1045,1046,1047,1048,1049,1050,1051,1052,1053,1054,1055,1056,1057,1058,1059,1060,1061,1062,1063,1064,1065,1066,1073,1150,1151,1152,1153,1154,1155,1156,1157,1158,1159,1160,1161,1162,1163,1164,1165,1166,1167,1168,1169,1170,1171,1172,1173,1174,1175,1176,1177,1178,1179,1180,1181,1182,1183,1184,1192,1193,1271,1272,1273,1274,1275,1276,1277,1278,1279,1286,1287,1288,1289,1290,1291,1292,1293,1294,1295,1296,1297,1298,1299,1302,1303,1304,1305,1306,1307,1312,1393,1394,1395,1409,1416,1423,1424,1425,1426,1427,1513,1514,1515,1545,1634,1635,1664],36,12,14.32,90.76,5.2496,5.2165,"0}0K1B0i20B20B2I0B20K1C2B02[0B1D2Y02B0C1B01B2U0C20H1D2E1C2H12D0K1D2C1P20M1C01B01N0R1P01010L1T0P"],"et":[39.6,8.6,[2832,2833,2951,2952,2953,3071,3072,3073,3074,3075,3192,3193],36,29,31.8,16.05,0.4827,0.4756,"1P0G1]0G1_0E1Y2F1B0C1W2I1B0C1I0C1I2K1B0B1G0E1I2L1B01D0H1H2N1B0L1G2N1C0L1G2N1010L1G2N1210H1I2R1C0B1M2R1R2S1Q2T1P2V1L2[1I2^1H2[1J2Y1K2X1M2V1F01H2T1G01H2Q1I0B1K2L1J0C1L2E1O0D1`0D1_0E1^0F"],"ph":[121.4,15.9,[2740,3101],36,40,118.76,19.62,0.1773,0.2012,"0s20}0L20}0C2E0_2G02B0Z2I0Z2J0Z2J0Z2J0Z2K0Y2L0X2L0X2K0Y2K0Y2J0W2B02H0Y2J0Z2J0[2H0\\2H0\\2H0\\2I0]20B2D0]20B2D0_2F0D2B0W2G0C2D0X2D0B2C02B0B2B0B2B0Q2B0D2B0B2D0C2B0M2B020D2B0B20B2D0R2E0C20B20C2C0S2E0J2D0Q2D0N20R2D0M20R2C0C20B20C2B0D2E0F20F20D20F2C0D2D0G2B0P20B20D2C0F20K20J20D2B0S2B0K20B2"],"eg":[29.9,26.5,[2108,2228,2229,2230,2231,2348,2349,2350,2351,2468,2469,2470,2471],36,30,23.7,32.66,0.3936,0.3887,"0\\1I0[1L0X1K2F0H2D0F1L2J02M1L2X1L2Y1K2S02E1K2Y01J2T02D1K2T02D1K2U02B01K2V0E1I2V0E1I2W0E1H2W0F1G2X0E1G2X0F1F2Y0F1E2Y0F1E2Z0F1D2[0E1D2[0F1C2[0F1C2[0F1C2\\0E1C2]0D1a0C1b0B1b0B"],"vn":[106.3,16.6,[2494,2495,2975],36,40,101.13,24.34,0.2589,0.419,"1}1}2G1S2Q1T2P1V2Q121B0C101J2R0H1L21C2I0K1Q2G0M1P2E0N1N2G0L1R2F0K1V2C0K1W2C0M10C1Q2D0O1S2B0O1T2C0M1U2D0K1W2D0I1W2E0H1Y2E0F1Y2E0F1X2G0E1X2G0E1Y2F0E1Y2G0D1Y2G0H1U2G0J1P2I0L1K2M0M1K2J0Q1E2L0V2I0]2F0]2F0^2C0a20}0`"],"jp":[137.9,36.6,[1667,1906,2024,2025,2143],36,31,128.6,45.8,0.4889,0.4903,"1R0R1Q0J20H1P0K2B0G1N0M2E0D1M0M2H0B1F0B1D0L2J0B1D0S2H0E1C0T20E20F1B0U20L1B0V20K10V2C0a2D0`2D0`2D0`2C0`2C0K10T2D0K1B0R2E0K1B0O2H0K1B0G20F2H0L1B0M2J0K10G2P0S2I02C0Q20C2D0B2E0X20C2D0B20W2D0B2B0\\2E020_2B0a2C0a2B0}0F"],"ir":[54.4,32.5,[1875,1878,1879,1995,1996,1997,1998,1999,2116,2117,2118,2119,2237,2238,2239,2240,2360],36,29,42.48,41.31,0.6213,0.6122,"1K0I1]0D1^0G1U2B1B2B1B0G1U2G0H1U2G0H1B2D1P2H0F2I1M2J0B2M1L2Y1L2X1K2Y1K2X1L2X1M2W1O2U1P2T1O2W1N2V1O0B2R1O0D2Q1O0E2Q1O0D2S1N0E2Q1O0F2D02J1O0L2H1P0B10F10C2F1T0E1B0N1N0E1D0M1X0L"],"tr":[35.4,39.1,[1750,1751,1752,1753,1754,1869,1870,1871,1872,1873,1874],36,15,24.6,43.56,0.6033,0.6152,"1F0T1O0W1L210V1K2C0F2G0I2B1F0B12B0C2X1D0C2]1D0B2_1C0D2\\1D0B12^1C0C12]1C010B2X1D21C0H2B0B2D0C21P0S1S0L10D1Q0S1Q"],"cd":[23.6,-2.9,[3186,3188,3306,3307,3308,3309,3426,3427,3428,3429,3545,3546,3547,3548,3549,3667,3668,3669,3787,3788,3789],36,36,10.69,6.84,0.6142,0.606,"1}1|2C1E2G1U2S1Q2T1P2T1O2U1O2U1O2T1P2S1Q2S1P2T1O2U1N2U1O2U1O2U1F01H2U1F01F2W1F0B12[1F0B12\\1E0C1G2U1E0C1G2U1E0D1F2D1D2N1D0D1G21F2O1C0D1N2L1F0D1N2K1G0D1N2K1G0E1N2J1G0E1N21B2G1G0E1S2E1G0E1W2B1F0D1Y2B1E0C1a0C1a0C1a"],"th":[101,15.1,[2613,2733,2734],36,40,96.38,21.43,0.2852,0.4197,"1}1W21`2E1T0B1E2L1P0C1E2L1P0C1E2L1P0C1D2M1G2C1G0B1E2K1B2J1G01F2W1I01D2V1H0B1E2U1G0D1E2U1F0E1C2X1D0E1B2Y1D0E12Z1D0F12Y1D0F1C2N1M0G1C2L1N0H1B2C0C2E1O0H1B2C0C2E1O0H1C2B0G2B1N0G1D20J21M0F1E20K1M0H1B20M1L0G1B2B0N1K0H2B0P10B1G0H2B0T1E0H2C0B20Q1D0I2E0R1B0K2F0Q10M2F0_2E0a2C0b2D0_2012E0_1C2C10]1B21E0\\1J0L1E0J1J0K"],"mm":[96.5,21.1,[2372,2491,2492,2611,2612,2731],36,40,91.18,29.52,0.3047,0.512,"1}1_2B1a2D1]2I1Y2K1X2L1W2L1W2K1Y2J1Y2K1V2R1R2S1J01E2U1I0B1D2V1H0B1C2X1B2B1C0C12[1E0D2Z1F0F2T1J0I2M1N0H2M1O0J2J1P0K2J1O0K2K1N0K2H02D1L0J2G0D2C1L0K2B020F2C1L0V2B1L0V21M0V2B1L0W2C1J0X2B1C0C1D0E10R2B1C0C1D0E10P2B02B1B0K10S2D0a2B10`21B0a210b1B0b1C0I"],"za":[25.2,-29,[4389,4390,4507,4508,4509,4510,4626,4627,4628,4629,4746],36,29,15.13,-20.83,0.5297,0.5265,"1}1}1K2F1]2G1[2I1[2J1X2L1M21E21D2L1B0B1I2B1C2P1210C1I21C2Q1D0B1I2U1B2B0B1I2X0D1H2X0E121E2X0F2U1B2E0I2S1D2C0J2S1C2D0J2Y0L2W0N2U0O2T0P2S0Q2R0R2N020U2F0}0}0I"],"de":[10.3,51,[1262,1263,1264,1382,1383],36,31,4.86,55.9,0.31,0.3105,"0K1F0D101B01D0R1C01C01D0B1D0R1C0B1B0C10I10O2B120D1C0Z2C0K20U2G0C2D0H10N2P1F0G2D02C02N1F0B1F2W1E01F2W1M2X1L2X1K2Z1H2\\1H2]1G2]1G2Y1L2U1N2T1Q2T1P2T1Q2T1U2Q1R2S1P2R1R2Q1S2B1B2M1[21}1}1D"],"tz":[34.8,-6.3,[3430,3431,3550,3551,3552,3670,3671,3672,3792],36,35,28.32,0.01,0.365,0.3635,"1}1u2K1Z2L1X2M1O01G2O1L0B1F2R1I0C1G2S1F0D1F2S1G0D1E2U1E0E1E2W1C0E1C2Z10F1C2[0F1C2Z0B20D1C2Z0G1C2Z0G1C2Z020E1D2Z0F1E2Z0E1F2X0F1F2X020D1G2W0F1G2W0F1I2V0E1L2S0E1P2O0E1Q2N0E1Q2P0C1Q2O1B0B1Q2M1C0C1R2H1G0C1a0C1a0C1b0B"],"kr":[127.9,36.5,[1902],36,40,125.16,39.62,0.1504,0.1577,"01O0V1M0V1N0V1Q0R1S0R1S0P1U0O1T2B0N1M2J0M1L2K0M1J2N0M1B0C10B12O0S2R0T2Q0T2P0T2Q0S2Q0O2U0O2V0P2S0Q2S0Q2S0R2R0R2S0Q2S0P2T0P2S0P2S0Q2R0R2J02C020R20B2F02020C2B0S2F020B20J10N202020B20^2B0t10}0v10J20V1C0G2E0S1E"],"co":[-73.1,3.9,[2915,3034,3035,3154,3155,3156,3274,3275,3276,3395,3396],36,40,-80.03,13.43,0.3931,0.4667,"0}0`20a2C0C10[2C10D1D0S2G1B01H0Q2G1C01N0K2G1B0C1M01B0H2F1D0B1N01D0D2H1R0D1C02K1Q0D1C2L1Q0E12M1Q0F2N1P0G2S1J0F2U1C2B1D0G2Y1D0G2X1E0G2X1E0G2X1E0G2X1E0G2Y1D0F2Y1E0D2\\1D0D2]1C0C2W1J0B1B2W1P2S1U2N1Y2L1X2M1Y2K1Z2J1Z2J1I01X21c21b2B1c21}1U"],"gb":[-2.4,53.8,[1018,1138,1259,1260],36,39,-7.13,59.65,0.2745,0.2725,"0t20a2B0z20D2H0U2C0C2G0^2D0^2F02G0S2B02N0V2M0W2L0V2B02J0Z2J0X20D2E02B0V2020B2K0V20C2K0Q2C0D2M0O2E0B2E0B2G0O2F0G2I0N12E0C10C2K0L1B20M2I0K1C0L2K0J1D0K2K0J1D0E2R0I1D0F2P0B20G1C0H2U0D1C0H2U0M2W0K2X0P2E02L0V2P0O2T0E10I2L0B20B20E1D0H2E0S1D0G20D20S1D0^1F0[1I0T1B0E1I0T1P"],"fr":[2.5,46.6,[1379,1380,1381,1499,1500,1501,1619,1620,1621,3162],36,26,-5.79,52.13,0.4157,0.4162,"01P0G1L0E1J0G1N0D1M0C1P0C1C0B1010G2D1N010P2F1L0O2K1J0J20D2O1F0J2W1C0C2D02Y1C0C2]1D0E2[1D0H2W1E0I2T1G0J2S1G0K2S1F0K2S1F0K2T1E0K2T1E0K2T1E0K2U1B0L2U0E1K2K0F2B0F1N212E0O1V0M21V0M21T0O2"],"ke":[37.8,0.6,[3191,3312,3313,3432,3433],36,40,32.9,6.49,0.2774,0.3046,"1}1w21b2C1`2D1_2F1]2L1L21K2M1H2G1J2O1C2G1J2Z1K2X1M2V1N2V1N2V1N2V1N2V1M2W1L2X1K2Y1K2Y1K2Y1K2Y1F01D2Y1E0B1D2Y1D0C1F2X1B0D1H2W0E1J2U0E1L2Q0G1N2N0H1P2J0J1Q2I0J1Q2H0K1R2G0K1S2F0K1U2C0L1V20M1W0M1V0B10K1V0N"],"sd":[29.9,16,[2588,2589,2590,2591,2708,2709,2710,2711,2827,2828,2829,2830,2831,2948,2949,2950],36,30,20.48,23.55,0.5408,0.5408,"1\\0F1_0E1`0D1J2V0D1J2W0D1I2W0D1I2W0E1F2Y0E1F2Y0E1F2[0C1F2[10B1F2Z1B0B1F2X1D0B1F2X1E01E2Y1E01E2Y1J2Z1J2Z1I2Z1J2Z1K2X1L2R12D1M2R12D1M2R12D1N2C1B2K1D21P2B1C2F1Y2B1}1}1N"],"tw":[121,23.8,[],36,40,119.07,26.28,0.1071,0.1338,"1E0_101B0`1E0_1E0_1D0`1E010]10C10_1B0U20a2D0]2I0Z2I0[2I0Y2K0X2L0X2K0X2K0X2L0W2M0W2L0W2M0W2M0W2L0X2L0W2M0X2K0Y2J0[2H0\\2G0_2D0a2C0b2B0b2B0c20}0}0}0}0["],"it":[12.3,43.5,[1503,1504,1623,1624,1745,1864],36,29,5.63,48.08,0.3849,0.3843,"1}1{2E1\\21B2H1V2B12L1R2P0B1R2N0D101Q2N0E1P2N0G1Q2B0D2G0G1O0H2H0G1L0J2H0G101F0M2I0I1E0H1B0D2H0K1C0H1B0F2H0K10H1B0G2J0\\2I0P2B0L2H0M2D0M2H0K2C0N2E0C20K2C0O2B0O2C0Q2C0N20R2C0a20b2B0Z2G0^2F0T1C0I2D0K"],"ug":[32.4,1.3,[3310,3311],36,37,28.56,5.22,0.2061,0.2079,"1}1}1}1W21^21C2B1U2D1B2J1S2Q1S2Q1S2R1R2S1Q2S1Q2T1R2R1R2R1Q2S1P2T1O2T1N2U1O2U1N2U1O2T1O2U1O2T1O2U1O2U1O2U1O2U1O2U1O2D1`2C1}1}1}1Y"],"dz":[2.6,28.1,[1979,1980,1981,1982,2099,2100,2101,2102,2217,2218,2219,2220,2221,2222,2338,2339,2340,2341,2342,2460,2461,2462,2581],36,32,-10.34,38.74,0.6655,0.669,"0B1M0W1L0T1B0C101H0M20B1B0K1B0I2K1C0L10F2N1D0J1F2P1D0J1G2N1D0I1I2N1D0G1K2O1E0E1L2N1H01I2S1G01I2T1F01G2V1F01E2X1I2[1H2\\1H2\\1I2[1K2Y1M2W1N2W1O2W1N2V1P2S1R2Q1U2M1X2J1[2H1^2E1_21}1Z"],"ua":[31.3,49.2,[1388,1389,1390,1391,1392,1511],36,17,20.69,53.79,0.5799,0.5882,"1}1`2B1S2E1F2G1Q2T1Q2S1O2[1H2^1F2^1F2G1C2T1R2P1T2N0C1R2120B2G0D1T2B0F1B20E1V0E1F01V0H1B0F1T0R1D"],"ma":[-8.7,29.8,[1978,2097,2098,2216,2335],36,33,-18.28,37.21,0.5137,0.517,"0W1I0[1C0}0I2B0G1C0W2I1D0W2I1D0V2J1D0S2M1D0B10O2O1C0R2O1C0Q2L1G0P2L1H0P2K1I0Q2I1J0P2G1M0O2E1P0H10E2E1Q0C10H2G1Q0J2H1R0I2I1R0I2D1W0G2F1W0G2E1X0G2E1X0F2E1Y0E2E1Z0E2C1\\0D2D1\\0D2D1\\0C2D1]0B21a0C1a0D1`"],"af":[65.9,33.8,[1883,2000,2001,2002,2003,2120,2121,2122],36,24,59.33,39.61,0.4641,0.4738,"1}1}1J2B1`2D1V2F12G1B2E1N2P1S2P1R2R1N2V1M2V1N2V1N2T1P2T1P2S1Q2R1R2R1T2M1W2J1Y2K1X2L1}1}1G"],"np":[84,28.3,[2247],36,21,79.05,31.39,0.2809,0.287,"1}1}1\\212C1^2H1[2K1Y2L121V2N1W2O1W2N1X2O1W2U1Q2S1X2L1Y2K1\\2H1}1}1Z"],"ar":[-64.8,-34.5,[4238,4357,4358,4359,4360,4477,4478,4479,4480,4596,4597,4598,4599,4600,4717,4718,4719,4720,4836,4837,4838,4839,4840,4956,4957,4958,5076,5077,5196,5197,5315,5316],36,40,-75.17,-20.21,0.6415,0.8435,"0H1\\0H1\\0H1E2G1P0G1F2H1O0G1E2K1M0G1C2P1J0G1C2Q1E21C0G1C2P1F21C0G1C2Q1B2D1C0F1C2U1F0F1B2U1G0F1B2T1H0E1C2S1I0F12T1I0F1B2R1J0E1C2R1I0F1C2R1H0G1C2S0M1C2U0K1C2W0I1D2V0K1D2T0L1C2N0R1C2O0R1C2K02C0R1012K0X12K020U1B2K0W1B2J0V101C2H0V1E2G0X1E2H0Y1B2K0U101B2I0W1C2I0Y1B2H0Y1D2E0[101C2E0M1010M101B0B10\\1E0B120Y"],"pe":[-74.4,-9.1,[3514,3515,3633,3634,3754,3755,3875,3876,3996],36,40,-82.35,0.97,0.4076,0.5082,"0F1^0F1^0E1L2B1Q0D1M2C1P0D1M2D1O0D1L2F1N0D1K2H1B2D1G0E1G2R1F0E1E2S1G0D21E2T1F0C2C1C2S1H0C2D12P1L0C2T1M0C2T1M0D2S1M0F2O1O0G2N1O0G2N1O0H2N1N0I2N1M0J2N1L0J2O1B2B1G0K2R1G0K2R121E0L2T1D0M2T1C0N2T1B0N2S1C0O2R1C0O2R1C0P2P1D0Q2O1D0R2N1D0U2K1D0W2J1C0Y2G1D0[2D1E0\\2C1E0]1G0^1F"],"pl":[19.4,52.1,[1265,1266,1267,1387],36,23,13.13,55.84,0.3327,0.3399,"1C0U1L0W1M0X1M0K2D0D1Q0H2U1I02[1H2\\1I2\\1G2]1H2\\1I2Y1K2[1I2Z1K2Z1I2\\1M2W1M2B1B2Q1U2N1W2L1b2B1}1v"],"iq":[43.8,33,[1994,2114,2115],36,32,37.77,38.37,0.327,0.3221,"1b0B1b0B1c01O2C121^2H1Z2J1Y2L1X2M1W2N1V2O1T2O1U2N1U2O1S2P1R2S1O2V1N2V1O2W1M2Y1L2Y1O2V1P2S1S2Q1T2Q1U2O1C01R2O1B01S2J1C0E1T2H1C0E1U2F1E0D1`0D1a0C1a0C"],"es":[-3.6,40.4,[1617,1738,1739,1858,1859],36,24,-10.24,44.77,0.4041,0.4061,"0V1N0V1N0V1N0D2O021M0E2T1J0G2Y1D0F2^0F1F2X0G1E2V0I1D2S0M1D2S0L1E2R0M1E2Q0G2B0D1E2R0M1F2Q0C20K1C2R0N1E2P0P1C2P0P1D2N0X2K0N1B0J2C0O1H0K20N1J0K10K1M0J1D01C0C1O"],"ye":[47.5,15.9,[2714,2715,2716,2717,2834,2835],36,24,41.66,20,0.3452,0.3495,"1}1}1K2E1Z2K1X2L1E01Q2N1D0B1B2B12D1F2O1D0B1B2K12Q1C0C12]0F2\\0H2[0I2[0I2Y0L2U0O2R0R2Q0T2L0S1B0C2J0U1C0B2F0Y1D02E0Z1E0]2B1E0_1D0V1B0H"],"mz":[35.6,-17.2,[3912,3913,4031,4032,4151,4270,4271],36,40,29.22,-9.46,0.3507,0.46,"1^0F1_0E1_20D1]2C0D1R2B1D2H0D1O2Q0D1O2Q0D1O2Q0D1O2Q0D1Q2O0D1I2C1F2O0C1E2J1D2N0C1C2L1D2N0C1C2L1D2M0D1F2I1C2M0E1J2F12M0F1J2Q0I1K2M0L1K2K0N1K2J0O1J2I0Q1J2H0R1K2E0T1J2F0T1I2G0T1I2H0S1H2I0S1G2J0S1F2L0R1F2L0R1G2K0R1G2K0R1H2I0S1H2G0U1H2C0Y1H2B0Z1H2C0Y1H2B0Z1J0Z1J0Z"],"uz":[63.3,41.8,[1639,1640,1641,1761,1762,1763,1882],36,20,54.6,46.93,0.553,0.5564,"1}1q2G1]2I1[2K1Y2R1R2S1Q2D1D2K1H21H2B1F2L1E21U2K1B2F1R2L1C2D1Q2L1Z2G1_2F1`2E1a2B1}1{"],"gh":[-1.2,8,[2939,3059],36,40,-4.25,12.17,0.1787,0.2101,"1}1}1}1L21E2C1T2O1T2Q1T2Q1S2R1R2R1R2R1S2P1T2R1Q2R1S2Q1S2Q1S2R1S2R1Q2R1Q2S1P2T1P2T1P2T1O2U1O2U1O2V1N2V1N2X1B0D1G2W0F1G2T0I1H2O0M1H2L0V2K0]2D0}0}0}0S"],"ve":[-66.2,7.1,[2916,2917,3036,3037,3038,3039,3157,3158,3159,3278],36,31,-74.45,13.26,0.4363,0.4405,"0}0P1C0D10[1B20C20[1C20C2D0W1D2B02G0V1D2B02L0D2D0C10E1C2C0B2T0H1C2C0B2W0E1D2B02X0E1D2Z0F1E2\\1B01E2[1I2[1N2V1O2S1V2N1V2O1T2Q1S2P1T2N1W2G1C21Y2G1\\2I1\\2H1]2H1\\2G1^2D1b21}1Z"],"ao":[17.6,-12.3,[3664,3665,3666,3785,3786,3904,3905,3906,4024,4025,4026],36,36,10.74,-4.86,0.3974,0.3934,"0C21`0D1`0D1`0D2K1U0E2J1U0E2K1G2B1K0F2J1F2F1H0F2K1E2F1H0F2V1H0G2U1H0F2V1H0F2V1H0F2V1H0G2V1G0G2V1G0H2U1G0H2Y1C0H2Y1C0G2Z1C0G2Z1C0F2[1C0E2W1H0D2X1H0D2X1H0D2X1H0D2X1H0C2Y1H0C2Y1H0C2Y1H0C2Z1G0C2[1F0C1D2X1E0B1R2L1D0C1a0C1a0D1`"],"kp":[127.2,40.1,[1782],36,31,123.35,44,0.2317,0.2348,"1}1}1r21F01\\2B1D0B1[2D10D1Y2E0F1U2H0G1O21E2G0H1N2C1D2F0I1M2O0H1L2P0H1J2Q0I1H2Q0K1F2R0L1E2Q0N1D2O0X2K0[2I0[2I0Z2L0Y2L0V2N10U2I1G0U2G1H0Z1K0Z1K0G10R1K0Y1K0V1N0J"],"mg":[46.7,-19.3,[3916,4035,4036,4155,4274,4275],36,40,42.26,-11.08,0.2563,0.3873,"0}0}0L2B0S10N2C0^20B2D0^2G0[2I0[2I0Z2J0X2M0T2M02B0Q2P0O2V0N2U0O2T0O2U0O2U0O2U0P2S0Q2S0R2Q0R2R0R2Q0R2R0Q2R0Q2S0P2S0Q2S0Q2R0R2R0S2P0T2P0T2O0V2N0W2L0Y2G0}0}0G"],"ci":[-5.6,7.6,[3057,3058,3177],36,37,-9.6,11.72,0.2249,0.2263,"1}1}1}1J2B1]2B1B2C12D1W2N1U2O1C2E1M2X1N2W1M2W1L2X1M2W1K2B12V1K2Z1K2X1L2W1K2Y1K2X1M2W1M2V1M2W1M2W1P2U1O2U1Q2S1Q2T1F01I2L0C2C021F0B1G2H0L1G0D1E2E0S10H1C2C0a20}0}0p"],"my":[114.7,3.6,[3218,3219,3334],36,25,108.54,7.99,0.3258,0.3251,"0}0e20c20a2D0`2D0_2F0\\2J0Z2L0B10S12J0W1B212I0W212C1E20X2F1F0W2G1D0X2G1F0T2I1H0P2L1I0O2K1J0O2K1J0I12C0B2K1J0I1B2G1D21O0F1D2B1Y0E1[0G101[0G10B1Y0I"],"cm":[12.7,5.7,[3064,3183,3184],36,40,7.53,14.08,0.2681,0.3351,"1}1}1J2B1c2B1c21c2B1b2B1`2D1_2E1^2F1^2G1\\2D1`2C1`2E1_2G1[2J1Z2K1X2L1X2M1V2M1P2C1C2M1P2E12M1O2T1O2U1O2U1O2U1N2W1J0D2V1I0E2W1H0H2T1H0D10C2U1G0I2V1E0I2W1D0I2W1D0H12E1G2K1D0H1W21D0H1\\0G1]0H1\\"],"ml":[-3.6,17.3,[2458,2459,2578,2579,2580,2698,2699,2700,2816,2817,2818,2937],36,33,-13.6,26.32,0.5322,0.5301,"1}1X2D1`2E1_2G1^2G1]2I1[2J1Z2L1X2M1W2N1V2P1T2R1R2Q1T2S1Q2S1Q2S1Q2S1Q2R1R2R1K2X1G2U1O2S1Q2Q1T2O1U2N1V2D12H1\\2G1^2F1^2E1}1`01c"],"ca":[-99,58.6,[33,34,35,36,37,38,148,149,150,151,152,153,154,155,263,265,266,268,269,271,272,273,379,380,381,384,386,388,389,392,393,503,504,505,508,510,511,512,513,514,515,516,613,614,615,616,617,618,619,620,621,622,623,624,625,626,627,628,629,630,631,632,634,636,637,638,733,734,735,736,737,738,739,740,741,742,743,744,745,746,747,748,749,750,751,752,754,756,757,853,854,855,856,857,858,859,860,861,862,863,864,865,866,867,868,874,875,975,976,977,978,979,980,981,982,983,984,985,986,987,988,994,995,996,998,1097,1098,1099,1100,1101,1102,1103,1104,1105,1106,1107,1108,1109,1110,1114,1115,1116,1117,1118,1119,1217,1218,1219,1220,1221,1222,1223,1224,1225,1226,1227,1228,1229,1230,1231,1232,1234,1235,1236,1237,1238,1239,1240,1339,1340,1341,1342,1343,1344,1345,1346,1347,1348,1349,1350,1351,1352,1353,1354,1355,1356,1357,1472,1473,1474,1475,1476,1477,1593],36,16,-147.83,78.81,2.7495,2.7478,"0K20C20F2C0B10B1F0L20F2B02020H1C0H2F0202B0B202D0G1D20202E02E02C0B20B2D0E1C2T020C2B020C1D2R0B2020C2B0E1C2Q0F2D0L2O0F2E0J12Q0C2F0K2Q02H0K2U0D20K1N2E120D20J1O2B1C0P1S0Q1Q0S1Q0J"],"sy":[38.5,35,[1992,1993],36,29,34.77,38.3,0.2388,0.2407,"1}1}1u21[2H1E01C0B1B21C2D1D2J1F0E1B2U1H0E1C2S1I0E1B2T1I0D2X1H0D2W1I0E2V1I0E2V1I0E2V1I0E1B2S1J0D1C2R1K0D1C2P1M0C1D2N1O0C1B2N1Q0B1C2L1S0B1C2J1U01D2H1W01D2F1`2B1}1}1q"],"ne":[9.3,17.4,[2463,2464,2582,2583,2584,2701,2702,2703,2704,2820,2822,2823],36,28,-1.1,24.78,0.5091,0.5125,"1}1}1J2E1]2J1X2L1W2M1U2P1S2Q1R2R1P2T1M2W1M2W1M2W1M2W1M2V1N2U1O2U1K2X1I2Z1J2Z1J2I1B2O1K2F1E2B12D1C2B1N2E1`2121}1}1M"],"lk":[80.7,7.6,[],36,40,78.71,10.81,0.1159,0.1466,"1J0Z1J0Z1J0Z1F0^1E0_1E0_1D0`1C0H2C0V1B0L20U1B0J2E0S1E0G2F0^2G0\\2H0\\2J0Z2J0Y2L0X2M0W2M0W2N0U2P0T2P0T2Q0S2Q0T2Q0S2Q0S2Q0S2Q0S2Q0T2P0T2O0U2M0X2J0[2F0}0}0}0}0Y"],"bf":[-1.8,12.3,[2819,2938],36,28,-6.52,16.08,0.2754,0.2733,"1}1}1j2D1^2F1\\2I1X2L1X2M1V2O1Q2S1Q2T1O2V1O2W1L2Y1I2[1I2[1I2W1L2R1C2B1M2I1[2I1\\2I1\\2H1c21}1}1l"],"mw":[34.3,-13.2,[3791,3911],36,40,31.67,-8.39,0.1451,0.2434,"1}1}1_21e2G1]2H1^2G1]2G1]2H1Z2I1\\2I1Z2K1Y2I1[2I1[2H1]2G1Z2J1Z2K1Y2K1X2L1W2P1V2O1W2O1V2O1]2H1\\2I1[2I1[2I1Z2J1Y2J1[2I1[2F1`2C1c2B1b2B1}1}1a"],"ro":[25,45.9,[1507,1508],36,21,19.24,49.26,0.3185,0.3139,"1}1}1H2B1W2F1B2F1T2Q1R2S1P2U1O2U1N2V1L2X1G01E2W1E0C1E2X1B2B0C1G2Z0C1H2V0F1J2T0F1L2K1B2E0F1O212D1G20G1]0G1[0I1[0I"],"kz":[67.3,48.4,[1280,1281,1282,1283,1284,1285,1396,1397,1398,1399,1400,1401,1402,1403,1404,1405,1406,1407,1408,1518,1519,1520,1521,1522,1523,1524,1525,1526,1527,1637,1638,1642,1643,1644,1645,1646],36,16,43.35,58.65,1.312,1.3309,"1}1^21^2I121X2N1N2C1F2N1K2]1G2^1G2\\1H0C2W1I0C2D1C2O1K0C2D1G2K1L0D121G2D1T0B1b0B1a0D1\\"],"zw":[29.9,-19,[4030,4149,4150],36,32,24.22,-14.64,0.2718,0.2737,"1}1}1h2E1^2I1[2K1W2Q1Q2S1Q2S1P2T1O2U1H2\\1I2[1J2Z1J2Y1K2Z1K2Y1L2X1N2V1O2U1Q2R1R2Q1S2Q1T2P1U2N1Y2J1]2F1}1}1_"],"gt":[-90.4,15.7,[],36,36,-93.23,18.82,0.1669,0.1689,"0I10B1R01B0F1E0C1S01B0C1]0C10C1_0E1_0E1^0F1M2K1F0F1M2K1F0F1M2K1F0F1K2M1F0F1L2L1F0F1M2K1F0F1O2I1F0F1P2H1E0G1Q2G1D0H1Q2G1C0I1I2O1B0J1H2S020C1B0B1H2V1M2U1H01E2U1I0B1D2T1J0C1D2Q1L0D1B2R1L0E12R1L0F2R1L0H2N1N0I2L1O0K2I1P0Q2B1Q0T1P0W1M0Z1F0B1B0c10c10b1B"],"kh":[104.9,12.7,[2854,2855],36,31,101.32,15.71,0.2025,0.203,"1}1}1}1Z2B1P21B212B1F2C12B1N2K1D2G1M2O1B2F1M2W1L2Y1J2Z1J2Z1K2X1L2Y1E0C1D2X1E0D1C2X1E0G2U1H0G2R1K0H2O121K0I2M1N0H2N1N0I2N1M0I20B2H1B2B1J0M2G1O0N20C2B1N0R10B1K0[1I0\\1G0\\1H0[1G0L"],"zm":[27.8,-13.5,[3790,3907,3908,3909,3910,4027,4028,4029],36,31,20.98,-7.19,0.3801,0.3822,"1}1}1G2E1_2H1[2K1Y2L1X2M1W2M1W2L1L21K2M1K2C1I2L1L2I1C2L1L2K1B212J1K2L1C2I1G2R1B2I1G2\\1H2\\1H2[1I2X1L2U1O2V1N2S1Q2R1R2Q1T2N1W2L1^2F1}1}1E"],"cl":[-71,-34.4,[4356,4476,4716,4835,4955,5195,5435,5436],36,40,-76.71,-16.5,0.2972,0.9594,"0O1U0S1D2B1K0U2E1J0V2E1I0V2E1I0V2G1G0V2H1F0U2K1D0U2G1H0T2G1I0T2G1I0S2G1J0R2F1L0R2E1M0Q2E1N0Q2D1O0R2D1N0Q2F1M0P2G1M0O2F1O0M2H1O0L2G1Q0K2H1Q0K2G1R0J2G1S0I2G1T0I2B0B2D1S0H2C0B2B1U0I20B2E1S0E20B2B0202C1T0J2G1N0H20B2K1O0K2G1V0D20C2F1R0I2B02021S0J20B2E1N0S2C021L0S2O0V2020B202B0F2B1B0Z202C0B21G0B"],"sn":[-14.5,14.4,[2815],36,28,-18.53,17.68,0.2265,0.2268,"0K1Y0K1Y0J1Z0J1Z0I1[0I12J1P0I2K1P0I2N1M0I2N1M0H2P1L0G2R1K0G2S1J0E2V1I0F2V1H0G2U1H0G2V1G0H2U1G0I2E1B2M1G0I1D0121E2H1G0H1D2F12L1E0H2W1E0H2W1E0H2F1J2G1E0H1S21H0J1Z0L10B1U0O1U0N1V"],"ec":[-78.4,-1.4,[3393,3394,3513],36,39,-81.96,2.46,0.2143,0.2166,"0P1T0P1T0P1T0N1V0N1V0O1U0L2E1S0I2J1Q0I2L1O0I2L1E21I0I2S1H0H2V1F0G2W1F0G2X1E0G2X1E0F2Y1E0E2Y1F0E2Y1F0E2Y1F0F2W1G0F2V1H0E2V1I0F2T1J0G20B2N1L0H202K1O0J2I1Q0I2I1R0G12I1S0F1B2I1S0E1C2H1T0D1C2I1T0C1D212F1U0C1H2D1U0C1I2B1V0D1`0D1`0E1_0E1_0D1`"],"sa":[44.7,24.1,[2112,2113,2232,2233,2234,2235,2352,2353,2354,2355,2356,2473,2474,2475,2476,2477,2594,2595,2596,2597],36,28,32.93,33.81,0.6774,0.6828,"0D1`0C1a0C1a0B1D2G1^2G1]2I1Y2L1E0D1L02S10D1K02T0D1J0C2T0E1I0C2T0G10C1B0D2S0I101C0C2T1B0E1B01C0D2T0E1C01D0D2T1L0E2T1L0D2X1I0C2X1I0C2X1I0D2W1I0E2U1K0E2Q1O0E2J1L01I0D2I1K0C1I0E21R0C1I0F1N0G1K0C1N0H1K0D1K0J"],"so":[45.7,4.7,[2956,3076,3194,3195,3314],36,40,39.96,12.98,0.3452,0.392,"1I01C0W1J0Z1J0Z1H0V2C0C1J0N1B2F0D1K0I1F2F0D1M01L2G0C1Z2F0D1Z2E0E1Z2E0E1Y2E0F1X2F0F1W2F0G1V2F0H1U2G0H1T2G0I1S2H0I1R2H0J1Q2I0J1P2I0K1O2I0L1I2N0M1F2P0N1E2P0O1D2P0P1C2P0Q1C2O0R1C2M0T1C2K0V1C2J0W1C2I0X1C2G0Z1C2F0[1C2E0\\1C2D0]1C2C0^1D20_1D0`1C0a1B0b"],"rw":[29.9,-2,[],36,34,27.86,-0.06,0.1117,0.1101,"1}1}1}1}1}1i21b2C1`2E1Z2C12G1W2M1V2O1U2O1T2O1V2O1U2O1T2P1S2Q1R2I1[2I1[2B1B2E1_2D1}1}1}1}1}1f"],"gn":[-10.9,10.4,[2935,2936],36,29,-16.05,13.67,0.2603,0.2572,"1}1}1_2B1a2J1H21R2K12G1H0B1G2S1I01C2X1G0C1B2X1G0D2Z1F0F2X1F0F2X1F0G2X1E0H2H1C2K1F0I2D1F2K1F0J2C1G2K1E0K21H2K1E0K1J2J1E0K1J2K1D0K1N2E1F0L1M2F1E0L1M2E1F0N1L2B121F0N1L2B1H0P1T0R1R0S1Q0T1P"],"td":[18.6,15.3,[2465,2585,2586,2587,2705,2706,2707,2825,2826,2945,2946],36,40,12.45,24.45,0.3482,0.4492,"1}1T2B1`2F1_2H1\\2K1Y2M1X2O1U2R1S2S1P2W1M2X1L2X1L2X1L2X1L2X1L2X1K2Y1J2Z1H2Z1I2Z1J2Y1J2Z1J2Y1L2X1N2U1P2V1N2V1O2U1N2W1N2S1Q2S1N2T1P2S1R2M1Y2K1Y2J1[2B121}1b"],"au":[134.2,-25.6,[3943,3944,3947,4061,4062,4063,4064,4065,4066,4067,4180,4181,4182,4183,4184,4185,4186,4187,4188,4298,4299,4300,4301,4302,4303,4304,4305,4306,4307,4308,4309,4418,4419,4420,4421,4422,4423,4424,4425,4426,4427,4428,4429,4430,4538,4539,4540,4541,4542,4543,4544,4545,4546,4547,4548,4549,4550,4659,4660,4661,4662,4663,4664,4665,4666,4667,4668,4669,4670,4779,4786,4787,4788,4789,4907,4908,4909],36,27,109.95,-7.47,1.3028,1.2929,"1D0Q101C0B10N10C10P1B0{2B0E20[2D0D2B0V2B02E0D2C0T2J0C2C0R2M0B2D0Q2S0P2U0L2Y0I2[0I2]0G2^0F2^0F2^0G2^0F2]0G2]0G2H0G2M0H2D0K202K0Z2I0\\2H0\\2F0}0K20a2B0G"],"bo":[-64.7,-16.7,[3757,3877,3878,3997,3998,3999,4000,4117,4118,4119,4120,4237],36,39,-70.64,-8.71,0.3931,0.3893,"1}1y2D1^2E1]2G1Z2J1[2J1Z2K1Z2K1X2O1U2R1R2U1O2V1N2V1M2W1N2V1M2W1M2X1N2X1K2[1H2\\1H2]1G2^1G2]1C01C2]1C01C2]1C01E2T1D2B1D01D2Q1N01D2Q1N01D2P1O01E2O1O01E2O1O01E2O1O01F2D1D2B1S01F2B1[01}1J01c"],"ht":[-72.7,18.9,[],36,29,-75.48,20.93,0.1343,0.1341,"0}0K1E0_1G0]1I0[1J0Z1F0M2B0O1B0Q20_2H0E1H0P2L1H0T2H1H0U2G1H0T2H1H0T2H1H0T2G1I0Q2B0B2G1H0W2E1H0H2D0K2C1J0G2L02G1I0I2S1F0M2B0E2C0E2B1E0_1D0`1D0a1B0}0}0}0B"],"bi":[29.9,-3.4,[],36,39,28.01,-1.31,0.1055,0.1062,"1}1}1}1}1}1i21_2F1^2E1W2B1F2E1V2C1E2F1W2M1X2N1V2O1U2P1T2O1U2N1V2M1W2L1X2K1Y2K1Y2J1[2H1]2G1]2F1^2E1_2C1}1}1}1}1}1g"],"tn":[9.6,34.1,[],36,40,6.5,38.34,0.1678,0.2278,"0}0}0h2B0_2G0N1H01D2J02C0I1K2O0J1K2N0K1K2M0L1K2M0L1K2O0J1K2P0I1K2P0I1K2P0I1J2P0J1J2N0L1H2N0N1F2O0O1F2P0N1F2Q020K1G2U0H1H2U0G1J2T1C0C1K2S1Q2S1S2O1W2K1Z2H1\\2F1^2F1_2E1_2E1_2E1`2C1}1}1}1L"],"nl":[5.6,52.3,[],36,29,2.45,54.44,0.1597,0.1618,"0}0}0}0Z1G0Q20D2F01G0S2K1F0N20C2L1F0N2O1G0N2O1G0N2M1I0M2O1H0L2Q1G0K2P1I0J2Q1I0J2L1N0K2L1M0H2D1212H1M0D1B2E1F2F1M01T2B1b21b2B1}1}1}1o"],"ss":[30.3,7.3,[3068,3069,3070,3189,3190],36,29,23.15,13.22,0.3645,0.3701,"1}1}1K2B1b2B1b2B1b2B1a2E1L2C1J2B1C2G1K2D1H2L1K2I1C2N1J2Z1I2[1J2W1N2V1O2X1M2W1N2W1N2W1N2V1O2V1N2V1O2T1Q2D12M1X2K1Z2F12B1}1v"],"cu":[-78.9,21.6,[2433],36,15,-85.89,24.19,0.3542,0.3557,"0W10}0^2I0Y2D0C2F0V2C0D2J0S20C20G2H0T20K2D0a2G0^2G0`2G0\\2I0f10}0K"],"bj":[2.3,9.6,[2940],36,40,-0.23,13.38,0.1409,0.2042,"1}1}1}1P2D1`2E1^2H1\\2I1U21C2J1T2Q1R2S1P2T1O2V1N2U1Q2R1T2P1T2N1V2N1V2M1X2L1Y2H1\\2H1\\2H1\\2H1\\2H1\\2H1\\2H1\\2H1\\2H1\\2H1\\2H1\\2H1\\2H1F01V2E0N1N0X1J0[1C0}0l"],"do":[-70.5,18.9,[2556],36,27,-73,20.91,0.1573,0.1585,"0}0}0z1B0b1C0F20B2B0V1F0B2I0S1H2L0R1F2L0Q1G2P0M1G2O0O1F2S0I10B1E2T0L1C2W0H1E2V0G1H2E0B2C0I20O12D0`2D0a2B0}0}0}0}0a"],"az":[47.7,40.3,[1755,1756],36,27,44,42.89,0.2046,0.2034,"1R0R1S0Q1T0P1U0O1U0O1K2C1H20M1K2D1F2C0L1E2C1E2C1C2F0K1F2E1B2L0K1G2S0J1G2T0I1G2W0F1H2W0E1J2Q0I1H2S0I1J2P0J1D2C121C2E1C2F0J1E2D1C2D1D2F0J1G2C1B2B1G2C0L1I21B21G2D0L1U2C0L1V2B0L1X0L1X0L1X0L1Y0K1[0I"],"hn":[-86.6,14.8,[],36,22,-90.36,17.02,0.2279,0.2293,"1I0[1I0[1H0K20P1G0]1F0M20P1I02Q0I1H2T0H1G2V0G1E2Z0E1E2X1B0E1E2R1H0E1E2R1H0E1G2O1I0E1H212H121J0H1I2E1N0K1G2D1N0M1D0B2B1O0S2B1O0S1Q0T1O0V1N0W1M0G"],"tj":[71,38.5,[1884],36,23,66.35,42.03,0.2714,0.2761,"1}1}1d2B1_2D1`2E1]2C1C21\\2C1]2L12C1F21N2V1P2T1O2X1M2I1B2M1L2H1C2M1K2H1E2M1I2F1H2M1I2C1B21H2E1_2C1}1}1d"],"pt":[-8,39.6,[1737,1857],36,40,-10.48,43.14,0.1464,0.1783,"0I1[0I1[0J1Z0K1Y0K1Y0K1Y0K12D1T0K2P1I0K2R1G0L2Q1G0L2N1J0L2M1K0L2M1K0L2M1K0L2M1K0K2N1K0K2M1L0K2M1L0J2N1L0J2J1P0I2L1O0H2N1N0G2P1M0G2Q1L0G2B02L1N0I2M1N0K2K1N0K2L1M0K2M1L0K2K1N0K2J1O0K2I1P0K2J1O0K2I0E1K0[1I0\\1H0\\1H0]1G0^1E0a1B0B"],"sv":[-88.9,13.7,[2790],36,27,-91.11,15.43,0.122,0.1209,"1}1}1}1}1y2B1b2D1_2F1\\2J1P0D1E2L1B2B1K0G12T1H0I2S1H0K2P1I0P2K1I0R2I0C1F0W2C0D1F0_1E0\\1B01E0]1G0^1F0_1E0`1D0b1B0c1"],"sl":[-11.8,8.6,[],36,37,-14.29,11,0.1392,0.1376,"1}1}1}1a0B1b0B1O2E1N0D1I2J1M0E1G2L1L0D1H2L1L0F1E2N1K0G1C2P1J0G1B2Q1J0G2S1J0I2R1I0H2S1I0J2Q1I0G202Q1B21G0H2U1G0I2S1H0J2Q1I0J2P1J0K2O1J0K202L1K0L2L1L0N2I1M0P2F1N0S2B1O0T1P0U1O0V1N0X1L0Y1K0Z1J0\\1H0^1F"],"by":[28,53.5,[1149,1268,1269,1270],36,21,22.18,57.15,0.3205,0.3277,"1D01}1{2C121\\2L1W2N1V2N1T2Q1S2Q1P2V1J2\\1I2\\1H2W1M2X1J2Z1L2W1L2B1J2J1`21B21}1y"],"la":[103.8,18.5,[2614,2735],36,40,99.11,23.5,0.265,0.2644,"1}1}1_2C1a2D1a2C1V01J2D1T0B1F2B1B2D1Q0E1E2J1P0E1D2P1I0G1D2P1H0H1E2Q1E0I1E2Q1D0J1E2N121D0K1H2J1G0K1H2K1F0K1H2M1D0K1H2O1B0K1H2H12F1C0J1H2C12C1D2E1C0I1G2B1K2E1C0H1G21M2E1B0H1V2E1B0G1U2G1B0F1U2G1C0E1U2G1D0D1V2H1D0B1X2G1D01Y2F1D01X2H1\\2H1\\2H1\\2G1\\2D1B21_21}1X0D1a0C1]"],"tg":[1,8.5,[3060],36,40,-1.09,12.12,0.1075,0.1757,"1}1}1}1k2E12C1[2H1\\2G1_2E1a2E1^2H1\\2J1Z2J1Z2J1\\2H1\\2I1Z2K1Z2J1Y2K1Z2J1\\2H1[2I1[2I1[2I1Z2J1Z2J1[2I1[2I1Z2J1[2I1\\2H1]2H1^2E10J1U0O1S0Q1L0X1H0\\1E0}0F"],"cz":[15.3,49.7,[1384,1385],36,18,11.09,52.04,0.2429,0.2479,"1}1}1c21B21]2J1X2M1S2R1B2C1O2X1L2Y1K2X1N2U1Q2F1B2J1T2C1}1}1k"],"hu":[19.4,47.2,[1506],36,20,15.09,49.55,0.244,0.24,"1}1}1l2E1^2I1N21F2Q1L2V1L2V1N2V1N2U1N2U1P2S1R2R1T2I1]2C1}1}1l"],"be":[4.7,50.6,[],36,25,1.52,52.49,0.1622,0.1592,"10R1R0Q1R0Q1S0O1U0O1U0P1T0M1H21N0I2B1E2G1M0G2S1J0B1E2S1J01F2R1V2Q1T2Q1T2Q1V2M1W2C12G1]2F1`2E1a2B1}1}1}1k"],"gr":[22.6,39.5,[1747,1867],36,30,19,42.74,0.2396,0.2433,"1}1o01c0B1\\21E0B1R2D1F2B1D0B1M2P1E0B1I2N0B2C1E0B1G2L0C20F1D0D1F2G02D0G20C10B10C1E2H0M101F0D12J0J2B0C1F0C212K0N1F0E2L0P1C0F2J020B20H2B01D0I2I0O1C0H2I02B0L1D0I2M0G20101C0F20D2B0C2F0G201E0I2L0M1B0G20B2G0C20K2B1B0K2H0O1B0K2E0S10K2F0Q1B0N2020P20P20O20U20}0s20N"],"ni":[-85,12.8,[2791],36,35,-88.67,16.01,0.1809,0.1792,"10N1B0B1C0N1B01V0K1Z0J1Z0J1]0G1^0F1[2B0G1T2B12G0F1S2K0F1S2K0F1R2L0F1N212M0G1K212P0G1K2Q0H1K2Q0H1D0C1C2R0O1B2S0N2V0O2U0P2S0R2S0S2Q0S2P0U2P0U2O0V2M0X2L0Y1C2H0X1I2D0Y1K0X1M0W1M0W1N0V1D01J0W1C01J0D"],"pg":[144.2,-6.6,[3587,3707,3708],36,30,139.86,-1.61,0.333,0.3348,"0x2B0N1B0\\2B0D1C2B0\\20B1C2D0\\21C2H0Y1C2I0X1C2L0U1C2N0R21C2O0Q21C2O0L20C2B1C2O0L20B2C1C2R0C202I01C2T0F2D0C1C2U0L1C2R0O1C2S0N1C2S0N1C2I0C2H0M1C2H0H2F0L1B2G0I2F0M12H0I2F0M2F0L2G0^2F0D20Z2G0_2F0c2B0o1B0b1B0["],"rs":[20.8,44.2,[1626,1627],36,35,17.84,47.17,0.1705,0.1693,"1}1}1}1j2E1\\2J1Z2K1Z2J1Z2K1[2K1W2N1X2M1W2M1V2T1P2T1Q2S1R2Q1R2R1S2Q1Q2S1R2T1Q2F1B2L1S2C1C2J1\\2F1I01U2E1I0C1T2D1I0E1Q2E1I0G1]0H1\\0J1Z0J1Z0J1Z0I1["],"bg":[25.2,42.8,[1628,1629],36,22,21.34,45.24,0.229,0.227,"1}1H01c0C1`0D1`0D1E2B1N2G1D0D1E2I1E2K1B0D1E2[0D1F2W0G1G2V0G1E2X0G1E2W0H1E2W0H1E2W0H1G2P1F0G1G2N1H0G1G2E1B2G1I0F1Q21O0C1]0B1B01O0G1F0I1L0M10H1I01E0J1D0B1H"],"ly":[18.1,27,[2103,2104,2107,2223,2224,2225,2226,2227,2343,2344,2345,2346,2347,2466,2467],36,32,8.04,34.45,0.5104,0.5069,"1D0`1E0_1G0]1G2E0M2D0G1F2H0J2G0E1D2K0H2K0B1D2N0F2I1G2P0C2J1F2^1F2^1F2^1F2^1G2]1G2]1F2^1G2]1F2^1F2^1G2]1G2]1J2Z1K2Y1N2C1C2P1V2N1X2L1Z2J1\\2H1^2F1`2D1}1r"],"py":[-58.4,-23.2,[4239,4240,4361],36,36,-63.65,-18.29,0.2891,0.2852,"1}1}1^2I1Y2M1W2M1V2N1V2O1U2O1U2O1T2P1T2P1T2Q1S2W1N2W1N2V1O2U1P2T1R2R1C21Q2S1S2Q1T2P1W2M1Y2K1Y2J1Y2K1X2L1X2L1X2K1X2K1X2K1}1}1^"],"kg":[74.5,41.5,[1764,1765],36,17,68.23,44.24,0.3616,0.3549,"1}1}12C1Z2D1B2P1M2Z1J2Y1I2X1N2B12R1T2L1W2L1Q21B2J1V2C12I1[212E1}1}1H"],"cf":[20.5,6.6,[2947,3065,3066,3067,3185,3187],36,26,13.39,12.03,0.418,0.4155,"1}1}1F2C1`2E1^2G1\\2G1Y2K1Y2M1V2P1O212S1L2Y1K2Z1I2\\1H2]1G2^1F2Z12C1F2J1D2H1O2H1F2D1R2I1\\2C1C21^21c21}1}1O"],"se":[16.3,62.4,[665,666,667,785,786,904,905,1024,1025,1144],36,38,10.11,70.08,0.4191,0.415,"0T1B0B1L0Q1S0M10D1R0K101B01H2D1H0H1010D1D2L1E0K1E2P1D0K1D2R1C0I1F2R1C0G1F2T1C0G1D2V1C0F1E2R0F10E101C2Q0K1G2R0K1G2R0G1I212Q0F1E01C2S0F1K2P0E101M2N0H1N2L0I1O2L0J1O2K0J1O2K0J1O2K0J1O2N0C10F1K2P0O1D2P0O10C12O0M1D0C2M0P1D0C2M0L1B0D1B0D2K0E20M1C0D2K0C2B0F1D0C1B0E2J0D20G1E01D0F2I0J1J0F2H0L1J0C1C02C0P1L01B0U1J01B010S1L0B10D10G1E0C1M"],"jo":[36.8,31.2,[],36,35,33.95,34.37,0.1762,0.1766,"0J1Z0J1Z0I1[0I1[0H1\\0G1]0G1S2B1H0G1Q2D1H0F1P2F1H0F1D21I2I1G0E1D2C1F2K1G0E1D2F1B2L1G0E1D2U1F0D1E2S1H0D1E2O1L0C1F2K1P0B1F2I1S01G2J1Z2K1Y2L1W2N1V2O1U2O1U2N1V2M1V2J1Z2I1[2H1[02G1[01c01c01b0B1b0B1b01`"],"at":[14.1,47.6,[],36,17,8.52,50,0.2674,0.2706,"1}1}1n2D1Z2M1V2O1T2P1U2M121H2B12B12T1J2Z1K212C1D2N1X2H1}1}1N0C1Q"],"tm":[59.5,39.1,[1758,1759,1760,1880,1881],36,22,51.36,43.91,0.4554,0.4487,"1}1K0C1a0C1K2121S0B10C2B1D2G1Q0F2C1C2G1Q0C20C2P1M0C2U1L0C2U1L0E2U1J0E2V1I0F2W1G0E2Z1E0E2C1F2S1C0F21K2M121C0F1M2J1]2G1]2F1^2D1}1y"],"il":[35,31.4,[2111],36,40,33.24,34.43,0.1019,0.1489,"0X1L0X1L0W1M0V1N0V1N0U1O0T1P0S1E21K0S1C2D1J0R2H1J0Q2I1J0Q2G1L0P2G1M0P2B1D21M0P21S0O2B1S0N2C1S0N2D1R0M2E1R0L12D1S0J12E1C2B1O0H1B2K1Y2K1Z2J1[2H1\\2G1^2F1^2F1_2E1_2D1a2C1a2B1c21c01b0B1a0B1b0B1b0B1a0B1b0B1U"],"ge":[43.5,42.2,[1633],36,19,38.98,44.57,0.2416,0.2367,"1`0D1b0C1b0C1b0D2C1\\0F2E1Y0I2I1R0J2J1Q0K2O1J0K2Q1H0K2R1G0L2S1E0K2S1F0J1G2H1B2D1E0G1K2B1J2B1}1}1Z"],"lr":[-9.3,6.5,[3056],36,36,-12.51,9.54,0.1697,0.1719,"1}1}1}1n2D1`2E1]2G1]2G1]2G1\\2H1D2B1T2K1C2B1L0C1D2R1K0E1B2R1K0F2S1K0G2Q1L0I2N1M0J2O1K0L2O1I0N2N1H0O2O1F0P2N1F0Q2M1F0R2L1F0S2K1F0U2H1G0W2F1G0X2E1D0^2B1B0}0}0}0f"],"ch":[8.2,46.8,[1502],36,22,4.97,48.77,0.1802,0.1794,"1}1}1}1t2E1W2O1U2N1U2O1S2T121N2V1L2V1N21C2H12E12B121M21C2H1B2C1X2F1D21}1}1}1o"],"lb":[35.9,33.9,[],36,37,34.11,35.68,0.0966,0.0974,"0C10M1S01B0O1S0Q1R0S1Q0S1Q0S1Q0R1R0R1R0S1Q0S1Q0S1C2B1L0S2E1L0R2F1L0Q2H1K0P2I1K0P2I1K0P2H1L0O2H1M0O2H1M0N2F1P0N2E1Q0M2G1P0M2F1Q0L2F1R0K2E1T0K2D1U0J2D1V0J1Z0J1Z0I1[0I1[0H1\\0H1\\0H1\\0H1\\0G1]0G1]"],"sk":[19.5,48.7,[1386],36,18,15.86,50.6,0.2132,0.2131,"1}1}1}1I2C12B1G21U2G1B2I1Q2U1K2X1K2X1L2P1F21M2L1Z2G1}1}1}1S"],"hk":[114.1,22.4,[],36,33,112.9,23.57,0.0678,0.0688,"1}1}1}1k01a0B1b0B1`0E1`010B1a0D1T0C1I0E1L0B1D0E1I0D1L0B1B0G1J0E1F0B10L1J0F2E0O1J0E2F0O1J0H2C0O1J0E2B020Q1J0D2B0C20P1B01D0]1B0B10_10c10}0}0}0}0}0v"],"ps":[35.3,31.9,[],36,40,33.87,33.53,0.0751,0.0796,"0S1Q0S1Q0R1R0R1R0Q1S0Q1S0P1T0P1T0O1U0O1U0N1V0N1V0N1V0M1C2D1P0M1B2G1N0M1B2H1M0M1B2H1M0L1B2H1N0L1C2G1N0K1D2G1N0K1D2G1N0J1F2F1N0I1H2E1N0I1F2G1N0H1F2G1O0G21F2G1O0F21F2F1Q0E21^0C1B21^01}1}1}1}1}1}1]"],"cg":[15.2,-0.8,[3304,3305,3425,3544],36,40,10.13,4.69,0.2637,0.2673,"1}1}1o2G1\\2H1\\2H1\\2G1\\2H1Q2E1F2G1R2I1B2G1R2R1R21B2O1V2M1W2M1V2O1T2O1U2O1V2N1W2M1W2L1X2K1Y2I1[2I1T21F2H1U21F2G1R2B12D1212H1S2Q1S2Q1M01E2Q1M0B1E2P1M0C12R1N0D2Q1O0E2O1P0F2C1B2C1B2C1Q0G21D21C2B1R0G1]0H1\\0H1\\0H1B01Y"],"ba":[17.8,44.2,[],36,29,14.74,46.28,0.1624,0.1626,"1}1}1}1n21V01E2C12N1L01E2S1B21O2U1H0B1F2S1I0B1G2R1I0B1G2S1H0101G2T1F0B10B1F2Q1H0F1F2Q1G0G1G2O1G0L1D2J1J0N1B2I1K0P12G1L0L1C01B2E1M0P10B12C1M0U121M0W1M0Y1K0Z1L0Y1R0U1M0W1F"],"md":[28.5,47.2,[1509],36,33,25.62,49.48,0.1531,0.1524,"1}1}1}1}1O2H1^2I1\\2K1Y2M1X2L1Y2K1Z2K1Z2L1Y2J1[2J1Z2L1Y2K1Y2K1F0B1Q2E1K0C1P2F1K0C1P2F1J0D1P2D1J0F1Q2B1G010H1P2C1G0J1[0I1[0I1Z0J1Z0J1V01B0K1U0O1U0O"],"al":[20.1,41.1,[1746],36,40,18.28,43.65,0.1042,0.1249,"1}1}1}1}1y21V0B1J2F1R0D1G2H1Q0F1D2K1O0H1B2L1N0I12L1N0L2J1N0L2I1O0L2I1O0K2J1O0K2J1O0K2K1N0K2K1N0K2L1M0K2O1J0J2P1J0J2P1J0K2N1L0I2N1N0J2K1O0L2H1O0O2C1R0O2D1P0M1B0B2B1Q0O10B1R0O10C1Q0S1Q0U1O0W1M0\\1H0X1L0V10B1K"],"cr":[-84.2,10,[2911],36,34,-86.91,12.19,0.1485,0.1505,"01U0P1S0R1S0R1R0S1P0U1O0V1N0W2C1J0V2K1D0V2K1B20V2O0U2O0T2Q0S2D02M0S2D0B2L0T2D02L0T2B0B2M0X2K120Z2H1D0Y2G1D0[2E1D0[2F1D0B10W2E1I0V20B2B1I0V2B02B1I0Z1J0a1C0c10}0m10c10}0L"],"er":[38.9,15.4,[2712],36,32,35.43,19,0.2414,0.2384,"1H0P1V0N1W0N1W0M1X0M1V2B0M1S2D0N1Q2F0N1M2I0N1M2I0L10B1L2J0N1L2J0O1K2J0O1J2L0M1K2L0M1K2N0L1I2P0K1I2R0I1I2F1B2L0G1I2C121K2E0G1Z2C0G1[2C0F1\\2D0E1\\2D0C1^2D0C1^2C0C1_2D0C1b0C1a0C1a0C1_0E1`0D"],"dk":[9.3,56.2,[1143],36,37,7.12,58.74,0.1336,0.1333,"1O0P1R0R1Q0S1O0V1K0Y1D0a1C0b1B0c10W2B0_2E0^2F0]2G0V2M0U2D0C2H0U2D0C2H0Y2K0T2C02M0S2T0P2T0O2Q0T2O0U2O0I2B0J2N0G202C020H2L0J2F0J2I0B2F0C2F0K2H0B2G0B2F0L2G0B2G0C202C0K2G0F2C0G2B0L2G02B020C202B0D20L1H0F20B2G0M1I0J2C0O1G0[1M0X1Q0S1P0F10M1O010C1C0P1T"],"fi":[26.2,64.3,[668,669,788,789,907,908,909],36,34,19.62,71.06,0.3588,0.3602,"0M1B010B10B1B0V101D01B0B1C01F0E1010B1D01E01N0G101P2F1E0D1C01O2J1M2B1K2I1O2C1C2B1B2J1T2P1V2P1T2R1R2Q1T2N1V2O1T2Q1U2P1M0J2L1M0K2L1L0J2O1L0G2Q1K0G2S1H0G2T1G0H2X1D0E2\\1C0D2]1C0E2Z1E0E2X1G0E2W1H0E2U1J0E2S1L0G2L0F1K0H202D0O1G0W1M0L1X0H10B1Y"],"mr":[-10.4,20.2,[2336,2337,2456,2457,2575,2576,2577,2695,2696,2697],36,37,-18.06,28.29,0.3956,0.393,"0C10B10B10E1U0L1X0L1X0L1L21K0K1M2C1I0I1O2E1G0I1F2O1F0H1G2Q1D0H1G2N1G0H1G2N1G0F1I2N1G0E1J2N1G0E1J2N1G0E1H2Q1F0D1I2Q1F0C1J2Q1F0C1J2Q1F0C1J2Q1F0C2[1F0D2Z1F0E2Y1F0E2Y1F0D2[1E0E2Z1E0E2Z1E0E2Z1E0E2Z1E0E2Z1E0E2Z1E0D2[1E0D1F2V1D0D1H2T1D0C1J2C12O1D0C1K2B1T01c0C1a0C1a"],"am":[44.9,40.3,[],36,31,42.44,42.29,0.143,0.1426,"1}1}1}1}1Y21Y2K1Z2M1X2M1W2M1V2M1W2O1V2P1T2O1Z2I1]2H1_2G1a2E1_2E1a2D1`2C1b2B1}1}1}1}1P"],"jm":[-77.3,18.2,[],36,24,-79.34,19.52,0.1147,0.117,"0}0}0}0}0}0\\2K0Y2M0Y2N0W2O0V2N0Z2B0}0}0}0}0}0d"],"hr":[16.4,45.2,[1505],36,26,12.52,47.53,0.2191,0.2152,"1}1}1}1M2D1^2G1]2I1P0B1H2P1G0E1D21C2Q1F0E2C02V1E0E2B02B02D1B21J2B1F0F2020B2D1U0J2F1T0K2F1S0L2E1T0L2E1U0L2D1V0K2E1T0M2D1T0M2B021S0M20B21T0R21R0S1R0T1R0S1F"],"ie":[-8.1,53.2,[1257],36,33,-11.39,56.37,0.1768,0.1785,"0a1C0a1C0^10B10_10C10b101B0`10Y2C0B1C0W2D021H0V2E1J0C10O2E1K0W21M0T2C1E2B1G0K2S1D0N2T0P2T0P2U0M2W0Q202Q0R2R0Q2S0P2C02O0Q2S0P2S0N2T0Q2N0U2B02H0R10G20B2E0}0}0}0v"],"pa":[-80.1,8.5,[],36,20,-84.03,10.6,0.2175,0.2188,"1C0a1C0a1D0`1E0_1G0]1E2C0K2G0K1D2C0I2K0J1D2C020D2F0B2F0F10B1C2O0E2E0D1B0B1012N0F2E10B1C0D1202J0F20D2C101C0K2E0J2E1E0K2B02C0I2E1E0N2D0I2C1F0J20C2C0J21H0\\1H0]1G0^1F0_1E0_1E"],"mn":[103.1,47,[1410,1411,1412,1413,1414,1415,1417,1418,1530,1531,1532,1533,1534,1535,1536,1537,1538,1652,1653,1654,1655,1656],36,15,85.17,54.69,1.0361,1.0445,"1}1{2D1Y2F12I1F2B1J2[1J2Y1B21J2\\1G2Y1N2R1T2P1W2K1}1U0B1a0B1"],"no":[12.2,63.8,[185,187,188,549,784,902,903,1022],36,21,2.82,73.18,0.8395,0.8209,"0}0}0I202I0S202H1E21C0N2B02D1E21I0N2C1S0M2C1S0N2B1U0K2C1H0E1I0J2C1I0D1J0H2C1J0C1L0E2F1H0C1N0C2H1F0E1N0C202G1E0E1N0C202G1F0E1E0C1E0C2H1H0K1F0C2E0B1G0F101K0J1G0I1J0H10B1E0B10C1B0B1J0F1D0B1D0F1N"],"nz":[170.6,-44,[4918,5038,5157,5276],36,30,165.48,-39.49,0.2748,0.2713,"0`2D0b2B0c20c20Y20I20X2D0B20C2B0X2H02C0X2G0D20V2J0Y2J0Z2I0Z2I0Z2I0Y2J0Y2J0X2N0T2L0V2K0X2L0V2N0U2N0V2N0U2N0U2O0U2M0]2F0}0C2B0a20}0C"],"uy":[-56,-32.8,[4601,4721],36,34,-59.44,-29.1,0.2032,0.2009,"1}1}1}1H2B1_2G1]2H1\\2I1[2I12B1X2M1V2P1T2Q1S2R1Q2V1N2V1N2W1F01F2X1E01F02X1C0B1F2X1D0B1E2X1D0C1E2X1C0D1D02X1B0E1E2X0G1E02W0G1E0B2U0H1E0C2S0I1E0G2N0J1G0H2B0C2D0L1I0[1K0Y1K0Y1K0Y1J0Z"],"ls":[28.2,-29.6,[],36,34,26.05,-27.58,0.1206,0.1194,"1}1}1}1}1}1D21`2D1^2H1Z2K1X2N1U2O1U2P1S2P1S2Q1Q2R1S2P1T2P1U2N1W2H1\\2G1^2F1_2D1b2B1}1}1D01b0B1a0C1`0D1_0E1]0G"],"lt":[23.9,55.3,[1147,1148],36,21,20.05,57.41,0.2147,0.2151,"0G1G0F1P0F1I0D1Q0E1_0E1_0E1_0E12Q1M0E2V1I0E2X1G0E2Y1F0D2Z1F0C101C2W1I01G2O1V2M1V2N1X2L1Z2F1}1}1}1K"],"sg":[103.8,1.4,[],36,33,102.65,2.45,0.0652,0.0661,"1S0Q1S0Q1T0P1U0O1U0O1U0O1V0N1V0O1V0P1T0R1S0S1Q0U1P0V1N0W1I01C0W1C02C0C1C0X10B2E0`2B0v10S10D1D0G1D0E10I1C0B1F0G1D0E10H1B0C10B1C0E1B0B1C0T1D0E1D0B1B0N10E1B0F1F0E10E10E10O1C0E1B0W1D0D10C10W1E0C1B0Z1F0B1B0Z1F0D1B0X1F0B1F0V1D0B1I0U1B0B1L0T"],"om":[56.1,20.6,[2478,2479,2598],36,38,50.98,25.98,0.2739,0.2719,"1B0P120C1O0O1C0H1J0N1D0O1C0M1E0P1B0L1D2B0P10K1E2D0O1C0G101F2C0O1P2G0M1P2J0J1P2M0G1P2M0G1O2O0F1P2O0E1P2P0D1Q2O0D1Q2N0E1P2O0E1P2M0G1P2M0G1O2M0H1O2K0B20G1O2J0K1M2L0K1J2O0K1G2R0K1D2U0K1D2Q0O1D2Q0O1E2O0P1E2N0Q1F2J0T1F2J0T1G2H0U1G2C0Z1G0]1E0_1D0`1E0_"],"na":[17.2,-22.1,[4144,4145,4146,4265,4266,4385,4386,4505,4506],36,32,10.64,-15.88,0.4363,0.4418,"0C1a0C1a0C1a0B2P1R0C2R1E2F1D0C2U1L0D2T1L0E2S1L0E2S1L0F2R1L0F2R1L0G2Q1L0G2Q1L0H2P1L0I2L1O0I2L1O0I2L1O0I2L1O0I2L1O0I2L1O0J2K1O0J2K1O0J2K1O0J2K1O0J2K1O0K2J1O0K2J1O0L2I1O0M212F1O0N1E21P0N1V0O1U"],"kw":[47.6,29.3,[],36,33,45.53,31.1,0.1087,0.108,"1}1}1}1]01b0101a0B1b0D1Q2E1J0E1O2G0B201B0H1N2I020K1N2I02B0J1M2L0K1M2I0N1L2H0P1K2L0M1J2N0L1I2O0L1Q2G0L1R2G0K1R2H0J1S2G0J1S2H0I1[0I1\\0H1\\0H1]0G1]0G1^0F1^0F1^0F1`0D"],"gm":[-15.4,13.4,[2814],36,20,-17.82,14.81,0.1389,0.1374,"0B1b0E1_0E1_0F1^0G1]0G1]0H1\\0H1J2C1O0I1H2F1M0I2J12E12B1H0G2B0202D1F2G1G0G2G1V0H1\\0H1\\0H1\\0H1\\0H1\\0H1\\0I1[0K1Y"],"mk":[21.7,41.6,[],36,28,19.45,43.36,0.1266,0.1252,"1}1}1}1}1}1B2D1\\2I1V2P1T2Q1I01H2S1H01G2T1P2T1P2T1P2R1S2Q1T2I1[2H1}1[0B1Z01H01Y0B1H01Y0D1E0C1X0I10D1V0F10C10D1V0J"],"bw":[23.8,-22.2,[4147,4148,4267,4268,4269,4387,4388],36,35,18.98,-16.79,0.3163,0.3162,"1}1}1D2B1Y2E1B2D1V2O1U2P1T2P1T2Q1S2R1R2T1P2T1P2V1N2U1O2V1N2Y1H2]1G2]1G2Z1J2Y1K2X1L2W1M2V1N2V1N2U1P2R1S2P1T2G1C2F1U2F1F21W2E1^2E1_2D1}1}1M"],"gw":[-14.9,12.1,[],36,27,-17.71,13.68,0.14,0.1385,"0H1\\0H1F0B1T0F1B0C1Y0G1]0G1]0G1]0G1]0G101H2K1H0G1H2N1G0G1B2T1G0I2R1I0J2R1H0K202E02I1H0K202B02L1H0P202I1I0L20D2F1M0Q2D1O0N20B2C1P0K20F2B1P0S1Q0S101O0V1N0V1N0W1M0W1M0Y1K0[1I"],"lv":[24.9,56.9,[],36,17,20.02,59.06,0.2552,0.2586,"0H1D01W0N1V0H1D0C1U0H10H1S0Q2E1N0H2B0G2G1L0F2F0E2M1F0E2H0C2N1F0D2[1E0D2[1E0D2C1F2E12M1D0D1R2I1E0D1T2F1F0E1_0E1_0B10B1}1F"],"ae":[54.3,23.9,[],36,29,50.57,27.07,0.1895,0.1879,"0O1L0B10D1B0P1J01B0E1B0U1B0B10H1B0b1B0^10D10C10Y210D10B1C0X1B0G1C0V2C0G1D0U2E0F1D0T2F0F1D0S2G0E1E0R2E1210E1E0Q2F1C0E1D0Q2F1E0D1D0P2H1E0C1E20J2B02I1E0C1F2T1I01G2S1R2R1R2Q1T2P1U2N1Z2J1c21}1}1}1I"],"ga":[11.8,-0.6,[3423,3424],36,38,7.7,3.3,0.2161,0.2163,"0J1Z0J1Z0J1Z0J1Z0J1Z0J1G2I1J0J1G2H1K0I1H2H1K0H1I2I1J0H1I2M1F0I21G2N1E0I2V1E0H2W1E0H2U1G0G20B2S1G0H2U1G0G2V1G0G2X1E0E2Z1E0E2Z1E0F2Y1E0H2W1E0H2W1E0G2X1E0H2N1B2F1F0I2M1B2F1F0J2H1K21F0J2H1R0K2G1R0M2F1Q0M2F1Q0N2E1Q0O21T0P1T0Q1S0R1R0S1Q0S1Q"],"sz":[31.5,-26.6,[],36,39,29.79,-24.74,0.0925,0.0915,"1}1}1}1}1k01b0B1a0C1`0D1P2C1M0D1O2E1K0E1N2H121G0E1N2K1F0E1M2L1G0D1L2L1J0B1L2L1J0B1K2N1I0B1K2N1I0B1K2N1I0B1K2N1I0B1L2M1I0B1L2L1I0C1M2K1I0C1N2I1J0C1O2H1J0C1Q2F1I0D1`0D1`0D1_0E1_0E1_0E1_0E1^0F1^0F1^0F1^0F1]0G"],"tl":[125.9,-8.8,[],36,26,123.92,-7.32,0.1217,0.1229,"0}0`1B0E10W1G0]1E0}0V10E101F0C20S10B1C01E0O2C0J10Q2H0T2O0T2N0U2M0V2K0W1D2G0V21E2E0W2C1E2B0Y1I20Z1I0[1H0\\1G0]1F0^1E0_1B0}0m"],"tt":[-61.3,10.4,[],36,33,-62.9,11.84,0.083,0.0841,"0}0}0}0|2B0`2B0}0}0q2F0L1G01D0C2H0M1H0I2F0^2F0M10P2F0M1B0O2F0M1C0N2F0M1C0L2H0M1C010H2I0N1E0_1F0C1B0Y1F0C1C0X1M01D0R1M01E0Q1T0P1W0M1Y0K1Y0K1Y0K1W0B10J1V0N"],"si":[14.8,46.1,[],36,24,12.38,47.86,0.1427,0.1432,"1}1}1}1}1a2C1^2F1Q2B1F2J1Q2R1R2O1U2O1V2N1V2L1T0E2E12E1O010F2F1C2D1O0H1\\0I1D0C1T0I1C0C101T0I1B01B0C1R0N10101R0R1R0R1R"],"gy":[-59,4.8,[3160,3280],36,40,-62.39,9.55,0.1919,0.2337,"1H0\\1G010[1H0\\1F0^1E0B1F0W1M2B0U1L2E0S1J2H0R1I2J0Q1I2K0P1K2I0P1I2K020N1F2R0L1F2S0K1F2U0I1E2V01C0C1H2U1P2T1Q2C12O1U2L1X2K1Y2K1[2I1[2I1\\2H1Z2K1Y2L121V2N1V2N1V2O1U2O1V2O1U2L1B2C1T2J1[2E1a21}1}1g"],"mu":[57.6,-20.3,[],36,37,56.32,-18.99,0.0688,0.0682,"0}0}0}0}0}0}0}0}0}0I2B0a2D0_2E0^2F0^2F0^2E0_2E0}0}0}0}0}0}0}0}0}0G"],"ee":[25.8,58.7,[1027,1028],36,22,22.43,60.64,0.1867,0.187,"1]0D1C01R0O1D01K0Z1D0|1D0P2C0K1F0J2R021F0F2W1G0F2W1G2C0C2U1I0F2U1I2E0B2T1I2B0G202P1I0K2Q1H0J21F2K1H0J1J2G1K0H1K2B1B21M0H1]0F1`01}1h"],"fj":[178,-17.8,[],36,31,176.25,-16.31,0.0949,0.0952,"0a2C0]2G0[2H0Y202I0Y2G02D0Y2D0a20w20}0a20R2E0]2I0Z2K0X2M020U2M0V2N0V2N0V2N0G20Q2G0}0}0}0}0}0R2020_2B0t"],"bt":[90.4,27.4,[],36,24,87.74,29.31,0.1485,0.1504,"1}1}1}1}1U2E1^2I1B21W2O1T2P1S2Q1R2U1O2U1N2V1O2U1P212E1C2E12B1}1}1}1}1Q"],"gq":[10.5,1.6,[3303],36,30,8.39,3.3,0.1097,0.1115,"02B0K1V0N1V0N1V0N1V0N1V0M1W0M1W0M1W0M1W0M1W0M2N1I0M2N1I0M2N1I0L2O1I0L2O1I0K2P1I0J2Q1I0J2Q1I0I2R1I0I2R1I0K1B2N1I0K1Y0K1Y0K1Y0I1[0I1[0J1Z0H10C1X0I1B0B1W0I1["],"km":[43.3,-11.7,[],36,40,42.23,-10.37,0.0629,0.0637,"0}0}0}0}0}0}0}0}0}0k2C0a2B0b2B0b2B0b2C0a2C0b2C0b2B0}0}0e20`2D0b2B0W2B0J20}0}0}0}0}0S"],"cy":[33,34.9,[],36,25,31.3,36.18,0.1042,0.1045,"0K1H0}0}0}0G1B0`1B0_1C0Y1I0Z1J0V2J1E0T2P0T2L0Y2J0\\2D0}0}0}0}0}0}0M"],"dj":[42.6,11.8,[],36,37,40.77,13.71,0.1013,0.1018,"1N0K1Z0J1Z0J1[0H1\\0H1^0G1^0G1^0F1_010D1`0D1^2C0G1B0C1T2D0L1P2B1B2E0K1O2K0J1N2L0J1N2L0J1M2L0K1L2L0L1K2K0N1J2J0P1J2I0Q1J2G0B2E0L1J2N1B0J1J2M1D0I1J2M1D0I1J2L1F0H1J2E1E21H0G1]0G1^0F1`0D1a0C1b0B1}1}1z"],"cv":[-23.6,15.1,[],36,37,-24.78,16.33,0.065,0.0652,"0}0h2C0`2D0`2D0}0}0}0}0}0}0N20G20[20G2B0Z2B0F2B0Y2D0a2D0U2B0I2D0T2D0J2B0U2B0}0}0}0}0}0}0}0}0m"],"bh":[50.5,26,[],36,40,49.45,27.25,0.0602,0.061,"0d10c1B0b1C0a1D0`1F0^1H0\\1I0[1K0Y1I0B10X1I0[1I0[1J0Z1L0X1L0X1M0W1L0F20Q1L0E2B0Q1J010E2B0J1B0E1J0G2B0H1E0D1J0G2B0G1G0C1K0F2B0F1I0B1K0G20F1J01L0M1J01L0L1K01M0K1K01M0K1J0B1N0I1K0B1O0H1K0B1P0F1L0B1Q0E1L0B1Q0E1M01R0D1M01R0D1M01R0D1`0D1a0D1a0C1L01U0B1L01V01K0B"],"me":[19.2,42.8,[],36,34,17.44,44.54,0.1087,0.108,"1}1}1}1}1}1a2B1b2C1_2B12D1\\2I1[2L1M01H2P1K01H2R1K0B1F2O1K0F1D2N1L0H12K12C1L0K2H1Q0L2F1R0N2C1S0O2C1R0P2B1R0Q21R0T1P0T1P0S1Q0S1Q0S1Q0S1Q0S1Q0S1Q0S1Q"],"sr":[-55.9,4.1,[3161],36,37,-59.06,6.99,0.1685,0.1662,"1C0a1G0]1H0\\1I0[1J0Z1K0Y1K02D0C2I0H1K2S10E1K2S1C0C1K2R01Q2Q1R2R1O2T1P2T1P2T1P2T1O2V1N2V1O2U1O2V1O2V1N2V1Q2R1R2R1R2R1S2Q1S2P1U2E1H21V2D1a2D1b2C1}1}1}1r"],"sb":[160.2,-9.6,[],36,30,158.61,-8.27,0.0893,0.0887,"0J2D0b20I2C0V2020I2C0a2D0`2D0a2B0b2C0a2D0M20K2B0F2D0L2B0K2B0E2D0a2D0R20N2C0Q2C0O20Q2I0J2B0P2J0H2C0O2K0H2B0P2K0_2F0a2B0}0}0\\2C0c2B0b2D0a2C0b2B0c20}0K"],"mv":[73.5,4.2,[],36,37,72.47,5.25,0.0572,0.0565,"0}0}0}0}0}0}0}0}0}0}0}0}0}0}0}0}0}0}0}0}0x20w"],"qa":[51.2,25.3,[],36,40,49.76,27.15,0.0793,0.0897,"0}0o1C0a1D0`1C0a1C0a1D0`1E0_1F0^1E0D10Z1E0D1B0G20Q1D0E1B0E2D0P1D0E1B0E2F0N1E0E10D2H0M1E0J2H0M1F0H2H0N1F0H2H0N1H0E2I0N1I0D2I0N1I0D2J0M1J0C2J0M1J0C2J0M1K0B2J0M1L0B2I0M1L0B2H0N1M2I0N1N2G0O1O2D0Q1U0O1T0P1T0P1Y0K1Z0J1Z0G1}1}1}"],"bz":[-88.7,17.2,[2670],36,40,-90.24,19.48,0.0876,0.1148,"1_0E1]0G1_0E1^0F1^0F1^0F1X01D0G1W0B1D0G1V0C1C0H1S2C0D1B0H1S2E0L1R2F0L1Q2G0B20I1L2C12H0L1L2K0M1L2K0M1L2K0M1L2K0D20H1L2J0D20I1L2J0N1L2J0N1L2J0N1L2J0N1L2J0N1L2J0N1L2I0O1L2H0P1L2G0Q1L2E0S1K2E0T1K2D0U1P0C10G1C0F1W0B1}1}1}1}1S"],"bn":[114.6,4.5,[],36,36,113.06,6.02,0.0829,0.0833,"0}0n10c10b1B0^10B1C0]1G0\\1H0]1G0]1G0^1F0^1F0V2B0E1G0U2D1K0S2C1B2B1J0R2B1D2B1J0P2D1D2C1I0K12I1C2C1I0K1C2G1C2C1I0K1D2F1D2B1I0K1D2F1O0J1F2E1O0I1H2C1P0H1J2B1P0H1\\0G1]0F1^0E1_0D1`0C1a0B1b01c01}1}1U"],"mt":[14.4,35.9,[],36,35,13.35,36.98,0.0616,0.0617,"0Q1M0X1K0Y1K0\\1H0a1C0}0}0}0}0}0}0O20e2B0b2C0b2B0}0}0}0}0}0}0}0}0}0l"],"ws":[-172.4,-13.6,[3842],36,32,-173.78,-12.47,0.0723,0.0731,"0}0}0}0}0}0}0}0}0^2G0^2G0^2F0_2E0h20a2F0_2G0`2D0}0}0}0}0}0{"],"bs":[-78,24.7,[],36,39,-79.44,26.2,0.0751,0.0747,"0]20b2B0a2C0c20}0}0}0}0}0i20d2B0b2B0F2D0X2C0`2E0_2E0^2G0^2G0[2I0\\2H0^2E0`2C0}0I2E0`2C020`2D0`2D0a2C0a2C0a2C0}0}0}0l"],"bb":[-59.6,13.2,[],36,37,-60.65,14.32,0.0617,0.061,"0}0}0}0}0}0}0}0}0}0}0R2B0b2C0b2B0}0}0}0}0}0}0}0}0}0}0S"],"lu":[6.1,49.8,[],36,35,4.73,51.17,0.0769,0.0778,"1}1}1}1}1}1}1}1x2C1`2D1`2E1^2G1]2I1\\2I1\\2G1\\2G1^2D121}1}1}1}1}1}1}1x"],"vu":[166.8,-15.2,[],36,40,165.53,-13.64,0.0744,0.075,"0}2B0b2B0}0}0x2C0a2C0}0}0l20c20b2C0b2C0a2C0C20]2C0B2B0^2B0B2B0N20O2G0M20O2G0M20O2G0I2B0B20O2G0H2B0S2H0F2B0D20P2F0M20Q20Q20U2B0L20c20c20V2B0b2C0a2C0c2B0I20Y2C0D2D0Y2D0D2C0Y2E0`2E0_2B0l"],"is":[-18.6,65,[773,774],36,14,-25.48,67.53,0.3589,0.3657,"0}0v2C0O2D0L2G0B2B02M0I2C0C2B0B2T0L2X0G20C2X0N2T0O2Q0X2G0}0}0"],"lc":[-61,13.9,[],36,39,-62.07,15.09,0.0608,0.0609,"0}0}0d1C0a1D0a1D0a1D0a1C0`1D0}0}0}0}0j20b2B0b2B0b2B0b2B0c20}0}0}0}0B1C0a1C0b10}0m10}0}0l"],"st":[6.6,0.2,[],36,37,5.47,1.41,0.0634,0.0637,"0}0}0}0}0}0}0}0}0}0l2C0`2D0`2D0`2C0a2B0}0}0}0}0}0}0}0}0}0m"],"vc":[-61.2,13.3,[],36,37,-62.28,14.36,0.0599,0.0599,"0}0}0}0S10b1B0a1C0a1C0a1C0}0}0}0}0f2B0b2B0b2B0}0m20}0}0}0}0}0}0}0a10b1B0Y"],"dm":[-61.4,15.4,[],36,39,-62.48,16.63,0.0619,0.0617,"0}0[10b1B0c1B0]1C01E0[1H0\\1D0a1C0a1C0a1B0E10c1B0}0}0u20c2C0a2D0a2C0a2C0b2B0b20}0}0}0}0I1D0a1D0`1D0a1D0a1C0a1D0c10}0x"],"fm":[158.2,6.9,[],36,36,157.13,7.98,0.0614,0.0607,"0}0}0}0}0}0}0}0}0}0}0R2C0b2B0}0}0}0}0}0}0}0}0}0}0S"],"gd":[-61.7,12.1,[],36,37,-62.78,13.24,0.0605,0.0602,"0Y1B0}0}0}0}0}0}0}0}0}0v20b2B0b2B0}0}0}0}0}0}0}0x1B0a1B0}0p"],"ki":[-157.4,1.9,[],36,34,-158.58,3.03,0.0668,0.0676,"0}0}0}0}0}0}0}0}0}0H20a20B20a2C0c2B0}0}0}0}0}0}0}0}0}0G"],"to":[-175.2,-21.2,[],36,35,-176.36,-20.07,0.0635,0.0627,"0}0}0}0}0}0}0}0}0}0}0R2D0b20}0N20c20}0}0}0}0}0}0}0v"],"ag":[-61.8,17.1,[],36,36,-62.89,18.17,0.0612,0.0603,"0}0}0V10}0}0f2B0b2B0}0}0D1B0c10}0L1B0c10K2B0a2D0}0}0q10c10}0}0`1B0b1C0]1B0B1D0\\1J0Z1C0a1D0`1D0a1B0O"],"kn":[-62.8,17.3,[],36,35,-63.84,18.4,0.0614,0.0622,"0}0X10a10}0K1B0}0}0}0s1B0b1B0c10P10}0L2B0c2B0d20d20c20K1B0b1C0}0}0q10d10}0}0}0g1B0a1C"],"mh":[171.2,7.1,[],36,32,170.04,8.17,0.0655,0.0658,"0}0}0}0}0}0}0}0}0}0F20e2C0h20}0}0}0}0}0}0}0}0["],"sc":[55.5,-4.7,[],36,37,54.38,-3.56,0.06,0.0602,"0}0}0}0}0}0}0}0}0}0}0S20d20c20}0}0}0}0}0}0}0}0}0}0S"],"mo":[113.5,22.2,[],36,36,112.48,23.25,0.0575,0.057,"1}1]0B1a0B1b0B1a0D1_01B0B1`0B101a0E1_0F1_0E1`0E1H01V0F1F0D1T0G1E0E1S0F1G0D1S0I1D0D1S0G10I1S0E1B0C1B0E1J01F0S1I0B1D0U1I0[1I0[1I0[1D0C10\\1C0b10g10`101B0}0}0}0}0}0M"]}};
 // ===== 生まれた場所：ブロックの地球と、空に浮かぶ国の島 =====
@@ -11308,6 +11694,168 @@ function lbIsleSVG(){ let S; try{ S=bkScene(); }catch(e){ return ''; }
   S.box(1.4,.2,.3,1.3,1.2,1.1,'#FFE7B8'); S.box(1.3,.1,1.4,1.5,1.4,.35,'#E9705A'); S.box(1.5,.3,1.75,1.1,1,.3,'#F08A72');
   const sv=S.render(); return `<svg viewBox="128 30 104 120">${sv}</svg>`; }
 setTimeout(()=>{ try{ const el=document.getElementById('lbIsle'); if(el&&!el.innerHTML) el.innerHTML=lbIsleSVG(); const a=el&&el.closest('a'); if(a) a.onclick=ev=>{ ev.preventDefault(); try{ if(typeof cur!=='undefined'&&cur&&typeof goHome==='function') goHome(); else window.scrollTo(0,0); }catch(_){} }; }catch(e){} },0);
+// ===== 地球アルバム：生まれた国の名所を、ブロックの絵はがきにして集める =====
+// 名所はすべて実在。説明は、よく知られた事実だけ（年や高さが確かなものだけ書く）。
+// [名所の名前, 形, 色, ひとこと]
+const EA_LM={
+ in:['タージ・マハル','dome','#F4F1EA','17世紀に、皇帝が亡き妃のために建てた白い大理石の霊廟'], cn:['万里の長城','wall','#C9A77C','北の国境に沿って、何世紀もかけて築かれた長い城壁'], id:['ボロブドゥール寺院','stupa','#9C8B78','9世紀ごろに建てられた、ジャワ島の大きな仏教遺跡'],
+ us:['自由の女神','statue','#7FB9A8','1886年にフランスから贈られた、ニューヨーク港の像'], pk:['バードシャーヒー・モスク','dome','#C2654A','ラホールにある、17世紀の赤い砂岩のモスク'], br:['コルコバードのキリスト像','statue','#E8E4DA','リオデジャネイロの山の上で両手を広げる像'],
+ ng:['ズマ・ロック','rock','#8C7B6B','首都アブジャの近くにそびえる、大きな一枚岩'], bd:['スンダルバンス','mangrove','#4F9A5B','ベンガルトラが暮らす、世界最大級のマングローブの森'], mx:['チチェン・イッツァ','pyramid','#B9A88C','ユカタン半島にある、マヤの階段ピラミッド'],
+ ru:['聖ワシリイ大聖堂','onion','#D9574A','モスクワ赤の広場の、色とりどりの玉ねぎ屋根'], et:['ラリベラの岩窟教会','church','#B07A55','岩を掘り下げてつくられた教会群'], ph:['チョコレート・ヒルズ','hills','#8E6A4C','ボホール島に1000をこえる丸い丘が並ぶ'],
+ eg:['ギザのピラミッド','pyramid','#E2C58F','4500年ほど前に建てられた、王の墓'], vn:['ハロン湾','karst','#6FA79A','海から石灰岩の島々がそびえる湾'], jp:['富士山','mountain','#6C8FC7','高さ3776メートル、日本でいちばん高い山'],
+ ir:['イマーム広場','dome','#4A90C2','イスファハーンにある、青いタイルのモスクに囲まれた広場'], tr:['カッパドキア','fairy','#E0B98A','きのこのような岩が立ち並ぶ高原'], cd:['ニーラゴンゴ山','volcano','#5B4C46','溶岩湖をもつ火山'],
+ th:['ワット・アルン','pagoda','#E8D7B5','バンコクのチャオプラヤー川沿いの寺院'], mm:['シュエダゴン・パゴダ','stupa','#E9B83A','ヤンゴンにある、金色にかがやく仏塔'], za:['テーブル・マウンテン','mesa','#8C9C7A','ケープタウンの上に広がる、平らな山'],
+ de:['ブランデンブルク門','gate','#D8C8A8','ベルリンの中心にある、18世紀の門'], tz:['キリマンジャロ','mountain','#5C7F9E','高さ5895メートル、アフリカでいちばん高い山'], kr:['景福宮','palace','#3E8C6A','ソウルにある、朝鮮王朝の王宮'],
+ co:['カルタヘナの旧市街','city','#F2B630','城壁に囲まれた、カラフルな港町'], gb:['ビッグ・ベン','clock','#C9A86A','ロンドンの国会議事堂にある時計塔'], fr:['エッフェル塔','eiffel','#8C6E54','1889年のパリ万国博覧会のために建てられた鉄の塔'],
+ ke:['マサイマラ国立保護区','savanna','#D9B96A','毎年ヌーの大移動が見られる草原'], sd:['メロエのピラミッド','pyramid','#C98A5A','クシュ王国の、小さくとがったピラミッドの群れ'], tw:['台北101','needle','#7FB0A0','2004年に完成した、台北の超高層ビル'],
+ it:['コロッセオ','colosseum','#D7B98E','古代ローマの円形闘技場'], ug:['マーチソン・フォールズ','falls','#4F9A5B','ナイル川がせまい岩の間を流れ落ちる滝'], dz:['カスバ（アルジェ）','city','#F4F1EA','白い家が坂に重なるアルジェの旧市街'],
+ ua:['聖ソフィア大聖堂（キーウ）','onion','#3F8E6E','11世紀に建てられた、キーウの大聖堂'], ma:['ハッサン2世モスク','dome','#5FA9A0','カサブランカの海辺に建つモスク'], af:['バーミヤン渓谷','cliff','#C9A27C','岩山に大きな仏像の跡が残る谷'],
+ np:['エベレスト','mountain','#7EA0C8','高さ8849メートル、世界でいちばん高い山'], ar:['イグアスの滝','falls','#5FA35C','ブラジルとの国境にある、たくさんの滝の集まり'], pe:['マチュピチュ','ruins_inca','#7C9A6A','アンデスの山の上にある、インカの都市の遺跡'],
+ pl:['ヴァヴェル城','castle','#C88A5A','クラクフのヴィスワ川沿いの城'], iq:['サーマッラーの大モスクのらせん塔','spiral','#C9A77C','9世紀に建てられた、らせん状のミナレット'], es:['サグラダ・ファミリア','sagrada','#C9A87C','バルセロナで1882年から建てられ続けている教会'],
+ ye:['シバーム','city_mud','#C79A6A','日干しれんがの高い家が並ぶ町'], mz:['モザンビーク島','island_fort','#E8D7B5','古いとりでと町並みが残る島'], uz:['レギスタン広場','dome','#4A90C2','サマルカンドにある、3つの神学校に囲まれた広場'],
+ gh:['ケープコースト城','castle_white','#F4F1EA','海辺に建つ、白いとりで'], ve:['エンジェル・フォール','falls','#4F8A5B','落差979メートル、世界でいちばん落差の大きい滝'], ao:['カランドゥーラの滝','falls','#5FA35C','ルカラ川にかかる大きな滝'],
+ kp:['白頭山','mountain','#7E9AB8','山頂に天池という湖がある火山'], mg:['バオバブの並木道','baobab','#B07A55','大きなバオバブの木が道に沿って並ぶ'], ci:['平和の聖母大聖堂','dome','#E8E4DA','ヤムスクロにある大きな聖堂'],
+ my:['ペトロナス・ツインタワー','twin','#B8C4CC','クアラルンプールの、ふたつ並んだ高いビル'], cm:['カメルーン山','volcano','#5B6C4E','西アフリカでいちばん高い火山'], ml:['ジェンネの泥のモスク','mud_mosque','#B88A5A','日干しれんがでできた大きなモスク'],
+ ca:['CNタワー','needle','#B8C4CC','トロントにある、高さ553メートルの塔'], sy:['パルミラ遺跡','ruins','#D7B98E','砂漠の中に残る古代都市の遺跡'], ne:['アガデスの大モスク','mud_mosque','#C08A5A','泥でつくられた高いミナレットのあるモスク'],
+ lk:['シーギリヤ','rock','#9C6B4E','頂上に宮殿の跡が残る、大きな岩山'], bf:['シンドゥの岩峰群','rock','#C98A5A','風が削った、細い岩が並ぶ'], mw:['マラウイ湖','lake','#4FA3C8','たくさんの種類の魚が暮らす、大きな湖'],
+ ro:['ブラン城','castle','#C88A5A','カルパチア山脈の入り口に建つ城'], kz:['バイテレク・タワー','needle','#E9B83A','首都アスタナにある、金色の玉をのせた塔'], zw:['ヴィクトリアの滝','falls','#4F9A5B','ザンビアとの国境にある、大きな滝'],
+ gt:['ティカル','pyramid','#9C9478','森の中にそびえる、マヤの神殿'], kh:['アンコール・ワット','angkor','#A89A7A','12世紀に建てられた、大きな寺院'], zm:['ヴィクトリアの滝','falls','#4F9A5B','ジンバブエとの国境にある、大きな滝'],
+ cl:['モアイ像（イースター島）','moai','#7A6A5E','太平洋の島に並ぶ、大きな石の像'], sn:['ゴレ島','island_fort','#C9805A','ダカールの沖に浮かぶ、歴史のある小さな島'], ec:['ガラパゴス諸島','island','#5FA35C','めずらしい生き物が暮らす島々'],
+ sa:['アル・ウラー','rock','#C98A5A','砂漠の岩山に古い墓が彫られた地域'], so:['ラース・ゲール','cliff','#B07A55','岩かげに古い壁画が残る場所'], rw:['ニュングェ森林国立公園','forest','#3E8C4E','山の上に広がる、深い森'],
+ gn:['フータ・ジャロン','hills','#5F9A55','たくさんの川が生まれる高原'], td:['エネディ山地','rock','#C08A5A','砂漠の中にアーチ形の岩が立つ山地'], au:['ウルル','rock','#C8603A','大陸の中心にそびえる、大きな一枚岩'],
+ bo:['ウユニ塩原','saltflat','#E8F2F8','空が鏡のように映る、広い塩の平原'], ht:['シタデル・ラフェリエール','castle','#9C8B78','山の上に建つ、大きなとりで'], bi:['タンガニーカ湖','lake','#4FA3C8','世界で2番目に深い湖'],
+ tn:['シディ・ブ・サイド','city','#F4F1EA','白い壁と青い窓の町'], nl:['キンデルダイクの風車','windmill','#8C6E54','運河沿いに19基の風車が並ぶ'], ss:['スッド湿地','lake','#5FA35C','白ナイル川が広がってできた、大きな湿地'],
+ cu:['ハバナ旧市街','city','#F2B630','カラフルな建物とクラシックカーの町'], bj:['ガンヴィエ','stilt','#8C6E54','湖の上に家が建つ村'], do:['サント・ドミンゴ植民都市','church','#C9A87C','アメリカ大陸で早い時期に建てられた町並み'],
+ az:['フレーム・タワーズ','twin','#4A90C2','バクーにある、炎の形をした3つのビル'], hn:['コパン遺跡','pyramid','#8C9478','彫刻の美しいマヤの都市の遺跡'], tj:['パミール高原','mountain','#7E9AB8','「世界の屋根」と呼ばれる高い山々'],
+ pt:['ベレンの塔','tower_stone','#E8E4DA','リスボンのテージョ川に建つ塔'], sv:['サンタ・アナ火山','volcano','#6C7C5E','火口に緑の湖がある火山'], sl:['バナナ諸島','island','#5FA35C','フリータウンの沖に浮かぶ島々'],
+ by:['ミール城','castle','#C2654A','赤いれんがの塔が並ぶ城'], la:['ルアンパバーンの寺院','pagoda','#E9B83A','メコン川沿いの古い町の寺院'], tg:['クタマク','mud_house','#B88A5A','泥でつくられた塔のような家々'],
+ cz:['プラハ城','castle','#C88A5A','ヴルタヴァ川を見下ろす城'], hu:['国会議事堂（ブダペスト）','parliament','#E8E4DA','ドナウ川沿いの大きな建物'], be:['アトミウム','atomium','#B8C4CC','1958年の万国博覧会のためにつくられた建物'],
+ gr:['パルテノン神殿','columns','#E8E4DA','アテネのアクロポリスの丘に建つ神殿'], ni:['モモトンボ火山','volcano','#6C7C5E','マナグア湖のほとりの火山'], pg:['シーク川','river','#4F9A5B','ニューギニア島を流れる長い川'],
+ rs:['ベオグラード要塞','castle','#9C8B78','ドナウ川とサヴァ川が出会う場所のとりで'], bg:['リラ修道院','church','#C2654A','山の中にある、しま模様の修道院'], ly:['レプティス・マグナ','ruins','#D7B98E','地中海沿いの古代ローマの都市の遺跡'],
+ py:['イタイプ・ダム','dam','#B8C4CC','ブラジルとの国境のパラナ川にあるダム'], kg:['イシク・クル湖','lake','#4FA3C8','山々に囲まれた大きな湖'], cf:['ボアリの滝','falls','#4F9A5B','ムバリ川にかかる滝'],
+ se:['ストックホルムの旧市街ガムラ・スタン','city','#E8A33A','島の上の古い町並み'], jo:['ペトラ遺跡','petra','#C8805A','岩をけずってつくられた古代都市'], at:['シェーンブルン宮殿','palace_eu','#F2D27A','ウィーンにある、黄色い宮殿'],
+ tm:['ダルヴァザのガス・クレーター','crater','#E8703A','砂漠の中で燃え続ける穴'], il:['エルサレム旧市街','city','#E2D2A8','城壁に囲まれた古い町'], ge:['ゲルゲティ三位一体教会','church','#9C8B78','カズベク山のふもとの丘に建つ教会'],
+ lr:['サポ国立公園','forest','#3E8C4E','西アフリカに残る、深い熱帯雨林'], ch:['マッターホルン','mountain','#7EA0C8','とがった形の、アルプスの山'], lb:['バールベック','columns','#D7B98E','大きな柱が残る、古代の神殿'],
+ sk:['スピシュ城','castle','#E8E4DA','丘の上に広がる、大きな城の跡'], hk:['ビクトリア・ハーバー','city_tall','#7FB0D8','高いビルが海辺に並ぶ港'], ps:['ベツレヘムの聖誕教会','church','#D7C8A8','長い歴史をもつ教会'],
+ cg:['オザラ・コクア国立公園','forest','#3E8C4E','ゴリラが暮らす森'], ba:['スタリ・モスト','bridge_arch','#E8E4DA','モスタルの川にかかる石の橋'], md:['オルヘイ・ヴェキ','cliff','#9C8B78','川沿いの崖に修道院がある場所'],
+ al:['ベラト','city','#E8E4DA','窓がたくさん並ぶ白い家の町'], cr:['アレナル火山','volcano','#5B6C4E','円すい形の美しい火山'], er:['アスマラの町並み','city','#F2D27A','20世紀前半の建物が並ぶ首都'],
+ dk:['ニューハウン','city','#E8703A','運河沿いにカラフルな家が並ぶ'], fi:['オーロラ（ラップランド）','aurora','#3FB58A','冬の夜空にオーロラが見える北の地方'], mr:['シンゲッティ','city_mud','#C79A6A','砂漠の中の古い町'],
+ am:['アララト山の見える修道院（ホル・ヴィラップ）','church','#C9A87C','大きな山を背にした修道院'], jm:['ダンズ・リバー・フォールズ','falls','#4F9A5B','海へ流れ込む、段になった滝'], hr:['ドブロブニク旧市街','city','#E8A33A','アドリア海に面した、城壁の町'],
+ ie:['モハーの断崖','cliff','#5F9A55','大西洋に面した、高い崖'], pa:['パナマ運河','canal','#4FA3C8','1914年に開通した、大西洋と太平洋を結ぶ運河'], mn:['ゲルと大草原','ger','#8CC06A','遊牧の暮らしのゲルが建つ草原'],
+ no:['フィヨルド','fjord','#4F8AB8','氷河がけずってできた、深い入り江'], nz:['ミルフォード・サウンド','fjord','#4F8AB8','山と海がつくる入り江'], uy:['コロニア・デル・サクラメント','city','#E8A33A','石だたみの古い町'],
+ ls:['マレツニャーネの滝','falls','#4F9A5B','高い崖から落ちる滝'], lt:['トラカイ城','castle','#C2654A','湖の島に建つ赤いれんがの城'], sg:['マリーナ・ベイ','city_tall','#7FB0D8','高いビルと海の町'],
+ om:['スルタン・カブース・グランド・モスク','dome','#E8E4DA','マスカットにある大きなモスク'], na:['ナミブ砂漠の赤い砂丘','dune','#D8743A','赤い砂丘がつづく、古い砂漠'], kw:['クウェート・タワーズ','needle','#4A90C2','玉をつけた3本の塔'],
+ gm:['ガンビア川','river','#4F9A5B','国の真ん中を流れる川'], mk:['オフリド湖','lake','#4FA3C8','古い教会が湖のほとりに建つ'], bw:['オカヴァンゴ・デルタ','lake','#5FA35C','砂漠の中に広がる、大きな湿地'],
+ gw:['ビジャゴ諸島','island','#5FA35C','たくさんの島が集まる諸島'], lv:['リガ旧市街','city','#C2654A','とがった屋根の教会が並ぶ町'], ae:['ブルジュ・ハリファ','needle','#B8C4CC','2010年に完成した、高さ828メートルのビル'],
+ ga:['ロペ国立公園','forest','#3E8C4E','森とサバンナが出会う場所'], sz:['ムリルワネ野生生物保護区','savanna','#8CC06A','動物が暮らす草原と山'], tl:['クリスト・レイ像','statue','#E8E4DA','ディリの岬の上に立つ像'],
+ tt:['ピッチ湖','lake','#3A3A3A','天然のアスファルトでできた湖'], si:['ブレッド湖','lake','#4FA3C8','湖の小さな島に教会が建つ'], gy:['カイエチュールの滝','falls','#4F9A5B','一段で大きく落ちる滝'],
+ mu:['ル・モーン・ブラバン','mountain','#5F9A55','海辺にそびえる岩山'], ee:['タリン旧市街','city','#C2654A','中世の町並みが残る'], fj:['サンゴの海','island','#5FA35C','サンゴ礁に囲まれた島々'],
+ bt:['タクツァン僧院','cliff','#E8E4DA','がけにはりつくように建つ僧院'], gq:['ビオコ島','island','#5FA35C','火山でできた島'], km:['カルタラ山','volcano','#5B6C4E','大きな火口のある火山'],
+ cy:['ペトラ・トゥ・ロミウ','rock','#E8E4DA','海に立つ白い岩'], dj:['アッサル湖','saltflat','#E8F2F8','海面より低い場所にある塩の湖'], cv:['フォゴ島','volcano','#5B4C46','島そのものが火山'],
+ bh:['バーレーン要塞','castle','#C9A77C','海辺に残る古いとりで'], me:['コトル湾','fjord','#4F8AB8','山にかこまれた入り江'], sr:['パラマリボの木の町並み','city','#F4F1EA','木でつくられた白い建物'],
+ sb:['マロボ・ラグーン','island','#5FA35C','島々に囲まれた大きなラグーン'], mv:['水上の家','stilt','#8C6E54','あさい海にたくさんの島が浮かぶ'], qa:['イスラム美術館（ドーハ）','museum','#E8E4DA','海辺に建つ美術館'],
+ bz:['グレート・ブルー・ホール','bluehole','#2F6FB0','海の中の、まるい深い穴'], bn:['スルタン・オマール・アリ・サイフディン・モスク','dome','#E9B83A','金色の丸屋根のモスク'], mt:['ヴァレッタ','city','#E2D2A8','はちみつ色の石の町'],
+ ws:['トー・スア・オーシャン・トレンチ','bluehole','#4FA3C8','岩にあいた、海水の大きな穴'], bs:['ピンクの砂浜','island','#F2C2C8','ピンク色の砂の浜辺がある島'], bb:['ハリソンズ洞窟','cave','#9C8B78','鍾乳石のある洞窟'],
+ lu:['ルクセンブルクの旧市街と要塞','castle','#C9A87C','谷の上に築かれた町'], vu:['ヤスール火山','volcano','#5B4C46','火口をのぞける火山'], is:['オーロラとゲイシール','geyser','#7EA0C8','熱い湯がふき上がる間欠泉'],
+ lc:['ピトン','mountain','#4F8A4B','海辺にそびえるふたつの山'], st:['ピコ・カン・グランデ','rock','#5B6C4E','森からそびえる細い岩山'], vc:['ラ・スフリエール火山','volcano','#5B6C4E','島の北にある火山'],
+ dm:['ボイリング・レイク','lake','#B8C4CC','湯気の立ちのぼる熱い湖'], fm:['ナン・マトール','ruins','#5B5450','海の上に石を積んでつくられた遺跡'], gd:['グランド・アンス・ビーチ','island','#5FA35C','長い白い砂浜'],
+ ki:['サンゴの環礁','island','#5FA35C','輪の形をしたサンゴの島'], to:['ハアモンガ・ア・マウイ','gate','#8C8C88','大きな石でつくられた門'], ag:['ネルソンズ・ドックヤード','city','#E8D7B5','古い造船所が残る港'],
+ kn:['ブリムストーン・ヒル要塞','castle','#5B6C4E','丘の上の大きなとりで'], mh:['マジュロ環礁','island','#5FA35C','細長いサンゴの島々'], sc:['アンス・ソース・ダルジャン','island','#E8E4DA','大きな花こう岩が並ぶ浜辺'],
+ mo:['聖ポール天主堂跡','facade','#C9A87C','正面の壁だけが残る教会の跡'] };
+// ---- 絵：形ごとにブロックを組む ----
+function eaDraw(S,type,col){ const B=(x,y,z,w,d,h,c)=>S.box(x,y,z,w,d,h,c||col); const W='#FFFFFF', G='#6DB84A', Wa='#4FA3C8', Br='#8E6A4C';
+  switch(type){
+  case 'eiffel': B(-1,-1,0,2,2,.6); B(-.7,-.7,.6,1.4,1.4,.8); B(-.45,-.45,1.4,.9,.9,1); B(-.25,-.25,2.4,.5,.5,1.2); B(-.1,-.1,3.6,.2,.2,.8); break;
+  case 'needle': B(-.25,-.25,0,.5,.5,3.4); B(-.6,-.6,2.4,1.2,1.2,.45); B(-.08,-.08,3.4,.16,.16,.9,'#B8C4CC'); break;
+  case 'twin': B(-1.4,-.4,0,.8,.8,3.2); B(.5,-.4,0,.8,.8,3.2); B(-.6,-.1,1.6,1.1,.3,.2,'#8C9AA4'); B(-1.2,-.2,3.2,.4,.4,.6); B(.7,-.2,3.2,.4,.4,.6); break;
+  case 'pyramid': for(let i=0;i<5;i++) B(-1.5+i*.3,-1.5+i*.3,i*.45,3-i*.6,3-i*.6,.45); break;
+  case 'stupa': B(-1.4,-1.4,0,2.8,2.8,.4); B(-1,-1,.4,2,2,.4); B(-.6,-.6,.8,1.2,1.2,.6); B(-.3,-.3,1.4,.6,.6,.6); B(-.1,-.1,2,.2,.2,.8); break;
+  case 'dome': B(-1.2,-.8,0,2.4,1.6,1); B(-.7,-.5,1,1.4,1,.5); B(-.45,-.3,1.5,.9,.6,.35); B(-.12,-.1,1.85,.24,.2,.3); B(-1.7,-.2,0,.3,.3,2.2); B(1.4,-.2,0,.3,.3,2.2); break;
+  case 'onion': B(-1,-.6,0,2,1.2,1.2); [[-.8,'#F2B630'],[-.15,'#4A90C2'],[.5,'#6DB84A']].forEach(([x,c])=>{ B(x,-.2,1.2,.4,.4,.6,'#E8E4DA'); B(x-.1,-.3,1.8,.6,.6,.45,c); B(x+.1,-.1,2.25,.2,.2,.3,c); }); break;
+  case 'statue': B(-.7,-.7,0,1.4,1.4,1); B(-.3,-.3,1,.6,.6,1.6); B(-.25,-.25,2.6,.5,.5,.5); B(-1.1,-.15,2.1,2.2,.3,.25); break;
+  case 'clock': B(-.5,-.5,0,1,1,3); B(-.6,-.6,2.2,1.2,1.2,.7,'#E8D7B5'); B(-.3,-.3,3,.6,.6,.7,'#5B6C4E'); B(-2,-.5,0,1.4,1,1.2,'#C9A86A'); break;
+  case 'gate': B(-1.4,-.3,0,.4,.6,1.8); B(-.5,-.3,0,.4,.6,1.8); B(.4,-.3,0,.4,.6,1.8); B(1.2,-.3,0,.4,.6,1.8); B(-1.6,-.4,1.8,3.4,.8,.45); B(-.3,-.2,2.25,.8,.4,.3,'#5B8C6A'); break;
+  case 'wall': for(let i=0;i<6;i++){ B(-2.4+i*.8,-.3,0,.8,.6,.8); if(i%2===0) B(-2.4+i*.8,-.3,.8,.3,.6,.2); } B(-.4,-.5,0,.8,1,1.4); break;
+  case 'mountain': case 'volcano': B(-2,-2,0,4,4,.8); B(-1.5,-1.5,.8,3,3,.8); B(-1,-1,1.6,2,2,.8); B(-.55,-.55,2.4,1.1,1.1,.6,type==='volcano'?'#5B4C46':W); if(type==='volcano') B(-.2,-.2,3,.4,.4,.3,'#E8703A'); else B(-.75,-.75,2.2,1.5,1.5,.25,W); break;
+  case 'mesa': B(-2,-1,0,4,2,.8); B(-1.7,-.8,.8,3.4,1.6,.5); break;
+  case 'rock': B(-1.6,-1,0,3.2,2,.9); B(-1.3,-.8,.9,2.6,1.6,.4); B(-.8,-.5,1.3,1.6,1,.2); break;
+  case 'falls': B(-1.8,-.4,0,3.6,1.2,1.8,'#8C7B6B'); B(-1.8,.8,0,3.6,.1,1.8,'#9BD3EC'); B(-1.8,.4,1.8,3.6,.8,.1,G); B(-1.8,.9,0,3.6,1,.15,Wa); break;
+  case 'columns': B(-1.4,-.8,0,2.8,1.6,.3); for(let i=0;i<5;i++) B(-1.25+i*.6,.5,.3,.25,.25,1.3); for(let i=0;i<5;i++) B(-1.25+i*.6,-.7,.3,.25,.25,1.3); B(-1.4,-.8,1.6,2.8,1.6,.3); B(-1.2,-.6,1.9,2.4,1.2,.2); break;
+  case 'ruins': B(-1.4,-.8,0,2.8,1.6,.2); [0,1,3,4].forEach(i=>B(-1.25+i*.6,-.1,.2,.25,.25,.6+(i%2)*.8)); B(-1.3,-.1,1.6,1.5,.25,.2); break;
+  case 'colosseum': for(let i=0;i<3;i++) B(-1.5+i*.15,-1.5+i*.15,i*.5,3-i*.3,3-i*.3,.5); B(-1,-1,1.5,2,2,.05,'#C9A77C'); break;
+  case 'castle': case 'castle_white': B(-1.2,-.8,0,2.4,1.6,1); B(-1.5,-1,0,.6,.6,1.8); B(.9,-1,0,.6,.6,1.8); B(-.3,-.3,1,.6,.6,1.2); B(-1.55,-1.05,1.8,.7,.7,.25,'#C2654A'); B(.85,-1.05,1.8,.7,.7,.25,'#C2654A'); B(-.35,-.35,2.2,.7,.7,.25,'#C2654A'); break;
+  case 'palace': case 'palace_eu': B(-1.8,-.6,0,3.6,1.2,1); B(-1.9,-.7,1,3.8,1.4,.3,type==='palace'?'#4A4A4A':'#5B8C6A'); B(-.6,-.4,1.3,1.2,.8,.4,col); break;
+  case 'pagoda': B(-1,-1,0,2,2,.6); B(-.7,-.7,.6,1.4,1.4,.6); B(-.45,-.45,1.2,.9,.9,.6); B(-.25,-.25,1.8,.5,.5,.7); B(-.08,-.08,2.5,.16,.16,.6); break;
+  case 'angkor': B(-1.8,-1.8,0,3.6,3.6,.35); B(-1.4,-1.4,.35,2.8,2.8,.35); [[-1.2,-1.2],[.8,-1.2],[-1.2,.8],[.8,.8]].forEach(([x,y])=>{ B(x,y,.7,.4,.4,.7); B(x+.1,y+.1,1.4,.2,.2,.3); }); B(-.35,-.35,.7,.7,.7,1.2); B(-.15,-.15,1.9,.3,.3,.5); break;
+  case 'church': B(-1,-.6,0,2,1.2,1); B(-1.1,-.7,1,2.2,1.4,.3,'#C2654A'); B(.4,-.3,0,.6,.6,2); B(.5,-.2,2,.4,.4,.5,'#C2654A'); break;
+  case 'sagrada': B(-1.2,-.6,0,2.4,1.2,1); [-1,-.4,.2,.8].forEach((x,i)=>{ B(x,-.2,1,.3,.3,1.4+(i%2)*.5); B(x+.05,-.15,2.4+(i%2)*.5,.2,.2,.3,'#F2B630'); }); break;
+  case 'city': case 'city_mud': case 'city_tall': { const hs=type==='city_tall'?[2.6,1.8,3.2,2.2]:type==='city_mud'?[1.6,2,1.4,1.8]:[.9,1.2,.8,1.1]; const cs=type==='city'?[col,'#F2B630','#5BA7DD','#EE7A92']:[col,bkShade(col,.9),bkShade(col,1.05),bkShade(col,.95)]; hs.forEach((h,i)=>{ B(-1.6+i*.8,-.5+(i%2)*.4,0,.7,.7,h,cs[i]); if(type==='city') B(-1.65+i*.8,-.55+(i%2)*.4,h,.8,.8,.2,'#C2654A'); }); break; }
+  case 'island': case 'island_fort': B(-1.8,-1.8,0,3.6,3.6,.1,Wa); B(-1,-1,0,2,2,.3,'#F2E2B0'); B(-.3,-.1,.3,.15,.15,1.2,Br); B(-.7,-.5,1.5,.9,.9,.2,G); if(type==='island_fort'){ B(.3,-.8,.3,.9,.9,.7,col); } break;
+  case 'stilt': B(-1.8,-1.8,0,3.6,3.6,.1,Wa); [[-1.2,-.6],[.3,-.9],[-.3,.6]].forEach(([x,y])=>{ B(x+.1,y+.1,0,.1,.1,.5,Br); B(x+.7,y+.7,0,.1,.1,.5,Br); B(x,y,.5,.9,.9,.5,col); B(x-.05,y-.05,1,1,1,.2,'#C9A77C'); }); break;
+  case 'savanna': B(-1.8,-1.8,0,3.6,3.6,.1,col); B(-.1,-.1,.1,.2,.2,1,Br); B(-.9,-.6,1.1,1.8,1.2,.25,'#5F9A55'); B(.9,.6,.1,.5,.25,.35,'#8C6E54'); B(1.3,.6,.35,.2,.2,.3,'#8C6E54'); break;
+  case 'baobab': [-1,.6].forEach(x=>{ B(x,-.2,0,.6,.6,1.6,'#9C7A5A'); B(x-.2,-.4,1.6,1,1,.2,G); }); break;
+  case 'forest': for(let i=0;i<5;i++){ const x=-1.6+i*.7, y=-.6+(i%2)*.7; B(x+.2,y+.2,0,.2,.2,.5,Br); B(x,y,.5,.6,.6,.7,i%2?'#3E8C4E':'#5F9A55'); } break;
+  case 'mangrove': B(-1.8,-1.8,0,3.6,3.6,.1,Wa); for(let i=0;i<4;i++){ const x=-1.4+i*.8; B(x,-.2,.1,.15,.15,.6,Br); B(x-.3,-.5,.7,.8,.8,.5,col); } break;
+  case 'lake': B(-1.8,-1.8,0,3.6,3.6,.12,col); B(-1.8,-1.8,0,3.6,.6,.4,G); B(.4,.2,.12,.5,.5,.5,'#E8E4DA'); B(.35,.15,.62,.6,.6,.2,'#C2654A'); break;
+  case 'river': B(-1.8,-.4,0,3.6,.8,.12,'#4FA3C8'); B(-1.8,-1.8,0,3.6,1.4,.3,col); B(-1.8,.4,0,3.6,1.4,.3,col); break;
+  case 'fjord': B(-1.8,-1.8,0,1.4,3.6,1.8,'#5F7A6A'); B(.4,-1.8,0,1.4,3.6,1.6,'#5F7A6A'); B(-.4,-1.8,0,.8,3.6,.1,col); B(-1.8,-1.8,1.8,1.4,3.6,.2,W); break;
+  case 'karst': case 'fairy': for(let i=0;i<4;i++){ const x=-1.5+i*.9, y=-.5+(i%2)*.6, h=1.2+(i%3)*.5; B(x,y,0,.6,.6,h); if(type==='fairy') B(x-.1,y-.1,h,.8,.8,.25,bkShade(col,.8)); else B(x,y,h,.6,.6,.15,G); } if(type==='karst') B(-1.8,-1.8,0,3.6,3.6,.05,'#4FA3C8'); break;
+  case 'hills': for(let i=0;i<5;i++){ const x=-1.6+i*.75, y=-.4+(i%2)*.7; B(x,y,0,.7,.7,.5); B(x+.1,y+.1,.5,.5,.5,.25); } break;
+  case 'saltflat': B(-1.8,-1.8,0,3.6,3.6,.08,col); B(-.3,-.3,.08,.3,.3,.6,'#E8703A'); break;
+  case 'dune': for(let i=0;i<3;i++) B(-1.6+i*1.1,-.6+i*.3,0,1.2,1.4,.6+i*.3); break;
+  case 'cliff': B(-1.8,-.8,0,3.6,1.6,2,col); B(-1.8,-.8,2,3.6,1.6,.15,G); B(-.4,.8,1,.8,.1,.6,'#E8E4DA'); break;
+  case 'spiral': for(let i=0;i<5;i++) B(-1+i*.18,-1+i*.18,i*.55,2-i*.36,2-i*.36,.55); break;
+  case 'windmill': B(-.4,-.4,0,.8,.8,1.6); B(-.5,-.5,1.6,1,1,.4,'#5B6C4E'); B(-.05,.4,2,.1,.1,.1); B(-1.1,.45,1.9,2.2,.06,.25,'#E8E4DA'); B(-.12,.45,.9,.25,.06,2.2,'#E8E4DA'); break;
+  case 'atomium': B(-.08,-.08,0,.16,.16,2.4,'#8C9AA4'); [[0,0,2.4],[-.9,-.9,1.4],[.9,.9,1.4],[-.9,.9,.6],[.9,-.9,.6]].forEach(([x,y,z])=>B(x-.3,y-.3,z,.6,.6,.6,col)); break;
+  case 'parliament': B(-1.8,-.5,0,3.6,1,1); B(-.5,-.4,1,1,.8,.6); B(-.2,-.2,1.6,.4,.4,.5,'#C2654A'); for(const x of [-1.6,1.4]) B(x,-.3,1,.2,.2,.6,'#C2654A'); break;
+  case 'petra': B(-1.8,-.4,0,3.6,1,2.2,'#B86A4A'); B(-.8,.6,.2,1.6,.05,1.5,col); for(let i=0;i<4;i++) B(-.7+i*.45,.62,.2,.15,.1,1,bkShade(col,.85)); break;
+  case 'crater': B(-1.8,-1.8,0,3.6,3.6,.2,'#C9A77C'); B(-.6,-.6,.2,1.2,1.2,.05,col); B(-.3,-.3,.25,.6,.6,.25,'#F2B630'); break;
+  case 'aurora': B(-1.8,-1.8,0,3.6,3.6,.15,W); B(-1,-.2,.15,.4,.4,1,'#3E6B4E'); B(.4,.2,.15,.4,.4,.8,'#3E6B4E'); break;
+  case 'geyser': B(-1.8,-1.8,0,3.6,3.6,.15,'#8C9C7A'); B(-.2,-.2,.15,.4,.4,2,'#DDF1FB'); B(-.4,-.4,2,.8,.8,.4,W); break;
+  case 'moai': for(let i=0;i<3;i++){ B(-1.4+i*1,-.2,0,.6,.5,1.6); B(-1.45+i*1,-.25,1.6,.7,.6,.15,'#9C6B4E'); } break;
+  case 'ger': B(-1.8,-1.8,0,3.6,3.6,.1,col); B(-.6,-.6,.1,1.2,1.2,.6,W); B(-.4,-.4,.7,.8,.8,.2,'#E8E4DA'); B(-.1,-.1,.9,.2,.2,.1,'#C2654A'); break;
+  case 'dam': B(-1.8,-.3,0,3.6,.6,1.4,col); B(-1.8,-1.8,0,3.6,1.5,1.2,Wa); break;
+  case 'canal': B(-.5,-1.8,0,1,3.6,.1,col); B(-1.8,-1.8,0,1.3,3.6,.4,G); B(.5,-1.8,0,1.3,3.6,.4,G); B(-.35,-.3,.1,.7,1.2,.35,'#C2654A'); break;
+  case 'bridge_arch': B(-1.8,-1.8,0,3.6,3.6,.1,'#4FA3C8'); B(-1.8,-.4,0,.8,.8,1); B(1,-.4,0,.8,.8,1); B(-1,-.4,.8,2,.8,.25); B(-.3,-.4,1.05,.6,.8,.15); break;
+  case 'bluehole': B(-1.8,-1.8,0,3.6,3.6,.1,'#7EC8E8'); B(-.7,-.7,0,1.4,1.4,.12,col); break;
+  case 'cave': B(-1.6,-.6,0,3.2,1.2,1.5); B(-.4,.55,0,.8,.1,.8,'#3A2E28'); break;
+  case 'mud_mosque': case 'mud_house': B(-1.2,-.7,0,2.4,1.4,1.2); [-1.1,-.2,.7].forEach(x=>{ B(x,-.6,1.2,.35,.35,.8); for(let k=0;k<3;k++) B(x+.12,-.75,.4+k*.4,.1,.1,.1,Br); }); break;
+  case 'tower_stone': B(-.6,-.6,0,1.2,1.2,1.6); B(-.7,-.7,1.6,1.4,1.4,.25); B(-.35,-.35,1.85,.7,.7,.6); B(-1.6,-.5,0,1,1,.6); break;
+  case 'museum': for(let i=0;i<4;i++) B(-1.2+i*.2,-1.2+i*.2,i*.5,2.4-i*.4,2.4-i*.4,.5); break;
+  case 'facade': B(-1.2,-.1,0,2.4,.3,2); B(-.8,-.1,2,1.6,.3,.5); B(-.3,-.1,2.5,.6,.3,.35); break;
+  case 'ruins_inca': for(let i=0;i<3;i++) B(-2+i*.3,-2+i*.3,i*.4,4-i*.6,4-i*.6,.4,'#7C9A6A'); [[-1,-1],[0,-.6],[-.6,.3]].forEach(([x,y])=>{ B(x,y,1.2,.7,.6,.5,'#B0A090'); B(x-.05,y-.05,1.7,.8,.7,.2,'#8C7B6B'); }); B(.6,.6,1.2,.8,.8,1.6,'#5F7A6A'); break;
+  case 'river_fall': default: B(-1,-1,0,2,2,1.4); }
+}
+function eaCardSVG(id,o){ o=o||{}; const L=EA_LM[id]; if(!L) return ''; let S; try{ S=bkScene(); }catch(e){ return ''; }
+  const [nm,type,col]=L; const h=nbHash('ea|'+id); const tod=o.tod||'day';
+  const sky={ day:['#BFE6FA','#E9F7FF'], evening:['#FFC9A8','#FFE9D6'], night:['#283A66','#4C5E8E'], morning:['#FFE0C8','#E9F7FF'] }[tod];
+  // 島の土台
+  S.box(-2.4,-2.4,-1.4,4.8,4.8,.7,'#8E6A4C'); S.box(-2.6,-2.6,-.7,5.2,5.2,.7,'#B08463');
+  for(let i=0;i<5;i++) for(let j=0;j<5;j++) S.box(-2.6+i*1.04,-2.6+j*1.04,0,1.04,1.04,.01,(i+j)%2?'#A6DC8E':'#97D07E');
+  eaDraw(S,type,col);
+  const stars=tod==='night'?[...Array(10)].map((_,i)=>`<rect x="${(nbHash(id+'s'+i)%340)+10}" y="${(nbHash(id+'t'+i)%60)+8}" width="2" height="2" fill="#FFF6C8"/>`).join(''):'';
+  const cl=tod!=='night'?`<g fill="#fff" opacity=".9"><rect x="${30+h%40}" y="22" width="40" height="10" rx="3"/><rect x="${38+h%40}" y="14" width="20" height="10" rx="3"/><rect x="${250+h%50}" y="34" width="34" height="9" rx="3"/></g>`:'';
+  return `<svg class="ea-svg" viewBox="0 0 360 240" role="img" aria-label="${esc(nm)}をブロックで描いた絵はがき"><defs><linearGradient id="eag${id}${tod}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient></defs><rect width="360" height="240" fill="url(#eag${id}${tod})"/>${stars}${cl}<g transform="translate(180 150) scale(2.05) translate(-180 -78)">${S.render()}</g></svg>`; }
+// ---- 集めた国（いまの人生・本棚の人生・これまでに見た人生）----
+const KEY_EA='hitotsu.earth';
+function eaCollected(){ let s=[]; try{ s=JSON.parse(localStorage.getItem(KEY_EA)||'[]'); }catch(e){}
+  const set=new Set(s); try{ if(cur&&cur.P) set.add(cur.P.countryId); }catch(e){}
+  try{ for(const a of store.get(KEY_ARC,[])){ const c=COUNTRIES.find(x=>x.name===a.nation); if(c) set.add(c.id); } }catch(e){}
+  const out=[...set].filter(id=>EA_LM[id]); if(out.length!==s.length){ try{ localStorage.setItem(KEY_EA,JSON.stringify(out)); }catch(e){} } return out; }
+function eaName(id){ try{ return (COUNTRIES.find(c=>c.id===id)||{}).name||id; }catch(e){ return id; } }
+// ホームの小さな欄
+function eaTileHTML(P){ const got=eaCollected(); const id=P&&P.countryId; const L=EA_LM[id]; const tod=(typeof localTod==='function'&&localTod(P))||'day';
+  return `<div class="ea-tile">${L?`<figure class="ea-card ea-big"><div class="ea-art">${eaCardSVG(id,{tod})}</div><figcaption><b>${esc(L[0])}</b>（${esc(eaName(id))}）<span>${esc(L[3]||'')}</span></figcaption></figure>`:''}
+    <p class="ea-count">集めた絵はがき <b>${got.length}</b> / ${Object.keys(EA_LM).length} か国</p>
+    <button type="button" class="ea-open" id="eaOpen">地球アルバムをひらく</button></div>`; }
+function eaAlbumHTML(){ const got=new Set(eaCollected()); const ids=Object.keys(EA_LM);
+  const cards=ids.filter(id=>got.has(id)).map(id=>{ const L=EA_LM[id]; return `<figure class="ea-card"><div class="ea-art">${eaCardSVG(id)}</div><figcaption><b>${esc(L[0])}</b><small>${esc(eaName(id))}</small></figcaption></figure>`; }).join('');
+  const rest=ids.length-got.size;
+  return `<div class="ea-grid">${cards}</div><p class="tiny muted">まだの国が ${rest} か国あります。新しい人生がその国に生まれると、その国の絵はがきが1枚ふえます。</p>`; }
+function eaOpenDialog(){ if(document.getElementById('eaOv')) return; const d=document.createElement('div'); d.id='eaOv'; d.className='mt-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','地球アルバム');
+  d.innerHTML=`<div class="mt-card ea-dlg"><h2>地球アルバム</h2><p class="tiny muted">これまでの人生が生まれた国の名所を、ブロックの絵はがきにして集めています。</p>${eaAlbumHTML()}<div class="mt-btns"><button type="button" class="mt-close" id="eaX">とじる</button></div></div>`;
+  document.body.appendChild(d); const close=()=>d.remove(); d.querySelector('#eaX').onclick=close; d.addEventListener('click',e=>{ if(e.target===d) close(); }); }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('#eaOpen'); if(b) eaOpenDialog(); });
 // ===== ホームを毎日たのしく：今日のひとこと・今日の小さな場面・身近な人のいま・世界のいま・図鑑・見守りスタンプ・時間帯で変わる空 =====
 // どれも表示だけ。人生の流れ（乱数）は変えない。日付で変わるので、毎日ちがうものが見られる。
 const KEY_STAMP='hitotsu.stamps';
@@ -13792,8 +14340,9 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     <section class="hm-tile hm-scene"><h3>今日の小さな場面<span class="hm-n">${dayKey().replace(/^\d+-0?(\d+)-0?(\d+)$/,'$1月$2日')}・${tod[1]}</span></h3>${scn?`<p class="hm-ono"><b>${esc(scn.w)}</b></p><p>${esc(scn.t)}</p>`:''}${near.length?`<ul class="hm-near">${near.map(n=>`<li><b>${esc(n.who)}</b>は、${esc(n.t)}</li>`).join('')}</ul>`:''}<p class="tiny muted">毎日、ちがう場面が届きます。</p></section>
     <section class="hm-tile hm-stamp"><h3>見守りスタンプ</h3>${stampHTML()}</section>
   </div>
+  ${typeof dailyPlusHTML==='function'?dailyPlusHTML(P,L,age,c):''}
   <div class="hm-grid">
-    ${homeTile('hm-recent','さいきんの出来事', recent.length?`<ul class="hm-list">${recent.map(r=>`<li class="${r.big?'big':''}"><span class="hm-a">${r.age}歳</span>${esc(r.t)}</li>`).join('')}</ul>`:'<p class="tiny muted">まだ出来事はありません。</p>', `<button class="linkish" type="button" data-go="life">続きを読む</button>`)}
+    ${homeTile('hm-recent','最近の出来事', recent.length?`<ul class="hm-list">${recent.map(r=>`<li class="${r.big?'big':''}"><span class="hm-a">${r.age}歳</span>${esc(r.t)}</li>`).join('')}</ul>`:'<p class="tiny muted">まだ出来事はありません。</p>', `<button class="linkish" type="button" data-go="life">続きを読む</button>`)}
     ${homeTile('hm-heart','心のうつりかわり', homeMoodSVG(L,age)+(egsNow?`<p class="hm-egs">いまの感情の段階　<b>${egsNow}</b>／22　${esc(egsName(egsNow))}</p>`:''), '<span class="tiny muted">感情の段階は、エイブラハムの感情の22段階によります。</span>')}
     ${homeTile('hm-people',`出会った人たち<span class="hm-n">${pplAll.length}人</span>`, ppl.length?`<div class="hm-chips">${ppl.map(p=>`<span class="hm-chip"><small>${esc(p.label||'')}</small>${esc(p.name)}</span>`).join('')}</div>`:'<p class="tiny muted">まだ、家族のほかに出会った人はいません。</p>')}
     ${homeTile('hm-album',`思い出のアルバム<span class="hm-n">${photos.length}枚</span>`, photos.length?`<div class="hm-photos">${photos.slice(-3).map(ph=>photoHTML(P,L,ph,true)).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。</p>', photos.length?`<button class="linkish" type="button" id="hmAlbum">アルバムをひらく</button>`:'')}
@@ -13803,7 +14352,9 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は、一冊の本になってここに並びます。</p>')}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
     ${typeof birthMapHTML==='function'?homeTile('hm-map','生まれた場所',birthMapHTML(P)):''}
+    ${typeof eaTileHTML==='function'?homeTile('hm-ea','地球アルバム',eaTileHTML(P)):''}
     ${typeof relChartHTML==='function'?homeTile('hm-rel',`${esc(P.country.name)}の宗教の割合`,relChartHTML(P)):''}
+    ${typeof newsHTML==='function'?homeTile('hm-news',`その年のニュース<span class="hm-n">物語の中の${sy}年</span>`,newsHTML(P,sy)):''}
     ${homeTile('hm-world',`世界のいま<span class="hm-n">物語の中の${sy}年</span>`, `<p class="tiny muted">${esc(P.given)}が生きているこの年、ほかの国では。</p><div class="hm-wl">${wn.map(w=>`<div class="hm-w"><b>${esc(w.name)}</b><span>平均寿命 ${w.lex}歳</span><span>一人の女性が産む子 ${w.tfr}人</span>${w.urb!=='—'?`<span>都市に住む人 ${w.urb}%</span>`:''}${w.cell>0.5?`<span>携帯電話 100人に${Math.round(w.cell)}台</span>`:''}</div>`).join('')}</div>`, '<span class="tiny muted">出典：世界銀行・国連の統計。毎日、別の国に変わります。</span>')}
     ${homeTile('hm-zukan','図鑑', `<div class="hm-zk">${zk.map(z=>`<div class="hm-z"><span class="tiny muted">${esc(z[0])}</span><b>${z[1]}<small>${z[3]}</small></b>${z[2]?`<span class="hm-zbar"><i style="width:${Math.max(2,Math.round(z[1]/z[2]*100))}%"></i></span><span class="tiny muted">全${z[2]}${z[3]}のうち</span>`:''}</div>`).join('')}</div>`)}
   </div>
@@ -13827,6 +14378,56 @@ function homeArt(P,L,age){ const o=sceneState(P,L,age); const v=1+Math.floor(Mat
   o.tod=(typeof localTod==='function'&&localTod(P))||['day','day','morning','evening','night'][Math.floor(Math.random()*5)];
   if(Math.random()<.25) o.mood=Math.max(40,o.mood);
   return blockSceneSVG(P,o,`${P.given}、${age}歳のいまの一枚`); }
+// ===== ふたつの世界線：分かれ道ごとに、選んだ側と選ばなかった側の人生を読む =====
+// 選ばなかった側は、同じ生まれ・同じ乱数のまま、その分かれ道だけを反対にして最後まで生き直した人生（simulate の第3引数で指定）。
+// 表示のためだけに別に計算するので、この人生の中身は変わらない。重いので、ひらいた分かれ道だけ計算する。
+const WL_CACHE={};
+function wlAlt(P,L,c){ const other=c.chosen==='A'?'B':c.chosen==='B'?'A':(c.lean||'A'); const key=P.seed+'|'+(P.countryId||'')+'|'+L.choiceStr+'|'+c.k+other;
+  if(WL_CACHE[key]) return WL_CACHE[key];
+  const cs=/^~/.test(L.choiceStr||'')?L.choiceStr+'.'.repeat(16):(L.choiceStr||'A');
+  const L2=simulate(P,cs,{[c.k]:other}); const r={ L2, other, label:other==='A'?c.A:c.B }; WL_CACHE[key]=r; return r; }
+const WL_SKIP=/^(death|insp|dream)$/;
+function wlEvents(LL,from,to,n){ const out=[]; for(const y of LL.years){ if(y.age<from||y.age>to) continue; for(const e of y.events){ if(WL_SKIP.test(e.kind||'')) continue; if(e.big||e.kind==='choice'||e.kind==='consequence') out.push({ age:y.age, text:e.text, feel:e.feel||'' }); } } return n?out.slice(0,n):out; }
+function wlAvg(LL,from,to){ const a=LL.years.filter(y=>y.age>=from&&y.age<=to); return a.length?Math.round(a.reduce((s,y)=>s+y.h,0)/a.length):null; }
+function wlEgs(LL,from,to){ try{ const v=egsLife(LL); const a=[]; LL.years.forEach((y,i)=>{ if(y.age>=from&&y.age<=to&&v[i]) a.push(v[i]); }); return a.length?Math.round(a.reduce((s,x)=>s+x,0)/a.length):null; }catch(e){ return null; } }
+function wlPat(LL,id,from){ return id?LL.patterns.filter(p=>p.belief===id&&p.age>=from).length:0; }
+function wlSide(P,LL,c,label,mine){ const a=c.age, end=Math.min(LL.deathAge,a+12);
+  const evs=wlEvents(LL,a,end,7); const av=wlAvg(LL,a+1,end), eg=wlEgs(LL,a,Math.min(LL.deathAge,a+5));
+  return `<div class="wl-side ${mine?'wl-mine':'wl-alt'}"><p class="wl-h">${mine?'選んだ世界線':'選ばなかった世界線'}<br><b>「${esc(label)}」</b></p>
+    ${evs.length?evs.map(e=>`<p class="tiny"><span class="muted">${e.age}歳</span>　${esc(e.text)}${e.feel?`<br><span class="muted">${esc(e.feel)}</span>`:''}</p>`).join(''):`<p class="tiny muted">しばらくは、大きな出来事のない日々が続いた。</p>`}
+    <p class="tiny wl-num">その後の幸福度 平均 <b>${av??'—'}</b>　／　${LL.deathAge}歳まで生きた</p>
+    ${eg?`<p class="tiny wl-num">そのころの感情の段階 <b>${eg}</b>／22（${esc(egsName(eg))}）</p>`:''}</div>`; }
+function wlBody(P,L,c){ const nm=P.given; let alt; try{ alt=wlAlt(P,L,c); }catch(e){ return `<p class="tiny muted">もう一方の世界線を読みこめませんでした。</p>`; }
+  const L2=alt.L2, a=c.age; const mineLabel=c.label||(c.chosen==='A'?c.A:c.B);
+  let h=`<div class="wl-pair">${wlSide(P,L,c,mineLabel,true)}${wlSide(P,L2,c,alt.label,false)}</div>`;
+  const rest=wlEvents(L2,a+13,L2.deathAge), dth=L2.years.flatMap(y=>y.events.filter(e=>e.kind==='death').map(e=>({age:y.age,text:e.text})))[0];
+  if(rest.length||dth) h+=`<details class="wl-more"><summary>選ばなかった世界線の、その後の一生を最後まで読む</summary>${rest.map(e=>`<p class="tiny"><span class="muted">${e.age}歳</span>　${esc(e.text)}${e.feel?`<br><span class="muted">${esc(e.feel)}</span>`:''}</p>`).join('')}${dth?`<p class="tiny"><span class="muted">${dth.age}歳</span>　${esc(dth.text)}</p>`:''}</details>`;
+  // 観念の整理
+  if(c.linked){ let pb=null; try{ pb=personalizeBelief(P.seed,c.linked); }catch(e){}
+    const m=wlPat(L,c.linked,a+1), o=wlPat(L2,c.linked,a+1);
+    h+=`<div class="wl-learn"><p class="wl-h2">観念の整理</p>
+      <p>この分かれ道の奥には、「${esc(c.linkedText||(pb&&pb.text)||'')}」という観念がありました。</p>
+      <p>この観念が、そのあとの人生で顔を出した回数：選んだ世界線では <b>${m}回</b>、選ばなかった世界線では <b>${o}回</b>。${m===o?'どちらを選んでも、観念そのものは同じように残りました。選ぶ道より、観念に気づくことのほうが大切だったのかもしれません。':m<o?`選んだ道は、この観念を少しゆるめる道でした。`:`選ばなかった道のほうが、この観念をゆるめていました。`}</p>
+      ${pb&&pb.reframe?`<p>見方を変えると：${esc(pb.reframe)}</p>`:''}
+      ${pb&&pb.question?`<p class="muted">自分に聞いてみる：${esc(pb.question)}</p>`:''}</div>`; }
+  // 感情のコントロール
+  const e1=wlEgs(L,a,a), e2=wlEgs(L,Math.max(0,a-1),a);
+  const now=e1||e2; if(now){ const up=Math.max(1,now-1);
+    h+=`<div class="wl-learn"><p class="wl-h2">感情の段階で見ると</p>
+      <p>迷っていたとき、${esc(nm)}の気持ちは感情の22段階の <b>${now}</b>（${esc(egsName(now))}）あたりでした。</p>
+      ${now>1?`<p>この段階からいきなり「喜び」をめざすのは、むずかしいことです。まず、ひとつ上の <b>${up}</b>（${esc(egsName(up))}）の気持ちを探してみる。気分が少しでも楽になる考えを選ぶことが、感情をととのえる一歩だとされています。</p>`:''}
+      <p class="tiny muted">感情の22段階：エスター＆ジェリー・ヒックス『実践 引き寄せの法則』（原題 Ask and It Is Given, 2004）。心理学の研究にもとづくものではありません。</p></div>`; }
+  return h; }
+function worldsHTML(P,L){ const CH=(L.choices||[]).filter(c=>c.chosen&&(c.A||c.B)); if(!CH.length) return '';
+  return `<section class="chap wl"><div class="no">世界線</div><h2>選んだ道と、選ばなかった道</h2>
+    <div class="prose"><p>${esc(P.given)}の一生には、分かれ道が${CH.length}回ありました。それぞれの分かれ道で、もし反対の道を選んでいたら、どんな人生になっていたのか。同じ生まれ、同じめぐり合わせのまま、その一回だけを選び直した世界線を読むことができます。</p></div>
+    <p><button class="btn ghost" id="wlAll" type="button">すべての世界線をひらく</button></p>
+    ${CH.map((c,i)=>`<details class="wl-item" data-wl="${i}"><summary><span class="muted">${c.age}歳・${esc(c.stage||'分かれ道')}</span>　${esc(c.prompt)}</summary><div class="wl-body"><p class="tiny muted">読みこんでいます…</p></div></details>`).join('')}
+  </section>`; }
+function worldsBind(P,L){ const CH=(L.choices||[]).filter(c=>c.chosen&&(c.A||c.B));
+  const fill=d=>{ if(d.dataset.done) return; d.dataset.done='1'; const c=CH[+d.dataset.wl]; const b=d.querySelector('.wl-body'); setTimeout(()=>{ b.innerHTML=wlBody(P,L,c); try{ if(typeof rubyApply==='function') rubyApply(b,P,L); }catch(e){} },20); };
+  document.querySelectorAll('details.wl-item').forEach(d=>d.addEventListener('toggle',()=>{ if(d.open) fill(d); }));
+  const all=document.getElementById('wlAll'); if(all) all.onclick=()=>{ const ds=[...document.querySelectorAll('details.wl-item')]; let i=0; const step=()=>{ if(i>=ds.length) return; ds[i].open=true; fill(ds[i]); i++; setTimeout(step,60); }; step(); }; }
 // ===== 画面 =====
 const DAY=86400000;
 const SUBTITLE='人生のヒントが、ここにある';
@@ -14362,7 +14963,7 @@ function reportHTML(P,L,isPast){
     :`<div class="end"><p style="font-family:var(--serif)">${name}の人生は、これで本当に終わりです。</p><button class="btn" id="reborn" type="button">次の人生に生まれる</button><p class="tiny muted">これまでの人生から受け継ぐものは、第2段階で加わります。</p></div>`;
   return `<section class="report fade">
     <div class="odds"><p class="pre">${esc(P.full)}　${P.year}年〜${deathYearOf(P,L)}年　${esc(P.country.name)}</p><p class="pre">この人生が生まれる確率は</p><p class="num">約${odds}<span>分の1</span></p><p class="tiny muted">国、家庭、生まれた日時、名前、寿命などが、この組み合わせになる確率です。</p></div>
-    ${ch1}${traitSecHTML(P,L)}${ch2}${ch3}${ch4}${ch5}${ch6}${ch7}${petSec}${egsSecHTML(P,L)}${albumHTML(P,L,L.deathAge,'思い出のアルバム')}${personsSec}${bookSecHTML(P,L)}${refSecHTML()}${endSec}</section>`;
+    ${ch1}${traitSecHTML(P,L)}${ch2}${ch3}${ch4}${typeof worldsHTML==='function'?worldsHTML(P,L):''}${ch5}${ch6}${ch7}${petSec}${egsSecHTML(P,L)}${albumHTML(P,L,L.deathAge,'思い出のアルバム')}${personsSec}${bookSecHTML(P,L)}${refSecHTML()}${endSec}</section>`;
 }
 
 // --- 本を閉じる前に：あとがき・帯・製本 ---
@@ -14412,7 +15013,7 @@ function bookHTML(P,L){
     <section class="bv-ch"><h2>あとがき</h2>${ans.atogaki?esc(ans.atogaki).split('\n').map(x=>`<p>${x}</p>`).join(''):'<p class="muted">（まだ書かれていません）</p>'}</section>
   </article>`;
 }
-function bindReport(P,L){
+function bindReport(P,L){ try{ if(typeof worldsBind==='function') worldsBind(P,L); }catch(e){ console.warn(e); }
   document.querySelectorAll('textarea[data-q]').forEach(t=>t.oninput=()=>{ const a=store.get(KEY_ANS+P.seed,{}); a[t.dataset.q]=t.value; store.set(KEY_ANS+P.seed,a); });
   document.querySelectorAll('input[name=obi]').forEach(r=>r.onchange=()=>{ const a=store.get(KEY_ANS+P.seed,{}); a.obi=+r.value; store.set(KEY_ANS+P.seed,a); });
   const mc=$('#mkCover'); if(mc) mc.onclick=()=>{ const c=obiCands(L); const i=+((document.querySelector('input[name=obi]:checked')||{}).value||0); const best=L.years.filter(y=>y.age>=3).reduce((a,y)=>(y.h??0)>(a.h??0)?y:a,L.years[0]||{age:0}); let svg=''; try{ svg=blockSceneSVG(P,sceneState(P,L,best.age)); }catch(e){}
