@@ -1,4 +1,5 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5af5f16575224c8c9596106067decbde"}'></script><!-- End Cloudflare Web Analytics -->
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5af5f16575224c8c9596106067decbde"}'></script>
 </head><body>
 <title>LIFE BOOK — 人生のヒントが、ここにある</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -553,6 +554,12 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .born-off .born-txt{ font-size:.82em; letter-spacing:.06em; }
 @media (max-width:520px){ .mast-r{ flex-wrap:wrap; row-gap:8px; } .mastnav{ display:flex; gap:6px; flex-wrap:wrap; } }
 .ic-top{ --m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath d='M3 0h2v2h3v2H7v1h1v3H5V7H3v1H0V5h1V4H0V2h3z'/%3E%3C/svg%3E"); }
+.frr{ margin:10px 0; padding:10px 12px; border-radius:12px; background:#FFF0F4; border:2px dashed #FFB3C6; }
+.frr-t{ margin:0 0 8px; line-height:1.6; }
+.frr-btns{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.frr-btns .frd-b{ width:auto; }
+.frr-out{ width:100%; font-size:12px; }
+.frr-ok{ margin:10px 0; padding:8px 12px; border-radius:12px; background:#EAF7E3; }
 </style>
 
 <div class="wrap">
@@ -10676,16 +10683,27 @@ function bindLoanReport(P,L){
 // 紹介コードには、その人の「いまの主人公」の生まれの種が入っている。人生は種から毎回同じように読み直せるので、
 // 相手の主人公がいつ・どこで生き、いつまで生きるかが分かり、二人がともに生きている年を選んで出会わせる。
 // 出会う年と場面は、二人の種から決まる（どちらの画面でも、同じ年になる）。人生の中身（乱数）は変わらない。
-const KEY_FRIEND='hitotsu.friends', KEY_MYID='hitotsu.myid';
+const KEY_FRIEND='hitotsu.friends', KEY_MYID='hitotsu.myid', KEY_FRREPLY='hitotsu.frReply', KEY_FRSENT='hitotsu.frSent';
 const FRIEND_URL='https://maesato333.github.io/life-book/play.html';
 function myId(){ let id=store.get(KEY_MYID,''); if(!id){ id=Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); store.set(KEY_MYID,id); } return id; }
 function myHero(){ if(typeof st!=='undefined'&&st&&st.seed!=null) return { s:st.seed, c:st.country||null, f:st.force||null, ch:st.choice||null };
   const a=store.get(KEY_ARC,[])[0]; return a?{ s:a.seed, c:a.country||null, f:a.force||null, ch:a.choice||null }:null; }
-function friendCode(){ const h=myHero(); if(!h) return null; return 'LIFEFRIEND1.'+b64e(JSON.stringify(Object.assign({ id:myId(), by:store.get(KEY_ME,'')||'' },h,{ t:Date.now() }))); }
-function friendLink(){ const c=friendCode(); if(!c) return null; const base=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; const u=base+'#friend='+c.replace('LIFEFRIEND1.',''); return typeof extURL==='function'?extURL(u):u; }
+function friendCode(re){ const h=myHero(); if(!h) return null; return 'LIFEFRIEND1.'+b64e(JSON.stringify(Object.assign({ id:myId(), by:store.get(KEY_ME,'')||'' },h,{ t:Date.now() },re?{ re:1 }:{}))); }
+function friendLink(re){ const c=friendCode(re); if(!c) return null; const base=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; const u=base+'#friend='+c.replace('LIFEFRIEND1.',''); return typeof extURL==='function'?extURL(u):u; }
 function readFriend(txt){ const m=(txt||'').match(/(?:LIFEFRIEND1\.|#friend=)([A-Za-z0-9_-]+)/); if(!m) return null; try{ const o=JSON.parse(b64d(m[1])); if(typeof o.s!=='number'||!o.id) return null; return o; }catch(e){ return null; } }
 function receiveFriend(o){ if(o.id===myId()) return 'self'; const L=store.get(KEY_FRIEND,[]); const i=L.findIndex(x=>x.id===o.id); const rec=Object.assign({},o,{ got:(i>=0?L[i].got:Date.now()) });
   if(i>=0){ L[i]=rec; store.set(KEY_FRIEND,L); return 'update'; } L.unshift(rec); store.set(KEY_FRIEND,L.slice(0,20)); return 'ok'; }
+// 紹介を受けた人から、紹介した人へ「つながったよ」を知らせる（サーバーを使わないので、返事のリンクを送ってもらう）
+function frReplies(){ return store.get(KEY_FRREPLY,[]); }
+function frReplyDone(id){ store.set(KEY_FRREPLY,frReplies().filter(x=>x.id!==id)); }
+function frReplyText(by,link){ return `${by||'友だち'}さん、紹介ありがとう！ LIFE BOOK でつながりました。\nこのリンクを押すと、${by||'友だち'}さんの画面でも、つながったことがわかります。\n${link}`; }
+function frReplyHTML(){ const rp=frReplies(); if(!rp.length||(typeof fbOnline==='function'&&fbOnline())) return ''; const can=!!myHero();
+  return `<div class="frr">${rp.map(x=>`<p class="frr-t">💌 <b>${esc(x.by||'友だち')}さん</b>に、つながったことを知らせましょう。知らせると、${esc(x.by||'友だち')}さんの画面にも「つながった人」としてあなたが出ます。</p>`+(can?`<div class="frr-btns"><button class="frd-b frd-line" type="button" data-frr="${esc(x.id)}" data-frr-by="${esc(x.by||'')}"><i class="ic ic-line" aria-hidden="true"></i><span>LINEで知らせる</span></button><button class="linkish" type="button" data-frr-copy="${esc(x.id)}" data-frr-by="${esc(x.by||'')}">知らせるリンクをコピー</button></div>`:`<p class="tiny muted">「生まれる」を押したあとに、知らせることができます。</p>`)).join('')}</div>`; }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-frr],[data-frr-copy]'); if(!b) return; try{
+  const id=b.dataset.frr||b.dataset.frrCopy, by=b.dataset.frrBy; const l=friendLink(true); if(!l) return; const t=frReplyText(by,l);
+  if(b.dataset.frr){ window.open('https://line.me/R/msg/text/?'+encodeURIComponent(t),'_blank','noopener'); }
+  else { try{ navigator.clipboard.writeText(t).catch(()=>{}); }catch(_){} }
+  frReplyDone(id); const box=b.closest('.frr'); if(box) box.outerHTML=`<p class="frr-ok">${esc(by||'友だち')}さんへの知らせを用意しました。${b.dataset.frr?'LINEで送ってください。':'LINEなどにはりつけて送ってください。'}</p>`+(b.dataset.frr?'':`<textarea class="frr-out" rows="4" readonly>${esc(t)}</textarea>`); }catch(_){} });
 // 二人の種から決まる、0〜1 の数（どちらから見ても同じ）
 function pairHash(a,b,k){ const x0=Math.min(a,b), y0=Math.max(a,b); let x=(x0*2654435761+y0*40503+k*977)>>>0; x^=x>>>15; x=Math.imul(x,2246822519)>>>0; x=(x^(x>>>13))>>>0; return (x%100000)/100000; }
 const FM_SAME_ADULT=['旅先の{場所}で、道をたずねてきた人と、気づけば長く話しこんでいた。{名}という人だった。','{場所}へ向かう電車で、となりの席になった{名}と、ふとしたことから話が始まった。降りる駅に着いたのが、惜しかった。','仕事の研修で、{相手の町}から来た{名}と同じ班になった。初めて会ったのに、話がよく合った。','雨宿りをした軒先で、同じように空を見上げていた{名}と、言葉を交わした。'];
@@ -10751,7 +10769,7 @@ function frArtSVG(big){ let S; try{ S=bkScene(); }catch(e){ return ''; }
 // 紹介の窓
 function friendDialogHTML(){ const me=store.get(KEY_ME,''); const can=!!myHero(); const fr=store.get(KEY_FRIEND,[]);
   return `<div class="frd-in"><button class="frd-x" type="button" aria-label="閉じる">×</button>
-    <div class="frd-art">${frArtSVG(true)}</div><h2>友だちに紹介する</h2><p class="frd-lead">${FR_LEAD}</p>
+    <div class="frd-art">${frArtSVG(true)}</div><h2>友だちに紹介する</h2><p class="frd-lead">${FR_LEAD}</p>${frReplyHTML()}
     ${can?'':'<p class="tiny frd-note">まだ主人公が生まれていないので、今送れるのは LIFE BOOK の入口のリンクです。「生まれる」を押したあとに送ると、ふたりの主人公が出会います。</p>'}
     <label class="frd-name">あなたの呼び名（友だちに表示されます）<input id="frBy" value="${esc(me)}" maxlength="20" placeholder="例：みつ"></label>
     <div class="frd-btns">
@@ -10784,16 +10802,20 @@ function bindFriend(){ bindFriendOpeners();
   const copy=(t,what)=>{ const o=$('#frOut'); if(o){ o.hidden=false; o.value=t; o.select(); }
     const done=()=>msg(what+'をコピーしました。LINEやメールにはりつけて、友だちに送ってください。'), fail=()=>msg('下の欄の文を選んで、コピーしてください。');
     try{ navigator.clipboard.writeText(t).then(done).catch(fail); }catch(e){ fail(); } };
-  const ln=$('#frLine'); if(ln) ln.onclick=()=>{ const t=friendShareText(link()); window.open('https://line.me/R/msg/text/?'+encodeURIComponent(t),'_blank','noopener'); msg('LINEがひらきます。送る相手を選んでください。ひらかないときは「リンクをコピー」を使ってください。'); };
+  const ln=$('#frLine'); if(ln) ln.onclick=()=>{ store.set(KEY_FRSENT,(store.get(KEY_FRSENT,0)||0)+1); const t=friendShareText(link()); window.open('https://line.me/R/msg/text/?'+encodeURIComponent(t),'_blank','noopener'); msg('LINEがひらきます。送る相手を選んでください。ひらかないときは「リンクをコピー」を使ってください。'); };
   const sh=$('#frShare'); if(sh&&navigator.share){ sh.hidden=false; sh.onclick=()=>{ const l=link(); navigator.share({ title:'LIFE BOOK', text:friendShareText(l).replace('\n'+l,''), url:l }).then(()=>msg('送りました。')).catch(()=>{}); }; }
-  const l=$('#frLink'); if(l) l.onclick=()=>copy(friendShareText(link()),'紹介の文とリンク');
+  const l=$('#frLink'); if(l) l.onclick=()=>{ store.set(KEY_FRSENT,(store.get(KEY_FRSENT,0)||0)+1); copy(friendShareText(link()),'紹介の文とリンク'); };
   const ml=$('#frMail'); if(ml) ml.onclick=()=>{ location.href='mailto:?subject='+encodeURIComponent('LIFE BOOK で、人生のどこかで出会いませんか')+'&body='+encodeURIComponent(friendShareText(link())); };
   const c=$('#frCode'); if(c) c.onclick=()=>{ by(); const t=friendCode(); if(t) copy(t,'紹介コード'); };
   const g=$('#frGet'); if(g) g.onclick=()=>{ const o=readFriend($('#frCodeIn').value); if(!o) return msg('読み取れませんでした。リンクやコードを、最初から最後まで、まるごとはりつけてください。'); afterFriend(o,receiveFriend(o)); };
 }
 function afterFriend(o,r){ if(r==='self'){ alertFriend('これは、あなた自身の紹介リンクです。'); return; }
   _fhCache=null; if(typeof load==='function'&&typeof st!=='undefined'&&st) load();
-  alertFriend(`${o.by||'友だち'}さんとつながりました。${o.by||'友だち'}さんの主人公と、あなたの主人公は、人生のどこかで出会います。${r==='ok'?'お返しに、あなたからも紹介を送ると、相手の人生でも出会いが起きます。':''}`); }
+  if(o.sv){ frReplyDone(o.id); alertFriend(`${o.by||'友だち'}さんが、あなたの紹介で LIFE BOOK を始めました。つながりました！ ふたりの主人公は、人生のどこかで出会います。`); return; }
+  if(o.re){ frReplyDone(o.id); alertFriend(`${o.by||'友だち'}さんから、返事が届きました！ ${o.by||'友だち'}さんと、おたがいにつながりました。ふたりの主人公は、人生のどこかで出会います。`); return; }
+  const online=typeof fbOnline==='function'&&fbOnline();
+  if(!online&&!frReplies().some(x=>x.id===o.id)) store.set(KEY_FRREPLY,[{ id:o.id, by:o.by||'' },...frReplies()].slice(0,10));
+  alertFriend(`${o.by||'友だち'}さんとつながりました。${o.by||'友だち'}さんの主人公と、あなたの主人公は、人生のどこかで出会います。`+(online?`${o.by||'友だち'}さんの画面にも、つながったことが届きます。`:`下のボタンで、${o.by||'友だち'}さんにも知らせてあげてください。`)); }
 function alertFriend(t){ if(typeof render==='function') render(); setTimeout(()=>openFriend(t),40); }
 // リンクで開いたとき
 function friendFromHash(){ try{ const h=location.hash||''; if(!/friend=/.test(h)) return; const o=readFriend(h); history.replaceState(null,'',location.pathname+location.search); if(!o) return; const r=receiveFriend(o); setTimeout(()=>afterFriend(o,r),300); }catch(e){} }
@@ -14273,7 +14295,7 @@ async function moveZip(s){ try{ if(typeof CompressionStream==='undefined') throw
 async function moveUnzip(t){ const k=t[0], body=t.slice(1); const bin=atob(body.replace(/-/g,'+').replace(/_/g,'/')); const u=Uint8Array.from(bin,c=>c.charCodeAt(0));
   if(k==='p') return new TextDecoder().decode(u);
   const ds=new Blob([u]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new TextDecoder().decode(await new Response(ds).arrayBuffer()); }
-function moveData(){ return { v:1, id:myId(), me:store.get(KEY_ME,''), cur:st||null, arc:store.get(KEY_ARC,[]), fr:store.get(KEY_FRIEND,[]), at:Date.now() }; }
+function moveData(){ return { v:1, id:myId(), me:store.get(KEY_ME,''), cur:st||null, arc:store.get(KEY_ARC,[]), fr:store.get(KEY_FRIEND,[]), idk:store.get('hitotsu.myidk','')||null, at:Date.now() }; }
 async function moveLink(){ const z=await moveZip(JSON.stringify(moveData())); const base=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; return extURL(base+'#move='+z); }
 function moveQR(text){ try{ const q=qrcode(0,'L'); q.addData(text,'Byte'); q.make(); return q.createSvgTag({ cellSize:4, margin:2, scalable:true }); }catch(e){ return ''; } }
 function moveDialogHTML(){ return `<div class="frd-in mv-in"><button class="frd-x" type="button" aria-label="閉じる">×</button>
@@ -14296,7 +14318,7 @@ async function openMove(){ let d=document.getElementById('mvDlg');
 function closeMove(){ const d=document.getElementById('mvDlg'); if(d) d.hidden=true; document.body.classList.remove('frd-on'); }
 // 受け取る
 function moveApply(o){
-  if(o.id) store.set(KEY_MYID,o.id); if(o.me) store.set(KEY_ME,o.me);
+  if(o.id) store.set(KEY_MYID,o.id); if(o.idk) store.set('hitotsu.myidk',o.idk); if(o.me) store.set(KEY_ME,o.me);
   const arc=store.get(KEY_ARC,[]); const seen=new Set(arc.map(a=>a.seed+':'+(a.at||0)));
   const mine=st; // この端末で見守っていた人生は、引き継ぐ人生と別なら、そのまま失わないように本棚の手前に置かない（生き終えていないため）。かわりに確認で知らせる
   const merged=(o.arc||[]).filter(a=>!seen.has(a.seed+':'+(a.at||0))).concat(arc).sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,30); store.set(KEY_ARC,merged);
@@ -14384,7 +14406,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-album',`思い出のアルバム<span class="hm-n">${photos.length}枚</span>`, photos.length?`<div class="hm-photos">${photos.slice(-3).map(ph=>photoHTML(P,L,ph,true)).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。</p>', photos.length?`<button class="linkish" type="button" id="hmAlbum">アルバムをひらく</button>`:'')}
     ${homeTile('hm-belief','心に生まれた観念', bel.length?`<ul class="hm-list">${bel.map(b=>`<li><span class="hm-a">${b.age}歳</span>「${esc(b.core||b.text||'')}」</li>`).join('')}</ul>`:'<p class="tiny muted">まだ、心に残る思い込みは生まれていません。</p>', arc.length?`<button class="linkish" type="button" id="hmKmap">本棚の人生とくらべる（観念の地図）</button>`:'')}
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
-    ${homeTile('hm-friends',`紹介でつながった人<span class="hm-n">${fr.length}人</span>`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの主人公が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m?(m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'人生のどこかで、出会う日が来ます。'):'この人生では、出会う年が重なりませんでした。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
+    ${homeTile('hm-friends',`紹介でつながった人<span class="hm-n">${fr.length}人</span>`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの主人公が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m?(m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'人生のどこかで、出会う日が来ます。'):'この人生では、出会う年が重なりませんでした。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
     ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は、一冊の本になってここに並びます。</p>')}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
     ${typeof birthMapHTML==='function'?homeTile('hm-map','生まれた場所',birthMapHTML(P)):''}
@@ -15128,5 +15150,80 @@ function refSecHTML(){
     <div class="prose">${PSYCH_REFS.concat(EGS_REFS,ONO_REFS,ECON_REFS,LAW_REFS,LAWW_REFS,JOB_REFS,HOBBY_REFS,VALUE_REFS,DEMO_REFS,RIGHTS_REFS,LIFE_REFS,FRIEND_REFS,ABROAD_REFS,NATURE_REFS,INFANT_REFS,HEALTH_REFS,FAITH_REFS,HIST_REFS,MONEY_REFS,BELIEF_REFS).map(x=>`<p class="tiny"><strong>${esc(x[0])}</strong>　${esc(x[1])}<br><span class="muted">${esc(x[2])}</span></p>`).join('')}
     <p class="tiny muted">数字は研究の結果を、この試作版の目盛りに置きかえた近似です。国の統計は、世界銀行・国連などが各国政府の統計から集めた値（Gapminder 経由）を使っています。</p></div></details></section>`;
 }
+</script>
+<script>
+// ===== サーバーで紹介を届ける（Firebase） =====
+// 紹介した人・された人の両方の端末に、つながった相手の主人公を届ける。
+// しくみ：
+//  ・Firebase に匿名でログインする（名前やメールは使わない）。
+//  ・自分の myId を ids/{myId} に登録する（この端末のログインと、秘密の合言葉 k を結びつける。だれも読めない）。
+//  ・紹介でつながった相手（KEY_FRIEND）ごとに、相手の受け箱 ids/{相手のid}/inbox/{myId} に、
+//    自分の「いまの主人公」（s,c,f,ch）と呼び名 by を書く。主人公が変わったら書き直す。
+//  ・自分の受け箱 ids/{myId}/inbox を見張り、届いたら receiveFriend() に渡す。初めての相手なら「つながりました」と知らせる。
+// 預かるもの：ランダムな記号（myId）・呼び名・主人公の種。本名・メール・位置は預からない。
+// FB_CONFIG が null のあいだは何もしない（ゲームはこれまでどおり端末の中だけで動く）。
+const FB_CONFIG=null; // ← Firebase の「ウェブアプリの設定」（apiKey など。公開してよい値）を入れる
+const FB_VER='10.14.1';
+const KEY_MYIDK='hitotsu.myidk', KEY_FBREG='hitotsu.fbreg', KEY_FBPUSH='hitotsu.fbpush';
+let FB=null, _fbBusy=false, _fbAgain=false;
+function fbKey(){ let k=store.get(KEY_MYIDK,''); if(!k){ const a=new Uint8Array(16); (window.crypto||{}).getRandomValues?crypto.getRandomValues(a):a.forEach((_,i)=>a[i]=Math.random()*256|0); k=[...a].map(x=>x.toString(16).padStart(2,'0')).join(''); store.set(KEY_MYIDK,k); } return k; }
+function fbHeroSig(h,by){ return h?[h.s,h.c||'',h.f||'',h.ch||'',by||''].join('|'):''; }
+async function fbStart(){
+  if(!FB_CONFIG||FB||!/^https?:$/.test(location.protocol)) return;
+  try{
+    const base='https://www.gstatic.com/firebasejs/'+FB_VER+'/';
+    const [A,U,D]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]);
+    const app=A.initializeApp(FB_CONFIG,'lifebook'); const auth=U.getAuth(app); const db=D.getFirestore(app);
+    if(window.FB_EMU){ U.connectAuthEmulator(auth,'http://127.0.0.1:'+FB_EMU.auth,{ disableWarnings:true }); D.connectFirestoreEmulator(db,'127.0.0.1',FB_EMU.fs); }
+    const cred=await U.signInAnonymously(auth);
+    FB={ U, D, auth, db, uid:cred.user.uid, seenOnce:false };
+    await fbRegister(); fbListen(); await fbPush();
+    setInterval(()=>fbPush(),60000);
+    document.addEventListener('visibilitychange',()=>{ if(!document.hidden) fbPush(); });
+  }catch(e){ FB=null; try{ console.warn('[fbsync] サーバーにつながりませんでした',e&&e.code||e); }catch(_){} }
+}
+// 自分の myId に、この端末のログインを結びつける（1回だけ）
+async function fbRegister(){ const id=myId(), reg=store.get(KEY_FBREG,'');
+  if(reg===id+'|'+FB.uid) return;
+  const { doc, setDoc, arrayUnion }=FB.D;
+  await setDoc(doc(FB.db,'ids',id),{ k:fbKey(), uids:arrayUnion(FB.uid) },{ merge:true });
+  store.set(KEY_FBREG,id+'|'+FB.uid); }
+// つながっている相手の受け箱に、自分の主人公を書く（変わったときだけ）
+async function fbPush(){ if(!FB) return; if(_fbBusy){ _fbAgain=true; return; } _fbBusy=true;
+  try{ const h=myHero(); if(!h) return; const by=store.get(KEY_ME,'')||'', sig=fbHeroSig(h,by), me=myId();
+    const done=store.get(KEY_FBPUSH,{}); const { doc, setDoc }=FB.D;
+    for(const f of store.get(KEY_FRIEND,[])){ if(!f.id||f.id===me||done[f.id]===sig) continue;
+      try{ await setDoc(doc(FB.db,'ids',String(f.id),'inbox',me),{ from:me, by:String(by).slice(0,20), s:h.s, c:h.c||null, f:h.f||null, ch:h.ch||null, t:Date.now() });
+        done[f.id]=sig; store.set(KEY_FBPUSH,done); if(typeof frReplyDone==='function') try{ frReplyDone(f.id); }catch(_){} }catch(e){ /* 相手がまだサーバーに来ていない等。次の機会にもう一度 */ } }
+    fbSweep();
+  }finally{ _fbBusy=false; if(_fbAgain){ _fbAgain=false; setTimeout(fbPush,500); } } }
+// サーバーで届けた相手は「〇〇さんに知らせる」の枠から外す
+function fbSweep(){ if(typeof frReplies!=='function'||typeof frReplyDone!=='function') return; const done=store.get(KEY_FBPUSH,{}); let n=0;
+  for(const x of frReplies()) if(done[x.id]){ frReplyDone(x.id); n++; } if(n&&typeof render==='function'&&!document.getElementById('mtOv')) try{ const d=document.getElementById('frDlg'); if(!d||d.hidden) render(); }catch(_){} }
+// サーバーにつながっているか（画面の文を変えたいとき用）
+function fbOnline(){ return !!(FB&&FB.uid); }
+// 自分の受け箱を見張る
+function fbListen(){ const { collection, onSnapshot }=FB.D;
+  onSnapshot(collection(FB.db,'ids',myId(),'inbox'),snap=>{
+    const fresh=[]; let changed=false;
+    snap.docChanges().forEach(ch=>{ if(ch.type==='removed') return; const d=ch.doc.data();
+      if(typeof d.s!=='number'||!d.from) return;
+      const o={ id:String(d.from), by:d.by||'', s:d.s, c:d.c||null, f:d.f||null, ch:d.ch||null, t:d.t||Date.now() };
+      const old=store.get(KEY_FRIEND,[]).find(x=>x.id===o.id);
+      if(old&&old.s===o.s&&(old.c||null)===o.c&&(old.by||'')===o.by) return; // 変わりなし
+      const r=receiveFriend(o); if(r==='self') return; changed=true;
+      if(typeof frReplyDone==='function') try{ frReplyDone(o.id); }catch(_){}
+      if(r==='ok') fresh.push(Object.assign({},o,{ re:1, sv:1 }));
+    });
+    if(!changed) return;
+    try{ _fhCache=null; }catch(_){}
+    fbPush(); // 新しい相手に、こちらの主人公も届ける
+    if(fresh.length){ const o=fresh[fresh.length-1]; afterFriend(o,'ok'); }
+    else { try{ if(typeof load==='function'&&typeof st!=='undefined'&&st) load(); if(typeof render==='function') render(); }catch(_){} }
+  },e=>{ try{ console.warn('[fbsync] 受け箱を読めませんでした',e&&e.code||e); }catch(_){} }); }
+// 紹介を受け取ったら（リンク・コード・どちらでも）、すぐ相手に届ける
+(function(){ const _af=afterFriend; afterFriend=function(o,r){ const x=_af(o,r); setTimeout(()=>fbPush(),400); return x; }; })();
+(function(){ const _rf=receiveFriend; receiveFriend=function(o){ const r=_rf(o); if(r!=='self') setTimeout(()=>fbPush(),50); return r; }; })();
+if(document.readyState==='complete') setTimeout(fbStart,800); else window.addEventListener('load',()=>setTimeout(fbStart,800));
 </script>
 </body></html>
