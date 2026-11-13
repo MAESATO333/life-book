@@ -347,12 +347,60 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .loan-form{ display:flex; flex-wrap:wrap; gap:12px; margin:8px 0; } .loan-form label{ display:flex; flex-direction:column; gap:4px; }
 .loan-form input{ font:inherit; font-size:14px; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink); }
 .loan-ab{ margin:6px 0 12px; padding:10px 14px; border-left:3px solid var(--line); font-family:var(--serif); }
+
+/* 友だちに紹介（ブロックの絵柄に合わせた、まるくてやわらかい見た目） */
+.masthead{ position:sticky; top:0; z-index:30; background:var(--bg); align-items:center; }
+.mast-r{ display:flex; align-items:center; gap:12px; }
+.ic{ display:inline-block; width:18px; height:18px; flex:none; background:currentColor; -webkit-mask:var(--m) center/contain no-repeat; mask:var(--m) center/contain no-repeat; }
+.ic-heart{ --m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6' shape-rendering='crispEdges'%3E%3Cpath d='M1 0h2v1h1V0h2v1h1v2H6v1H5v1H4v1H3V5H2V4H1V3H0V1h1z'/%3E%3C/svg%3E"); }
+.ic-line{ --m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s6-3.5 8.2-6.1C21.6 14 22 12.6 22 11c0-4.4-4.5-8-10-8z'/%3E%3C/svg%3E"); }
+.ic-link{ --m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1'/%3E%3Cpath d='M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'/%3E%3C/svg%3E"); }
+.ic-mail{ --m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='3'/%3E%3Cpath d='M4 7l8 6 8-6'/%3E%3C/svg%3E"); }
+.ic-share{ --m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 15V3M7 8l5-5 5 5'/%3E%3Cpath d='M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6'/%3E%3C/svg%3E"); }
+.fr-top{ display:inline-flex; align-items:center; gap:6px; font:inherit; font-size:13px; font-weight:700; padding:7px 14px 7px 11px; border-radius:999px; border:2px solid #E86A88; background:#FF8FAA; color:#fff; cursor:pointer; white-space:nowrap; box-shadow:0 3px 0 #D85878; transition:transform .12s, box-shadow .12s; }
+.fr-top::before{ content:""; width:15px; height:13px; background:currentColor; -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6' shape-rendering='crispEdges'%3E%3Cpath d='M1 0h2v1h1V0h2v1h1v2H6v1H5v1H4v1H3V5H2V4H1V3H0V1h1z'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6' shape-rendering='crispEdges'%3E%3Cpath d='M1 0h2v1h1V0h2v1h1v2H6v1H5v1H4v1H3V5H2V4H1V3H0V1h1z'/%3E%3C/svg%3E") center/contain no-repeat; }
+.fr-top:hover,.fr-big:hover,.frd-b:hover{ transform:translateY(-1px); }
+.fr-top:active,.fr-big:active,.frd-b:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.18); }
+.fr-top:focus-visible,.frd-b:focus-visible,.fr-big:focus-visible,.ih-fr button:focus-visible{ outline:3px solid #8EC3E6; outline-offset:2px; }
+@media (max-width:520px){ .masthead .meta{ display:none; } }
+.friend-card{ display:flex; gap:18px; align-items:center; margin:28px 0 8px; padding:16px 18px; border:2px solid #FFC2D0; border-radius:20px; background:#FFF3F6; color:#3A2A33; }
+.friend-card .fc-art{ flex:none; line-height:0; }
+.friend-card h3{ margin:0 0 4px; font-family:var(--serif); font-size:19px; color:#C9466A; }
+.friend-card p{ margin:0 0 12px; font-size:14px; line-height:1.75; }
+.friend-card .tiny{ color:#7A5A66; margin:8px 0 0; }
+.fr-big{ display:inline-flex; align-items:center; gap:8px; font:inherit; font-size:16px; font-weight:700; padding:12px 24px; border-radius:999px; border:2px solid #E86A88; background:#FF8FAA; color:#fff; cursor:pointer; box-shadow:0 4px 0 #D85878; transition:transform .12s, box-shadow .12s; }
+@media (max-width:520px){ .friend-card{ flex-direction:column; align-items:stretch; text-align:center; } .friend-card .fc-art svg{ width:100%; height:auto; max-width:300px; } .fr-big{ justify-content:center; } }
+.frd{ position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(60,40,60,.38); }
+.frd[hidden]{ display:none; } body.frd-on{ overflow:hidden; }
+.frd-in{ position:relative; width:100%; max-width:420px; max-height:calc(100vh - 32px); overflow:auto; padding:16px 18px 18px; border-radius:24px; border:3px solid #FFC2D0; background:#FFFBFC; color:#3A2A33; box-shadow:0 12px 40px rgba(80,30,50,.25); animation:frdPop .22s ease-out; }
+@keyframes frdPop{ from{ transform:scale(.94); opacity:0; } to{ transform:none; opacity:1; } }
+@media (prefers-reduced-motion:reduce){ .frd-in{ animation:none; } .fr-top,.fr-big,.frd-b{ transition:none; } }
+.frd-art{ line-height:0; margin:0 0 8px; } .frd-art svg{ width:100%; height:auto; border-radius:16px; }
+.frd-in h2{ margin:0 0 4px; font-family:var(--serif); font-size:21px; color:#C9466A; text-align:center; }
+.frd-lead{ margin:0 0 12px; font-size:14px; line-height:1.8; text-align:center; }
+.frd-note{ margin:0 0 12px; padding:8px 12px; border-radius:12px; background:#FFF0D6; color:#6A4A20; }
+.frd-x{ position:absolute; top:10px; right:10px; z-index:2; width:34px; height:34px; border-radius:50%; border:2px solid #FFC2D0; background:#fff; color:#C9466A; font-size:18px; line-height:1; cursor:pointer; }
+.frd-name{ display:flex; flex-direction:column; gap:4px; font-size:12px; color:#7A5A66; margin-bottom:12px; }
+.frd-name input{ font:inherit; font-size:15px; padding:9px 14px; border:2px solid #F3D3DC; border-radius:999px; background:#fff; color:#3A2A33; }
+.frd-btns{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.frd-b{ display:flex; align-items:center; justify-content:center; gap:8px; font:inherit; font-size:14px; font-weight:700; padding:12px 10px; border-radius:16px; border:2px solid rgba(0,0,0,.08); cursor:pointer; color:#3A2A33; box-shadow:0 3px 0 rgba(0,0,0,.12); transition:transform .12s, box-shadow .12s; }
+.frd-b[hidden]{ display:none; }
+.frd-line{ grid-column:1/-1; font-size:16px; padding:14px; background:#06C755; color:#fff; box-shadow:0 4px 0 #05A146; }
+.frd-sky{ background:#D7EEFF; } .frd-lemon{ background:#FFF1A8; } .frd-lilac{ background:#E9DEFF; }
+.frd-msg{ min-height:1.2em; margin:12px 0 4px; font-size:13px; color:#2F7A55; text-align:center; }
+.frd-in textarea{ width:100%; font-size:12px; margin:4px 0; box-sizing:border-box; border:2px solid #F3D3DC; border-radius:12px; padding:8px; background:#fff; color:#3A2A33; }
+.frd-get{ margin-top:12px; font-size:13px; } .frd-get summary{ cursor:pointer; color:#7A5A66; }
+.frd-get .btn{ border-radius:999px; background:#8EC3E6; border-color:#8EC3E6; color:#13324A; }
+.frd-in .tiny.muted{ color:#7A5A66; }
+.linkish{ font:inherit; border:0; background:none; color:#C9466A; text-decoration:underline; cursor:pointer; padding:0; }
+.ih-fr{ margin-top:14px; font-size:13px; color:var(--muted); line-height:1.8; }
+.ih-fr button{ display:inline-flex; align-items:center; gap:5px; margin-left:4px; font:inherit; font-weight:700; padding:4px 12px; border-radius:999px; border:2px solid #FFC2D0; background:#FFF3F6; color:#C9466A; cursor:pointer; }
 </style>
 
 <div class="wrap">
   <header class="masthead">
     <div class="name">LIFE BOOK<small>試作版</small></div>
-    <div class="meta" id="mastmeta"></div>
+    <div class="mast-r"><div class="meta" id="mastmeta"></div><button class="fr-top fr-open" type="button">友だちに紹介</button></div>
   </header>
   <main id="app"></main>
 </div>
@@ -9338,31 +9386,74 @@ function friendMeet(P,L){
     const i=y.events.findIndex(e=>e.kind==='death'); if(i>=0) y.events.splice(i,0,ev); else y.events.push(ev);
   }
 }
-// 画面：紹介する・紹介を受け取る
-function friendHTML(){ const fr=store.get(KEY_FRIEND,[]); const me=store.get(KEY_ME,''); const can=!!myHero();
-  return `<details class="friend-sec"><summary>LIFE BOOK を友だちに紹介する</summary>
-    <p class="tiny muted">紹介した人とされた人の主人公は、それぞれの人生のどこかで出会います。二人がともに生きている年の中から、出会う年が決まります。</p>
-    ${can?`<label class="tiny">あなたの呼び名 <input id="frBy" value="${esc(me)}" maxlength="20" placeholder="例：みつ"></label>
-    <div class="obi-btns"><button class="btn small" id="frLink" type="button">紹介リンクをコピー</button><button class="btn ghost small" id="frCode" type="button">紹介コードをコピー</button></div>`:'<p class="tiny">まず「生まれる」を押して、人生を始めてください。紹介には、あなたの主人公が必要です。</p>'}
-    <p class="tiny" id="frMsg" role="status"></p><textarea id="frOut" rows="2" readonly hidden aria-label="紹介リンクまたはコード"></textarea>
-    <div class="fr-in"><p class="tiny muted">友だちから届いた紹介コードやリンクをはりつけると、その人の主人公と、あなたの主人公が出会います。</p>
-    <textarea id="frCodeIn" rows="2" placeholder="LIFEFRIEND1. からはじまるコード、またはリンク"></textarea><button class="btn small" id="frGet" type="button">受け取る</button></div>
-    ${fr.length?`<p class="tiny">つながっている人：${fr.map(f=>esc(f.by||'友だち')+'さん').join('、')}</p>`:''}
-  </details>`; }
-function bindFriend(){
+// 画面：紹介する・紹介を受け取る（どの画面にもある「友だちに紹介」ボタン → 紹介の窓）
+const FR_LEAD='紹介した人と、紹介された人。ふたりの主人公は、それぞれの人生のどこかで、出会います。';
+function friendShareText(link){ return `LIFE BOOK で、世界のどこかに生まれた一人の人生を見守っています。\nこのリンクから始めると、わたしの主人公と、あなたの主人公が、人生のどこかで出会います。\n${link}`; }
+function friendPlainLink(){ return /github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; }
+// 画面の中に置く案内（大きなボタンつき）
+function friendHTML(){ const fr=store.get(KEY_FRIEND,[]);
+  return `<section class="friend-card"><div class="fc-art">${frArtSVG()}</div><div class="fc-body"><h3>友だちに紹介する</h3><p>${FR_LEAD}</p>
+    <button class="fr-big fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>
+    ${fr.length?`<p class="tiny muted">つながっている人：${fr.map(f=>esc(f.by||'友だち')+'さん').join('、')}</p>`:''}</div></section>`; }
+function frHeart(x,y,u,col){ const P=['.XX.XX.','XXXXXXX','XXXXXXX','.XXXXX.','..XXX..','...X...']; let o=''; P.forEach((r,j)=>[...r].forEach((c,i)=>{ if(c==='X') o+=`<rect x="${x+i*u}" y="${y+j*u}" width="${u}" height="${u}" fill="${col}"/>`; })); return o; }
+function frArtSVG(big){ let S; try{ S=bkScene(); }catch(e){ return ''; }
+  const top='#A6DC8E'; [[-4.2,-.6],[1.2,-4.6]].forEach(([x0,y0])=>{ S.box(x0+.3,y0+.3,-1.5,2.4,2.4,.9,'#B08463'); for(let i=0;i<3;i++) for(let j=0;j<3;j++) S.box(x0+i,y0+j,-.6,1,1,.6,((i+j)%2)?top:bkShade(top,.95)); });
+  S.box(-1.4,-2.4,-.25,.6,.6,.2,'#F2DFA8'); S.box(-.6,-3.2,-.25,.6,.6,.2,'#F2DFA8'); S.box(.2,-4,-.25,.4,.4,.2,'#F2DFA8');
+  [[-4,1.9,'#FF9FB2'],[-2.4,.0,'#FFE27A'],[3.2,-4.4,'#C9B6F2'],[1.4,-2.6,'#FFFFFF']].forEach(([x,y,c])=>S.box(x,y,0,.2,.2,.2,c));
+  bkPerson(S,-3.4,.4,{ stage:'child', skin:'#F1CDA8', hair:'#2B2320', shirt:'#8EC3E6', gender:'男性', mood:80 });
+  bkPerson(S,2,-3.8,{ stage:'child', skin:'#B9825B', hair:'#4A3326', shirt:'#FFB3C4', gender:'女性', mood:80 });
+  const W=big?320:150, H=big?150:96;
+  let bg=`<rect width="360" height="200" rx="22" fill="#CDEBFF"/><rect y="120" width="360" height="80" rx="22" fill="#E6F6FF"/>`;
+  [[24,30,.8],[262,20,.7],[300,150,.5]].forEach(([x,y,k])=>{ bg+=`<g fill="#FFFFFF"><rect x="${x}" y="${y}" width="${46*k}" height="${12*k}" rx="3"/><rect x="${x+8*k}" y="${y-8*k}" width="${22*k}" height="${10*k}" rx="3"/></g>`; });
+  const env=`<g transform="translate(232 112) rotate(-10)"><rect width="34" height="24" rx="3" fill="#FFFFFF" stroke="#E7A9B8" stroke-width="2"/><path d="M2 3 L17 14 L32 3" fill="none" stroke="#E7A9B8" stroke-width="2"/>${frHeart(13,13,2,'#FF7E9A')}</g>`;
+  return `<svg class="fr-art" viewBox="0 0 360 200" width="${W}" height="${H}" role="img" aria-label="ふたつの小さな浮島に立つブロックの子どもたちと、そのあいだに浮かぶハート">${bg}<g transform="translate(0 52)">${S.render()}</g>${frHeart(160,26,6,'#FF7E9A')}${frHeart(214,58,3,'#FFB3C4')}${frHeart(112,40,3,'#FFB3C4')}${env}</svg>`; }
+// 紹介の窓
+function friendDialogHTML(){ const me=store.get(KEY_ME,''); const can=!!myHero(); const fr=store.get(KEY_FRIEND,[]);
+  return `<div class="frd-in"><button class="frd-x" type="button" aria-label="閉じる">×</button>
+    <div class="frd-art">${frArtSVG(true)}</div><h2>友だちに紹介する</h2><p class="frd-lead">${FR_LEAD}</p>
+    ${can?'':'<p class="tiny frd-note">まだ主人公が生まれていないので、今送れるのは LIFE BOOK の入口のリンクです。「生まれる」を押したあとに送ると、ふたりの主人公が出会います。</p>'}
+    <label class="frd-name">あなたの呼び名（友だちに表示されます）<input id="frBy" value="${esc(me)}" maxlength="20" placeholder="例：みつ"></label>
+    <div class="frd-btns">
+      <button class="frd-b frd-line" id="frLine" type="button"><i class="ic ic-line" aria-hidden="true"></i><span>LINEで送る</span></button>
+      <button class="frd-b frd-sky" id="frShare" type="button" hidden><i class="ic ic-share" aria-hidden="true"></i><span>ほかのアプリで送る</span></button>
+      <button class="frd-b frd-lemon" id="frLink" type="button"><i class="ic ic-link" aria-hidden="true"></i><span>リンクをコピー</span></button>
+      <button class="frd-b frd-lilac" id="frMail" type="button"><i class="ic ic-mail" aria-hidden="true"></i><span>メールで送る</span></button>
+    </div>
+    <p class="frd-msg" id="frMsg" role="status"></p><textarea id="frOut" rows="3" readonly hidden aria-label="紹介の文とリンク"></textarea>
+    <details class="frd-get"><summary>友だちから届いたリンクやコードを受け取る</summary>
+      <p class="tiny muted">届いたリンクを押せば、自動でつながります。うまくいかないときは、ここにはりつけてください。</p>
+      <textarea id="frCodeIn" rows="2" placeholder="届いたリンク、または LIFEFRIEND1. からはじまるコード"></textarea><button class="btn small" id="frGet" type="button">受け取る</button>
+      ${can?'<p class="tiny"><button class="linkish" id="frCode" type="button">紹介コードだけをコピー</button></p>':''}
+    </details>
+    ${fr.length?`<p class="tiny muted">つながっている人：${fr.map(f=>esc(f.by||'友だち')+'さん').join('、')}</p>`:''}</div>`; }
+function openFriend(msgText){ let d=document.getElementById('frDlg');
+  if(!d){ d=document.createElement('div'); d.id='frDlg'; d.className='frd'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','友だちに紹介する'); document.body.appendChild(d);
+    d.addEventListener('click',e=>{ if(e.target===d) closeFriend(); }); document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!d.hidden) closeFriend(); }); }
+  d.innerHTML=friendDialogHTML(); d.hidden=false; document.body.classList.add('frd-on'); bindFriend();
+  if(msgText){ const m=$('#frMsg'); if(m) m.textContent=msgText; }
+  const f=d.querySelector('#frLine'); if(f) f.focus(); }
+function closeFriend(){ const d=document.getElementById('frDlg'); if(d) d.hidden=true; document.body.classList.remove('frd-on'); }
+function bindFriendOpeners(){ document.querySelectorAll('.fr-open').forEach(b=>{ b.onclick=()=>openFriend(); }); }
+function bindFriend(){ bindFriendOpeners();
+  const d=document.getElementById('frDlg'); if(!d||d.hidden) return;
   const msg=t=>{ const m=$('#frMsg'); if(m) m.textContent=t; };
   const by=()=>{ const i=$('#frBy'); if(i) store.set(KEY_ME,(i.value||'').trim().slice(0,20)); };
-  const give=(t,what)=>{ if(!t) return msg('まだ主人公がいません。'); const o=$('#frOut'); if(o){ o.hidden=false; o.value=t; o.select(); }
-    const done=()=>msg(what+'をコピーしました。友だちに送ってください。'), fail=()=>msg('下の欄の'+what+'を選んで、コピーしてください。');
+  const link=()=>{ by(); return friendLink()||friendPlainLink(); };
+  const x=d.querySelector('.frd-x'); if(x) x.onclick=closeFriend;
+  const copy=(t,what)=>{ const o=$('#frOut'); if(o){ o.hidden=false; o.value=t; o.select(); }
+    const done=()=>msg(what+'をコピーしました。LINEやメールにはりつけて、友だちに送ってください。'), fail=()=>msg('下の欄の文を選んで、コピーしてください。');
     try{ navigator.clipboard.writeText(t).then(done).catch(fail); }catch(e){ fail(); } };
-  const l=$('#frLink'); if(l) l.onclick=()=>{ by(); give(friendLink(),'紹介リンク'); };
-  const c=$('#frCode'); if(c) c.onclick=()=>{ by(); give(friendCode(),'紹介コード'); };
-  const g=$('#frGet'); if(g) g.onclick=()=>{ const o=readFriend($('#frCodeIn').value); if(!o) return msg('コードが読み取れませんでした。最初から最後まで、まるごとはりつけてください。'); afterFriend(o,receiveFriend(o)); };
+  const ln=$('#frLine'); if(ln) ln.onclick=()=>{ const t=friendShareText(link()); window.open('https://line.me/R/msg/text/?'+encodeURIComponent(t),'_blank','noopener'); msg('LINEがひらきます。送る相手を選んでください。ひらかないときは「リンクをコピー」を使ってください。'); };
+  const sh=$('#frShare'); if(sh&&navigator.share){ sh.hidden=false; sh.onclick=()=>{ const l=link(); navigator.share({ title:'LIFE BOOK', text:friendShareText(l).replace('\n'+l,''), url:l }).then(()=>msg('送りました。')).catch(()=>{}); }; }
+  const l=$('#frLink'); if(l) l.onclick=()=>copy(friendShareText(link()),'紹介の文とリンク');
+  const ml=$('#frMail'); if(ml) ml.onclick=()=>{ location.href='mailto:?subject='+encodeURIComponent('LIFE BOOK で、人生のどこかで出会いませんか')+'&body='+encodeURIComponent(friendShareText(link())); };
+  const c=$('#frCode'); if(c) c.onclick=()=>{ by(); const t=friendCode(); if(t) copy(t,'紹介コード'); };
+  const g=$('#frGet'); if(g) g.onclick=()=>{ const o=readFriend($('#frCodeIn').value); if(!o) return msg('読み取れませんでした。リンクやコードを、最初から最後まで、まるごとはりつけてください。'); afterFriend(o,receiveFriend(o)); };
 }
-function afterFriend(o,r){ if(r==='self'){ alertFriend('これは、あなた自身の紹介コードです。'); return; }
+function afterFriend(o,r){ if(r==='self'){ alertFriend('これは、あなた自身の紹介リンクです。'); return; }
   _fhCache=null; if(typeof load==='function'&&typeof st!=='undefined'&&st) load();
-  alertFriend(`${o.by||'友だち'}さんとつながりました。${o.by||'友だち'}さんの主人公と、あなたの主人公は、人生のどこかで出会います。${r==='ok'?'お返しに、あなたの紹介コードも送ると、相手の人生でも出会いが起きます。':''}`); }
-function alertFriend(t){ if(typeof render==='function') render(); setTimeout(()=>{ const d=document.querySelector('.friend-sec'); if(d) d.open=true; const m=$('#frMsg'); if(m) m.textContent=t; else { const p=document.createElement('p'); p.className='toast'; p.textContent=t; document.body.appendChild(p); setTimeout(()=>p.remove(),6000); } },40); }
+  alertFriend(`${o.by||'友だち'}さんとつながりました。${o.by||'友だち'}さんの主人公と、あなたの主人公は、人生のどこかで出会います。${r==='ok'?'お返しに、あなたからも紹介を送ると、相手の人生でも出会いが起きます。':''}`); }
+function alertFriend(t){ if(typeof render==='function') render(); setTimeout(()=>openFriend(t),40); }
 // リンクで開いたとき
 function friendFromHash(){ try{ const h=location.hash||''; if(!/friend=/.test(h)) return; const o=readFriend(h); history.replaceState(null,'',location.pathname+location.search); if(!o) return; const r=receiveFriend(o); setTimeout(()=>afterFriend(o,r),300); }catch(e){} }
 window.addEventListener('hashchange',()=>{ if(typeof friendFromHash==='function') friendFromHash(); });
@@ -9474,6 +9565,7 @@ function introHTML(){
       <p class="brand-sub">${SUBTITLE}</p>
       <p class="lead">世界のどこかに、<br><em>ひとりの人間</em>として生まれる。</p>
       <div class="ih-cta"><button class="btn" id="bornBtn" type="button">生まれる</button></div>
+      <p class="ih-fr">友だちを誘うと、ふたりの主人公が人生のどこかで出会います。<button class="fr-open" type="button">友だちに紹介する</button></p>
     </div><div class="hero">${bkHeroSVG()}</div></div>
     <div class="body"><p>国も、家族も、家の暮らし向きも、生まれた日時も、名前も、すべて世界の統計に沿って偶然に決まります。その人は、自分で考え、自分で選んで生きていきます。あなたにできるのは、迷っているその人に、一生で2〜3回だけ「インスピレーション」を贈ること。届くかどうかは、その時のその人の心しだいです。</p>
     <p style="margin-top:10px">人生は、現実の約3日半で1歳ずつ進みます（80歳まで生きる人生なら、約9か月）。ひらくたびに、前に見た時から今までに起きた出来事と、その時の気持ちが読めます。人生が終わると、葬儀のあとに、その人生を読み解く振り返りが届きます。生き終えた人生は、章立てのある一冊の本になって、あなたの本棚に並びます。</p></div>
