@@ -1,5 +1,6 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5af5f16575224c8c9596106067decbde"}'></script>
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#FF8FAB"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LIFE BOOK"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head><body>
 <title>LIFE BOOK — 人生のヒントが、ここにある</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -14380,7 +14381,7 @@ var qrcode = function() {
 const MOVE_PRE='LIFEMOVE1.';
 // LINE などのアプリの中のブラウザは、記録の置き場所が、いつものブラウザ（Safari・Chrome）と別になる。
 // そのため、LINEで開いたら、いつものブラウザで開き直す（LINE は ?openExternalBrowser=1 をつけたリンクを外のブラウザで開く）。
-const IN_LINE=/\bLine\//i.test(navigator.userAgent||''), IN_APP=IN_LINE||/FBAN|FBAV|Instagram|MicroMessenger|KAKAOTALK/i.test(navigator.userAgent||'');
+const IN_LINE=/\bLine\//i.test(navigator.userAgent||''), IN_APP=IN_LINE||/FBAN|FBAV|Instagram|MicroMessenger|KAKAOTALK|\bGSA\/|YJApp|Twitter|TikTok|musical_ly/i.test(navigator.userAgent||'');
 function extURL(u){ const i=u.indexOf('#'); const base=i<0?u:u.slice(0,i), h=i<0?'':u.slice(i); if(/openExternalBrowser=1/.test(base)) return u; return base+(base.includes('?')?'&':'?')+'openExternalBrowser=1'+h; }
 function inAppGuard(){ if(!IN_APP) return; const tried=/openExternalBrowser=1/.test(location.search);
   if(IN_LINE&&!tried){ location.replace(extURL(location.href)); return true; }
@@ -14428,12 +14429,14 @@ function moveConfirmHTML(o,diff){ const P=o.cur?(()=>{ try{ return makeBirth(o.c
 async function moveFromHash(){ const h=location.hash||''; if(!/move=/.test(h)) return; const t=h.split('move=')[1]||''; history.replaceState(null,'',location.pathname+location.search);
   let o=null; try{ o=JSON.parse(await moveUnzip(t)); }catch(e){}
   if(!o||o.v!==1){ return; }
+  if(o.id&&o.id===store.get(KEY_MYID,'')) return; // 同じ人のデータ（ホーム画面のアイコンから開くたびに付いてくる分など）は、何もしない
+  if(o.at&&store.get('hitotsu.mvNo',0)===o.at) return; // 一度「やめる」を選んだ引き継ぎは、もう聞かない
   let diff=''; if(st&&o.cur&&st.seed!==o.cur.seed&&cur) diff=cur.P.full;
   if(st&&o.cur&&st.seed===o.cur.seed&&(st.choice||'').length>(o.cur.choice||'').length) o.cur=st; // この端末のほうが先へ進んでいるときは、この端末の記録を残す
   let d=document.getElementById('mvDlg'); if(!d){ d=document.createElement('div'); d.id='mvDlg'; d.className='frd'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); document.body.appendChild(d); }
   d.innerHTML=moveConfirmHTML(o,diff); d.hidden=false; document.body.classList.add('frd-on');
   $('#mvYes').onclick=()=>{ closeMove(); moveApply(o); };
-  $('#mvNo').onclick=closeMove; }
+  $('#mvNo').onclick=()=>{ if(o.at) store.set('hitotsu.mvNo',o.at); closeMove(); }; }
 window.addEventListener('hashchange',()=>{ moveFromHash(); });
 // ===== メインのページ（ホーム）：今の人生のようすと、いろいろな入口を一つの画面に =====
 let page='home';
@@ -14505,6 +14508,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-friends',`Group Soul /紹介でつながった人たち<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
     ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は「思い出のLIFE BOOK」になって、ここに並びます。</p>')}
     ${typeof borrowTileHTML==='function'?homeTile('hm-borrow',`友だちからLIFE BOOKを借りる<span class="hm-n">${store.get(KEY_LOAN,[]).length}冊</span>`,borrowTileHTML()):''}
+    ${typeof pwaTileHTML==='function'?pwaTileHTML():''}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
     ${typeof birthMapHTML==='function'?homeTile('hm-map','生まれた場所',birthMapHTML(P)):''}
     ${typeof eaTileHTML==='function'?homeTile('hm-ea','地球アルバム',eaTileHTML(P)):''}
@@ -14515,7 +14519,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
   </div>
   <section class="hm-move"><div><h3>携帯とパソコンで、同じ人生を</h3><p class="tiny">この端末の人生と本棚を、もう一方の端末に引き継げます。QRコードを読みとるだけです。</p></div><button class="hm-btn ghost" type="button" id="hmMove">ほかの端末で続ける</button></section>
   </div>`; }
-function bindHome(){ bindFriend(); if(typeof bindLoanShelf==='function') bindLoanShelf();
+function bindHome(){ bindFriend(); if(typeof bindPwa==='function') bindPwa(); if(typeof bindLoanShelf==='function') bindLoanShelf();
   const r=$('#hmRead'); if(r) r.onclick=goLife; const mv=$('#hmMove'); if(mv) mv.onclick=openMove;
   document.querySelectorAll('[data-go="life"]').forEach(b=>b.onclick=goLife);
   const a=$('#hmAlbum'); if(a) a.onclick=()=>{ albumOpen=true; goLife(); setTimeout(()=>{ const al=document.querySelector('.album'); if(al) al.scrollIntoView({ block:'start' }); },60); };
@@ -15543,5 +15547,55 @@ async function osmFetch(){ if(!FB||!FB.db) return; if(Date.now()-_osmAt<20*60000
 .osm-p .osm-d{ display:block; margin:0; font-size:11px; }
 .osm-p p{ margin:2px 0 0; font-family:var(--serif); font-size:15px; line-height:1.75; overflow-wrap:anywhere; }
 `; document.head.appendChild(s); })();
+// ===== ホーム画面に置く（アプリのように使う / PWA） =====
+// 公開版（play.html）だけに入る。いつも同じ入口から入れるように、ホーム画面への追加を案内する。
+// iPhone のホーム画面アプリは Safari と保存場所が別なので、追加するときに今の人生をアドレスに付けて、アプリ側で引き継ぐ。
+const PWA_STANDALONE=(()=>{ try{ return matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true; }catch(e){ return false; } })();
+const PWA_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent||'')||(/Macintosh/.test(navigator.userAgent||'')&&navigator.maxTouchPoints>1);
+let _pwaPrompt=null, _pwaDone=false;
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); _pwaPrompt=e; pwaRefresh(); });
+window.addEventListener('appinstalled',()=>{ _pwaPrompt=null; _pwaDone=true; pwaRefresh(); });
+if('serviceWorker' in navigator && /github\.io$/.test(location.host)) window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+function pwaRefresh(){ const t=document.querySelector('.hm-pwa'); if(t) t.outerHTML=pwaTileHTML(); bindPwa(); }
+function pwaTileHTML(){ if(PWA_STANDALONE||(typeof IN_APP!=='undefined'&&IN_APP)) return '';
+  const lead=`<p class="pwa-lead">ホーム画面に LIFE BOOK のアイコンを置くと、アプリのように、いつも同じ入口から入れます。検索して入るたびに別の人になってしまうことが、なくなります。</p>`;
+  let body;
+  if(_pwaDone) body=`<p class="pwa-ok">ホーム画面に置きました。これからは、アイコンから開いてください。</p>`;
+  else if(PWA_IOS) body=`<ol class="pwa-steps">
+      <li>画面の下（iPad は上）にある <b>共有ボタン</b> <span class="pwa-ic" aria-label="四角から上向きの矢印">${pwaShareSVG()}</span> を押します</li>
+      <li>メニューを下へ動かして <b>「ホーム画面に追加」</b> を押します</li>
+      <li>右上の <b>「追加」</b> を押すと、アイコンができます</li></ol>
+    <p class="tiny pwa-note">${typeof st!=='undefined'&&st?'いま見守っている人生と本棚も、そのままアイコンのほうへ引き継がれます。アイコンから開いたら、最初に出る「引き継ぐ」を押してください。':'追加したら、これからはアイコンから開いてください。'}</p>`;
+  else if(_pwaPrompt) body=`<button class="hm-btn pwa-go" type="button" id="pwaGo">ホーム画面に追加する</button>`;
+  else body=`<p class="tiny">ブラウザのメニュー（︙ や …）から <b>「ホーム画面に追加」</b> または <b>「アプリをインストール」</b> を選んでください。</p>`;
+  return homeTile('hm-pwa','アプリのようにホーム画面に置く',lead+body); }
+function pwaShareSVG(){ return `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 8H5v9h10V8h-1.5"/><path d="M10 12V2.5M6.8 5.5 10 2.5l3.2 3"/></svg>`; }
+let _pwaHashAt=0;
+async function pwaCarryLife(){ // iPhone：追加するときのアドレスに、今の人生を付けておく（同じ Safari では何も起きない）
+  if(!PWA_IOS||PWA_STANDALONE||typeof moveData!=='function'||typeof st==='undefined'||!st) return;
+  if(Date.now()-_pwaHashAt<60000&&/#move=/.test(location.hash)) return;
+  try{ const z=await moveZip(JSON.stringify(moveData())); history.replaceState(null,'',location.pathname+location.search+'#move='+z); _pwaHashAt=Date.now(); }catch(e){} }
+function bindPwa(){ const b=document.getElementById('pwaGo'); if(b) b.onclick=async()=>{ if(!_pwaPrompt) return; _pwaPrompt.prompt(); try{ const r=await _pwaPrompt.userChoice; if(r&&r.outcome==='accepted') _pwaDone=true; }catch(e){} _pwaPrompt=null; pwaRefresh(); };
+  if(document.querySelector('.hm-pwa')) pwaCarryLife(); }
+// ホーム画面のアイコンから開いて、まだ人生が無いとき：Safari でコピーした引き継ぎリンクを貼れる欄を出す
+function pwaPasteHTML(){ return `<section class="pwa-paste" id="pwaPaste"><h3>Safari で見守っていた人生がありますか？</h3>
+  <p class="tiny">Safari の LIFE BOOK で「ほかの端末で続ける」を押し、「リンクをコピー」したものを、ここに貼りつけてください。</p>
+  <div class="pwa-prow"><input id="pwaIn" type="text" inputmode="url" autocomplete="off" placeholder="ここに貼りつける" aria-label="引き継ぎリンク"><button class="hm-btn" type="button" id="pwaPasteGo">引き継ぐ</button></div><p class="tiny" id="pwaPMsg" role="status"></p></section>`; }
+function pwaAfterRender(){ if(!PWA_STANDALONE||(typeof st!=='undefined'&&st)||store.get(KEY_ARC,[]).length||document.getElementById('pwaPaste')) return;
+  const app=document.getElementById('app'); if(!app) return; app.insertAdjacentHTML('afterbegin',pwaPasteHTML());
+  document.getElementById('pwaPasteGo').onclick=()=>{ const v=(document.getElementById('pwaIn').value||'').trim(); const m=v.match(/move=([A-Za-z0-9_\-]+)/);
+    if(!m){ document.getElementById('pwaPMsg').textContent='引き継ぎリンクが見つかりませんでした。「リンクをコピー」したものを、そのまま貼りつけてください。'; return; }
+    location.hash='move='+m[1]; }; }
+if(typeof render==='function'){ const _pwaR=render; render=function(){ const r=_pwaR.apply(this,arguments); try{ pwaAfterRender(); }catch(e){} return r; }; setTimeout(()=>{ try{ pwaAfterRender(); }catch(e){} },0); }
+(function(){ const c=document.createElement('style'); c.textContent=`.hm-pwa .pwa-lead{ margin:0 0 10px; }
+.pwa-steps{ margin:0 0 8px; padding-left:1.4em; line-height:1.9; }
+.pwa-ic{ display:inline-flex; vertical-align:-3px; color:#2F7FE0; }
+.pwa-note{ margin:4px 0 0; }
+.pwa-ok{ margin:0; font-weight:700; color:#D6457A; }
+.pwa-paste{ margin:12px auto; max-width:640px; padding:14px 16px; border-radius:18px; border:2px dashed #FF8FAB; background:#FFF5F8; }
+.pwa-paste h3{ margin:0 0 6px; font-size:16px; }
+.pwa-prow{ display:flex; gap:8px; margin-top:8px; }
+.pwa-paste .hm-btn, .hm-pwa .pwa-go{ border:2px solid #E86A88; background:#FF8FAA; color:#fff; box-shadow:0 4px 0 #D85878; font-weight:700; }
+.pwa-prow input{ flex:1; min-width:0; font-size:16px; padding:10px 12px; border-radius:12px; border:2px solid #F4C6D4; }`; document.head.appendChild(c); })();
 </script>
 </body></html>
