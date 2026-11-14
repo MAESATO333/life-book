@@ -10817,8 +10817,8 @@ function friendMeet(P,L){
   if(dirty){ const ks=Object.keys(memo); if(ks.length>200) for(const k of ks.slice(0,ks.length-200)) delete memo[k]; store.set(KEY_FRMEET,memo); }
 }
 // 画面：紹介する・紹介を受け取る（どの画面にもある「友だちに紹介」ボタン → 紹介の窓）
-const FR_LEAD='紹介した人と、紹介された人。ふたりの Channelは、それぞれの人生のどこかで、出会います。出会ったときは、お互いに「出会った！」と通知されます。';
-function friendShareText(link){ return `LIFE BOOK で、世界のどこかに生まれた一人の人生を見守っています。\nこのリンクから始めると、わたしの Channelと、あなたの Channelが、人生のどこかで出会います。\n${link}`; }
+const FR_LEAD='紹介した人と、紹介された人。ふたりの Channel は、それぞれの人生のどこかで、出会います。出会ったときは、お互いに「出会った！」と通知されます。';
+function friendShareText(link){ return `LIFE BOOK で、世界のどこかに生まれた一人の人生を見守っています。\nこのリンクから始めると、わたしの Channel と、あなたの Channel が、人生のどこかで出会います。\n${link}`; }
 function friendPlainLink(){ const u=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; return typeof extURL==='function'?extURL(u):u; }
 // 画面の中に置く案内（大きなボタンつき）
 function friendHTML(){ const fr=store.get(KEY_FRIEND,[]);
@@ -10841,7 +10841,7 @@ function frArtSVG(big){ let S; try{ S=bkScene(); }catch(e){ return ''; }
 function friendDialogHTML(){ const me=store.get(KEY_ME,''); const can=!!myHero(); const fr=store.get(KEY_FRIEND,[]);
   return `<div class="frd-in"><button class="frd-x" type="button" aria-label="閉じる">×</button>
     <div class="frd-art">${frArtSVG(true)}</div><h2>友だちに紹介する</h2><p class="frd-lead">${FR_LEAD}</p>${frReplyHTML()}
-    ${can?'':'<p class="tiny frd-note">まだ Channel が生まれていないので、今送れるのは LIFE BOOK の入口のリンクです。「生まれる」を押したあとに送ると、ふたりの Channelが出会います。</p>'}
+    ${can?'':'<p class="tiny frd-note">まだ Channel が生まれていないので、今送れるのは LIFE BOOK の入口のリンクです。「生まれる」を押したあとに送ると、ふたりの Channel が出会います。</p>'}
     <label class="frd-name">あなたの呼び名（友だちに表示されます）<input id="frBy" value="${esc(me)}" maxlength="20" placeholder="例：みつ"></label>
     <div class="frd-btns">
       <button class="frd-b frd-line" id="frLine" type="button"><i class="ic ic-line" aria-hidden="true"></i><span>LINEで送る</span></button>
@@ -10882,11 +10882,11 @@ function bindFriend(){ bindFriendOpeners();
 }
 function afterFriend(o,r){ if(r==='self'){ alertFriend('これは、あなた自身の紹介リンクです。'); return; }
   _fhCache=null; if(typeof load==='function'&&typeof st!=='undefined'&&st) load();
-  if(o.sv){ frReplyDone(o.id); alertFriend(`${o.by||'友だち'}さんが、あなたの紹介で LIFE BOOK を始めました。つながりました！ ふたりの Channelは、人生のどこかで出会います。`); return; }
-  if(o.re){ frReplyDone(o.id); alertFriend(`${o.by||'友だち'}さんから、返事が届きました！ ${o.by||'友だち'}さんと、おたがいにつながりました。ふたりの Channelは、人生のどこかで出会います。`); return; }
+  if(o.sv){ frReplyDone(o.id); alertFriend(`${o.by||'友だち'}さんが、あなたの紹介で LIFE BOOK を始めました。つながりました！ ふたりの Channel は、人生のどこかで出会います。`); return; }
+  if(o.re){ frReplyDone(o.id); alertFriend(`${o.by||'友だち'}さんから、返事が届きました！ ${o.by||'友だち'}さんと、おたがいにつながりました。ふたりの Channel は、人生のどこかで出会います。`); return; }
   const online=typeof fbOnline==='function'&&fbOnline();
   if(!online&&!frReplies().some(x=>x.id===o.id)) store.set(KEY_FRREPLY,[{ id:o.id, by:o.by||'' },...frReplies()].slice(0,10));
-  alertFriend(`${o.by||'友だち'}さんとつながりました。${o.by||'友だち'}さんの Channelと、あなたの Channelは、人生のどこかで出会います。`+(online?`${o.by||'友だち'}さんの画面にも、つながったことが届きます。`:`下のボタンで、${o.by||'友だち'}さんにも知らせてあげてください。`)); }
+  alertFriend(`${o.by||'友だち'}さんとつながりました。${o.by||'友だち'}さんの Channel と、あなたの Channel は、人生のどこかで出会います。`+(online?`${o.by||'友だち'}さんの画面にも、つながったことが届きます。`:`下のボタンで、${o.by||'友だち'}さんにも知らせてあげてください。`)); }
 function alertFriend(t){ if(typeof render==='function') render(); setTimeout(()=>openFriend(t),40); }
 // リンクで開いたとき
 function friendFromHash(){ try{ const h=location.hash||''; if(!/friend=/.test(h)) return; const o=readFriend(h); history.replaceState(null,'',location.pathname+location.search); if(!o) return; if(!o.re) o.lk=1; const r=receiveFriend(o); setTimeout(()=>afterFriend(o,r),300); }catch(e){} }
@@ -15229,7 +15229,13 @@ function fallbackCopy(txt){ const d=$('#dev'); const ta=document.createElement('
 $('#devbtn').onclick=()=>{ devOpen=!devOpen; renderDev(); };
 // 「制作用」は、アドレスの最後に ?dev か #dev をつけた時だけ出す
 if(/[?&#]dev\b/.test(location.search+location.hash)||(()=>{ try{ return localStorage.getItem('hitotsu.dev')==='1'; }catch(e){ return false; } })()){ $('#devbtn').hidden=false; try{ localStorage.setItem('hitotsu.dev','1'); }catch(e){} }
-function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); render(); try{ if(/^#(gateway|birth)\b/.test(location.hash)&&typeof goTop==='function'){ history.replaceState(null,'',location.pathname+location.search); goTop(); } }catch(_){} if(typeof friendFromHash==='function') friendFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
+// サイトのメニューから来たとき：play.html#birth / #home / #record / #friend（#gateway は #birth と同じ）
+function navFromHash(){ try{ const m=(location.hash||'').match(/^#(gateway|birth|home|record|friend)(?![=\w])/); if(!m) return; history.replaceState(null,'',location.pathname+location.search);
+  const k=m[1]; if(k==='friend'){ if(typeof openFriend==='function') setTimeout(()=>openFriend(),200); return; }
+  if((k==='home'||k==='record')&&typeof st!=='undefined'&&st){ if(k==='home') goHome(); else goLife(); return; }
+  if(typeof goTop==='function') goTop(); }catch(_){} }
+window.addEventListener('hashchange',navFromHash);
+function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); render(); navFromHash(); if(typeof friendFromHash==='function') friendFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
 start();
 setInterval(()=>{ if(st && st.stage==='life' && !viewing && !inspAnim && document.visibilityState==='visible' && !document.activeElement.matches('textarea')) render(); }, 30000);
 
@@ -15329,7 +15335,7 @@ function fbListen(){ const { collection, onSnapshot }=FB.D;
     if(!changed) return;
     try{ _fhCache=null; }catch(_){}
     fbPush(); // 新しい相手に、こちらの主人公も届ける
-    if(accepted.length){ const o=accepted[accepted.length-1]; alertFriend(`${o.by||'友だち'}さんが受けてくれました。${o.by||'友だち'}さんと、つながりました！ ふたりの Channelは、人生のどこかで出会います。`); }
+    if(accepted.length){ const o=accepted[accepted.length-1]; alertFriend(`${o.by||'友だち'}さんが受けてくれました。${o.by||'友だち'}さんと、つながりました！ ふたりの Channel は、人生のどこかで出会います。`); }
     else if(fresh.length){ const o=fresh[fresh.length-1]; afterFriend(o,'ok'); }
     else { try{ if(typeof load==='function'&&typeof st!=='undefined'&&st) load(); if(typeof render==='function') render(); }catch(_){} }
   },e=>{ try{ console.warn('[fbsync] 受け箱を読めませんでした',e&&e.code||e); }catch(_){} }); }
@@ -15379,7 +15385,7 @@ function fbDlgRefresh(msg){ const d=document.getElementById('frDlg'); if(!d||d.h
 (function(){ const _bf=bindFriend; bindFriend=function(){ const r=_bf.apply(this,arguments); const d=document.getElementById('frDlg'); if(!d||d.hidden) return r;
   const say=t=>fbDlgRefresh(t);
   d.querySelectorAll('[data-ask]').forEach(b=>{ b.onclick=async()=>{ b.disabled=true; const c=fbCandidates().find(x=>x.id===b.dataset.ask); const ok=await fbAsk(b.dataset.ask); say(ok?`${(c&&c.by)||'相手'}さんに「つながりたい」を送りました。OKが届いたら、お知らせします。`:'送れませんでした。少したってから、もう一度ためしてください。'); }; });
-  d.querySelectorAll('[data-acc]').forEach(b=>{ b.onclick=async()=>{ b.disabled=true; const x=FB_REQS.find(r=>r.from===b.dataset.acc); const ok=await fbAccept(b.dataset.acc); say(ok?`${(x&&x.by)||'相手'}さんと、つながりました！ ふたりの Channelは、人生のどこかで出会います。`:'うまくつながれませんでした。少したってから、もう一度ためしてください。'); }; });
+  d.querySelectorAll('[data-acc]').forEach(b=>{ b.onclick=async()=>{ b.disabled=true; const x=FB_REQS.find(r=>r.from===b.dataset.acc); const ok=await fbAccept(b.dataset.acc); say(ok?`${(x&&x.by)||'相手'}さんと、つながりました！ ふたりの Channel は、人生のどこかで出会います。`:'うまくつながれませんでした。少したってから、もう一度ためしてください。'); }; });
   d.querySelectorAll('[data-dec]').forEach(b=>{ b.onclick=()=>fbDecline(b.dataset.dec); });
   return r; }; })();
 // 紹介リンクに招待の印を入れる
