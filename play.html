@@ -12865,6 +12865,125 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .sp-ul{ list-style:none; margin:0; padding:0; } .sp-sub{ margin:2px 0 0; padding-left:1.1em; font-size:12.5px; }
 .sp-note{ font-size:11.5px; color:var(--muted); margin:0 0 4px; } .sp-wait{ font-size:12px; color:var(--muted); margin:4px 0; } .sp-src{ font-size:9.5px; opacity:.8; margin:4px 0 0; }
 </style>`);
+// ===== 世界のいま：月・地球・小惑星・探査機・星空のいま =====
+// 月の形・距離・惑星の位置・ボイジャーの距離は、いまの日時から計算（天文の公式の式。数百kmや数日の誤差がある目安）。
+// 地震は USGS（アメリカ地質調査所）、小惑星ときょうの宇宙の写真は NASA の公開データを、その場で読みこむ。
+const RAD=Math.PI/180, n360=x=>((x%360)+360)%360;
+const skJD=d=>d.getTime()/864e5+2440587.5;
+const skDate=d=>`${d.getMonth()+1}月${d.getDate()}日`;
+const skLi=a=>a.map(t=>`<li>${t}</li>`).join('');
+// --- 月 ---
+function skMoon(d){ const jd=skJD(d), T=(jd-2451545)/36525; const syn=29.530588853; const age=((jd-2451550.1)%syn+syn)%syn;
+  const D=n360(297.8501921+445267.1114034*T)*RAD, M=n360(357.5291092+35999.0502909*T)*RAD, Mp=n360(134.9633964+477198.8675055*T)*RAD;
+  const dist=385000.56+(-20905.355*Math.cos(Mp)-3699.111*Math.cos(2*D-Mp)-2954.156*Math.cos(2*D)-569.925*Math.cos(2*Mp)+246.158*Math.cos(2*D-2*Mp)-204.586*Math.cos(2*D-M)-170.733*Math.cos(2*D+Mp)-152.138*Math.cos(2*D-M-Mp)-129.620*Math.cos(M-Mp)+108.743*Math.cos(D)+104.755*Math.cos(M+Mp));
+  const toFull=((14.765-age)+syn)%syn, toNew=syn-age; const nm=age<1.5?'新月':age<5.5?'三日月（細い月）':age<9.5?'上弦の半月':age<13.5?'ふくらんでいく月':age<16.5?'満月':age<20.5?'欠けていく月':age<24.5?'下弦の半月':age<28?'明け方の細い月':'新月';
+  const lit=Math.round((1-Math.cos(age/syn*2*Math.PI))/2*100);
+  return { age, nm, dist, lit, full:new Date(d.getTime()+toFull*864e5), nw:new Date(d.getTime()+toNew*864e5), toFull, toNew }; }
+// --- 惑星（NASA JPL の近似軌道要素 1800〜2050年）---
+const SK_PL={ 水星:[0.38709927,0.00000037,0.20563593,0.00001906,7.00497902,-0.00594749,252.25032350,149472.67411175,77.45779628,0.16047689,48.33076593,-0.12534081],
+ 金星:[0.72333566,0.00000390,0.00677672,-0.00004107,3.39467605,-0.00078890,181.97909950,58517.81538729,131.60246718,0.00268329,76.67984255,-0.27769418],
+ 地球:[1.00000261,0.00000562,0.01671123,-0.00004392,-0.00001531,-0.01294668,100.46457166,35999.37244981,102.93768193,0.32327364,0,0],
+ 火星:[1.52371034,0.00001847,0.09339410,0.00007882,1.84969142,-0.00813131,-4.55343205,19140.30268499,-23.94362959,0.44441088,49.55953891,-0.29257343],
+ 木星:[5.20288700,-0.00011607,0.04838624,-0.00013253,1.30439695,-0.00183714,34.39644051,3034.74612775,14.72847983,0.21252668,100.47390909,0.20469106],
+ 土星:[9.53667594,-0.00125060,0.05386179,-0.00050991,2.48599187,0.00193609,49.95424423,1222.49362201,92.59887831,-0.41897216,113.66242448,-0.28867794] };
+function skHelio(k,T){ const e=SK_PL[k]; const a=e[0]+e[1]*T, ec=e[2]+e[3]*T, I=(e[4]+e[5]*T)*RAD, L=e[6]+e[7]*T, w=e[8]+e[9]*T, O=e[10]+e[11]*T;
+  const M=n360(L-w)*RAD, om=(w-O)*RAD, Om=O*RAD; let E=M; for(let i=0;i<8;i++) E=E-(E-ec*Math.sin(E)-M)/(1-ec*Math.cos(E));
+  const xp=a*(Math.cos(E)-ec), yp=a*Math.sqrt(1-ec*ec)*Math.sin(E);
+  const x=(Math.cos(om)*Math.cos(Om)-Math.sin(om)*Math.sin(Om)*Math.cos(I))*xp+(-Math.sin(om)*Math.cos(Om)-Math.cos(om)*Math.sin(Om)*Math.cos(I))*yp;
+  const y=(Math.cos(om)*Math.sin(Om)+Math.sin(om)*Math.cos(Om)*Math.cos(I))*xp+(-Math.sin(om)*Math.sin(Om)+Math.cos(om)*Math.cos(Om)*Math.cos(I))*yp;
+  const z=Math.sin(om)*Math.sin(I)*xp+Math.cos(om)*Math.sin(I)*yp; return [x,y,z]; }
+function skPlanets(d){ const T=(skJD(d)-2451545)/36525; const E=skHelio('地球',T); const sunLon=n360(Math.atan2(-E[1],-E[0])/RAD);
+  return ['水星','金星','火星','木星','土星'].map(k=>{ const P=skHelio(k,T), g=[P[0]-E[0],P[1]-E[1],P[2]-E[2]]; const lon=n360(Math.atan2(g[1],g[0])/RAD);
+    const s=[-E[0],-E[1],-E[2]], dot=g[0]*s[0]+g[1]*s[1]+g[2]*s[2], el=Math.acos(dot/(Math.hypot(...g)*Math.hypot(...s)))/RAD; let dl=lon-sunLon; if(dl>180) dl-=360; if(dl<-180) dl+=360;
+    const dist=Math.hypot(...g); const need=k==='水星'?18:k==='金星'?10:15;
+    const when=el<need?null:el>150&&k!=='水星'&&k!=='金星'?'一晩中':dl>0?'夕方の西の空':'明け方の東の空';
+    return { k, el:Math.round(el), when, dist }; }); }
+const SK_METEOR=[[1,4,'しぶんぎ座流星群'],[4,22,'こと座流星群'],[5,6,'みずがめ座η流星群'],[8,13,'ペルセウス座流星群'],[10,21,'オリオン座流星群'],[11,17,'しし座流星群'],[12,14,'ふたご座流星群'],[12,22,'こぐま座流星群']];
+// --- 探査機（NASA の公表値から計算した、太陽からの距離の目安）---
+function skVoyager(d){ const y=(d-new Date('2025-01-01T00:00:00Z'))/(365.25*864e5); const AU=1.495978707e8;
+  return [['ボイジャー1号',165.0+3.57*y],['ボイジャー2号',138.5+3.26*y]].map(([n,au])=>({ n, km:au*AU, h:au*AU/299792.458/3600 })); }
+const SK_FACT={
+ moon:['月は、地球から平均で約38万4400km離れている。','月は、毎年約3.8cmずつ地球から遠ざかっている。','月はいつも同じ面を地球に向けている。','1969年7月20日、アポロ11号で人類がはじめて月に降り立った。','2024年1月、日本の月着陸機「SLIM」が月に着陸した。'],
+ earth:['日本には、気象庁が選んだ活火山が111ある。','世界で起きるマグニチュード6以上の地震の、約2割が日本のまわりで起きている。','地球の内部の熱で、プレートは1年に数cmずつ動いている。','観測史上最大の地震は、1960年のチリ地震（マグニチュード9.5）。'],
+ neo:['2013年2月、ロシアのチェリャビンスク上空で小惑星が爆発し、窓ガラスが割れるなどの被害が出た。','約6600万年前、大きな天体の衝突が、恐竜がいなくなった原因の一つと考えられている。','2022年9月、NASA の探査機 DART が小惑星にぶつかり、軌道を変えることに成功した。','2029年4月13日、小惑星アポフィスが地球から約3万kmまで近づく（ぶつからない）。','日本の「はやぶさ2」は、2020年12月に小惑星リュウグウの砂を地球に届けた。'],
+ probe:['ボイジャー1号は、2026年11月ごろ、地球から光で1日かかる距離に届く。人の作った物で初めて。','ボイジャー1号は2012年に、太陽の風が届く範囲（太陽圏）の外へ出た。','ニュー・ホライズンズは、2015年7月に冥王星のそばを通り、はじめて近くから写真をとった。','火星探査車パーサヴィアランスは、2021年2月に火星に着陸した。','ジェイムズ・ウェッブ宇宙望遠鏡は、地球から約150万km離れた場所で宇宙を見ている。'],
+ star:['夜空でいちばん明るい星（太陽をのぞく）は、おおいぬ座のシリウス。','北極星は、ほとんど動かないので、昔から方角を知る目じるしにされてきた。','肉眼で見える星は、空全体で約8600個といわれる。','天の川は、わたしたちの銀河を内側から見た姿。'] };
+let _skH={}, _skAt=0;
+function skyHTML(){ const Y=new Date().getFullYear(); const now=new Date();
+  const mo=skMoon(now);
+  const moon=`<ul class="sp-ul"><li><b>今夜の月</b>　${mo.nm}（月齢${mo.age.toFixed(1)}、光っている部分は約${mo.lit}%）</li><li><b>次の満月</b>　${skDate(mo.full)}ごろ（あと${Math.round(mo.toFull)}日）</li><li><b>次の新月</b>　${skDate(mo.nw)}ごろ（あと${Math.round(mo.toNew)}日）</li><li><b>いまの月までの距離</b>　約${(Math.round(mo.dist/1000)/10).toFixed(1)}万km</li>${skLi(SK_FACT.moon.map(esc))}</ul><p class="sp-src">月の形と距離は、いまの日時から計算した目安です。</p>`;
+  const pl=skPlanets(now); const vis=pl.filter(p=>p.when), hid=pl.filter(p=>!p.when);
+  const y=now.getFullYear(), t0=Date.UTC(y,now.getMonth(),now.getDate()); const ms=SK_METEOR.map(m=>{ let t=Date.UTC(y,m[0]-1,m[1]); if(t<t0) t=Date.UTC(y+1,m[0]-1,m[1]); return [m,Math.round((t-t0)/864e5)]; }).sort((a,b)=>a[1]-b[1]).slice(0,4);
+  const star=`<ul class="sp-ul">${vis.map(p=>`<li><b>${p.k}</b>　${p.when}に見える（太陽から${p.el}°はなれている）</li>`).join('')}${hid.length?`<li>${hid.map(p=>p.k).join('・')}は、いまは太陽の近くにあって見えにくい。</li>`:''}${ms.map(([m,dd])=>`<li><b>${m[2]}</b>　いちばん多く流れるのは${m[0]}月${m[1]}日ごろ（${dd===0?'きょう':`あと${dd}日`}）</li>`).join('')}${skLi(SK_FACT.star.map(esc))}</ul><p class="sp-src">惑星の位置は NASA JPL の軌道の数字から計算。流星群の日は国際流星機構の例年の目安。</p>`;
+  const vg=skVoyager(now); const probe0=vg.map(v=>`<li><b>${v.n}</b>　太陽から約${Math.round(v.km/1e8)}億km（光で約${Math.round(v.h)}時間）</li>`).join('');
+  const show=k=>_skH[k]||`<p class="sp-wait">読みこんでいます…</p>`;
+  if(Date.now()-_skAt>60000) setTimeout(skFill,0);
+  return `<div class="sp-wrap">
+  <section class="sp sk-moon"><h4>🌙 月のいま　${Y}年</h4><div class="sp-l">${moon}</div></section>
+  <section class="sp sk-earth"><h4>🌋 地球のいま　${Y}年</h4><p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="skEarth">${show('earth')}</div></section>
+  <section class="sp sk-neo"><h4>☄ 小惑星のいま　${Y}年</h4><p class="sp-note">この1週間に地球の近くを通る小惑星。</p><div class="sp-l" id="skNeo">${show('neo')}</div></section>
+  <section class="sp sk-probe"><h4>🚀 探査機のいま　${Y}年</h4><div class="sp-l" id="skProbe"><ul class="sp-ul">${probe0}<li id="skApod">${_skH.apod||'きょうの宇宙の写真を読みこんでいます…'}</li>${skLi(SK_FACT.probe.map(esc))}</ul><p class="sp-src">ボイジャーの距離は NASA の公表値から計算した目安。写真：NASA「きょうの天文写真」</p></div></section>
+  <section class="sp sk-star"><h4>🌌 星空のいま　${Y}年</h4><div class="sp-l">${star}</div></section></div>`; }
+async function skFill(){ _skAt=Date.now(); const J=async u=>{ const r=await fetch(u); if(!r.ok) throw new Error('http '+r.status); return r.json(); };
+  const get=(k,ms)=>{ try{ const v=JSON.parse(localStorage.getItem('hitotsu.sky.'+k)||'null'); if(v&&Date.now()-v.t<ms) return v.d; }catch(e){} return null; }, put=(k,d)=>{ try{ localStorage.setItem('hitotsu.sky.'+k,JSON.stringify({t:Date.now(),d})); }catch(e){} };
+  const jst=s=>{ const d=new Date(s); return `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}時${String(d.getMinutes()).padStart(2,'0')}分`; };
+  // 地震
+  { let rows=[]; try{ let q=get('eq',20*60e3); if(!q){ const j=await J('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson'); q=(j.features||[]).map(f=>({m:f.properties.mag,p:f.properties.place,t:f.properties.time})); put('eq',q); }
+      const big=q.slice().sort((a,b)=>b.m-a.m)[0]; rows.push(`<li><b>この24時間の、マグニチュード4.5以上の地震</b>　世界で${q.length}回${big?`。いちばん大きいのは M${big.m.toFixed(1)}（${esc(big.p||'')}）`:''}</li>`);
+      q.sort((a,b)=>b.t-a.t).slice(0,25).forEach(x=>rows.push(`<li>${jst(x.t)}ごろ　M${(+x.m).toFixed(1)}　${esc(x.p||'')}</li>`)); }catch(e){}
+    _skH.earth=`<ul class="sp-ul">${rows.join('')}${skLi(SK_FACT.earth.map(esc))}</ul>${rows.length?'<p class="sp-src">出典：USGS（アメリカ地質調査所）いまのデータ。時刻は日本時間。</p>':'<p class="sp-wait">いまの地震のデータは読みこめませんでした。通信のよいところで開き直してください。</p>'}`; }
+  // 小惑星
+  { let rows=[]; try{ let a=get('neo',6*3600e3); if(!a){ const d=new Date(), ds=x=>x.toISOString().slice(0,10); const e=new Date(d.getTime()+6*864e5);
+        const j=await J(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${ds(d)}&end_date=${ds(e)}&api_key=DEMO_KEY`); a=[];
+        for(const day in (j.near_earth_objects||{})) for(const o of j.near_earth_objects[day]){ const c=(o.close_approach_data||[])[0]; if(!c) continue; const dm=o.estimated_diameter&&o.estimated_diameter.meters||{};
+          a.push({n:o.name,t:c.epoch_date_close_approach,ld:+c.miss_distance.lunar,lo:Math.round(dm.estimated_diameter_min||0),hi:Math.round(dm.estimated_diameter_max||0),h:!!o.is_potentially_hazardous_asteroid}); }
+        put('neo',a); }
+      rows.push(`<li><b>この1週間に地球に近づく小惑星</b>　${a.length}個（どれも地球にはぶつからない）</li>`);
+      a.sort((p,q)=>p.ld-q.ld).slice(0,20).forEach(x=>rows.push(`<li>${jst(x.t)}ごろ　${esc(x.n)}　大きさ約${x.lo}〜${x.hi}m、月までの距離の${x.ld<10?x.ld.toFixed(1):Math.round(x.ld)}倍まで近づく${x.h?'（よく見張られている小惑星）':''}</li>`)); }catch(e){}
+    _skH.neo=`<ul class="sp-ul">${rows.join('')}${skLi(SK_FACT.neo.map(esc))}</ul>${rows.length?'<p class="sp-src">出典：NASA 地球接近天体のデータ（いまのデータ）</p>':'<p class="sp-wait">いまの小惑星のデータは読みこめませんでした。通信のよいところで開き直してください。</p>'}`; }
+  // きょうの宇宙の写真
+  try{ let p=get('apod',6*3600e3); if(!p){ const j=await J('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&thumbs=true'); p={t:j.title,u:j.media_type==='image'?j.url:(j.thumbnail_url||''),d:j.date}; put('apod',p); }
+    _skH.apod=`<b>きょうの宇宙の写真（${esc(p.d||'')}）</b>　${esc(p.t||'')}${p.u?`<img class="sk-apod" src="${esc(p.u)}" alt="${esc(p.t||'宇宙の写真')}" loading="lazy">`:''}`; }catch(e){ _skH.apod='きょうの宇宙の写真は、いまは読みこめませんでした。'; }
+  const set=(id,h)=>{ const el=document.getElementById(id); if(el) el.innerHTML=h; }; set('skEarth',_skH.earth); set('skNeo',_skH.neo); set('skApod',_skH.apod);
+  try{ if(typeof msRebalance==='function') msRebalance(); }catch(_){} }
+document.head.insertAdjacentHTML('beforeend',`<style>
+.sk-moon{ background:#FFFBEA; border-color:#F2E2A6; } .sk-moon h4{ color:#A4801A; }
+.sk-earth{ background:#FDF0EC; border-color:#F3C9BC; } .sk-earth h4{ color:#B4532F; }
+.sk-neo{ background:#F2F2F6; border-color:#D3D3E0; } .sk-neo h4{ color:#565A7A; }
+.sk-probe{ background:#EEF4FF; border-color:#C9D7F5; } .sk-probe h4{ color:#3956A6; }
+.sk-star{ background:#F1EEFB; border-color:#D2C9F1; } .sk-star h4{ color:#5A46A8; }
+.sk-apod{ display:block; width:100%; max-width:320px; border-radius:10px; margin:6px 0 2px; }
+</style>`);
+// ===== 人生のヒントの下：今日の星座占い・今日の花言葉・賢者の言葉（毎日入れかわる） =====
+// 星座占いは「お楽しみ」。花言葉は日本で広く知られているもの。賢者の言葉は、言った人（または、その人の言葉とされるもの）を必ず書く。
+const ZD=[['おひつじ座',3,21],['おうし座',4,20],['ふたご座',5,21],['かに座',6,22],['しし座',7,23],['おとめ座',8,23],['てんびん座',9,23],['さそり座',10,24],['いて座',11,23],['やぎ座',12,22],['みずがめ座',1,20],['うお座',2,19]];
+function zdOf(m,d){ const v=m*100+d; const S=[[120,'みずがめ座'],[219,'うお座'],[321,'おひつじ座'],[420,'おうし座'],[521,'ふたご座'],[622,'かに座'],[723,'しし座'],[823,'おとめ座'],[923,'てんびん座'],[1024,'さそり座'],[1123,'いて座'],[1222,'やぎ座']]; let r='やぎ座'; for(const x of S){ if(v>=x[0]) r=x[1]; } return r; }
+const ZD_MSG=['小さな「ありがとう」が、大きな笑顔になって返ってくる日。','気になっていたことに、ひとつ手をつけてみよう。','いつもとちがう道を通ると、いい発見がありそう。','だれかの話を、さいごまで聞いてみて。','おいしいものを食べると、運気がぐっと上がる日。','早起きが、一日をきらきらさせてくれそう。','深呼吸をひとつ。あせらなくて大丈夫。','なつかしい人のことを、思い出すかも。','好きな音楽が、心を元気にしてくれる日。','思いきって、ほめ言葉を口にしてみよう。','部屋を少し片づけると、心もすっきり。','空を見上げる時間をつくると、いいことがありそう。','新しいことを始めるのに、ぴったりの日。','笑顔でいると、まわりもやさしくなる日。','がんばった自分に、小さなごほうびを。','人に頼ることで、うまくいく日。'];
+const ZD_COL=['ピンク','水色','レモン色','若草色','ラベンダー','オレンジ','白','ミントグリーン','金色','さくら色','空色','クリーム色'];
+const ZD_ITEM=['ハンカチ','手紙','お気に入りのペン','あたたかい飲み物','花','本','音楽','ノート','くつ下','お守り','写真','紅茶'];
+// [花, 花言葉]（日本で広く知られているもの）
+const HANA=[['桜','精神の美・優美な女性'],['赤いバラ','愛情・美'],['ひまわり','あなただけを見つめる・憧れ'],['赤いチューリップ','愛の告白'],['赤いカーネーション','母への愛'],['スイートピー','門出・優しい思い出'],['かすみ草','感謝・清らかな心'],['菜の花','快活・明るさ'],['すずらん','再び幸せが訪れる'],['ラベンダー','あなたを待っています・沈黙'],['コスモス','乙女の真心・調和'],['マーガレット','恋占い・真実の愛'],['たんぽぽ','真心の愛・幸せ'],['パンジー','もの思い・私を思って'],['ガーベラ','希望・常に前進'],['白いユリ','純潔・威厳'],['菊','高貴・高潔'],['スミレ','謙虚・誠実'],['ポインセチア','祝福・聖夜'],['シクラメン','はにかみ・内気'],['梅','高潔・忍耐'],['藤','優しさ・歓迎'],['朝顔','愛情の絆・結束'],['金木犀','謙虚・気高い人'],['ネモフィラ','どこでも成功・可憐'],['勿忘草（わすれなぐさ）','私を忘れないで・真実の愛'],['牡丹','風格・富貴'],['ハナミズキ','私の想いを受けてください・返礼'],['ブルースター','信じあう心・幸福な愛'],['四つ葉のクローバー','幸運・私のものになって'],['ミモザ','感謝・友情'],['ダリア','華麗・優雅'],['撫子（なでしこ）','純愛・無邪気'],['カモミール','逆境に耐える・苦難の中の力'],['蓮','清らかな心・神聖'],['アイリス','希望・よい便り'],['ジャスミン','愛想のよい・優美'],['ブーゲンビリア','情熱・あなたは魅力に満ちている'],['クチナシ','とてもうれしい・洗練'],['アジサイ','家族団らん・辛抱強い愛情']];
+// [言葉, 言った人]（「とされる」は、その人の言葉として伝わっているもの）
+const KENJA=[['千里の行も足下より始まる。','老子'],['足るを知る者は富む。','老子'],['上善は水の如し。','老子'],['己の欲せざる所は人に施すことなかれ。','孔子（『論語』）'],['これを知る者はこれを好む者に如かず。これを好む者はこれを楽しむ者に如かず。','孔子（『論語』）'],['学びて思わざれば則ち罔し。思いて学ばざれば則ち殆し。','孔子（『論語』）'],['人間は考える葦である。','パスカル（『パンセ』）'],['我思う、ゆえに我あり。','デカルト（『方法序説』）'],['想像力は、知識よりも大切だ。','アインシュタイン'],['人生とは自転車に乗るようなもの。バランスを保つには、走り続けなければならない。','アインシュタイン（息子への手紙）'],['天才とは、1%のひらめきと99%の努力である。','エジソン'],['時は金なり。','ベンジャミン・フランクリン'],['いちばん大切なことは、目に見えない。','サン＝テグジュペリ（『星の王子さま』）'],['愛の反対は憎しみではなく、無関心だ。','エリ・ヴィーゼル'],['人生は、近くで見ると悲劇だが、遠くから見れば喜劇だ。','チャップリン（とされる）'],['ハングリーであれ。愚かであれ。','スティーブ・ジョブズ（2005年の講演）'],['わたしには夢がある。','キング牧師（1963年の演説）'],['一人の子ども、一人の先生、一冊の本、そして一本のペンが、世界を変えられる。','マララ・ユスフザイ（2013年の国連演説）'],['生きるとは、呼吸することではない。行動することだ。','ルソー（『エミール』）'],['為せば成る、為さねば成らぬ何事も。成らぬは人の為さぬなりけり。','上杉鷹山'],['初心忘るべからず。','世阿弥（『花鏡』）'],['人の一生は、重荷を負うて遠き道を行くがごとし。急ぐべからず。','徳川家康（遺訓とされる）'],['やってみせ、言って聞かせて、させてみせ、ほめてやらねば、人は動かじ。','山本五十六'],['天は人の上に人を造らず、人の下に人を造らず、と言えり。','福沢諭吉（『学問のすゝめ』）'],['少年よ、大志を抱け。','クラーク博士'],['世界がぜんたい幸福にならないうちは、個人の幸福はあり得ない。','宮沢賢治（『農民芸術概論綱要』）'],['雨ニモマケズ、風ニモマケズ。','宮沢賢治'],['志を立てて、もって万事の源となす。','吉田松陰'],['念ずれば花ひらく。','坂村真民'],['明日死ぬかのように生きよ。永遠に生きるかのように学べ。','ガンディー（とされる）'],['ただ一つ知っているのは、自分が何も知らないということだ。','ソクラテス（とされる）'],['一期一会。','茶の湯の心得（井伊直弼が広めた）']];
+function dailyThreeHTML(P){ const k=dayKey(); const h=(...a)=>dHash(k,...a);
+  const my=P&&P.month?zdOf(P.month,P.day||1):null; const order=ZD.map(z=>z[0]).sort((a,b)=>h('zd',a)-h('zd',b));
+  const zd=n=>{ const r=order.indexOf(n)+1; return { r, msg:ZD_MSG[h('zm',n)%ZD_MSG.length], col:ZD_COL[h('zc',n)%ZD_COL.length], it:ZD_ITEM[h('zi',n)%ZD_ITEM.length] }; };
+  const show=my||order[0]; const z=zd(show); const top3=order.slice(0,3);
+  const hn=HANA[h('hana')%HANA.length], kj=KENJA[h('kenja')%KENJA.length];
+  return `<div class="d3">
+  <section class="d3-c d3-zd"><small>⭐ 今日の星座占い</small><p class="d3-t">${my?`Channelの${esc(show)}は、きょう`:`${esc(show)}は、きょう`} <b>${z.r}位</b></p><p>${esc(z.msg)}</p><p class="d3-s">ラッキーカラー：${esc(z.col)}　ラッキーアイテム：${esc(z.it)}</p>
+    <details class="d3-all"><summary>12星座のランキング</summary><ol>${order.map(n=>`<li${n===show?' class="on"':''}>${esc(n)}</li>`).join('')}</ol></details><p class="d3-note">きょうの1位は${top3[0]}。お楽しみの占いです。</p></section>
+  <section class="d3-c d3-hn"><small>🌸 今日の花言葉</small><p class="d3-t">${esc(hn[0])}</p><p>「${esc(hn[1])}」</p></section>
+  <section class="d3-c d3-kj"><small>📜 賢者の言葉</small><p class="d3-t">「${esc(kj[0])}」</p><p class="d3-s">― ${esc(kj[1])}</p></section></div>`; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+.d3{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin:10px 0 4px; }
+.d3-c{ border-radius:16px; padding:12px 14px; border:2px solid; } .d3-c small{ display:block; font-weight:700; font-size:12.5px; margin-bottom:4px; } .d3-c p{ margin:2px 0; font-size:14px; line-height:1.7; }
+.d3-t{ font-size:15.5px !important; font-weight:700; } .d3-s{ font-size:12.5px !important; color:var(--muted); } .d3-note{ font-size:11px !important; color:var(--muted); }
+.d3-zd{ background:#F3F0FF; border-color:#D6CCF7; } .d3-zd small{ color:#6A4BB8; }
+.d3-hn{ background:#FFF0F5; border-color:#F7C8D8; } .d3-hn small{ color:#C2456A; }
+.d3-kj{ background:#F2F8EE; border-color:#CFE5C2; } .d3-kj small{ color:#4F7F3A; }
+.d3-all summary{ cursor:pointer; font-size:12px; color:#6A4BB8; margin-top:4px; } .d3-all ol{ margin:4px 0 0; padding-left:1.6em; font-size:12.5px; columns:2; } .d3-all li.on{ font-weight:700; color:#6A4BB8; }
+</style>`);
 // ===== Life Record の文体（エッセイ風の日記・中性的・大人向けで漢字多め） =====
 // 表示するときだけ整える。人生の中身（出来事・乱数）は一切変えない。
 // ・地の文のかなを、自然な範囲で漢字にする（「」の中＝せりふは、かなのまま残す）
@@ -15360,7 +15479,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
   const kana=P.fullKana&&P.fullKana!==P.full?`<div class="kana">${esc(P.fullKana)}</div>`:'';
   const hint=hintNow();
   return `<div class="home fade">
-  <section class="hm-hint" aria-label="人生のヒント"><span class="hm-hint-ic" aria-hidden="true"></span><div><small>人生のヒント</small><p>${esc(hint)}</p></div></section>${typeof pwaNoteHTML==='function'?pwaNoteHTML('top'):''}
+  <section class="hm-hint" aria-label="人生のヒント"><span class="hm-hint-ic" aria-hidden="true"></span><div><small>人生のヒント</small><p>${esc(hint)}</p></div></section>${typeof dailyThreeHTML==='function'?dailyThreeHTML(P):''}${typeof pwaNoteHTML==='function'?pwaNoteHTML('top'):''}
   <section class="hm-hero">
     <div class="hm-art">${art}${todOverlay()}${c.dead?'':`<div class="hm-bubble" role="note"><small>今日の${esc(P.given)}</small>${esc(hk)}</div>`}</div>
     <div class="hm-id">
@@ -15391,7 +15510,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${typeof eaTileHTML==='function'?homeTile('hm-ea','地球アルバム',eaTileHTML(P)):''}
     ${typeof relChartHTML==='function'?homeTile('hm-rel',`${esc(P.country.name)}の宗教の割合`,relChartHTML(P)):''}
     ${typeof newsHTML==='function'?homeTile('hm-news',`物語の${sy}年のNEWS`,newsHTML(P,sy)):''}
-    ${homeTile('hm-world',`世界のいま　${new Date().getFullYear()}年`, (typeof spaceHTML==='function'?spaceHTML():'')+(typeof worldNowHTML==='function'?worldNowHTML(P,new Date().getFullYear()):''))}
+    ${homeTile('hm-world',`世界のいま　${new Date().getFullYear()}年`, (typeof spaceHTML==='function'?spaceHTML():'')+(typeof skyHTML==='function'?skyHTML():'')+(typeof worldNowHTML==='function'?worldNowHTML(P,new Date().getFullYear()):''))}
     ${homeTile('hm-zukan','図鑑', `<div class="hm-zk">${zk.map(z=>`<div class="hm-z"><span class="tiny muted">${esc(z[0])}</span><b>${z[1]}<small>${z[3]}</small></b></div>`).join('')}</div>`)}
   </div>
   ${typeof pwaNoteHTML==='function'?pwaNoteHTML('bottom'):''}
