@@ -16859,6 +16859,10 @@ function mpHealCheck(){ const p=mpGet(); if(!p||!mpIsSick(p)) return; const n=((
   const W=mpWcHTML; mpWcHTML=function(p){ let h=''; const s=mpSickToday(p); if(s&&!mpGone(p)){ h=p.heal===dayKey()?`<p class="mp-sick ok">☀️ ${esc(p.name)}は、すっかり元気になりました！</p>`:`<p class="mp-sick">🤒 きょうの${esc(p.name)}は、${esc(s[1])}<small>ごはんをあげたり、なでたり、2回お世話をしてあげると、元気になります。</small></p>`; } return h+W(p); };
   const T=mpTileHTML; mpTileHTML=function(){ const p=mpGet(); let h=T(); if(p&&mpIsSick(p)) h=h.replace('<span class="mp-love">',`<span class="mp-sick-t">🤒 ちょっと元気がない…</span><span class="mp-love">`); return h; }; }
 document.head.insertAdjacentHTML('beforeend',`<style>.mp-sick{ margin:8px 0 4px; padding:9px 12px; border-radius:12px; background:#FFF0E6; color:#7A3E1A; font-size:14px; line-height:1.6; } .mp-sick small{ display:block; font-size:12px; color:#9A6A4A; } .mp-sick.ok{ background:#EFFBEF; color:#2E6A34; } .mp-sick-t{ color:#C0662E; font-weight:700; font-size:13px; }</style>`);
+// ===== うちのペットは、Channel の部屋（絵）に、いつもいる。選んだ種類・色のまま。虹の橋のあとは、いない =====
+{ const SS=sceneState; sceneState=function(P,L,age){ const o=SS(P,L,age); try{ const p=mpGet(); if(!p||p.chS==null||typeof st==='undefined'||!st||viewing||P.seed!==st.seed||p.chS!==st.seed||!PB_ALL[p.breed]) return o;
+    const mpy=typeof msPerYear==='function'?msPerYear(P):2.5*864e5; const from=Math.floor(p.chA); let end=Infinity; if(mpGone(p)){ end=Math.floor(p.chA+(p.life*MP_MPY)/mpy); try{ end=Math.min(end,Math.floor(clock().age)); }catch(e){} }
+    if(age>=from&&age<end){ o.petB=p.breed; o.pet=p.kind; } }catch(e){} return o; }; }
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
