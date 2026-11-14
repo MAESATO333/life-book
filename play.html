@@ -12024,11 +12024,13 @@ function nwOwn(P,y){ if(!P) return []; const r=newsFor(P,y); const nm=id=>{ try{
   return [...r.mine.map(n=>({ d:'', t:n[2], w:P.country.name })),...r.world.map(n=>({ d:'', t:n[2], w:'世界' })),...r.near.map(n=>({ d:'', t:n[2], w:nm(n[1]) }))]; }
 function nwLi(x){ return `<li>${(c=>`<span class="nw-tag nw-c-${esc(c)}">${esc(c)}</span>`)(nwCat(x.t))}${x.w?`<span class="nw-d">${esc(x.w)}</span>`:''}${x.d?`<span class="nw-d">${esc(x.d)}</span>`:''}${esc(x.t)}</li>`; }
 function nwListHTML(y,items,all){ const own=nwOwn(_nwP,y); const show=items?(all?items:nwPick(items,Math.max(10,26+Math.floor(nwRng(nwDay()+y*7)()*9)-own.length),y)):[];
-  return `<ul class="nw-list nw-wiki">${own.map(nwLi).join('')}${show.map(nwLi).join('')}</ul>
+  let st=[]; try{ if(_nwP&&typeof wnStatItems==='function') st=wnStatItems(_nwP,y); }catch(e){}
+  const stLi=x=>`<li><span class="nw-tag nw-c-数字">${esc(x.cat)}の数字</span>${esc(x.t)}</li>`;
+  return `<ul class="nw-list nw-wiki">${own.map(nwLi).join('')}${st.slice(0,6).map(stLi).join('')}${show.map(nwLi).join('')}${st.slice(6).map(stLi).join('')}</ul>
     ${items&&!all&&items.length>show.length?`<button type="button" class="nw-more" data-nwall="${y}">全部読む（${items.length+own.length}本）</button>`:''}
     ${items?`<p class="nw-src">出典：<a href="https://ja.wikipedia.org/wiki/${encodeURIComponent(y+'年')}" target="_blank" rel="noopener">Wikipedia「${y}年」</a>（<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" target="_blank" rel="noopener">CC BY-SA 4.0</a>）</p>`:''}`; }
 newsHTML=function(P,year){ _nwP=P; const nowY=new Date().getFullYear(); const own=nwOwn(P,year);
-  if(year>nowY) return own.length?`<div class="nw-box">${nwListHTML(year,null,false)}</div>`:`<p class="tiny muted">${year}年のNEWSは、まだありません。</p>`;
+  if(year>nowY) return own.length?`<div class="nw-box">${nwListHTML(year,null,false)}</div>`:(typeof wnStatItems==='function'?`<div class="nw-box">${nwListHTML(year,null,false)}</div>`:`<p class="tiny muted">${year}年のNEWSは、まだありません。</p>`);
   const it=_nwCache[year]; const body=it?nwListHTML(year,it,false):(own.length?nwListHTML(year,null,false):'')+`<p class="nw-wait">NEWSを読みこんでいます…</p>`;
   if(!it) setTimeout(()=>nwFill(year),0);
   return `<div class="nw-box" data-nwy="${year}">${body}</div>`; };
@@ -12042,7 +12044,7 @@ document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closes
 .nw-d{ display:inline-block; margin-right:6px; font-size:.78em; color:#7A8A9A; font-variant-numeric:tabular-nums; }
 .nw-c-政治{ background:#EEF4FB; color:#3E68B0; } .nw-c-経済{ background:#FFF5DA; color:#9A6A00; } .nw-c-スポーツ{ background:#E8F7E3; color:#3B8A2E; }
 .nw-c-エンタメ{ background:#FFEAF1; color:#C9466A; } .nw-c-映画{ background:#F1EAFB; color:#7A4FB8; } .nw-c-科学{ background:#E6F6F7; color:#24808A; }
-.nw-c-災害{ background:#FDEDE8; color:#B5533A; } .nw-c-総合{ background:#F1F1F1; color:#666; }
+.nw-c-災害{ background:#FDEDE8; color:#B5533A; } .nw-c-数字{ background:#E6F4E0; color:#3F7F3A; } .nw-c-総合{ background:#F1F1F1; color:#666; }
 .nw-more{ display:block; margin:10px auto 4px; font:inherit; font-size:13px; font-weight:700; padding:6px 16px; border-radius:999px; border:2px solid #E86A88; background:#FF8FAA; color:#fff; box-shadow:0 2px 0 #D85878; cursor:pointer; }
 .nw-src{ margin:8px 0 2px; font-size:9.5px; opacity:.8; color:#6A7A8A; }
 .nw-wait{ font-size:13px; color:#6A7A8A; padding:8px 0; }`; document.head.appendChild(c); })();
@@ -12646,6 +12648,7 @@ const WN_CAP={ jp:['東京',35.68,139.69,'Asia/Tokyo'], kr:['ソウル',37.57,12
  ar:['ブエノスアイレス',-34.60,-58.38,'America/Argentina/Buenos_Aires'], pe:['リマ',-12.05,-77.04,'America/Lima'], ca:['オタワ',45.42,-75.70,'America/Toronto'], tr:['アンカラ',39.93,32.86,'Europe/Istanbul'],
  np:['カトマンズ',27.72,85.32,'Asia/Kathmandu'], mn:['ウランバートル',47.89,106.91,'Asia/Ulaanbaatar'], ae:['アブダビ',24.45,54.38,'Asia/Dubai'], cl:['サンティアゴ',-33.45,-70.67,'America/Santiago'] };
 
+function wnToday(){ const d=new Date(); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; }
 function wnName(c){ return (WSTAT[c]&&WSTAT[c].n)||(typeof eaName==='function'?eaName(c):c); }
 function wnLocal(d,tz){ try{ const f=new Intl.DateTimeFormat('ja-JP',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d); const g=t=>+((f.find(x=>x.type===t)||{}).value||0); return {h:g('hour')%24,m:g('minute')}; }catch(e){ return null; } }
 // 日の出・日の入り（NOAA の簡単な式。数分の誤差）。返り値は UTC の Date
@@ -12661,10 +12664,10 @@ function wnMoon(d){ const age=((d.getTime()/864e5+2440587.5-2451550.1)%29.530588
 const hh=t=>t?`${t.h}時${String(t.m).padStart(2,'0')}分`:'';
 const WN_TOD=h=>h<5?'夜中':h<9?'朝':h<12?'午前':h<16?'昼すぎ':h<19?'夕方':'夜';
 
-function wnPool(P,year){ const k=dayKey(), now=new Date(), out=[]; const W=WSTAT; const f=(v,d)=>(+v).toFixed(d);
+function wnStatItems(P,year,k){ k=k||dayKey(); const out=[]; const W=WSTAT; const f=(v,d)=>(+v).toFixed(d);
   const pick=(ids,salt,n)=>ids.slice().sort((a,b)=>dHash(k,salt,a)-dHash(k,salt,b)).slice(0,n);
   const sids=Object.keys(W).filter(c=>c!==P.countryId&&W[c].lex&&W[c].n);
-  const fut=year>2025?'（2025年より先は見こみの数字）':'';
+  const fut=year>2024?'（国連などの推計）':'';
   const ST=[
    ['lex','長生き',c=>{ const v=wsAt(W[c].lex,year); return v?`${wnName(c)}の平均寿命は、${f(v,1)}歳。`:null; }],
    ['tfr','家族',c=>{ const v=wsAt(W[c].tfr,year); return v?`${wnName(c)}では、一人の女性が一生のあいだに産む子どもは、平均${f(v,1)}人。`:null; }],
@@ -12678,6 +12681,11 @@ function wnPool(P,year){ const k=dayKey(), now=new Date(), out=[]; const W=WSTAT
   for(const [key,cat,fn] of ST){ let got=0; for(const c of pick(sids,key,12)){ const t=fn(c); if(t){ out.push({id:key+c,cat,ic:'📊',t,src:`${year}年の数字${fut}`}); if(++got>=2) break; } } }
   // 3か国のくらし（まとめ）
   { const cs=pick(sids,'trio',3); out.push({id:'trio',cat:'くらし',ic:'🌏',t:`${year}年の3か国のくらし：`+cs.map(c=>`${wnName(c)}は平均寿命${f(wsAt(W[c].lex,year),1)}歳・子ども${f(wsAt(W[c].tfr,year),1)}人`).join('／'),src:`${year}年の数字${fut}`}); }
+  return out; }
+function wnPool(P,year){ const k=dayKey(), now=new Date(), out=[]; const W=WSTAT; const f=(v,d)=>(+v).toFixed(d);
+  const pick=(ids,salt,n)=>ids.slice().sort((a,b)=>dHash(k,salt,a)-dHash(k,salt,b)).slice(0,n);
+  const sids=Object.keys(W).filter(c=>c!==P.countryId&&W[c].lex&&W[c].n);
+  out.push(...wnStatItems(P,year,k));
   pick(Object.keys(WN_GREET),'gr',4).forEach(c=>{ const g=WN_GREET[c]; out.push({id:'gr'+c,cat:'あいさつ',ic:'👋',t:`${wnName(c)}（${g[4]}）で「こんにちは」は ${g[0]}（${g[1]}）、「ありがとう」は ${g[2]}（${g[3]}）。`}); });
   pick(Object.keys(WN_FOOD),'fd',4).forEach(c=>out.push({id:'fd'+c,cat:'食卓',ic:'🍽',t:`${wnName(c)}でよく食べられている料理：${WN_FOOD[c]}。`}));
   pick(Object.keys(WN_ANIMAL),'an',3).forEach(c=>{ const a=WN_ANIMAL[c]; out.push({id:'an'+c,cat:'動物',ic:'🐾',t:`${wnName(c)}の${a[0]}。${a[1]}。`}); });
@@ -12686,15 +12694,15 @@ function wnPool(P,year){ const k=dayKey(), now=new Date(), out=[]; const W=WSTAT
   // もうすぐの祝日・お祭り（いまの本当の日付から40日以内）
   const y=now.getFullYear(); const today=Date.UTC(y,now.getMonth(),now.getDate());
   WN_HOL.map(h=>{ let t=Date.UTC(y,h[0]-1,h[1]); if(t<today) t=Date.UTC(y+1,h[0]-1,h[1]); return [h,Math.round((t-today)/864e5)]; }).filter(x=>x[1]<=40).sort((a,b)=>a[1]-b[1]).slice(0,4)
-   .forEach(([h,dd])=>out.push({id:'hol'+h[3]+h[2],cat:'お祭り',ic:'🎉',t:`${h[0]}月${h[1]}日、${h[2]?wnName(h[2])+'の':'世界の多くの国で'}「${h[3]}」。${h[4]?h[4]+'。':''}${dd===0?'きょうです。':`あと${dd}日。`}`,src:'きょう'}));
+   .forEach(([h,dd])=>out.push({id:'hol'+h[3]+h[2],cat:'お祭り',ic:'🎉',t:`${h[0]}月${h[1]}日、${h[2]?wnName(h[2])+'の':'世界の多くの国で'}「${h[3]}」。${h[4]?h[4]+'。':''}${dd===0?'きょうです。':`あと${dd}日。`}`,src:wnToday()}));
   // いまの時刻と、日の出・日の入り
   pick(Object.keys(WN_CAP),'cap',4).forEach(c=>{ const C=WN_CAP[c]; const t=wnLocal(now,C[3]); if(!t) return; const s=wnSun(C[1],C[2],now);
     const sun=s.polar?(s.polar==='night'?'きょうは太陽がほとんどのぼらない季節。':'きょうは太陽が沈まない季節。'):`日の出は${hh(wnLocal(s.rise,C[3]))}ごろ、日の入りは${hh(wnLocal(s.set,C[3]))}ごろ。`;
-    out.push({id:'cap'+c,cat:'時差',ic:'🕰',t:`${wnName(c)}の${C[0]}は、いま${WN_TOD(t.h)}の${hh(t)}。${sun}`,src:'いま'}); });
+    out.push({id:'cap'+c,cat:'時差',ic:'🕰',t:`${wnName(c)}の${C[0]}は、いま${WN_TOD(t.h)}の${hh(t)}。${sun}`,src:wnToday()+' いま'}); });
   // 空
-  const mo=wnMoon(now); out.push({id:'moon',cat:'空',ic:'🌙',t:`今夜の月は「${mo.nm}」（月齢${mo.age}）。世界のどこから見ても同じ形で、南半球では左右が逆に見える。`,src:'きょう'});
+  const mo=wnMoon(now); out.push({id:'moon',cat:'空',ic:'🌙',t:`今夜の月は「${mo.nm}」（月齢${mo.age}）。世界のどこから見ても同じ形で、南半球では左右が逆に見える。`,src:wnToday()});
   const m=now.getMonth()+1; const ns=m>=3&&m<=5?'春':m<=8&&m>=6?'夏':m>=9&&m<=11?'秋':'冬'; const ss={春:'秋',夏:'冬',秋:'春',冬:'夏'}[ns];
-  out.push({id:'season',cat:'空',ic:'🌤',t:`いま、日本など北半球は${ns}、オーストラリアやアルゼンチンなど南半球は${ss}。`,src:'きょう'});
+  out.push({id:'season',cat:'空',ic:'🌤',t:`いま、日本など北半球は${ns}、オーストラリアやアルゼンチンなど南半球は${ss}。`,src:wnToday()});
   out.push({id:'crux',cat:'空',ic:'✨',t:'南十字星は、南半球の空でよく見える星座。オーストラリア・ニュージーランド・ブラジル・パプアニューギニア・サモアの国旗に描かれている。'});
   // 名前
   try{ pick(Object.keys(NB_COUNTRY).filter(c=>c!==P.countryId&&W[c]),'nm',6).slice(0,2).forEach(c=>{ const B=NB[NB_COUNTRY[c][0][0]]; if(!B||!B.female.length||!B.male.length) return;
@@ -12705,7 +12713,7 @@ function wnPick(pool,n){ const k=dayKey(); const by={}; pool.slice().sort((a,b)=
   const cats=Object.keys(by).sort((a,b)=>dHash(k,'c',a)-dHash(k,'c',b)); const out=[]; let i=0; while(out.length<n&&cats.some(c=>by[c].length)){ const c=cats[i++%cats.length]; if(by[c].length) out.push(by[c].shift()); } return out; }
 function worldNowHTML(P,year){ let items=[]; try{ items=wnPick(wnPool(P,year),20); }catch(e){ items=[]; }
   return `<p class="wn-h">🌏 世界のいろいろな国のこと<small>毎日20こ、入れかわります。下にスクロールして読めます。</small></p>
-  <div class="wn-box"><ul class="wn-list">${items.map(x=>`<li><span class="wn-tag">${x.ic} ${esc(x.cat)}</span>${x.src?`<small class="wn-when">${esc(x.src)}</small>`:''}<p>${esc(x.t)}</p></li>`).join('')}</ul></div>
+  <div class="wn-box"><ul class="wn-list">${items.map(x=>`<li><span class="wn-tag">${x.ic} ${esc(x.cat)}</span><small class="wn-when">${esc(x.src||(new Date().getFullYear()+'年の情報'))}</small><p>${esc(x.t)}</p></li>`).join('')}</ul></div>
   <p class="wn-src">数字の出典：世界銀行・国連・Gapminder の統計。時刻・日の出・月の形は、いまの日時から計算しています。</p>`; }
 document.head.insertAdjacentHTML('beforeend',`<style>
 .wn-box{ max-height:220px; overflow-y:auto; padding:2px 10px 6px; border-radius:14px; background:#F6FBF4; border:1px solid #D7EBD0; -webkit-overflow-scrolling:touch; }
@@ -12713,22 +12721,97 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .wn-list p{ margin:3px 0 0; font-size:14px; line-height:1.7; } .wn-tag{ display:inline-block; font-size:11px; background:#E6F4E0; color:#3F7F3A; border-radius:999px; padding:1px 9px; }
 .wn-when{ margin-left:6px; font-size:10.5px; color:var(--muted); } .wn-h{ font-size:15px; font-weight:700; color:#3F7F3A; margin:4px 0 6px; } .wn-h small{ display:block; font-weight:400; font-size:11.5px; color:var(--muted); } .wn-src{ font-size:9.5px; opacity:.8; margin:6px 2px 0; }
 </style>`);
+// ===== 宇宙人・太陽・衛星のいま：確かめられた事実の一覧（新しい公式発表があれば、ここに足す） =====
+// [並べ順の日付 YYYYMMDD, 表示する日付, 内容, 出典]
+const UFO_ALL=[
+ [20261023,'2026年10月','アメリカ国防総省が、UFO（UAP）の記録の7回目の公開を行った（5月から、ほぼ毎月公開している）。','アメリカ国防総省'],
+ [20260918,'2026年9月','国防総省の6回目の公開。国防総省の記録のほか、コロラド州の地元警察の記録もふくまれた。','アメリカ国防総省'],
+ [20260807,'2026年8月','国防総省の5回目の公開で、41の記録が出された。','アメリカ国防総省'],
+ [20260721,'2026年7月','国防総省のAARO（全領域異常解決局）が、2024年6月〜2025年5月の年次報告を公開。新しい報告は319件。説明がついたものは、すべてふつうの原因（風船・鳥・ドローン・人工衛星の反射など）だった。','AARO 年次報告'],
+ [20260720,'2026年7月','同じ報告で、アメリカ海軍がバージニア州の沖で「約100個の空飛ぶ未確認物体」を報告していたことがわかった。AARO は「調査中」としている。','AARO 年次報告'],
+ [20260719,'2026年7月','AARO は、宇宙の報告44件を調べ、太陽の光を反射した人工衛星と一致すると説明した。宇宙人の技術や、外国の進んだ技術の証拠は見つかっていない。','AARO 年次報告'],
+ [20260710,'2026年7月','国防総省の4回目の公開。40の記録のうち、19が映像だった。','アメリカ国防総省'],
+ [20260616,'2026年6月16日','国家情報長官室・FBI・国防総省が作った「UAP 統治委員会」が、はじめて会合を開いた。','国家情報長官室'],
+ [20260612,'2026年6月','国防総省の3回目の公開。CIA や FBI の記録もふくまれた。','アメリカ国防総省'],
+ [20260522,'2026年5月22日','国防総省の2回目の公開。音声や映像をふくむ、たくさんの記録が出された。','アメリカ国防総省'],
+ [20260508,'2026年5月8日','国防総省（いまは「戦争省」とも名のる）が、UFO の記録を公開するサイト「PURSUE」を始めた。政府は「宇宙人がいるという確かな証拠は示していない。判断は皆さんにゆだねる」としている。','アメリカ国防総省'],
+ [20250909,'2025年9月9日','アメリカ下院の特別チームが、UAP の情報公開をテーマに公聴会を開いた。軍の元関係者などが証言した。','アメリカ議会'],
+ [20250910,'2025年9月10日','NASA が、火星探査車パーサヴィアランスが見つけた岩に「生命の痕跡かもしれない特徴」があると発表した。生命の証拠と決まったわけではなく、さらに調べる必要がある。','NASA'],
+ [20250920,'2025年9月','NASA が確認した、太陽系の外の惑星（系外惑星）の数が、6000をこえた。','NASA'],
+ [20250701,'2025年7月1日','太陽系の外から飛んできた天体「3I/ATLAS」が見つかった。太陽系の外から来た天体としては、観測史上3つ目。','国際天文学連合など'],
+ [20241114,'2024年11月14日','AARO が年次報告を公開。2023年5月〜2024年6月に受けた報告は757件。さらにくわしい分析が必要なものは21件だった。宇宙人の技術の証拠は見つかっていない。','AARO 年次報告'],
+ [20241113,'2024年11月13日','アメリカ下院で、UAP について話し合う公聴会が開かれた。','アメリカ議会'],
+ [20241014,'2024年10月14日','木星の衛星エウロパに、生命がすめる環境があるかを調べる探査機「エウロパ・クリッパー」が打ち上げられた。','NASA'],
+ [20240606,'2024年6月','日本の超党派の国会議員の集まりが、UAP を調べる専門の部署をつくるよう、防衛大臣に提言した。','日本の国会議員連盟'],
+ [20240308,'2024年3月','AARO が「歴史記録報告 第1巻」を公開。1945年以降の政府の記録を調べたが、宇宙人の技術だと示す証拠はなかった、と結論した。','AARO'],
+ [20240101,'2024年','アメリカの国立公文書館が、UAP の記録をまとめた「UAP 記録コレクション」の公開を始めた。','アメリカ国立公文書館'],
+ [20231215,'2023年12月','アメリカの国防権限法で、国立公文書館に UAP の記録を集めることが決められた。','アメリカ議会'],
+ [20231031,'2023年10月31日','AARO が、元政府関係者などが UAP の情報を届け出られるしくみを始めた。','アメリカ国防総省'],
+ [20231018,'2023年10月','アメリカ政府の年次報告で、AARO が受けた報告は2023年4月末までに801件になった。','国家情報長官室・国防総省'],
+ [20230914,'2023年9月14日','NASA の専門家チームが報告書を公開。「宇宙人と結びつける証拠はない」としつつ、くわしいデータを集めることが大切だとした。NASA は UAP 研究の担当者を置いた。','NASA'],
+ [20230912,'2023年9月12日','メキシコ議会で UAP の公聴会が開かれ、ジャーナリストが「人間ではない遺体」だと主張するものを見せた。多くの科学者は、これを否定している。','メキシコ議会'],
+ [20230831,'2023年8月31日','AARO が公式サイトを公開し、説明のついた事例の映像などをのせ始めた。','アメリカ国防総省'],
+ [20230726,'2023年7月26日','アメリカ下院で、元軍人などが証言する公聴会が開かれた。','アメリカ議会'],
+ [20230615,'2023年6月','日本で、超党派の国会議員が「安全保障から考える未確認異常現象解明議員連盟」をつくった。','日本の国会議員連盟'],
+ [20230531,'2023年5月31日','NASA の UAP 研究チームが、はじめての公開会議を開いた。','NASA'],
+ [20230419,'2023年4月19日','AARO の所長が、アメリカ上院の委員会ではじめて証言した。','アメリカ議会'],
+ [20230112,'2023年1月','アメリカ政府の年次報告。新しい報告366件のうち、195件は風船やドローンなどと説明できたが、171件は説明がつかなかった。','国家情報長官室'],
+ [20221015,'2022年10月','カナダ政府の首席科学顧問室が、空の未確認現象を調べる「スカイ・カナダ計画」を始めた。','カナダ政府'],
+ [20220720,'2022年7月','国防総省に、UAP を専門に調べる AARO（全領域異常解決局）ができた。','アメリカ国防総省'],
+ [20220517,'2022年5月17日','アメリカ下院で、UAP についての公開の公聴会が、約50年ぶりに開かれた。','アメリカ議会'],
+ [20210625,'2021年6月25日','国家情報長官室が、はじめての公式報告を公開。144件の報告のうち、説明がついたのは1件だけだった。','国家情報長官室'],
+ [20200915,'2020年9月','日本の防衛省が、自衛隊が空で正体のわからない物体を見たときの、記録と報告の手順を定めた。','日本の防衛省'],
+ [20200804,'2020年8月','国防総省が、UAP を調べる「UAP タスクフォース」をつくった。','アメリカ国防総省'],
+ [20200427,'2020年4月27日','国防総省が、アメリカ海軍の戦闘機がとらえた3本の映像を、正式に公開した。','アメリカ国防総省'],
+ [20200428,'2020年4月','日本の防衛大臣が、自衛隊が UFO に出会ったときの手順を定める考えを示した。','日本の防衛省'],
+ [20180220,'2018年2月','日本政府が国会への答弁書で、「地球の外から来たと思われる未確認飛行物体を確認したことはない」と答えた。','日本政府'],
+ [20171216,'2017年12月','アメリカ国防総省が、2007〜2012年に UFO を調べる計画（AATIP）があったことを認めた。','アメリカ国防総省'],
+ [20171019,'2017年10月','太陽系の外から来た天体「オウムアムア」が、はじめて見つかった。','ハワイ大学など'],
+ [20170105,'2017年1月','チリの公的機関 CEFAA が、海軍のヘリコプターがとらえた空の物体の映像を公開し、「説明できない」とした。','チリ CEFAA'],
+ [20130621,'2013年6月','イギリス国防省の UFO ファイルの公開が終わった。2008年から、国立公文書館で200以上のファイルが公開された。','イギリス国防省'],
+ [20110101,'2011年','アルゼンチン空軍が、空の現象を調べる委員会をつくった。','アルゼンチン空軍'],
+ [20101201,'2010年12月','ニュージーランド国防軍が、UFO の目撃報告のファイルを公開した。','ニュージーランド国防軍'],
+ [20100801,'2010年8月','ブラジル空軍が、UFO の目撃報告を記録して国立公文書館に送るよう、決まりを定めた。','ブラジル空軍'],
+ [20090115,'2009年1月','デンマーク軍が、UFO の目撃報告のファイルを公開した。','デンマーク軍'],
+ [20080514,'2008年5月','イギリス国防省が、UFO の目撃報告ファイルを国立公文書館で公開し始めた。','イギリス国防省'],
+ [20071218,'2007年12月','日本政府が国会への答弁書で、「UFO の存在を確認していない」と答えた。','日本政府'],
+ [20070322,'2007年3月','フランスの国立宇宙研究センターの GEIPAN が、UFO の調査資料をインターネットで公開した。国の機関としては世界で初めて。','フランス GEIPAN'],
+ [20060515,'2006年5月','イギリス国防省の調査報告「コンダイン報告」が公開された。目撃の多くは、自然の現象で説明できるとした。','イギリス国防省'],
+ [20040511,'2004年5月','メキシコ国防省が、空軍機の赤外線カメラがとらえた11の光の映像を公開した。','メキシコ国防省'],
+ [20010101,'2001年','ペルー空軍が、空の未確認現象を調べる部署をつくった。','ペルー空軍'],
+ [19970101,'1997年','チリで、空の未確認現象を調べる公的な委員会 CEFAA ができた。','チリ民間航空局'],
+ [19920101,'1992年','スペイン空軍が、UFO の調査資料の公開を始めた。','スペイン空軍'],
+ [19900331,'1990年3月','ベルギーで「空飛ぶ三角形」の目撃が相次ぎ、ベルギー空軍の戦闘機が調べるために飛び立った。','ベルギー空軍'],
+ [19860519,'1986年5月19日','ブラジルの空で、レーダーに約20の未確認の物体がうつり、空軍の戦闘機が出動した。','ブラジル空軍'],
+ [19801226,'1980年12月','イギリスのレンドルシャムの森で、近くの基地のアメリカ軍兵士が、正体のわからない光を見たと報告した。','イギリス国防省の記録'],
+ [19781218,'1978年12月','国連総会で、カリブ海の国グレナダの提案により、UFO の研究について加盟国に協力を呼びかける決定がされた。','国連'],
+ [19770815,'1977年8月15日','アメリカの電波望遠鏡が、宇宙からの強い電波「Wow! シグナル」をとらえた。いまも正体はわかっていない。','オハイオ州立大学'],
+ [19770905,'1977年','フランスの国立宇宙研究センターに、UFO を調べる部署（いまの GEIPAN）ができた。','フランス GEIPAN'],
+ [19770820,'1977年8月・9月','探査機ボイジャー1号・2号が打ち上げられた。宇宙人へのメッセージとして、地球の音や音楽を入れた「ゴールデンレコード」をのせている。','NASA'],
+ [19741116,'1974年11月16日','プエルトリコのアレシボ電波望遠鏡から、宇宙人に向けた電波のメッセージが送られた。','アレシボ天文台'],
+ [19691217,'1969年12月','アメリカ空軍が、UFO 調査「プロジェクト・ブルーブック」を終えた。1万2000件をこえる報告のうち、701件は正体がわからないままだった。','アメリカ空軍'],
+ [19660101,'1966年','アメリカ空軍が、コロラド大学に UFO の科学的な調査を任せた（コンドン委員会）。','アメリカ空軍'],
+ [19520729,'1952年7月','アメリカの首都ワシントンの上空で、レーダーに正体のわからない物体が何度もうつり、空軍が記者会見を開いた。','アメリカ空軍'],
+ [19520301,'1952年','アメリカ空軍が、UFO の調査「プロジェクト・ブルーブック」を始めた。','アメリカ空軍'],
+ [19950101,'1995年','太陽のような星のまわりを回る惑星（系外惑星）が、はじめて見つかった。発見した2人は、のちにノーベル物理学賞を受けた。','ジュネーブ大学'] ];
+// 太陽の確かな事実
+const SUN_FACTS=['太陽は、地球から約1億5000万km離れている。光が届くのに、約8分20秒かかる。','太陽は、約46億年前に生まれたと考えられている。','太陽の表面の温度は約6000度。まわりのコロナは、100万度をこえる。',
+ '太陽の活動は約11年ごとに強くなったり弱くなったりする。NASA と NOAA は2024年10月に「太陽は活動のいちばん強い時期に入った」と発表した。','フレアの強さは、弱い順に A・B・C・M・X。X クラスの大きなフレアは、無線や GPS に影響することがある。',
+ '2024年10月3日、今の太陽活動の周期で最大級の X9.0 のフレアが起きた。','2024年5月、約20年ぶりの最大級の磁気嵐が起き、日本の北海道などでもオーロラが見えた。','1859年、記録に残る最大級の磁気嵐「キャリントン・イベント」が起き、電信が止まるなどした。',
+ '1989年3月、強い磁気嵐でカナダのケベック州が大停電になった。','NASA の探査機パーカー・ソーラー・プローブは、2024年12月24日に、太陽の表面から約610万kmまで近づいた。人工物として最も太陽に近づいた。',
+ '日本の太陽観測衛星「ひので」は、2006年から太陽を観測している。','インドの太陽観測機「アディティヤL1」は、2023年に打ち上げられた。','太陽の黒点は、まわりより温度が低いため、黒く見える。'];
+// 衛星・宇宙の確かな事実
+const SAT_FACTS=['1957年10月4日、ソ連が世界初の人工衛星「スプートニク1号」を打ち上げた。','1961年4月12日、ソ連のガガーリンが、人類で初めて宇宙を飛んだ。','1969年7月20日、アポロ11号で、人類が初めて月に降り立った。',
+ '1970年2月11日、日本初の人工衛星「おおすみ」が打ち上げられた。','国際宇宙ステーション（ISS）には、2000年11月から、いつも誰かが暮らしている。','ISS は、高さ約400kmを、約90分で地球を1周している。',
+ '地球のまわりを回る人工衛星は、いま1万機をこえている。','ハッブル宇宙望遠鏡は、1990年に打ち上げられた。','ジェイムズ・ウェッブ宇宙望遠鏡は、2021年12月25日に打ち上げられた。',
+ '日本の「はやぶさ2」は、2020年12月に小惑星リュウグウの砂を地球に届けた。','2024年1月、日本の月着陸機「SLIM」が月に着陸した。日本は月に着陸した5番目の国になった。','2024年2月、日本の新しいロケット H3 が、初めて打ち上げに成功した。',
+ '2023年8月、インドの「チャンドラヤーン3号」が、月の南極の近くに初めて着陸した。','2024年6月、中国の「嫦娥6号」が、月の裏側の石を初めて地球に持ち帰った。','GPS は、地球のまわりを回る約30機の衛星を使って、場所を知るしくみ。'];
 // ===== 世界のいま：いつも出る3つの欄（宇宙人のいま・太陽のいま・衛星のいま） =====
 // 宇宙人のいま：アメリカ国防総省（AARO など）・国家情報長官室の「公式発表」の事実だけ。推測は書かない。
 // 太陽のいま：NOAA 宇宙天気予報センター（SWPC）の公開データを、その場で読みこむ。
 // 衛星のいま：国際宇宙ステーションの位置（wheretheiss.at）と、打ち上げ予定（The Space Devs の Launch Library 2）を読みこむ。
 // 読みこめないときは、確かめ済みの事実だけを出す。
-const UFO_NEWS=[
- ['2026年10月','国防総省が、UFO（UAP）の記録の7回目の公開を行った（5月から、ほぼ毎月公開している）。','war.gov/ufo'],
- ['2026年7月','国防総省のAARO（全領域異常解決局）が、2024年6月〜2025年5月の年次報告を公開。新しい報告は319件。説明がついたものは、すべてふつうの原因（風船・鳥・ドローン・人工衛星の反射など）だった。','AARO 年次報告'],
- ['2026年7月','同じ報告で、アメリカ海軍がバージニア州の沖で「約100個の空飛ぶ未確認物体」を報告していたことがわかった。AARO は「調査中」としている。','AARO 年次報告'],
- ['2026年7月','AARO は、宇宙の報告44件を調べ、太陽の光を反射した人工衛星と一致すると説明した。宇宙人の技術や、外国の進んだ技術の証拠は見つかっていない。','AARO 年次報告'],
- ['2026年6月16日','国家情報長官室・FBI・国防総省が作った「UAP 統治委員会」が、はじめて会合を開いた。','国家情報長官室'],
- ['2026年5月8日','国防総省（いまは「戦争省」とも名のる）が、UFO の記録を公開するサイト「PURSUE」を始めた。政府は「宇宙人がいるという確かな証拠は示していない。判断は皆さんにゆだねる」としている。','war.gov/ufo'],
- ['2024年3月','AARO が「歴史記録報告 第1巻」を公開。これまで調べた中に、宇宙人の技術だと示す証拠はなかった、と結論した。','AARO'],
- ['2023年9月14日','NASA の専門家チームが報告書を公開。「宇宙人と結びつける証拠はない」としつつ、くわしいデータを集めることが大切だとした。','NASA'],
- ['2023年7月26日','アメリカ下院で、元軍人などが証言する公聴会が開かれた。','アメリカ議会'],
- ['2021年6月25日','国家情報長官室が、はじめての公式報告を公開。144件の報告のうち、説明がついたのは1件だけだった。','国家情報長官室'] ];
+// 一覧は spacedata.js（UFO_ALL・SUN_FACTS・SAT_FACTS）
 const SP_KEY='hitotsu.space.'; let _spSun='', _spSat='', _spAt=0;
 function spGet(k,ms){ try{ const v=JSON.parse(localStorage.getItem(SP_KEY+k)||'null'); if(v&&Date.now()-v.t<ms) return v.d; }catch(e){} return null; }
 function spSet(k,d){ try{ localStorage.setItem(SP_KEY+k,JSON.stringify({t:Date.now(),d})); }catch(e){} }
@@ -12737,33 +12820,43 @@ const spJst=s=>{ const d=new Date(s); if(isNaN(d)) return ''; return `${d.getMon
 const SP_CLS=c=>{ const L=(c||'')[0]; return L==='X'?'いちばん強いXクラス':L==='M'?'強めのMクラス':L==='C'?'ふつうのCクラス':L==='B'?'弱いBクラス':'弱いクラス'; };
 
 function spaceHTML(){
-  const ufo=UFO_NEWS.map(x=>`<li><b>${esc(x[0])}</b>　${esc(x[1])}<small>（${esc(x[2])}）</small></li>`).join('');
+  const k=(typeof dayKey==='function'?dayKey():''); const pick=UFO_ALL.slice().sort((a,b)=>dHash(k,'ufo',a[0]+a[2])-dHash(k,'ufo',b[0]+b[2])).slice(0,50).sort((a,b)=>b[0]-a[0]);
+  const ufo=pick.map(x=>`<li><b>${esc(x[1])}</b>　${esc(x[2])}<small>（${esc(x[3])}）</small></li>`).join('');
   return `<div class="sp-wrap">
-  <section class="sp sp-ufo"><h4>👽 宇宙人のいま</h4><p class="sp-note">アメリカ国防総省などの公式発表だけをのせています。</p><ul class="sp-l">${ufo}</ul></section>
-  <section class="sp sp-sun"><h4>☀️ 太陽のいま</h4><div class="sp-l" id="spSun">${_spSun||'<p class="sp-wait">太陽のようすを読みこんでいます…</p>'}</div></section>
-  <section class="sp sp-sat"><h4>🛰 衛星のいま</h4><div class="sp-l" id="spSat">${_spSat||'<p class="sp-wait">宇宙のようすを読みこんでいます…</p>'}</div></section>
+  <section class="sp sp-ufo"><h4>👽 宇宙人のいま　${new Date().getFullYear()}年<small>${pick.length}件</small></h4><p class="sp-note">アメリカ国防総省や世界の国の公式発表・確かな記録だけ。毎日入れかわります。</p><ul class="sp-l">${ufo}</ul></section>
+  <section class="sp sp-sun"><h4>☀️ 太陽のいま　${new Date().getFullYear()}年</h4><p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="spSun">${_spSun||'<p class="sp-wait">太陽のようすを読みこんでいます…</p>'}</div></section>
+  <section class="sp sp-sat"><h4>🛰 衛星のいま　${new Date().getFullYear()}年</h4><p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="spSat">${_spSat||'<p class="sp-wait">宇宙のようすを読みこんでいます…</p>'}</div></section>
   </div>${(Date.now()-_spAt>60000||!_spSun)?(setTimeout(spFill,0),''):''}`; }
 async function spFill(){ _spAt=Date.now();
   const sun=document.getElementById('spSun'), sat=document.getElementById('spSat'); if(!sun&&!sat) return;
-  const sunBase=`<li>太陽の活動は約11年ごとに強くなったり弱くなったりする。NASA と NOAA は2024年10月に「太陽は活動のいちばん強い時期に入った」と発表した。</li><li>フレアの強さは、弱い順に A・B・C・M・X。X クラスの大きなフレアは、無線や GPS に影響することがある。</li>`;
-  if(sun){ try{ let a=spGet('flr',30*60e3); if(!a){ a=await spJSON('https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json'); spSet('flr',a); }
+  const sunBase=SUN_FACTS.map(t=>`<li>${esc(t)}</li>`).join('');
+  if(sun){ let rows=[];
+    try{ let a=spGet('flr',30*60e3); if(!a){ a=await spJSON('https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json'); spSet('flr',a); }
       const fl=(a||[]).filter(x=>x&&x.max_class).sort((p,q)=>new Date(q.max_time)-new Date(p.max_time)); const strong=fl.filter(x=>/^[MX]/.test(x.max_class));
       const big=fl.slice().sort((p,q)=>spRank(q.max_class)-spRank(p.max_class))[0];
-      sun.innerHTML=`<ul class="sp-ul">${big?`<li><b>この7日でいちばん大きなフレア</b>　${esc(big.max_class)}（${SP_CLS(big.max_class)}）、${spJst(big.max_time)}ごろ（日本時間）。</li>`:''}
-        <li>この7日の M・X クラスのフレア：<b>${strong.length}回</b>。</li>${fl[0]?`<li><b>いちばん新しいフレア</b>　${esc(fl[0].max_class)}、${spJst(fl[0].max_time)}ごろ。</li>`:''}${sunBase}</ul><p class="sp-src">出典：NOAA 宇宙天気予報センター（いまのデータ）</p>`; }
-    catch(e){ sun.innerHTML=`<ul class="sp-ul">${sunBase}</ul><p class="sp-wait">いまのフレアのデータは読みこめませんでした。通信のよいところで開き直してください。</p>`; } }
-  if(sat){ const base=`<li>地球のまわりを回る人工衛星は、いま1万機をこえている。</li><li>国際宇宙ステーション（ISS）は、高さ約400kmを、約90分で地球を1周している。</li>`; let rows=[];
+      if(big) rows.push(`<li><b>この7日でいちばん大きなフレア</b>　${esc(big.max_class)}（${SP_CLS(big.max_class)}）、${spJst(big.max_time)}ごろ（日本時間）。</li>`);
+      rows.push(`<li><b>この7日のフレア</b>　全部で${fl.length}回。そのうち M・X クラスは${strong.length}回。</li>`);
+      fl.slice(0,30).forEach(x=>rows.push(`<li>${spJst(x.max_time)}ごろ　${esc(x.max_class)} のフレア（${SP_CLS(x.max_class)}）</li>`)); }catch(e){}
+    try{ let sc=spGet('scl',30*60e3); if(!sc){ sc=await spJSON('https://services.swpc.noaa.gov/products/noaa-scales.json'); spSet('scl',sc); } const n=sc&&sc['0'];
+      if(n) rows.unshift(`<li><b>いまの宇宙天気</b>　電波への影響 R${esc(n.R&&n.R.Scale||'0')}・放射線 S${esc(n.S&&n.S.Scale||'0')}・磁気嵐 G${esc(n.G&&n.G.Scale||'0')}（0がおだやか、5がいちばん強い）</li>`); }catch(e){}
+    sun.innerHTML=`<ul class="sp-ul">${rows.join('')}${sunBase}</ul>${rows.length?'<p class="sp-src">出典：NOAA 宇宙天気予報センター（いまのデータ）</p>':'<p class="sp-wait">いまのフレアのデータは読みこめませんでした。通信のよいところで開き直してください。</p>'}`; }
+  if(sat){ const base=SAT_FACTS.map(t=>`<li>${esc(t)}</li>`).join(''); let rows=[];
     try{ const p=await spJSON('https://api.wheretheiss.at/v1/satellites/25544'); rows.push(`<li><b>いまの国際宇宙ステーション</b>　緯度${(+p.latitude).toFixed(1)}°・経度${(+p.longitude).toFixed(1)}°の上空、高さ${Math.round(p.altitude)}km、時速${Math.round(p.velocity).toLocaleString()}kmで飛んでいる。</li>`); }catch(e){}
-    try{ let n=spGet('ppl',3*3600e3); if(n==null){ const j=await spJSON('https://ll.thespacedevs.com/2.2.0/astronaut/?in_space=true&limit=1&mode=list'); n=j.count; spSet('ppl',n); } if(n!=null) rows.push(`<li><b>いま宇宙にいる人</b>　${n}人。</li>`); }catch(e){}
-    try{ let L=spGet('lch',3*3600e3); if(!L){ const j=await spJSON('https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=5&mode=list'); L=(j.results||[]).map(x=>({n:x.name,t:x.net,w:x.lsp_name||(x.launch_service_provider&&x.launch_service_provider.name)||'',p:x.location||(x.pad&&x.pad.location&&x.pad.location.name)||''})); spSet('lch',L); }
-      if(L&&L.length) rows.push(`<li><b>これからの打ち上げ予定</b><ul class="sp-sub">${L.slice(0,5).map(x=>`<li>${spJst(x.t)}ごろ　${esc(x.n)}${x.p?`（${esc(x.p)}）`:''}</li>`).join('')}</ul></li>`); }catch(e){}
+    try{ let A=spGet('ppl2',3*3600e3); if(!A){ const j=await spJSON('https://ll.thespacedevs.com/2.2.0/astronaut/?in_space=true&limit=30&mode=list'); A={n:j.count,l:(j.results||[]).map(x=>({n:x.name,a:(x.agency&&(x.agency.abbrev||x.agency.name))||x.agency_abbrev||''}))}; spSet('ppl2',A); }
+      if(A&&A.n!=null) rows.push(`<li><b>いま宇宙にいる人</b>　${A.n}人${A.l&&A.l.length?`<ul class="sp-sub">${A.l.map(x=>`<li>${esc(x.n)}${x.a?`（${esc(x.a)}）`:''}</li>`).join('')}</ul>`:'。'}</li>`); }catch(e){}
+    const LL=x=>({n:x.name,t:x.net,p:x.location||(x.pad&&x.pad.location&&x.pad.location.name)||'',s:(x.status&&(x.status.abbrev||x.status.name))||''});
+    try{ let L=spGet('lch2',3*3600e3); if(!L){ const j=await spJSON('https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=15&mode=list'); L=(j.results||[]).map(LL); spSet('lch2',L); }
+      if(L&&L.length) rows.push(`<li><b>これからの打ち上げ予定（${L.length}件）</b><ul class="sp-sub">${L.map(x=>`<li>${spJst(x.t)}ごろ　${esc(x.n)}${x.p?`（${esc(x.p)}）`:''}</li>`).join('')}</ul></li>`); }catch(e){}
+    try{ let L=spGet('prv',3*3600e3); if(!L){ const j=await spJSON('https://ll.thespacedevs.com/2.2.0/launch/previous/?limit=10&mode=list'); L=(j.results||[]).map(LL); spSet('prv',L); }
+      const ok=s=>/Success/i.test(s)?'成功':/Fail/i.test(s)?'失敗':'';
+      if(L&&L.length) rows.push(`<li><b>さいきんの打ち上げ（${L.length}件）</b><ul class="sp-sub">${L.map(x=>`<li>${spJst(x.t)}　${esc(x.n)}${ok(x.s)?`…${ok(x.s)}`:''}</li>`).join('')}</ul></li>`); }catch(e){}
     sat.innerHTML=`<ul class="sp-ul">${rows.join('')}${base}</ul>${rows.length?'<p class="sp-src">出典：Where the ISS at?・The Space Devs（いまのデータ）</p>':'<p class="sp-wait">いまのデータは読みこめませんでした。通信のよいところで開き直してください。</p>'}`; }
   if(sun) _spSun=sun.innerHTML; if(sat) _spSat=sat.innerHTML;
   try{ if(typeof msRebalance==='function') msRebalance(); }catch(_){} }
 function spRank(c){ const m=/^([ABCMX])([\d.]+)?/.exec(c||''); if(!m) return 0; return 'ABCMX'.indexOf(m[1])*100+(+m[2]||0); }
 document.head.insertAdjacentHTML('beforeend',`<style>
 .sp-wrap{ display:grid; gap:10px; margin:6px 0 12px; }
-.sp{ border-radius:14px; padding:10px 12px; border:1.5px solid; } .sp h4{ margin:0 0 4px; font-size:15px; }
+.sp{ border-radius:14px; padding:10px 12px; border:1.5px solid; } .sp h4{ margin:0 0 4px; font-size:15px; } .sp h4 small{ margin-left:8px; font-size:11px; font-weight:400; color:var(--muted); }
 .sp-ufo{ background:#F4F0FD; border-color:#D9CCF5; } .sp-ufo h4{ color:#6A4BB8; }
 .sp-sun{ background:#FFF6E6; border-color:#FBD9A0; } .sp-sun h4{ color:#C0701A; }
 .sp-sat{ background:#EEF6FD; border-color:#C5DDF3; } .sp-sat h4{ color:#2F6EA8; }
@@ -15298,7 +15391,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${typeof eaTileHTML==='function'?homeTile('hm-ea','地球アルバム',eaTileHTML(P)):''}
     ${typeof relChartHTML==='function'?homeTile('hm-rel',`${esc(P.country.name)}の宗教の割合`,relChartHTML(P)):''}
     ${typeof newsHTML==='function'?homeTile('hm-news',`物語の${sy}年のNEWS`,newsHTML(P,sy)):''}
-    ${homeTile('hm-world',`世界のいま<span class="hm-n">物語の中の${sy}年</span>`, (typeof spaceHTML==='function'?spaceHTML():'')+(typeof worldNowHTML==='function'?worldNowHTML(P,sy):''))}
+    ${homeTile('hm-world',`世界のいま　${new Date().getFullYear()}年`, (typeof spaceHTML==='function'?spaceHTML():'')+(typeof worldNowHTML==='function'?worldNowHTML(P,new Date().getFullYear()):''))}
     ${homeTile('hm-zukan','図鑑', `<div class="hm-zk">${zk.map(z=>`<div class="hm-z"><span class="tiny muted">${esc(z[0])}</span><b>${z[1]}<small>${z[3]}</small></b></div>`).join('')}</div>`)}
   </div>
   ${typeof pwaNoteHTML==='function'?pwaNoteHTML('bottom'):''}
