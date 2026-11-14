@@ -15784,6 +15784,7 @@ function pwaNoteHTML(pos){ if(typeof IN_APP!=='undefined'&&IN_APP) return ''; co
     <p class="pwa-nl">検索から入ると、別の人として始まってしまうことがあります。一度だけ、下のやり方で LIFE BOOK のアイコンを作ってください。そのあとは、<b>そのアイコンから入れば、毎回同じ自分</b>です。</p>
     ${_pwaDone?'<p class="pwa-ok">アイコンを作りました。これからは、アイコンから開いてください。</p>':_pwaPrompt?'<button class="pwa-go" type="button" id="pwaGo">アイコンを作る</button>':''}
     <ul class="pwa-rows">${rows.map(([k,n,t])=>`<li${k===PWA_DEV?' class="is-me"':''}><b class="pwa-dn">${n}${k===PWA_DEV?'<span class="pwa-you">いまの端末</span>':''}</b><span>${t}</span></li>`).join('')}</ul>
+    ${pos==='bottom'?'':'<button class="pwa-set" type="button" id="pwaSetDone">アイコンを作りました（次から、この案内をたたむ）</button>'}
     ${carry?'<p class="pwa-cy">iPhone では、アイコンから初めて開くと、新しい人生から始まります。そのあとは、アイコンから入れば毎回同じ人生です。</p>':''}`;
   if(pos==='bottom') return `<details class="pwa-note pwa-bottom" aria-label="いつも同じ自分で入る方法"><summary class="pwa-nh">※ いつも同じ自分で入るために（設定ずみ）</summary>${inner}</details>`;
   return `<aside class="pwa-note" aria-label="いつも同じ自分で入る方法"><p class="pwa-nh">※ いつも同じ自分で入るために</p>${inner}</aside>`; }
@@ -15794,6 +15795,7 @@ async function pwaCarryLife(){ return; /* 2026-11-14 MITSUさんの指示で、�
   if(Date.now()-_pwaHashAt<60000&&/#pmove=/.test(location.hash)) return;
   try{ const z=await moveZip(JSON.stringify(moveData())); history.replaceState(null,'',location.pathname+location.search+'#pmove='+z); _pwaHashAt=Date.now(); }catch(e){} }
 function bindPwa(){ const b=document.getElementById('pwaGo'); if(b) b.onclick=async()=>{ if(!_pwaPrompt) return; _pwaPrompt.prompt(); try{ const r=await _pwaPrompt.userChoice; if(r&&r.outcome==='accepted'){ _pwaDone=true; try{ store.set(KEY_PWASET,Date.now()); }catch(e){} } }catch(e){} _pwaPrompt=null; pwaRefresh(); };
+  const sd=document.getElementById('pwaSetDone'); if(sd) sd.onclick=()=>{ try{ store.set(KEY_PWASET,Date.now()); }catch(e){} pwaRefresh(); };
   if(document.querySelector('.pwa-note')) pwaCarryLife(); }
 // ホーム画面のアイコンから開いて、まだ人生が無いとき：Safari でコピーした引き継ぎリンクを貼れる欄を出す
 function pwaPasteHTML(){ return `<section class="pwa-paste" id="pwaPaste"><h3>Safari で見守っていた人生がありますか？</h3>
@@ -15818,6 +15820,7 @@ if(typeof render==='function'){ const _pwaR=render; render=function(){ const r=_
 .pwa-you{ display:inline-block; margin-left:6px; padding:0 6px; border-radius:999px; background:#FF8FAA; color:#fff; font-size:10px; vertical-align:1px; }
 .pwa-ic{ display:inline-flex; vertical-align:-3px; color:#2F7FE0; }
 .pwa-cy{ margin:6px 0 0; font-size:12px; }
+.pwa-set{ display:block; margin:8px 0 2px; font:inherit; font-size:13px; font-weight:700; padding:7px 16px; border-radius:999px; border:2px solid #E86A88; background:#fff; color:#D6457A; box-shadow:0 3px 0 #F4B6C6; cursor:pointer; }
 .pwa-ok{ margin:0 0 6px; font-weight:700; color:#D6457A; }
 .pwa-go{ margin:2px 0 8px; font:inherit; font-size:14px; font-weight:700; padding:8px 18px; border-radius:999px; border:2px solid #E86A88; background:#FF8FAA; color:#fff; box-shadow:0 3px 0 #D85878; cursor:pointer; }
 @media (max-width:520px){ .pwa-rows li{ grid-template-columns:1fr; gap:0; } }
