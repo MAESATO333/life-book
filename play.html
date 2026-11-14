@@ -416,6 +416,7 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .linkish{ font:inherit; border:0; background:none; color:#C9466A; text-decoration:underline; cursor:pointer; padding:0; }
 .ih-fr{ margin-top:14px; font-size:13px; color:var(--muted); line-height:1.8; }
 .ih-site{ margin-top:10px; } .ih-site a{ text-decoration:none; }
+.ih-go{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; } .ih-go a.btn{ text-decoration:none; }
 .ih-fr button{ display:inline-flex; align-items:center; gap:5px; margin-left:4px; font:inherit; font-weight:700; padding:4px 12px; border-radius:999px; border:2px solid #FFC2D0; background:#FFF3F6; color:#C9466A; cursor:pointer; }
 
 /* ホーム */
@@ -423,6 +424,7 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .ic-book{ --m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath d='M0 1h3v1h1V1h4v6H4v1H3V7H0zM1 2v4h2V2zM5 2v4h2V2z'/%3E%3C/svg%3E"); }
 .mastnav{ display:flex; gap:6px; }
 .nav-b{ display:inline-flex; align-items:center; gap:5px; font:inherit; font-size:13px; font-weight:600; padding:6px 12px; border-radius:999px; border:2px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; white-space:nowrap; }
+a.nav-b{ text-decoration:none; }
 .nav-b .ic{ width:14px; height:14px; } .nav-b.on{ border-color:#8EC3E6; background:#D7EEFF; color:#13324A; }
 .nav-b:focus-visible{ outline:3px solid #8EC3E6; outline-offset:2px; }
 @media (max-width:640px){ .masthead{ flex-wrap:wrap; row-gap:8px; } .masthead .name small{ display:none; } .mast-r{ width:100%; justify-content:space-between; gap:6px; } .nav-b{ padding:6px 10px; font-size:12px; } .fr-top{ padding:6px 11px 6px 9px; font-size:12px; } }
@@ -568,6 +570,7 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 #toLifeBtn{ margin:10px 0 0; }
 .born-off .born-txt{ font-size:.82em; letter-spacing:.06em; }
 @media (max-width:520px){ .mast-r{ flex-wrap:wrap; row-gap:8px; } .mastnav{ display:flex; gap:6px; flex-wrap:wrap; } }
+@media (max-width:520px){ .mastnav{ gap:4px; } .mastnav .nav-b{ padding:5px 7px; font-size:11px; gap:3px; } .mastnav .nav-b .ic{ transform:scale(.85); } }
 .ic-top{ --m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath d='M3 0h2v2h3v2H7v1h1v3H5V7H3v1H0V5h1V4H0V2h3z'/%3E%3C/svg%3E"); }
 .frr{ margin:10px 0; padding:10px 12px; border-radius:12px; background:#FFF0F4; border:2px dashed #FFB3C6; }
 .frr-t{ margin:0 0 8px; line-height:1.6; }
@@ -14426,7 +14429,7 @@ function goLife(){ ART_NEW=true; viewing=null; page='life'; render(); window.scr
 // 上の帯のボタン
 function navSync(){ const n=document.getElementById('mastnav'); if(!n) return; const has=!!st;
   const onTop=!viewing&&(!st||page==='top'), onHome=!viewing&&st&&page==='home', onLife=!viewing&&st&&page!=='home'&&page!=='top';
-  n.innerHTML=`<button type="button" class="nav-b ${onTop?'on':''}" data-nav="top" ${onTop?'aria-current="page"':''}><i class="ic ic-top" aria-hidden="true"></i>Gateway</button>${has?`<button type="button" class="nav-b ${onHome?'on':''}" data-nav="home" ${onHome?'aria-current="page"':''}><i class="ic ic-home" aria-hidden="true"></i>Life Home</button>`:''}${has?`<button type="button" class="nav-b ${onLife?'on':''}" data-nav="life" ${onLife?'aria-current="page"':''}><i class="ic ic-book" aria-hidden="true"></i>Life Record${(()=>{ const k=typeof meetBadgeCount==='function'?meetBadgeCount():0; return k?`<span class="mt-badge" aria-label="出会いのお知らせ ${k}件">${k}</span>`:''; })()}</button>`:''}`;
+  n.innerHTML=`<a class="nav-b" href="${typeof siteTopURL==='function'?siteTopURL():'./'}"><i class="ic ic-top" aria-hidden="true"></i>Gateway</a><button type="button" class="nav-b ${onTop?'on':''}" data-nav="top" ${onTop?'aria-current="page"':''}><i class="ic ic-heart" aria-hidden="true"></i>Birth</button>${has?`<button type="button" class="nav-b ${onHome?'on':''}" data-nav="home" ${onHome?'aria-current="page"':''}><i class="ic ic-home" aria-hidden="true"></i>Life Home</button>`:''}${has?`<button type="button" class="nav-b ${onLife?'on':''}" data-nav="life" ${onLife?'aria-current="page"':''}><i class="ic ic-book" aria-hidden="true"></i>Life Record${(()=>{ const k=typeof meetBadgeCount==='function'?meetBadgeCount():0; return k?`<span class="mt-badge" aria-label="出会いのお知らせ ${k}件">${k}</span>`:''; })()}</button>`:''}`;
   n.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>b.dataset.nav==='top'?goTop():b.dataset.nav==='home'?goHome():goLife()); }
 // 心のうつりかわり（幸せの度合い）を小さなグラフに
 function homeMoodSVG(L,age){ const ys=L.years.filter(y=>y.age<=age&&y.h!=null); if(ys.length<2) return '<p class="tiny muted">まだ、グラフにするほどの年月がたっていません。</p>';
@@ -14681,7 +14684,7 @@ function introHTML(){
       <p class="brand-sub">${SUBTITLE}</p>
       <p class="lead">世界のどこかに、<br><em>ひとりの人間</em>として生まれる。</p>
       <div class="ih-cta"><button class="born-btn" id="bornBtn" type="button"><svg class="born-heart" viewBox="0 0 28 24" shape-rendering="crispEdges" aria-hidden="true">${typeof frHeart==='function'?frHeart(0,0,4,'#FFFFFF'):''}</svg><span class="born-txt">生まれる</span><span class="born-sub">あたらしい いのちが、はじまります</span></button></div>
-      <p class="ih-fr">友だちを誘うと、ふたりの Channel が人生のどこかで出会います。<button class="fr-open" type="button">友だちに紹介する</button></p><p class="ih-site"><a class="btn ghost small" href="${siteTopURL()}">LIFE BOOK のはじめのページを見る</a></p>
+      <p class="ih-fr">友だちを誘うと、ふたりの Channel が人生のどこかで出会います。<button class="fr-open" type="button">友だちに紹介する</button></p><p class="ih-site"><a class="btn ghost small" href="${siteTopURL()}">Gateway（はじめのページ）を見る</a></p>
     </div><div class="hero">${bkHeroSVG()}</div></div>
     <div class="body"><p>国も、家族も、家の暮らし向きも、生まれた日時も、名前も、すべて世界の統計に沿って偶然に決まります。生まれた人は「Channel」。Channel は、自分で考え、自分で選んで生きていきます。見守るあなたは「Higher Self」。Higher Self にできるのは、迷っているその人に、一生で2〜3回だけ「インスピレーション」を贈ること。届くかどうかは、その時のその人の心しだいです。</p>
     <p style="margin-top:10px">人生は、現実の約2日半で1歳ずつ進みます（80歳まで生きる人生なら、約6か月半）。ひらくたびに、前に見た時から今までに起きた出来事と、その時の気持ちが読めます。人生が終わると、葬儀のあとに、その人生を読み解く「LIFE BOOK前世レポート」が届きます。生き終えた人生は、章立てのある一冊の本になって、あなたの本棚に並びます。</p></div>
@@ -14718,7 +14721,7 @@ function kannenMapHTML(){
 // すでに生まれている人がトップを見る時は、「生まれる」を押せないようにする
 function introLock(){ ['#bornBtn','#bornBtn2'].forEach(sel=>{ const b=$(sel); if(!b) return; b.disabled=true; b.classList.add('born-off'); b.onclick=null; b.setAttribute('aria-disabled','true');
     const t=b.querySelector('.born-txt'); if(t) t.textContent='いまは、人生の途中'; const sb=b.querySelector('.born-sub'); if(sb) sb.textContent='生き終えたら、次の人生へ';
-    if(sel==='#bornBtn'&&!document.getElementById('toLifeBtn')){ const a=document.createElement('p'); a.innerHTML='<button type="button" class="btn ghost" id="toLifeBtn">Life Record へ</button>'; b.parentElement.after(a); a.querySelector('button').onclick=goLife; } }); }
+    if(sel==='#bornBtn'&&!document.getElementById('toLifeBtn')){ const a=document.createElement('p'); a.className='ih-go'; a.innerHTML='<button type="button" class="btn ghost" id="toLifeBtn">Life Record へ</button><a class="btn ghost" id="toSiteBtn" href="'+siteTopURL()+'">Gateway（はじめのページ）へ</a>'; b.parentElement.after(a); a.querySelector('button').onclick=goLife; const low=document.querySelector('.ih-site'); if(low) low.remove(); } }); }
 function bindIntro(){
   bindLoanShelf(); bindFriend();
   $('#bornBtn').onclick=()=>born(null); const b2=$('#bornBtn2'); if(b2) b2.onclick=()=>born(null);
@@ -15226,7 +15229,7 @@ function fallbackCopy(txt){ const d=$('#dev'); const ta=document.createElement('
 $('#devbtn').onclick=()=>{ devOpen=!devOpen; renderDev(); };
 // 「制作用」は、アドレスの最後に ?dev か #dev をつけた時だけ出す
 if(/[?&#]dev\b/.test(location.search+location.hash)||(()=>{ try{ return localStorage.getItem('hitotsu.dev')==='1'; }catch(e){ return false; } })()){ $('#devbtn').hidden=false; try{ localStorage.setItem('hitotsu.dev','1'); }catch(e){} }
-function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); render(); if(typeof friendFromHash==='function') friendFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
+function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); render(); try{ if(/^#(gateway|birth)\b/.test(location.hash)&&typeof goTop==='function'){ history.replaceState(null,'',location.pathname+location.search); goTop(); } }catch(_){} if(typeof friendFromHash==='function') friendFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
 start();
 setInterval(()=>{ if(st && st.stage==='life' && !viewing && !inspAnim && document.visibilityState==='visible' && !document.activeElement.matches('textarea')) render(); }, 30000);
 
