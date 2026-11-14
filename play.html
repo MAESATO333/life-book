@@ -16541,7 +16541,7 @@ function mpPageHTML(){ const p=mpGet(); if(mpStageLog(p)) mpSet(p); if(p.per==nu
     <p class="mp-big">${gone?`🌈 ${esc(p.name)}は、${p.life}歳で虹の橋をわたりました。`:`うちに来て <b>${mpDays(p)}</b> 日目`}</p>
     ${gone?'':`<p class="mp-sub">${Math.floor(a)}歳${Math.floor((a%1)*12)}か月・${st[0]}${mpHuman(p)!=null?`（人の年齢なら約${mpHuman(p)}歳）`:''}</p>`}<p class="mp-sub">💗 愛情 ${p.love||0}　📷 写真 ${(p.photos||[]).length}枚</p></div></div>
   ${gone?`<div class="mp-rb"><p>🌈 ${esc(p.name)}は、${p.life}歳まで、たくさんの愛情に包まれて生きました。</p><p>いまは虹の橋のたもとで、元気に走りまわっています。いつかまた会える日まで、ゆっくり待っていてくれるそうです。</p><p>💗 もらった愛情 ${p.love||0}　📷 思い出の写真 ${(p.photos||[]).length}枚　🏠 いっしょにいた日 ${mpTogether(p)}日</p><p class="tiny">思い出のアルバムは、ずっとここに残ります。</p></div>`:`${(w=>w.all.length?`<p class="tiny muted">あなた（Higher Self）が、だれにお願いしますか？${w.all.some(x=>x.k==='ch')?'':'（Channel は、まだ小さくて動けません。3歳になったら、お世話できます）'}</p><div class="mp-who">${w.all.map(x=>`<button type="button" class="mp-w${x.k===w.k?' on':''}" data-mpw="${esc(x.k)}">${esc(x.call==='Channel'?x.n+'（Channel）':x.call+'の'+x.n)}</button>`).join('')}</div>`:'')(mpWho())}<div class="mp-acts">${Object.keys(MP_ACT).map(k=>`<button type="button" class="mp-a${done.includes(k)?' done':''}" data-mpa="${k}">${MP_ACT[k][1]} ${k==='play'&&p.kind==='dog'?'さんぽに行ってあげて':MP_ACT[k][0]}${done.includes(k)?' ✓':''}</button>`).join('')}<button type="button" class="mp-a mp-cam" data-mp="photo">📷 写真をとる</button></div>
-  ${mpFoodHTML(p)}${(an=>an?`<p class="mp-anniv">${esc(an)}</p>`:'')(mpAnniv(p))}${mpAnnivHTML(p)}<p class="mp-msg" id="mpMsg" role="status">${esc(p.msg||'きょうも、見守ってあげてね。')}</p><p class="tiny muted">${esc(p.name)}は、${esc(per.d)}。</p>${mpChatHTML(p)}`}
+  ${mpFoodHTML(p)}${(an=>an?`<p class="mp-anniv">${esc(an)}</p>`:'')(mpAnniv(p))}${mpAnnivHTML(p)}${p.cry?`<span class="mp-cry">${esc(p.cry)}</span>`:''}<p class="mp-msg" id="mpMsg" role="status">${esc(p.msg||'きょうも、見守ってあげてね。')}</p><p class="tiny muted">${esc(p.name)}は、${esc(per.d)}。</p>${mpChatHTML(p)}`}
   <p class="tiny muted">見守った日</p><div class="stp-row">${days.map(x=>{ const on=S.has(dayKey(x)); return `<span class="stp ${on?'on':''} ${dayKey(x)===dayKey()?'today':''}"><small>${W[x.getDay()]}</small>${on?'<i aria-hidden="true"></i>':x.getDate()}</span>`; }).join('')}</div>
   ${mpDiaryHTML(p)}<h4 class="mp-h4">📷 ${esc(p.name)}のアルバム</h4>${ph.length?`<div class="mp-album">${ph.map(x=>`<figure class="mp-ph">${mpArt(p,x.k)}<figcaption>${esc(x.c)}</figcaption></figure>`).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。「写真をとる」を押すと、いまの姿がアルバムに残ります。</p>'}
   <div class="mp-row">${gone?`<button type="button" class="mp-btn" data-mp="again">新しい家族を迎える</button>`:''}<button type="button" class="linkish" data-mp="close">もどる</button></div>
@@ -16682,7 +16682,7 @@ function mpDiaryHTML(p){ const d=(p.diary||[]).slice().reverse().slice(0,40); if
 function mpChatLeft(p){ const n=((p.chat||{})[dayKey()]||[]).length; return Math.max(0,1-n); }
 function mpChatHTML(p){ if(mpGone(p)) return ''; const today=(p.chat||{})[dayKey()]||[]; const left=mpChatLeft(p);
   return `<h4 class="mp-h4">💬 ${esc(p.name)}とおしゃべり <small>1日1回まで</small></h4>
-  <div class="mp-chat">${today.map(c=>`<p class="mp-me">${esc(c.q)}</p><p class="mp-pet"><b>${esc(p.name)}</b>${esc(c.a)}</p>`).join('')}</div>
+  <div class="mp-chat">${today.map(c=>`<p class="mp-me">${esc(c.q)}</p><p class="mp-pet"><b>${esc(p.name)}</b>${mpCryWrap(c.a)}</p>`).join('')}</div>
   ${left?`<div class="mp-in-row"><textarea id="mpChatIn" class="mp-in" maxlength="100" rows="2" placeholder="${esc(p.name)}に話しかけてみよう（100文字まで）"></textarea><button type="button" class="mp-btn" data-mp="chat">話す</button></div>`:`<p class="tiny muted">きょうのおしゃべりは、おしまい。また明日、話そうね。</p>`}`; }
 function mpChat(){ const p=mpGet(); if(!p||mpGone(p)) return; const el=document.getElementById('mpChatIn'); const q=(el&&el.value||'').trim().slice(0,100); if(!q||!mpChatLeft(p)) return;
   p.chat=p.chat||{}; const d=dayKey(); const a=mpReply(p,q); (p.chat[d]=p.chat[d]||[]).push({ q, a });
@@ -16702,7 +16702,7 @@ function mpFeed(i){ const p=mpGet(); if(!p||mpGone(p)) return; const f=(MP_FOOD[
 function mpIsAnniv(p){ const d=mpDays(p); if([7,30,100,365,500,1000].includes(d)) return true; return !!(p.anMsg&&p.anMsg.d===dayKey()); }
 function mpAnnivHTML(p){ if(mpGone(p)||!mpIsAnniv(p)) return ''; const sent=(p.letters||{})[dayKey()], gift=(p.gifts||{})[dayKey()];
   return `<div class="mp-anv"><p class="tiny"><b>きょうは記念日！</b> ${esc(p.name)}に、メッセージやプレゼントを送れます。</p>
-  ${sent?`<p class="mp-me">${esc(sent.q)}</p><p class="mp-pet"><b>${esc(p.name)}</b>${esc(sent.a)}</p>`:`<div class="mp-in-row"><textarea id="mpLetterIn" class="mp-in" maxlength="100" rows="2" placeholder="記念日のメッセージ（100文字まで）"></textarea><button type="button" class="mp-btn" data-mp="letter">送る</button></div>`}
+  ${sent?`<p class="mp-me">${esc(sent.q)}</p><p class="mp-pet"><b>${esc(p.name)}</b>${mpCryWrap(sent.a)}</p>`:`<div class="mp-in-row"><textarea id="mpLetterIn" class="mp-in" maxlength="100" rows="2" placeholder="記念日のメッセージ（100文字まで）"></textarea><button type="button" class="mp-btn" data-mp="letter">送る</button></div>`}
   ${gift?'<p class="tiny">🎁 プレゼントは、もうあげました。</p>':`<button type="button" class="mp-a" data-mp="gift">🎁 ごはんをプレゼント</button>`}</div>`; }
 function mpLetter(){ const p=mpGet(); if(!p) return; const el=document.getElementById('mpLetterIn'); const q=(el&&el.value||'').trim().slice(0,100); if(!q) return;
   const a=mpReply(p,q+' 記念日 おめでとう'); p.letters=p.letters||{}; p.letters[dayKey()]={ q, a }; p.love=(p.love||0)+2; mpLog(p,`記念日に、Higher Self からメッセージが届いた。「${q.slice(0,24)}${q.length>24?'…':''}」`,'letter'); mpSet(p); mpOpen(); }
@@ -16722,6 +16722,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .mp-anv{ margin:10px 0; padding:10px 12px; border-radius:14px; background:#FFF3D6; display:flex; flex-direction:column; gap:6px; } .mp-anv .mp-a{ align-self:flex-start; }
 .mp-per{ display:inline-block; margin:2px 0; padding:2px 10px; border-radius:999px; background:#F3F0FF; color:#6A4BB8; font-size:12.5px; font-weight:700; }
 </style>`);
+
+function mpCryWrap(t){ const m=String(t).match(/^(\S+)\s(.*)$/s); return m?`<span class="mp-cry2">${esc(m[1])}</span> ${esc(m[2])}`:esc(t); }
 // ===== うちのペットの性格：50種類（家に来たときに決まる）。おしゃべりの返事の、前後のひとこと・一人称が変わる =====
 // [名前, どんな子か, 前のひとこと×2, 後のひとこと×2, 一人称]
 const MP_PER50=[
@@ -16779,6 +16781,35 @@ const MP_PER50=[
 // 50種類を、mypet2.js のしくみに入れる（今いる子の性格の番号は、そのまま）
 MP_PER.length=0; MP_PER50.forEach((x,i)=>{ MP_PER.push({ k:'p'+i, n:x[0], d:x[1] }); MP_PER_PRE['p'+i]=[x[2],x[3]]; MP_PER_POST['p'+i]=[x[4],x[5]]; });
 function mpPron(p){ const x=MP_PER50[p.per]; return x?x[6]:'ぼく'; }
+// ===== 鳴き声を、文字で出す（かわいいので）。動物・気分・性格で変わる =====
+const MP_CRY={
+  dog:{ love:['くぅ〜ん','クンクン♪','くぅん、くぅん'], eat:['ワフワフ！','ハグハグ…ワン！','ワンッ！'], happy:['ワン！','ワンワン！','ワォーン！'], photo:['ワン？','キャン！'], no:['くぅ〜ん…','フンッ'] },
+  cat:{ love:['ゴロゴロ…','ミャ〜ン','ニャ〜ン♪'], eat:['ウニャウニャ…','ニャムニャム','ニャッ！'], happy:['ニャー！','ニャッ','ニャニャッ！'], photo:['ニャ？','ミャ？'], no:['…ニャ。','フシャー（ちょっとだけ）'] },
+  bird:{ love:['ピュイ〜♪','チュンチュン','ピヨピヨ'], eat:['ポリポリ…ピッ','ピピッ！'], happy:['ピッ！','ピピピッ！','ピーヨ！'], photo:['ピ？','ピッ？'], no:['…ピ。'] },
+  rabbit:{ love:['プゥ〜','プゥプゥ♪'], eat:['モシャモシャ…プゥ','カリカリ…プッ'], happy:['プゥプゥ！','（ぴょーん）プッ！'], photo:['プッ？','（鼻ひくひく）プゥ？'], no:['ブゥ…（足ダンッ）'] },
+  fish:{ love:['ぷくぷく…','ぷくっ♪'], eat:['パクッ！パクパク','パクパク！'], happy:['パクパク！','（すいーっ）ぷくっ！'], photo:['（くるっ）パク？'], no:['…ぷく。'] } };
+// 性格で、ちょっとだけ変える（甘えんぼう系は♡、元気系は「！」を足す）
+const MP_CRY_SWEET=/甘え|人懐|さみしがり|好き好き|くっつき|お出迎え|あまえ|なつっこい|ほめられ|照れ/, MP_CRY_GENKI=/やんちゃ|お調子|ムード|いたずら|あわて|おしゃべり|冒険|負けず|がんばり|早起き/;
+function mpCry(p,mood){ const v=(MP_CRY[p.kind]||MP_CRY.dog), a=v[mood]||v.happy; let c=a[Math.floor(Math.random()*a.length)]; const n=(MP_PER50[p.per]||[''])[0];
+  if(MP_CRY_SWEET.test(n)&&mood!=='no') c=c.replace(/[！!]?$/,'♡'); else if(MP_CRY_GENKI.test(n)&&mood!=='no') c=c+'！'; return c; }
+// おしゃべりの返事の、最初の鳴き声も同じ言葉にそろえる
+MP_VOICE.rabbit.s=['プゥプゥ','プッ','（足ダンッ）ブゥ','プゥ〜']; MP_VOICE.fish.s=['パクパク','ぷくぷく','（くるっ）パク','ぷくっ']; MP_VOICE.bird.s=['ピッ！','ピピッ','チュンチュン','ピュイ〜'];
+// お世話・ごはん・写真・プレゼントのあとに、鳴き声を出す
+function mpSetCry(mood){ const p=mpGet(); if(!p) return; p.cry=mpCry(p,mood); mpSet(p); mpOpen(); }
+{ const A=mpAct; mpAct=function(k){ const p0=mpGet(); const was=p0&&p0.acts&&(p0.acts[dayKey()]||[]).includes(k); A(k); if(k==='food'&&!was) return; mpSetCry(was?'no':k==='pet'?'love':'happy'); };
+  const F=mpFeed; mpFeed=function(i){ F(i); const p=mpGet(); mpSetCry(p&&/ぷいっ|あとで食べる/.test(p.msg||'')?'no':'eat'); };
+  const Ph=mpPhoto; mpPhoto=function(){ Ph(); mpSetCry('photo'); };
+  const Lt=mpLetter; mpLetter=function(){ Lt(); mpSetCry('love'); };
+  const C=mpClose; mpClose=function(){ const p=mpGet(); if(p&&p.cry){ p.cry=''; mpSet(p); } C(); }; }
+document.head.insertAdjacentHTML('beforeend',`<style>.mp-cry{ display:inline-block; margin:6px 0 0; padding:4px 14px; border-radius:999px 999px 999px 4px; background:#FFE3EC; color:#C2476B; font-weight:800; font-size:18px; letter-spacing:.04em; animation:mpCry .5s ease-out; } @keyframes mpCry{ 0%{ transform:scale(.6) rotate(-6deg); opacity:0 } 70%{ transform:scale(1.08) rotate(2deg); opacity:1 } 100%{ transform:none } } @media (prefers-reduced-motion:reduce){ .mp-cry{ animation:none } } .mp-pet .mp-cry2{ color:#C2476B; font-weight:800; }</style>`);
+// ---- 鳴き声を、ふやす場所（ここに足すだけで、ふえます） ----
+const MP_CRY_MORE={
+  dog:{ love:['クゥ〜ン♪','ヒュンヒュン','くんくん…','（しっぽブンブン）ワフ','クーン、クーン'], eat:['ガツガツ…ワフッ','ワンワンワン！（はやく！）','ペロペロ…ワン','モグモグ…ワフ','ハッハッハッ（よだれ）'], happy:['ワンッワンッ！','バウッ！','ワフワフワフ！','アオーン♪','ワワン！','キャンキャン！'], photo:['ワフ？','（首かしげ）ワン？','…ワン（キメ顔）'], no:['ク〜ン（しょんぼり）','…ワフ。','ブフッ'] },
+  cat:{ love:['ゴロゴロゴロ…','ニャ〜ン♡','ンニャ〜','ミィ〜','（ふみふみ）ゴロゴロ'], eat:['ハグハグ…ニャ','ニャウニャウ！','ンマンマ…','ウマウマニャ','ニャーオ！（もっと）'], happy:['ニャオ〜ン！','ニャン！','ミャッ！','ニャンニャン！','ンニャッ！','ニャ〜オ'], photo:['ニャン？','（じーっ）ニャ','…ミャ（キメ顔）'], no:['…ンニャ。','（しっぽパタン）','ニャ…（無視）'] },
+  bird:{ love:['ピュルル〜♪','チュチュ♡','ピヨ…ピヨ…','ピッピッ（すりすり）'], eat:['カリカリ…ピピッ','ポリッ、ポリッ…ピュイ','チュンッ！（おいしい）'], happy:['ピーピー！','チュピチュピ！','ピュイピュイ！','ピロロロ♪','オハヨ！ピッ！'], photo:['ピピ？','（首くりっ）ピ？'], no:['…チュン。','ギャッ（ちょっとだけ）'] },
+  rabbit:{ love:['プゥプゥ♡','（鼻ひくひく）プゥ〜','クゥ…プゥ','（ごろん）プゥ'], eat:['ポリポリ…プッ','シャクシャク…プゥ！','モグモグモグ…'], happy:['（ビンキー！）プゥ！','プッ！プッ！','（ぴょんぴょん）プゥ〜♪'], photo:['（耳ぴーん）プ？','プゥ？'], no:['ブッ！','（足ダンッ！）'] },
+  fish:{ love:['ぷくぷくぷく…♡','（ひらひら）ぷく','ぽこっ♪'], eat:['パクパクパクッ！','パクン！','ぱくっ、ぱくっ'], happy:['（すいすい〜）パク！','（くるくる）ぷくぷく！','ぴちゃん！'], photo:['ぷく？','（じっと見て）パク'], no:['（そっぽを向いて）ぷく…'] } };
+for(const k in MP_CRY_MORE) for(const m in MP_CRY_MORE[k]) MP_CRY[k][m]=(MP_CRY[k][m]||[]).concat(MP_CRY_MORE[k][m]);
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
