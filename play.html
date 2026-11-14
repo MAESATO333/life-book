@@ -8439,11 +8439,14 @@ const goIdx=g=>GO.indexOf(g);
 // a が b を生じる / 剋する
 const goGen=(a,b)=>(goIdx(a)+1)%5===goIdx(b), goCtl=(a,b)=>(goIdx(a)+2)%5===goIdx(b);
 const SIGNS=['牡羊座','牡牛座','双子座','蟹座','獅子座','乙女座','天秤座','蠍座','射手座','山羊座','水瓶座','魚座'];
+// 太陽星座ごとの、占いで言われる性格（O=好奇心 C=まじめさ E=外向性 A=やさしさ N=繊細さ）
+const SIGN_B5=[{E:9,O:4,A:-3,N:-3},{C:8,N:-5,O:-3},{O:9,E:7,C:-3},{A:9,N:6,E:-2},{E:10,N:-6,A:2},{C:10,N:3,O:-1},{A:9,E:5,C:-2},{N:7,C:5,E:-3,O:3},{O:8,E:7,C:-5},{C:10,O:-4,E:-2},{O:10,A:-3,E:3},{A:8,O:6,N:6,C:-3}];
+const SIGN_TRAIT=['まっすぐで行動力がある','おだやかで、ねばり強い','好奇心がいっぱいで、話し上手','情が深く、家族思い','明るく、堂々としている','ていねいで、よく気がつく','人当たりがよく、調和を大切にする','一途で、深く考える','自由で、冒険が好き','まじめで、こつこつ努力する','個性的で、自分の考えを大切にする','やさしく、感受性が豊か'];
 const SIGN_EL=['火','地','風','水','火','地','風','水','火','地','風','水'];
 function jdn(y,m,d){ const a=Math.floor((14-m)/12), yy=y+4800-a, mm=m+12*a-3; return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045; }
 // 節入りのおおよその日（1月=小寒…12月=大雪）
 const SETSU=[6,4,6,5,6,6,7,8,8,8,7,7];
-function fortuneOf(year,month,day,hour,minute,gender){
+function fortuneOf(year,month,day,hour,minute,gender,strongMode){
   // --- 西洋占星術 ---
   const sunI=(()=>{ const z=zodiacOf(month,day); return SIGNS.indexOf(z[0]); })();
   const J=jdn(year,month,day)+(hour+minute/60-12)/24 - 9/24; const dd=J-2451545.0;
@@ -8474,15 +8477,17 @@ function fortuneOf(year,month,day,hour,minute,gender){
   const xun=Math.floor(dIdx/10); const k1=(10-2*xun+12)%12; const kuu=[k1,(k1+1)%12];
   // 性格への小さな傾き
   const b5={O:0,C:0,E:0,A:0,N:0}; const add=(o,w)=>{ for(const k in o) b5[k]+=o[k]*w; };
-  add(FORT_ELEM_W[SIGN_EL[sunI]],1.5); add(FORT_ELEM_W[SIGN_EL[moonI]],.8); add(FORT_ELEM_W[SIGN_EL[ascI]],.8); add(FORT_GOGYO_B5[me],1.5);
-  if(strong) b5.E+=1; else { b5.A+=1; b5.N+=1; }
+  if(strongMode){ // 星座らしい性格を、強く（星座ごとの性格のことば＝占いの読み。研究で確かめられた関係ではない）
+    add(SIGN_B5[sunI],1); add(FORT_ELEM_W[SIGN_EL[moonI]],2.2); add(FORT_ELEM_W[SIGN_EL[ascI]],2.2); add(FORT_GOGYO_B5[me],2.5); if(strong) b5.E+=3; else { b5.A+=3; b5.N+=3; } const ctr={O:9,C:5,E:8,A:5,N:4}; for(const k in ctr) b5[k]-=ctr[k]; }
+  else { add(FORT_ELEM_W[SIGN_EL[sunI]],1.5); add(FORT_ELEM_W[SIGN_EL[moonI]],.8); add(FORT_ELEM_W[SIGN_EL[ascI]],.8); add(FORT_GOGYO_B5[me],1.5);
+  if(strong) b5.E+=1; else { b5.A+=1; b5.N+=1; } }
   return { sun:SIGNS[sunI], sunEl:SIGN_EL[sunI], moon:SIGNS[moonI], moonEl:SIGN_EL[moonI], asc:SIGNS[ascI], ascEl:SIGN_EL[ascI],
     pillars:pillars.map(([s,b])=>STEMS[s]+BRANCHES[b]), dayMaster:STEMS[dS], me, cnt, strong, good, bad, dayun, kuu:kuu.map(b=>BRANCHES[b]), kuuB:kuu, b5, fwd, start };
 }
-function fortunePlan(P){ if(!P._fort) P._fort=fortuneOf(P.year,P.month,P.day,P.hour,P.minute,P.gender); return P._fort; }
+function fortunePlan(P){ if(!P._fort) P._fort=fortuneOf(P.year,P.month,P.day,P.hour,P.minute,P.gender,!!P.fv2); return P._fort; }
 // その年の巡り（-1〜+1）
 function fortuneLuck(P,age){ const F=fortunePlan(P); const y=P.year+age; let L=0; const du=F.dayun.find(d=>age>=d.from&&age<=d.to); if(du) L+=du.q*.6;
-  const yb=((y-4)%12+12)%12; if(F.kuuB.includes(yb)) L-=.5; if(age>0&&age%12===0) L+=.35; if(age===29||age===30||age===58||age===59) L-=.25; return clamp(L,-1,1); }
+  const yb=((y-4)%12+12)%12; if(F.kuuB.includes(yb)) L-=.5; if(age>0&&age%12===0) L+=.35; if(age===29||age===30||age===58||age===59) L-=.25; if(P.fv2) L*=1.6; return clamp(L,-1,1); }
 const FORT_EL_DOM={ 火:'仕事', 地:'お金', 風:'人間関係', 水:'恋愛' };
 const FORT_EV={
   good:{ 火:['不思議と、やることなすことに追い風が吹いた。思い切って手を挙げた仕事が、次々と形になった。','新しいことを始める勇気がわいた。'], 地:['こつこつ続けてきたことが、ようやく実を結び始めた。','暮らしが、少しずつ安定してきた。'], 風:['思いがけない人とのつながりが、次々と新しい扉を開いた。','人に恵まれる年だった。'], 水:['心から信じられる人との縁が、深まっていった。','人の優しさが、身にしみる年だった。'] },
@@ -8496,11 +8501,11 @@ function fortuneYear(X){
   const { age, r, S, P } = X; const out=[]; if(age<6) return out; const F=fortunePlan(P); const L=fortuneLuck(P,age); S.fortL=L;
   const push=(t,d,inner)=>out.push({ kind:'life', text:t, feel:'', d, inner:inner||null, season:r.int(0,3) });
   S.fortSeen=S.fortSeen||[]; const uniq=pool=>{ const c=pool.filter(t=>!S.fortSeen.includes(t)); const t=r.pick(c.length?c:pool); S.fortSeen.push(t); return t; };
-  const du=F.dayun.find(d=>age===d.from); if(du && age>=12 && age<=85 && r.chance(.6)) push(uniq(du.q>=.3?FORT_EV.turnGood:du.q<=-.3?FORT_EV.turnBad:['生活の中心が、少しずつ移り変わっていった。']),du.q>=.3?3:du.q<=-.3?-2:0);
-  if(age>=18 && (age===29||age===58) && r.chance(.7)) push(uniq(FORT_EV.saturn),-3,'自分は、何のために生きているんだろう');
-  if(age>=12 && age%12===0 && r.chance(.45)) push(uniq(FORT_EV.jupiter),3);
-  if(age>=13 && L<=-.4 && r.chance(.35)) push(uniq(FORT_EV.bad),-2);
-  if(age>=13 && L>=.4 && r.chance(.3)) push(uniq(FORT_EV.good[F.sunEl]),3);
+  const du=F.dayun.find(d=>age===d.from); if(du && age>=12 && age<=85 && r.chance(P.fv2?.9:.6)) push(uniq(du.q>=.3?FORT_EV.turnGood:du.q<=-.3?FORT_EV.turnBad:['生活の中心が、少しずつ移り変わっていった。']),du.q>=.3?3:du.q<=-.3?-2:0);
+  if(age>=18 && (age===29||age===58) && r.chance(P.fv2?.95:.7)) push(uniq(FORT_EV.saturn),-3,'自分は、何のために生きているんだろう');
+  if(age>=12 && age%12===0 && r.chance(P.fv2?.8:.45)) push(uniq(FORT_EV.jupiter),3);
+  if(age>=13 && L<=-.4 && r.chance(P.fv2?.6:.35)) push(uniq(FORT_EV.bad),-2);
+  if(age>=13 && L>=.4 && r.chance(P.fv2?.6:.3)) push(uniq(FORT_EV.good[F.sunEl]),3);
   return out;
 }
 const SIGN_NOTE={ 火:'情熱と行動', 地:'着実さと現実感覚', 風:'知性と人とのつながり', 水:'感受性と深い情' };
@@ -8524,6 +8529,33 @@ function fortuneReport(P,L,name){
     <p>空亡の年は${kuuYears.length}回あり、人生のつらい出来事の${share}%がその年に重なっていました。${sat!=null&&sat0!=null?`土星が一巡りして戻る29歳ごろ、満たされ度は${sat0}から${sat}へと動きました。`:''}</p>
     <p class="tiny muted">このゲームでは、星と命式と名前の響きを、性格のわずかな傾きと、年ごとの巡り（出来事の起こりやすさ）として、裏で人生に組みこんでいます。</p>`;
 }
+// ===== 星座らしさと、親ゆずり（2026-11-15 以降に生まれた人生だけ）を、Life Record に書く。表示だけ（乱数は使わない） =====
+const F2_HI={ O:['好奇心が強く、なんでも「なんで？」と聞く','新しいものに目をかがやかせる'], C:['こつこつと、最後までやりとげる','約束や決まりを、きちんと守る'], E:['人の輪の中に、自然と入っていく','よく笑い、よく話す'], A:['人の気持ちに、すぐ気づく','困っている人を、放っておけない'], N:['小さなことにも、心が動きやすい','まわりの空気に、敏感に気づく'] };
+const F2_LO={ O:['いつものやり方を大切にする','なじんだものに安心する'], C:['気分のまま、のびのびと動く','思いつきで、すぐ動き出す'], E:['ひとりの時間を、大切にする','静かに、じっくり考える'], A:['自分の考えを、はっきり言う','負けずぎらいで、ゆずらない'], N:['どんなときも、どっしりしている','ちょっとのことでは、動じない'] };
+function f2H(P,k){ let h=2166136261; const s=String(P.seed)+'|f2|'+k; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+function fort2Apply(P,L){ if(!P||!P.fv2||!L||!L.years||L._f2) return; L._f2=1; try{ fort2Gap(P,L); }catch(e){}
+  const F=fortunePlan(P); const si=SIGNS.indexOf(F.sun); const nm=P.given||'';
+  const add=(age,ev,k)=>{ const y=L.years.find(y=>y.age===age); if(!y) return; y.events.splice(f2H(P,'pos'+k)%(y.events.length+1),0,Object.assign({ kind:'life', feel:'', inner:null, d:2, season:f2H(P,'s'+k)%4 },ev)); };
+  // 1) 星座らしさ（5歳ごろ）と、月星座（13歳ごろ）
+  if(si>=0&&P.deathAge>5) add(5,{ text:`${nm}は、${F.sun}らしく、${SIGN_TRAIT[si]}子だった。`, feel:'' },'sun');
+  const mi=SIGNS.indexOf(F.moon); if(mi>=0&&P.deathAge>13) add(13,{ text:`心の奥には、月の星座の${F.moon}らしい、${SIGN_TRAIT[mi]}一面もあった。`, feel:'' },'moon');
+  // 2) 親ゆずり（8歳ごろ・15歳ごろ）：親の気質のうち、いちばんはっきりしているものを受けついだ
+  const H=P.her; if(H){ const call={ father:'父', mother:'母' };
+    const cand=[]; for(const w of ['father','mother']) for(const k of 'OCEAN'){ const v=H[w][k], c=P.big5[k]; if(Math.abs(v-50)>=12&&Math.sign(v-50)===Math.sign(c-50)) cand.push({ w, k, hi:v>50, s:Math.abs(v-50)+Math.abs(c-50) }); }
+    cand.sort((a,b)=>b.s-a.s);
+    const t=(c,i)=>{ const L2=(c.hi?F2_HI:F2_LO)[c.k]; return L2[f2H(P,'t'+i)%L2.length]; };
+    if(cand[0]&&P.deathAge>8) add(8,{ text:`「${call[cand[0].w]}にそっくりだね」と、親せきに言われた。${nm}も${call[cand[0].w]}と同じように、${t(cand[0],0)}ところがあった。`, d:2 },'her0');
+    const c2=cand.find(c=>c.w!==(cand[0]||{}).w)||cand[1]; if(c2&&P.deathAge>15) add(15,{ text:`${call[c2.w]}ゆずりの、${t(c2,1)}ところが、${nm}の中にもあると気づいた。`, d:1 },'her1'); } }
+// 3) 占い通りにいかないところ：経験から生まれた観念・思考・感情が、星の性格を変えていく（MITSUさんの基本の考え方）
+const F2_KEYN={ O:'好奇心', C:'まじめさ', E:'明るさ', A:'やさしさ', N:'繊細さ' };
+function fort2Gap(P,L){ if(!P||!P.fv2||!L||!L.years||L._f2g) return; L._f2g=1; const F=fortunePlan(P); const si=SIGNS.indexOf(F.sun); if(si<0) return;
+  const w=SIGN_B5[si]; const key=Object.keys(w).sort((a,b)=>Math.abs(w[b])-Math.abs(w[a]))[0]; const want=w[key]>0, v=P.big5[key];
+  if(want?v>=46:v<=54) return; // 占い通り
+  const bs=(L.beliefs?Object.values(L.beliefs):[]).filter(b=>b&&(b.core||b.text)&&typeof BELIEFS!=='undefined'&&BELIEFS[b.id]&&BELIEFS[b.id].kind==='neg').sort((a,b)=>(a.age||0)-(b.age||0)); const b=bs[0];
+  const age=Math.min(P.deathAge-1,Math.max(16,(b&&b.age||10)+3)); if(age<10) return;
+  const yy=L.years.find(y=>y.age===age); if(!yy) return;
+  const txt=b?`${F.sun}らしい${F2_KEYN[key]}は、「${b.core||b.text}」という思いの奥に、そっとしまわれていた。`:`${F.sun}らしい${F2_KEYN[key]}は、これまでの経験の中で、少しずつ形を変えていた。`;
+  yy.events.splice(f2H(P,'gap')%(yy.events.length+1),0,{ kind:'life', text:txt, feel:'', inner:null, d:-1, season:f2H(P,'gs')%4 }); }
 // ===== 病気・けが・障害・介護 =====
 // 参考：厚生労働省「人口動態統計」（日本の死因：がん、心疾患、老衰、脳血管疾患、肺炎の順）、国立がん研究センター「がん統計」
 //   （日本人が一生のうちにがんと診断される確率は男性約63%、女性約51%。5年相対生存率は約64%）、
@@ -9989,8 +10021,12 @@ function makeBirth(seed, opt){
   const oto=analyzeName(given[1]);
   const nudge=(oto.dominant&&OTODAMA_ROWS[oto.dominant].nudge)||{};
   const big5={};
-  for(const k of ['O','C','E','A','N']) big5[k]=r.normal(50,12)+(nudge[k]||0);
-  { const fz=fortuneOf(year,month,day,hour,minute,gender); for(const k in fz.b5) big5[k]+=fz.b5[k]; }
+  const V2=seed>=4294967296; // 2026-11-15 以降に生まれた人生：星と家系が、性格に強く効く（それより前の人生は、そのまま）
+  for(const k of ['O','C','E','A','N']){ let x=r.normal(50,12); if(V2) x=50+(x-50)*.6; big5[k]=x+(nudge[k]||0)*(V2?2:1); }
+  { const fz=fortuneOf(year,month,day,hour,minute,gender,V2); for(const k in fz.b5) big5[k]+=fz.b5[k]; }
+  // 家系の遺伝（V2）：父と母の気質を種から決め、子はその平均に寄る。性格の個人差の約4割は遺伝で説明される（Vukasović & Bratko, 2015, Psychological Bulletin のメタ分析）。乱数は使わない。
+  let her=null; if(V2){ const hh=s=>{ let h=2166136261; s=String(seed)+'|her|'+s; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0)/4294967296; };
+    her={ father:{}, mother:{} }; for(const k of ['O','C','E','A','N']){ for(const w of ['father','mother']){ her[w][k]=Math.round(clamp(50+(hh(w+k+1)+hh(w+k+2)+hh(w+k+3)-1.5)*24,10,90)); } big5[k]+=((her.father[k]+her.mother[k])/2-50)*.55; } }
   big5.N+=env.conflict*10-env.warmth*4; big5.A+=(env.warmth-.5)*8; big5.E+=(env.warmth-.5)*6;
   for(const k in big5) big5[k]=Math.round(clamp(big5[k],5,95));
   const sp=clamp(.25+.5*env.warmth-.3*env.conflict-(structure!=='両親'?.07:0),.15,.85), rest=1-sp;
@@ -10014,7 +10050,7 @@ function makeBirth(seed, opt){
   const petAge=petOwner?(r.chance(.45)?r.int(5,14):r.int(20,55)):null;
   let city=r.pick(CITIES[country.id],true); if(country.id==='jp'&&typeof miyakoCity==='function') city=miyakoCity({ countryId:'jp', seed, force:opt.force||null, city }); if(country.id==='jp'&&typeof shinjukuCity==='function') city=shinjukuCity({ countryId:'jp', seed, force:opt.force||null, city });
   const traits=makeTraits({ gender, countryId:country.id, year, econ, big5 }, r); const orient=makeOrient(r);
-  return { force:opt.force||null, seed, city, country, countryId:country.id, year, month, day, hour, minute, gender, econ, religion, structure,
+  return { fv2:V2||undefined, her:her||undefined, force:opt.force||null, seed, city, country, countryId:country.id, year, month, day, hour, minute, gender, econ, religion, structure,
     given:given[0], givenKana:given[1], family:family[0], full, fullKana, siblings, sib, env, big5, attachment, single,
     father:{name:fatherN[0], age:fatherAge, dies:fatherDies}, mother:{name:motherN[0], age:motherAge, dies:motherDies},
     oto, deathAge, choiceAge, petAge, traits, orient, logp:r.logp };
@@ -13007,7 +13043,6 @@ function skyHTML(){ const Y=new Date().getFullYear(); const now=new Date();
   if(Date.now()-_skAt>60000) setTimeout(skFill,0);
   return `<div class="sp-wrap">
   <section class="sp sk-moon"><h4>🌙 月のいま　${Y}年</h4>${skToday()}<div class="sp-l">${moon}</div></section>
-  <section class="sp sk-earth"><h4>🌋 地球のいま　${Y}年</h4>${skToday()}<p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="skEarth">${show('earth')}</div></section>
   <section class="sp sk-neo"><h4>☄ 小惑星のいま　${Y}年</h4>${skToday()}<p class="sp-note">この1週間に地球の近くを通る小惑星。</p><div class="sp-l" id="skNeo">${show('neo')}</div></section>
   <section class="sp sk-probe"><h4>🚀 探査機のいま　${Y}年</h4>${skToday()}<div class="sp-l" id="skProbe"><ul class="sp-ul">${probe0}<li id="skApod">${_skH.apod||'きょうの宇宙の写真を読みこんでいます…'}</li>${skLi(SK_FACT.probe.map(esc))}</ul><p class="sp-src">ボイジャーの距離は NASA の公表値から計算した目安。写真：NASA「きょうの天文写真」</p></div></section>
   <section class="sp sk-star"><h4>🌌 星空のいま　${Y}年</h4>${skToday()}<div class="sp-l">${star}</div></section></div>`; }
@@ -15713,7 +15748,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${typeof eaTileHTML==='function'?homeTile('hm-ea','地球アルバム',eaTileHTML(P)):''}
     ${typeof relChartHTML==='function'?homeTile('hm-rel',`${esc(P.country.name)}の宗教の割合`,relChartHTML(P)):''}
     ${typeof newsHTML==='function'?homeTile('hm-news',`物語の${sy}年のNEWS<span class="nw-cntw" data-nwc="${sy}">${typeof nwCntHTML==='function'?nwCntHTML(sy):''}</span>`,newsHTML(P,sy)):''}
-    ${homeTile('hm-world',`世界のいま　${new Date().getFullYear()}年`, (typeof spaceHTML==='function'?spaceHTML():'')+(typeof skyHTML==='function'?skyHTML():'')+(typeof worldNowHTML==='function'?worldNowHTML(P,new Date().getFullYear()):''))}
+    ${homeTile('hm-world',`世界のいま　${new Date().getFullYear()}年`, (typeof worldNowHTML==='function'?worldNowHTML(P,new Date().getFullYear()):'')+(typeof spaceHTML==='function'?spaceHTML():'')+(typeof skyHTML==='function'?skyHTML():''))}
     ${homeTile('hm-zukan','図鑑', `<div class="hm-zk">${zk.map(z=>`<div class="hm-z"><span class="tiny muted">${esc(z[0])}</span><b>${z[1]}<small>${z[3]}</small></b></div>`).join('')}</div>`)}
   </div>
   ${typeof pwaNoteHTML==='function'?pwaNoteHTML('bottom'):''}
@@ -15806,7 +15841,7 @@ let viewing=null;     // 過去の人生のレポートを読んでいる時 { s
 function load(){
   if(!st){ cur=null; return; }
   const P=makeBirth(st.seed,{country:st.country||null,force:st.force||null});
-  const L=simulate(P, st.choice||undefined); if(typeof birthSitApply==='function'){ if(!st.bs&&st.bsNew){ st.bs=bsChoose(P,L); delete st.bsNew; save(); } birthSitApply(P,L,st.bs||null); } if(typeof momentsApply==='function') momentsApply(P,L); if(typeof mpLifeApply==='function') mpLifeApply(P,L); if(typeof petExtraApply==='function') petExtraApply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(typeof dreamApply==='function') dreamApply(P,L); if(typeof friendMeet==='function') friendMeet(P,L);
+  const L=simulate(P, st.choice||undefined); if(typeof birthSitApply==='function'){ if(!st.bs&&st.bsNew){ st.bs=bsChoose(P,L); delete st.bsNew; save(); } birthSitApply(P,L,st.bs||null); } if(typeof momentsApply==='function') momentsApply(P,L); if(typeof mpLifeApply==='function') mpLifeApply(P,L); if(typeof petExtraApply==='function') petExtraApply(P,L); if(typeof fort2Apply==='function') fort2Apply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(typeof dreamApply==='function') dreamApply(P,L); if(typeof friendMeet==='function') friendMeet(P,L);
   cur={P,L};
   // 速さを変えた前から続いている人生は、今の年齢を保ったまま新しい速さに切りかえる
   if(st.spd!==3){ const t=Date.now()+(st.shift||0)-st.birthTime-(st.pause||0); const a=Math.max(0,t/(st.spd===2?mpy2(P):oldMpy(P))); st.birthTime=Date.now()+(st.shift||0)-(st.pause||0)-a*msPerYear(P); st.spd=3; save(); }
@@ -15866,7 +15901,7 @@ function deathYearOf(P,L){ const D=L.deathAge; if(D===0){ const mo=(L.death&&L.d
 
 // --- 誕生 ---
 function born(country,force){
-  const seed=((Math.random()*2**31)>>>0)+2147483648;
+  const seed=((Math.random()*2**31)>>>0)+2147483648+4294967296; // +2^32：乱数は前と同じ並び。2^32以上は「星と家系が強く効く」新しい人生のしるし
   st={ spd:3, force:force||null, seed, country:country||null, birthTime:Date.now(), shift:0, choice:'~', pause:0, lastSeen:-1, stage:'life', bsNew:1 };
   save(); load(); sinceAge=-1; viewing=null; page='life'; render();
   window.scrollTo(0,0);
@@ -15885,7 +15920,7 @@ let RUBY_PL=null, VIEW_CACHE=null;
 function render1(){
   const app=$('#app'); if(typeof navSync==='function') navSync();
   if(!viewing&&st&&page==='home'&&cur){ app.innerHTML=homeHTML(); bindHome(); $('#mastmeta').textContent=''; renderDev(); return; }
-  if(viewing){ const vk=JSON.stringify([viewing.seed,viewing.country,viewing.force,viewing.choice,viewing.bs,viewing.loan]); let P,L; if(VIEW_CACHE&&VIEW_CACHE.k===vk){ P=VIEW_CACHE.P; L=VIEW_CACHE.L; } else { P=makeBirth(viewing.seed,{country:viewing.country||null,force:viewing.force||null}); L=simulate(P,viewing.choice||undefined); VIEW_CACHE={ k:vk, P, L }; } if(typeof birthSitApply==='function') birthSitApply(P,L,viewing.bs||null); if(typeof momentsApply==='function') momentsApply(P,L); if(typeof petExtraApply==='function') petExtraApply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(typeof dreamApply==='function') dreamApply(P,L); if(viewing.loan==null&&typeof friendMeet==='function') friendMeet(P,L); RUBY_PL=[P,L]; app.innerHTML=reportHTML(P,L,true)+loanReportHTML(P,L); bindReport(P,L); bindLoanReport(P,L); $('#mastmeta').textContent='過去の人生'; renderDev(); return; }
+  if(viewing){ const vk=JSON.stringify([viewing.seed,viewing.country,viewing.force,viewing.choice,viewing.bs,viewing.loan]); let P,L; if(VIEW_CACHE&&VIEW_CACHE.k===vk){ P=VIEW_CACHE.P; L=VIEW_CACHE.L; } else { P=makeBirth(viewing.seed,{country:viewing.country||null,force:viewing.force||null}); L=simulate(P,viewing.choice||undefined); VIEW_CACHE={ k:vk, P, L }; } if(typeof birthSitApply==='function') birthSitApply(P,L,viewing.bs||null); if(typeof momentsApply==='function') momentsApply(P,L); if(typeof petExtraApply==='function') petExtraApply(P,L); if(typeof fort2Apply==='function') fort2Apply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(typeof dreamApply==='function') dreamApply(P,L); if(viewing.loan==null&&typeof friendMeet==='function') friendMeet(P,L); RUBY_PL=[P,L]; app.innerHTML=reportHTML(P,L,true)+loanReportHTML(P,L); bindReport(P,L); bindLoanReport(P,L); $('#mastmeta').textContent='過去の人生'; renderDev(); return; }
   if(!st){ app.innerHTML=introHTML(); bindIntro(); $('#mastmeta').textContent=''; renderDev(); return; }
   if(!viewing&&page==='top'){ app.innerHTML=introHTML(); bindIntro(); introLock(); $('#mastmeta').textContent=''; renderDev(); return; }
   if(st.stage==='funeral'){ app.innerHTML=funeralHTML(cur.P,cur.L); bindFuneral(); $('#mastmeta').textContent='葬儀'; renderDev(); return; }
