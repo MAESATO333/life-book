@@ -16537,7 +16537,7 @@ function mpNewHTML(){ const k=_mpPick.kind, list=mpBreeds(k), loc=list.filter(x=
 function mpPageHTML(){ const p=mpGet(); if(mpStageLog(p)) mpSet(p); if(p.per==null){ mpPer(p); mpSet(p); } const per=mpPer(p); const gone=mpGone(p), st=mpStage(p), b={ name:mpBreedName(p) }, a=Math.min(mpAge(p),p.life), done=mpToday(p);
   const days=[]; const t=new Date(); for(let i=13;i>=0;i--){ const x=new Date(t); x.setDate(t.getDate()-i); days.push(x); } const S=new Set(Object.keys(p.acts||{}));
   const W='日月火水木金土'; const ph=(p.photos||[]).slice().reverse();
-  return `<div class="mp-top">${mpArt(p,st[1])}<div><h3 class="mp-h">${esc(p.name)}</h3><p class="mp-sub">${esc(b.name||'')}</p><span class="mp-per" title="${esc(per.d)}">性格：${esc(per.n)}</span>
+  return `<div class="mp-top">${mpArt(p,st[1])}<div><h3 class="mp-h">${esc(p.name)}</h3><p class="mp-sub">${esc(b.name||'')}</p>
     <p class="mp-big">${gone?`🌈 ${esc(p.name)}は、${p.life}歳で虹の橋をわたりました。`:`うちに来て <b>${mpDays(p)}</b> 日目`}</p>
     ${gone?'':`<p class="mp-sub">${Math.floor(a)}歳${Math.floor((a%1)*12)}か月・${st[0]}${mpHuman(p)!=null?`（人の年齢なら約${mpHuman(p)}歳）`:''}</p>`}<p class="mp-sub">🏠 お迎えした日：${mpStoryDate(p.at)}</p><p class="mp-sub">💗 愛情 ${p.love||0}　📷 写真 ${(p.photos||[]).length}枚</p></div></div>
   ${gone?`<div class="mp-rb"><p>🌈 ${esc(p.name)}は、${p.life}歳まで、たくさんの愛情に包まれて生きました。</p><p>いまは虹の橋のたもとで、元気に走りまわっています。いつかまた会える日まで、ゆっくり待っていてくれるそうです。</p><p>💗 もらった愛情 ${p.love||0}　📷 思い出の写真 ${(p.photos||[]).length}枚　🏠 いっしょにいた日 ${mpTogether(p)}日</p><p class="tiny">思い出のアルバムは、ずっとここに残ります。</p></div>`:`${(w=>w.all.length?`<p class="tiny muted">あなた（Higher Self）が、だれにお願いしますか？${w.all.some(x=>x.k==='ch')?'':'（Channel は、まだ小さくて動けません。3歳になったら、お世話できます）'}</p><div class="mp-who">${w.all.map(x=>`<button type="button" class="mp-w${x.k===w.k?' on':''}" data-mpw="${esc(x.k)}">${esc(x.call==='Channel'?x.n+'（Channel）':x.call+'の'+x.n)}</button>`).join('')}</div>`:'')(mpWho())}<div class="mp-acts">${Object.keys(MP_ACT).map(k=>`<button type="button" class="mp-a${(k==='food'?done.filter(x=>x==='food').length>=2:done.includes(k))?' done':''}" data-mpa="${k}">${MP_ACT[k][1]} ${k==='play'&&p.kind==='dog'?'さんぽに行ってあげて':MP_ACT[k][0]}${k==='food'?(n=>n>=2?' ✓':n?' （あと1回）':'')(done.filter(x=>x==='food').length):done.includes(k)?' ✓':''}</button>`).join('')}<button type="button" class="mp-a mp-cam" data-mp="photo">📷 写真をとる</button></div>
@@ -16791,7 +16791,7 @@ const MP_CRY={
 // 性格で、ちょっとだけ変える（甘えんぼう系は♡、元気系は「！」を足す）
 const MP_CRY_SWEET=/甘え|人懐|さみしがり|好き好き|くっつき|お出迎え|あまえ|なつっこい|ほめられ|照れ/, MP_CRY_GENKI=/やんちゃ|お調子|ムード|いたずら|あわて|おしゃべり|冒険|負けず|がんばり|早起き/;
 function mpCry(p,mood){ const v=(MP_CRY[p.kind]||MP_CRY.dog), a=v[mood]||v.happy; let c=a[Math.floor(Math.random()*a.length)]; const n=(MP_PER50[p.per]||[''])[0];
-  if(MP_CRY_SWEET.test(n)&&mood!=='no') c=c.replace(/[！!]?$/,'♡'); else if(MP_CRY_GENKI.test(n)&&mood!=='no') c=c+'！'; return c; }
+  if(MP_CRY_SWEET.test(n)&&mood!=='no') c=c.replace(/[！!]?$/,'♡'); else if(MP_CRY_GENKI.test(n)&&mood!=='no'&&!/[！!♪]$/.test(c)) c=c+'！'; return c; }
 // おしゃべりの返事の、最初の鳴き声も同じ言葉にそろえる
 MP_VOICE.rabbit.s=['プゥプゥ','プッ','（足ダンッ）ブゥ','プゥ〜']; MP_VOICE.fish.s=['パクパク','ぷくぷく','（くるっ）パク','ぷくっ']; MP_VOICE.bird.s=['ピッ！','ピピッ','チュンチュン','ピュイ〜'];
 // お世話・ごはん・写真・プレゼントのあとに、鳴き声を出す
@@ -16834,6 +16834,31 @@ function mpStoryDate(t){ const x=new Date(t), real=`${x.getFullYear()}年${x.get
   try{ const p=mpGet(); if(typeof cur==='undefined'||!cur||viewing||typeof st==='undefined'||!st||(p&&p.chS!=null&&p.chS!==st.seed)) return real;
     const c=clock(), P=cur.P; const a=(c.ageF!=null?c.ageF:c.age)-(Date.now()-t)/c.mpy; if(!(a>=0)) return real;
     const s=storyNow(P,a), fr=a*12-Math.floor(a*12+1e-9), dim=new Date(s.y,s.m,0).getDate(); return `${s.y}年${s.m}月${Math.min(dim,1+Math.floor(fr*dim))}日`; }catch(e){ return real; } }
+// ===== ときどき、体調がよくない日（10日に1日くらい）。お世話を2回すると、元気になる。寿命には関係なし =====
+const MP_SICK=[
+  ['ねむたい','なんだか、ねむたそう…',['ふぁ〜…きょうは、ずっとねむたいの…','まぶたが、おもたい…ちょっとだけ、寝てもいい？','（うとうと）…あ、聞いてるよ…たぶん…']],
+  ['だるい','ちょっと、だるそう…',['きょうは、なんだかダルいの…','からだが、おもたい感じ…そばにいてくれる？','うごくの、ちょっとおやすみ…']],
+  ['足がちょっと痛い','前足を、ちょっと気にしている…',['前足が、ちょっとだけ痛いの…','あいたた…でも、だいじょうぶ。ちょっとだけ、なでてくれる？','きょうは、ゆっくり歩く日にする…']],
+  ['おなかの調子がいまいち','おなかの調子が、いまいちみたい…',['おなかが、ちょっと…ぐるぐるする…','ごはん、少しだけなら食べられるかも…','あったかいところで、まるくなっていたい…']],
+  ['くしゃみが出る','くしゅん！ くしゃみをしている…',['くしゅんっ！…ちょっと、鼻がむずむずするの…','くしゅん…寒いのかなあ…くっついてもいい？','（鼻をすすって）…へっくし！']],
+  ['元気がでない','しっぽが、しょんぼりしている…',['きょうは、なんだか元気がでないの…','ちょっとだけ、さみしい気分…なでてほしいな…','…ぎゅってしてくれたら、元気になるかも。']],
+  ['食欲がない','ごはんを、ちょっとしか食べていない…',['ごはん、あんまり食べたくないの…','おいしいの、ちょっとだけなら…','きょうは、おなかがすかない日みたい…']],
+];
+const MP_SICK_CRY={ dog:['くぅ〜ん…','クゥン…','…ワフ…'], cat:['…ニャ…','ミィ…','ンニャ…'], bird:['…ピ…','ピュ…'], rabbit:['…プゥ…','（耳をたらして）…'], fish:['…ぷく…','（じっと底で）…'] };
+const MP_HEAL=['元気になったよ！ お世話してくれて、ありがとう！','もう、だいじょうぶ！ だーいすき！','すっかり元気！ やっぱり、そばにいてくれるのがいちばんのお薬だね！','いつもの元気がもどってきた！ ありがとう！'];
+function mpSickToday(p){ if(!p||mpGone(p)||mpDays(p)<3) return null; const d=dayKey(); const h=pbHash(String(p.at)+'|sick|'+d); if(h%100>=10) return null; return MP_SICK[(h>>8)%MP_SICK.length]; }
+function mpIsSick(p){ return !!mpSickToday(p)&&p.heal!==dayKey(); }
+function mpSickCry(p){ const a=MP_SICK_CRY[p.kind]||MP_SICK_CRY.dog; return a[Math.floor(Math.random()*a.length)]; }
+// お世話（なでる・ごはん・遊ぶ・さんぽ）を、きょう2回したら元気になる
+function mpHealCheck(){ const p=mpGet(); if(!p||!mpIsSick(p)) return; const n=((p.acts||{})[dayKey()]||[]).length; if(n<2) return;
+  const s=mpSickToday(p); p.heal=dayKey(); p.cry=mpCry(p,'happy'); p.msg=(p.msg||'')+` …${p.name}「${MP_HEAL[Math.floor(Math.random()*MP_HEAL.length)]}」`; mpLog(p,`${s[0].replace(/い$/,'くて')}元気がなかったけれど、お世話で元気になった。`,'heal'); mpSet(p); mpOpen(); }
+{ const A2=mpAct; mpAct=function(k){ A2(k); const p=mpGet(); if(p&&mpIsSick(p)){ if(p.cry){ p.cry=mpSickCry(p); mpSet(p); mpOpen(); } mpHealCheck(); } };
+  const F2=mpFeed; mpFeed=function(i){ F2(i); const p=mpGet(); if(p&&mpIsSick(p)){ p.cry=mpSickCry(p); mpSet(p); mpOpen(); } mpHealCheck(); };
+  const R=mpReply; mpReply=function(p,text){ if(!mpIsSick(p)) return R(p,text); const s=mpSickToday(p); const l=s[2][Math.floor(Math.random()*s[2].length)]; const e=(MP_VOICE[p.kind]||MP_VOICE.dog).e[0];
+    const r=`${mpSickCry(p)} ${l.replace(/(の|よ)?…$/,'…'+e+'…')} （でも、話しかけてくれて、うれしい）`; return r.length>100?r.slice(0,99)+'…':r; };
+  const W=mpWcHTML; mpWcHTML=function(p){ let h=''; const s=mpSickToday(p); if(s&&!mpGone(p)){ h=p.heal===dayKey()?`<p class="mp-sick ok">☀️ ${esc(p.name)}は、すっかり元気になりました！</p>`:`<p class="mp-sick">🤒 きょうの${esc(p.name)}は、${esc(s[1])}<small>ごはんをあげたり、なでたり、2回お世話をしてあげると、元気になります。</small></p>`; } return h+W(p); };
+  const T=mpTileHTML; mpTileHTML=function(){ const p=mpGet(); let h=T(); if(p&&mpIsSick(p)) h=h.replace('<span class="mp-love">',`<span class="mp-sick-t">🤒 ちょっと元気がない…</span><span class="mp-love">`); return h; }; }
+document.head.insertAdjacentHTML('beforeend',`<style>.mp-sick{ margin:8px 0 4px; padding:9px 12px; border-radius:12px; background:#FFF0E6; color:#7A3E1A; font-size:14px; line-height:1.6; } .mp-sick small{ display:block; font-size:12px; color:#9A6A4A; } .mp-sick.ok{ background:#EFFBEF; color:#2E6A34; } .mp-sick-t{ color:#C0662E; font-weight:700; font-size:13px; }</style>`);
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
