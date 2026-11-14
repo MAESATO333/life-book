@@ -14610,13 +14610,16 @@ function moveApply(o){
   const mine=st; // この端末で見守っていた人生は、引き継ぐ人生と別なら、そのまま失わないように本棚の手前に置かない（生き終えていないため）。かわりに確認で知らせる
   const merged=(o.arc||[]).filter(a=>!seen.has(a.seed+':'+(a.at||0))).concat(arc).sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,30); store.set(KEY_ARC,merged);
   const fr=store.get(KEY_FRIEND,[]); (o.fr||[]).forEach(f=>{ if(!fr.find(x=>x.id===f.id)) fr.push(f); }); store.set(KEY_FRIEND,fr);
-  if(o.cur){ st=o.cur; save(); } if(typeof _fhCache!=='undefined') _fhCache=null; load(); viewing=null; page='home'; render(); window.scrollTo(0,0); }
+  if(o.cur){ st=o.cur; save(); } if(typeof _fhCache!=='undefined') _fhCache=null; load(); viewing=null; page='home'; render(); window.scrollTo(0,0);
+  // サーバーとのつながりは、引き継いだ人の記号でつなぎ直す（開き直さないと、前の記号のまま動いてしまうため）
+  try{ store.set('hitotsu.fbreg',''); }catch(e){} if(/^https?:$/.test(location.protocol)&&typeof FB!=='undefined'&&FB) setTimeout(()=>location.reload(),600); }
 function moveConfirmHTML(o,diff){ const P=o.cur?(()=>{ try{ return makeBirth(o.cur.seed,{country:o.cur.country||null,force:o.cur.force||null}); }catch(e){ return null; } })():null;
   return `<div class="frd-in"><h2>人生を引き継ぎますか？</h2>
   <p class="frd-lead">${P?`${esc(P.country.name)}に生まれた<b>${esc(P.full)}</b>の人生を、この端末で続けます。`:'本棚と、紹介でつながった人を、この端末に引き継ぎます。'}</p>
   ${diff?`<p class="tiny frd-note">この端末でいま見守っている${esc(diff)}の人生は、引き継ぐ人生に置きかわります。</p>`:''}
   <div class="frd-btns"><button class="frd-b frd-sky" id="mvYes" type="button" style="grid-column:1/-1;font-size:16px;padding:14px">引き継ぐ</button><button class="frd-b" id="mvNo" type="button" style="grid-column:1/-1">やめる</button></div></div>`; }
-async function moveFromHash(){ const h=location.hash||''; if(!/move=/.test(h)) return; const t=h.split('move=')[1]||''; history.replaceState(null,'',location.pathname+location.search);
+// 「ほかの端末で続ける」は外した（2026-11-14）。いま受け取るのは、iPhone などでホーム画面のアイコンを作るときの引き継ぎ（#pmove=）だけ。古い #move= のリンクは、何もせずに消す
+async function moveFromHash(){ const h=location.hash||''; if(!/move=/.test(h)) return; if(!/pmove=/.test(h)){ history.replaceState(null,'',location.pathname+location.search); return; } const t=h.split('pmove=')[1]||''; history.replaceState(null,'',location.pathname+location.search);
   let o=null; try{ o=JSON.parse(await moveUnzip(t)); }catch(e){}
   if(!o||o.v!==1){ return; }
   if(o.id&&o.id===store.get(KEY_MYID,'')) return; // 同じ人のデータ（ホーム画面のアイコンから開くたびに付いてくる分など）は、何もしない
@@ -14706,7 +14709,6 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-world',`世界のいま<span class="hm-n">物語の中の${sy}年</span>`, `<p class="tiny muted">${esc(P.given)}が生きているこの年、ほかの国では。</p><div class="hm-wl">${wn.map(w=>`<div class="hm-w"><b>${esc(w.name)}</b><span>平均寿命 ${w.lex}歳</span><span>一人の女性が産む子 ${w.tfr}人</span>${w.urb!=='—'?`<span>都市に住む人 ${w.urb}%</span>`:''}${w.cell>0.5?`<span>携帯電話 100人に${Math.round(w.cell)}台</span>`:''}</div>`).join('')}</div>`, '<span class="tiny muted">出典：世界銀行・国連の統計。毎日、別の国に変わります。</span>')}
     ${homeTile('hm-zukan','図鑑', `<div class="hm-zk">${zk.map(z=>`<div class="hm-z"><span class="tiny muted">${esc(z[0])}</span><b>${z[1]}<small>${z[3]}</small></b></div>`).join('')}</div>`)}
   </div>
-  <section class="hm-move"><div><h3>携帯とパソコンで、同じ人生を</h3><p class="tiny">この端末の人生と本棚を、もう一方の端末に引き継げます。QRコードを読みとるだけです。</p></div><button class="hm-btn ghost" type="button" id="hmMove">ほかの端末で続ける</button></section>
   ${typeof pwaNoteHTML==='function'?pwaNoteHTML('bottom'):''}
   </div>`; }
 function bindHome(){ bindFriend(); if(typeof bindPwa==='function') bindPwa(); if(typeof bindLoanShelf==='function') bindLoanShelf();
@@ -15783,15 +15785,15 @@ function pwaShareSVG(){ return `<svg viewBox="0 0 20 20" width="16" height="16" 
 let _pwaHashAt=0;
 async function pwaCarryLife(){ // iPhone：追加するときのアドレスに、今の人生を付けておく（同じ Safari では何も起きない）
   if(!(PWA_IOS||PWA_MACSAFARI)||PWA_STANDALONE||typeof moveData!=='function'||typeof st==='undefined'||!st) return;
-  if(Date.now()-_pwaHashAt<60000&&/#move=/.test(location.hash)) return;
-  try{ const z=await moveZip(JSON.stringify(moveData())); history.replaceState(null,'',location.pathname+location.search+'#move='+z); _pwaHashAt=Date.now(); }catch(e){} }
+  if(Date.now()-_pwaHashAt<60000&&/#pmove=/.test(location.hash)) return;
+  try{ const z=await moveZip(JSON.stringify(moveData())); history.replaceState(null,'',location.pathname+location.search+'#pmove='+z); _pwaHashAt=Date.now(); }catch(e){} }
 function bindPwa(){ const b=document.getElementById('pwaGo'); if(b) b.onclick=async()=>{ if(!_pwaPrompt) return; _pwaPrompt.prompt(); try{ const r=await _pwaPrompt.userChoice; if(r&&r.outcome==='accepted'){ _pwaDone=true; try{ store.set(KEY_PWASET,Date.now()); }catch(e){} } }catch(e){} _pwaPrompt=null; pwaRefresh(); };
   if(document.querySelector('.pwa-note')) pwaCarryLife(); }
 // ホーム画面のアイコンから開いて、まだ人生が無いとき：Safari でコピーした引き継ぎリンクを貼れる欄を出す
 function pwaPasteHTML(){ return `<section class="pwa-paste" id="pwaPaste"><h3>Safari で見守っていた人生がありますか？</h3>
   <p class="tiny">Safari の LIFE BOOK で「ほかの端末で続ける」を押し、「リンクをコピー」したものを、ここに貼りつけてください。</p>
   <div class="pwa-prow"><input id="pwaIn" type="text" inputmode="url" autocomplete="off" placeholder="ここに貼りつける" aria-label="引き継ぎリンク"><button class="hm-btn" type="button" id="pwaPasteGo">引き継ぐ</button></div><p class="tiny" id="pwaPMsg" role="status"></p></section>`; }
-function pwaAfterRender(){ if(!PWA_STANDALONE||(typeof st!=='undefined'&&st)||store.get(KEY_ARC,[]).length||document.getElementById('pwaPaste')) return;
+function pwaAfterRender(){ return; /* 貼りつけ欄は、「ほかの端末で続ける」を外したのでやめた */ if(!PWA_STANDALONE||(typeof st!=='undefined'&&st)||store.get(KEY_ARC,[]).length||document.getElementById('pwaPaste')) return;
   const app=document.getElementById('app'); if(!app) return; app.insertAdjacentHTML('afterbegin',pwaPasteHTML());
   document.getElementById('pwaPasteGo').onclick=()=>{ const v=(document.getElementById('pwaIn').value||'').trim(); const m=v.match(/move=([A-Za-z0-9_\-]+)/);
     if(!m){ document.getElementById('pwaPMsg').textContent='引き継ぎリンクが見つかりませんでした。「リンクをコピー」したものを、そのまま貼りつけてください。'; return; }
