@@ -16539,18 +16539,18 @@ function mpPageHTML(){ const p=mpGet(); if(mpStageLog(p)) mpSet(p); if(p.per==nu
   const W='日月火水木金土'; const ph=(p.photos||[]).slice().reverse();
   return `<div class="mp-top">${mpArt(p,st[1])}<div><h3 class="mp-h">${esc(p.name)}</h3><p class="mp-sub">${esc(b.name||'')}</p><span class="mp-per" title="${esc(per.d)}">性格：${esc(per.n)}</span>
     <p class="mp-big">${gone?`🌈 ${esc(p.name)}は、${p.life}歳で虹の橋をわたりました。`:`うちに来て <b>${mpDays(p)}</b> 日目`}</p>
-    ${gone?'':`<p class="mp-sub">${Math.floor(a)}歳${Math.floor((a%1)*12)}か月・${st[0]}${mpHuman(p)!=null?`（人の年齢なら約${mpHuman(p)}歳）`:''}</p>`}<p class="mp-sub">💗 愛情 ${p.love||0}　📷 写真 ${(p.photos||[]).length}枚</p></div></div>
-  ${gone?`<div class="mp-rb"><p>🌈 ${esc(p.name)}は、${p.life}歳まで、たくさんの愛情に包まれて生きました。</p><p>いまは虹の橋のたもとで、元気に走りまわっています。いつかまた会える日まで、ゆっくり待っていてくれるそうです。</p><p>💗 もらった愛情 ${p.love||0}　📷 思い出の写真 ${(p.photos||[]).length}枚　🏠 いっしょにいた日 ${mpTogether(p)}日</p><p class="tiny">思い出のアルバムは、ずっとここに残ります。</p></div>`:`${(w=>w.all.length?`<p class="tiny muted">あなた（Higher Self）が、だれにお願いしますか？${w.all.some(x=>x.k==='ch')?'':'（Channel は、まだ小さくて動けません。3歳になったら、お世話できます）'}</p><div class="mp-who">${w.all.map(x=>`<button type="button" class="mp-w${x.k===w.k?' on':''}" data-mpw="${esc(x.k)}">${esc(x.call==='Channel'?x.n+'（Channel）':x.call+'の'+x.n)}</button>`).join('')}</div>`:'')(mpWho())}<div class="mp-acts">${Object.keys(MP_ACT).map(k=>`<button type="button" class="mp-a${done.includes(k)?' done':''}" data-mpa="${k}">${MP_ACT[k][1]} ${k==='play'&&p.kind==='dog'?'さんぽに行ってあげて':MP_ACT[k][0]}${done.includes(k)?' ✓':''}</button>`).join('')}<button type="button" class="mp-a mp-cam" data-mp="photo">📷 写真をとる</button></div>
+    ${gone?'':`<p class="mp-sub">${Math.floor(a)}歳${Math.floor((a%1)*12)}か月・${st[0]}${mpHuman(p)!=null?`（人の年齢なら約${mpHuman(p)}歳）`:''}</p>`}<p class="mp-sub">🏠 お迎えした日：${mpStoryDate(p.at)}</p><p class="mp-sub">💗 愛情 ${p.love||0}　📷 写真 ${(p.photos||[]).length}枚</p></div></div>
+  ${gone?`<div class="mp-rb"><p>🌈 ${esc(p.name)}は、${p.life}歳まで、たくさんの愛情に包まれて生きました。</p><p>いまは虹の橋のたもとで、元気に走りまわっています。いつかまた会える日まで、ゆっくり待っていてくれるそうです。</p><p>💗 もらった愛情 ${p.love||0}　📷 思い出の写真 ${(p.photos||[]).length}枚　🏠 いっしょにいた日 ${mpTogether(p)}日</p><p class="tiny">思い出のアルバムは、ずっとここに残ります。</p></div>`:`${(w=>w.all.length?`<p class="tiny muted">あなた（Higher Self）が、だれにお願いしますか？${w.all.some(x=>x.k==='ch')?'':'（Channel は、まだ小さくて動けません。3歳になったら、お世話できます）'}</p><div class="mp-who">${w.all.map(x=>`<button type="button" class="mp-w${x.k===w.k?' on':''}" data-mpw="${esc(x.k)}">${esc(x.call==='Channel'?x.n+'（Channel）':x.call+'の'+x.n)}</button>`).join('')}</div>`:'')(mpWho())}<div class="mp-acts">${Object.keys(MP_ACT).map(k=>`<button type="button" class="mp-a${(k==='food'?done.filter(x=>x==='food').length>=2:done.includes(k))?' done':''}" data-mpa="${k}">${MP_ACT[k][1]} ${k==='play'&&p.kind==='dog'?'さんぽに行ってあげて':MP_ACT[k][0]}${k==='food'?(n=>n>=2?' ✓':n?' （あと1回）':'')(done.filter(x=>x==='food').length):done.includes(k)?' ✓':''}</button>`).join('')}<button type="button" class="mp-a mp-cam" data-mp="photo">📷 写真をとる</button></div>
   ${mpFoodHTML(p)}${(an=>an?`<p class="mp-anniv">${esc(an)}</p>`:'')(mpAnniv(p))}${mpAnnivHTML(p)}${typeof mpWcHTML==='function'?mpWcHTML(p):''}${p.cry?`<span class="mp-cry">${esc(p.cry)}</span>`:''}<p class="mp-msg" id="mpMsg" role="status">${esc(p.msg||'きょうも、見守ってあげてね。')}</p><p class="tiny muted">${esc(p.name)}は、${esc(per.d)}。</p>${mpChatHTML(p)}`}
   <p class="tiny muted">見守った日</p><div class="stp-row">${days.map(x=>{ const on=S.has(dayKey(x)); return `<span class="stp ${on?'on':''} ${dayKey(x)===dayKey()?'today':''}"><small>${W[x.getDay()]}</small>${on?'<i aria-hidden="true"></i>':x.getDate()}</span>`; }).join('')}</div>
-  ${mpDiaryHTML(p)}<h4 class="mp-h4">📷 ${esc(p.name)}のアルバム</h4>${ph.length?`<div class="mp-album">${ph.map(x=>`<figure class="mp-ph">${mpArt(p,x.k)}<figcaption>${esc(x.c)}</figcaption></figure>`).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。「写真をとる」を押すと、いまの姿がアルバムに残ります。</p>'}
+  ${mpDiaryHTML(p)}<h4 class="mp-h4">📷 ${esc(p.name)}のアルバム</h4>${ph.length?`<div class="mp-album">${ph.map(x=>`<figure class="mp-ph">${mpArt(p,x.k)}<figcaption>${esc(String(x.c).replace(/^\d+年\d+月\d+日/,mpStoryDate(x.t)))}</figcaption></figure>`).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。「写真をとる」を押すと、いまの姿がアルバムに残ります。</p>'}
   <div class="mp-row">${gone?`<button type="button" class="mp-btn" data-mp="again">新しい家族を迎える</button>`:''}<button type="button" class="linkish" data-mp="close">もどる</button></div>
   <p class="mp-src">寿命の目安：犬の平均は約14.6歳、猫は約15.8歳（日本ペットフード協会 2023年）。この中では、約1か月で1歳、年をとります。</p>`; }
 function mpAdopt(){ const k=_mpPick.kind, br=_mpPick.col||(document.getElementById('mpBreed')||{}).value||_mpPick.breed; const inp=document.getElementById('mpName'); let nm=(inp&&inp.value||'').trim().slice(0,12)||(inp&&inp.placeholder)||'ポチ';
   const kk=(PB_ALL[br]||{}).k||1; const L=k==='dog'?(kk>=1.25?[10,13]:kk<=.8?[13,17]:[12,15]):(MP_LIFE[k]||[10,14]); const life=L[0]+Math.floor(Math.random()*(L[1]-L[0]+1));
   let chS=null, chA=null; try{ if(typeof st!=='undefined'&&st&&cur&&!viewing){ const c=clock(); if(!c.dead){ chS=st.seed; chA=c.ageF||c.age; } } }catch(e){}
   const cl=mpColors(_mpPick.breed).find(x=>x.id===br); mpSet({ kind:k, breed:br, base:_mpPick.breed, col:cl?cl.l:'', name:nm, at:Date.now(), life, chS, chA, love:0, acts:{}, photos:[], per:Math.floor(Math.random()*MP_PER.length), diary:[{ t:Date.now(), x:`${nm}が、うちに来た。`, k:'in' }], msg:`${nm}が、家族になりました！ これから、よろしくね。` }); try{ if(typeof load==='function'&&typeof st!=='undefined'&&st) load(); }catch(_){} mpOpen(); }
-function mpAct(k){ const p=mpGet(); if(!p||mpGone(p)) return; const d=dayKey(); if(k==='food'&&!(p.acts&&(p.acts[d]||[]).includes('food'))){ _mpFoodOpen=!_mpFoodOpen; _mpGiftMode=false; mpOpen(); return; } p.acts=p.acts||{}; const a=p.acts[d]||[]; if(a.includes(k)){ p.msg=`きょうは、もう${MP_ACT[k][0].replace(/て$/,'た')}よ。また明日ね。`; }
+function mpAct(k){ const p=mpGet(); if(!p||mpGone(p)) return; const d=dayKey(); if(k==='food'&&((p.acts&&p.acts[d])||[]).filter(x=>x==='food').length<2){ _mpFoodOpen=!_mpFoodOpen; _mpGiftMode=false; mpOpen(); return; } p.acts=p.acts||{}; const a=p.acts[d]||[]; if(a.includes(k)){ p.msg=k==='food'?'きょうのごはんは、もう2回あげたよ。また明日ね。':`きょうは、もう${MP_ACT[k][0].replace(/て$/,'た')}よ。また明日ね。`; }
   else { a.push(k); p.acts[d]=a; p.love=(p.love||0)+1; const L=k==='play'&&p.kind==='dog'?MP_WALK:MP_ACT[k][2]; const w=mpWho(); p.msg=L[Math.floor(Math.random()*L.length)].replace(/\{p\}/g,p.name).replace(/\{w\}/g,mpWhoName(w))+' 💗+1'; }
   const ks=Object.keys(p.acts).sort(); if(ks.length>400) ks.slice(0,ks.length-400).forEach(x=>delete p.acts[x]); mpSet(p); mpOpen(); }
 function mpPhoto(){ const p=mpGet(); if(!p||mpGone(p)) return; const st=mpStage(p), a=mpAge(p), t=new Date();
@@ -16676,12 +16676,12 @@ function mpReply(p,text){ const v=MP_VOICE[p.kind]||MP_VOICE.dog, per=mpPer(p), 
 function mpLog(p,text,kind){ p.diary=p.diary||[]; p.diary.push({ t:Date.now(), x:text, k:kind||'' }); if(p.diary.length>200) p.diary=p.diary.slice(-200); }
 function mpStageLog(p){ const st=mpStage(p)[0]; if(p.lastStage!==st){ if(p.lastStage) mpLog(p,`${p.name}が「${st}」になった。`,'grow'); p.lastStage=st; return true; } return false; }
 function mpDiaryHTML(p){ const d=(p.diary||[]).slice().reverse().slice(0,40); if(!d.length) return '';
-  const f=t=>{ const x=new Date(t); return `${x.getFullYear()}年${x.getMonth()+1}月${x.getDate()}日`; };
+  const f=t=>mpStoryDate(t);
   return `<h4 class="mp-h4">🐾 ${esc(p.name)}の成長の記録</h4><ul class="mp-diary">${d.map(x=>`<li><small>${f(x.t)}</small>${esc(x.x)}</li>`).join('')}</ul>`; }
 // ---- おしゃべり（1日1回・100文字まで） ----
-function mpChatLeft(p){ const n=((p.chat||{})[dayKey()]||[]).length; return Math.max(0,1-n); }
+function mpChatLeft(p){ const n=((p.chat||{})[dayKey()]||[]).length; return Math.max(0,3-n); }
 function mpChatHTML(p){ if(mpGone(p)) return ''; const today=(p.chat||{})[dayKey()]||[]; const left=mpChatLeft(p);
-  return `<h4 class="mp-h4">💬 ${esc(p.name)}とおしゃべり <small>1日1回まで</small></h4>
+  return `<h4 class="mp-h4">💬 ${esc(p.name)}とおしゃべり <small>1日3回まで・きょう、あと${left}回</small></h4>
   <div class="mp-chat">${today.map(c=>`<p class="mp-me">${esc(c.q)}</p><p class="mp-pet"><b>${esc(p.name)}</b>${mpCryWrap(c.a)}</p>`).join('')}</div>
   ${left?`<div class="mp-in-row"><textarea id="mpChatIn" class="mp-in" maxlength="100" rows="2" placeholder="${esc(p.name)}に話しかけてみよう（100文字まで）"></textarea><button type="button" class="mp-btn" data-mp="chat">話す</button></div>`:`<p class="tiny muted">きょうのおしゃべりは、おしまい。また明日、話そうね。</p>`}`; }
 function mpChat(){ const p=mpGet(); if(!p||mpGone(p)) return; const el=document.getElementById('mpChatIn'); const q=(el&&el.value||'').trim().slice(0,100); if(!q||!mpChatLeft(p)) return;
@@ -16696,7 +16696,7 @@ function mpFoodHTML(p){ if(!_mpFoodOpen&&!_mpGiftMode) return ''; const L=MP_FOO
 function mpFeed(i){ const p=mpGet(); if(!p||mpGone(p)) return; const f=(MP_FOOD[p.kind]||MP_FOOD.dog)[i]; if(!f) return; const w=mpWho(); const who=mpWhoName(w);
   const h=pbHash(f[0]+Date.now()); const no=mpPer(p).k==='cool'&&h%4===0; let t=mpPick(no?MP_FOODR_NO:MP_FOODR,h>>3).replace(/\{p\}/g,p.name).replace(/\{f\}/g,f[0]);
   if(_mpGiftMode){ p.gifts=p.gifts||{}; p.gifts[dayKey()]=1; p.love=(p.love||0)+2; p.msg=`🎁 記念日のプレゼントに、${f[0]}をあげた。${t} 💗+2`; mpLog(p,`記念日のプレゼントに、${f[0]}をもらった。`,'gift'); }
-  else { const d=dayKey(); p.acts=p.acts||{}; const a=p.acts[d]||[]; if(a.includes('food')){ p.msg='きょうのごはんは、もうあげたよ。また明日ね。'; } else { a.push('food'); p.acts[d]=a; p.love=(p.love||0)+1; p.msg=`${who}が、${f[0]}をあげた。${t} 💗+1`; p.fav=p.fav||{}; p.fav[f[0]]=(p.fav[f[0]]||0)+1; } }
+  else { const d=dayKey(); p.acts=p.acts||{}; const a=p.acts[d]||[]; if(a.filter(x=>x==='food').length>=2){ p.msg='きょうのごはんは、もう2回あげたよ。また明日ね。'; } else { a.push('food'); p.acts[d]=a; p.love=(p.love||0)+1; p.msg=`${who}が、${f[0]}をあげた。${t} 💗+1`; p.fav=p.fav||{}; p.fav[f[0]]=(p.fav[f[0]]||0)+1; } }
   _mpFoodOpen=false; _mpGiftMode=false; mpSet(p); mpOpen(); }
 // ---- 記念日：メッセージとプレゼント ----
 function mpIsAnniv(p){ const d=mpDays(p); if([7,30,100,365,500,1000].includes(d)) return true; return !!(p.anMsg&&p.anMsg.d===dayKey()); }
@@ -16796,7 +16796,7 @@ function mpCry(p,mood){ const v=(MP_CRY[p.kind]||MP_CRY.dog), a=v[mood]||v.happy
 MP_VOICE.rabbit.s=['プゥプゥ','プッ','（足ダンッ）ブゥ','プゥ〜']; MP_VOICE.fish.s=['パクパク','ぷくぷく','（くるっ）パク','ぷくっ']; MP_VOICE.bird.s=['ピッ！','ピピッ','チュンチュン','ピュイ〜'];
 // お世話・ごはん・写真・プレゼントのあとに、鳴き声を出す
 function mpSetCry(mood){ const p=mpGet(); if(!p) return; p.cry=mpCry(p,mood); mpSet(p); mpOpen(); }
-{ const A=mpAct; mpAct=function(k){ const p0=mpGet(); const was=p0&&p0.acts&&(p0.acts[dayKey()]||[]).includes(k); A(k); if(k==='food'&&!was) return; mpSetCry(was?'no':k==='pet'?'love':'happy'); };
+{ const A=mpAct; mpAct=function(k){ const p0=mpGet(); const td=(p0&&p0.acts&&p0.acts[dayKey()])||[]; const was=k==='food'?td.filter(x=>x==='food').length>=2:td.includes(k); A(k); if(k==='food'&&!was) return; mpSetCry(was?'no':k==='pet'?'love':'happy'); };
   const F=mpFeed; mpFeed=function(i){ F(i); const p=mpGet(); mpSetCry(p&&/ぷいっ|あとで食べる/.test(p.msg||'')?'no':'eat'); };
   const Ph=mpPhoto; mpPhoto=function(){ Ph(); mpSetCry('photo'); };
   const Lt=mpLetter; mpLetter=function(){ Lt(); mpSetCry('love'); };
@@ -16829,6 +16829,11 @@ function mpWcCheck(p){ if(!p||mpGone(p)||p.kind==='fish') return false; const d=
 { const O2=mpOpen; mpOpen=function(view){ const p=mpGet(); if(p&&view!=='new'&&mpWcCheck(p)) mpSet(p); return O2(view); }; }
 function mpWcHTML(p){ const w=p&&p.wcMsg; if(!w||Date.now()-w.at>6*36e5) return ''; const x=new Date(w.at); return `<p class="mp-wc">🚽 <b>${esc(w.cry)}</b> ${esc(w.t)}<small>${x.getHours()}時${String(x.getMinutes()).padStart(2,'0')}分</small></p>`; }
 document.head.insertAdjacentHTML('beforeend',`<style>.mp-wc{ margin:8px 0 4px; padding:8px 12px; border-radius:12px; background:#EEF7FF; color:#2F4A66; font-size:13.5px; line-height:1.6; } .mp-wc b{ color:#C2476B; } .mp-wc small{ display:block; font-size:11px; color:#7A8BA0; }</style>`);
+// ===== 日付は、Channel が生きている物語の時代で書く（例：1986年10月12日） =====
+function mpStoryDate(t){ const x=new Date(t), real=`${x.getFullYear()}年${x.getMonth()+1}月${x.getDate()}日`;
+  try{ const p=mpGet(); if(typeof cur==='undefined'||!cur||viewing||typeof st==='undefined'||!st||(p&&p.chS!=null&&p.chS!==st.seed)) return real;
+    const c=clock(), P=cur.P; const a=(c.ageF!=null?c.ageF:c.age)-(Date.now()-t)/c.mpy; if(!(a>=0)) return real;
+    const s=storyNow(P,a), fr=a*12-Math.floor(a*12+1e-9), dim=new Date(s.y,s.m,0).getDate(); return `${s.y}年${s.m}月${Math.min(dim,1+Math.floor(fr*dim))}日`; }catch(e){ return real; } }
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
