@@ -11993,7 +11993,7 @@ const NW_CAT=[['政治',/大統領|首相|政府|選挙|議会|国会|条約|独
   ['エンタメ',/歌手|アルバム|シングル|コンサート|テレビ番組|番組|ドラマ|アニメ|ゲーム機|ゲームソフト|ビートルズ|音楽|紅白|ミュージカル|バンド|俳優|女優|ライブ|ヒット|漫画|小説|ファミコン|ディズニー/g],
   ['科学',/打ち上げ|宇宙|衛星|探査|発見|開発|コンピュータ|インターネット|ロケット|月面|ノーベル|技術|医学|アルゴリズム|研究所|発明|遺伝子/g],
   ['災害',/地震|津波|台風|噴火|ハリケーン|洪水|事故|墜落|沈没|火災|爆発|テロ|感染|流行|干ばつ|飢饉/g]];
-function nwCat(t){ let best='できごと', bn=0; for(const [c,re] of NW_CAT){ const n=(String(t).match(re)||[]).length; if(n>bn){ bn=n; best=c; } } return best; }
+function nwCat(t){ let best='総合', bn=0; for(const [c,re] of NW_CAT){ const n=(String(t).match(re)||[]).length; if(n>bn){ bn=n; best=c; } } return best; }
 const _nwCache={};
 function nwKey(y){ return 'hitotsu.nw.'+y; }
 function nwParse(txt){ const out=[]; let on=false, mon='';
@@ -12041,7 +12041,7 @@ document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closes
 .nw-d{ display:inline-block; margin-right:6px; font-size:.78em; color:#7A8A9A; font-variant-numeric:tabular-nums; }
 .nw-c-政治{ background:#EEF4FB; color:#3E68B0; } .nw-c-経済{ background:#FFF5DA; color:#9A6A00; } .nw-c-スポーツ{ background:#E8F7E3; color:#3B8A2E; }
 .nw-c-エンタメ{ background:#FFEAF1; color:#C9466A; } .nw-c-映画{ background:#F1EAFB; color:#7A4FB8; } .nw-c-科学{ background:#E6F6F7; color:#24808A; }
-.nw-c-災害{ background:#FDEDE8; color:#B5533A; } .nw-c-できごと{ background:#F1F1F1; color:#666; }
+.nw-c-災害{ background:#FDEDE8; color:#B5533A; } .nw-c-総合{ background:#F1F1F1; color:#666; }
 .nw-more{ display:block; margin:10px auto 4px; font:inherit; font-size:13px; font-weight:700; padding:6px 16px; border-radius:999px; border:2px solid #E86A88; background:#FF8FAA; color:#fff; box-shadow:0 2px 0 #D85878; cursor:pointer; }
 .nw-src{ margin:8px 0 2px; font-size:9.5px; opacity:.8; color:#6A7A8A; }
 .nw-wait{ font-size:13px; color:#6A7A8A; padding:8px 0; }`; document.head.appendChild(c); })();
