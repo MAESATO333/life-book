@@ -11751,7 +11751,7 @@ function letterHTML(P,L,age){ const k=dayKey(); const got=d2Get(KEY_LETTER,[]); 
   if(last!==k){ got.push(k); d2Set(KEY_LETTER,got.slice(-400)); }
   const y=new Date(); y.setDate(y.getDate()-1); const missedY=got.length>1&&!got.includes(dayKey(y));
   const lt=letterToday(P,L,age);
-  return `<div class="lt-letter"><p class="lt-to">見守ってくれている Higher Self へ</p>${lt.body.split('\n').map(s=>`<p>${esc(s)}</p>`).join('')}<p class="lt-sign">${esc(lt.sign)}より</p></div>
+  return `<div class="lt-letter"><p class="lt-to">見守ってくれている Higher Self へ</p>${lt.body.split('\n').map(s=>`<p>${esc(s)}</p>`).join('')}<p class="lt-sign"><span class="chn-tag">Channel</span>${esc(lt.sign)} より</p></div>
     <div class="lt-stampbox">${ltStampHTML(P,k)}</div>
     <p class="tiny muted">チャネリング日記は1日に1ページ。その日にひらかないと読めません。これまでに読んだ日記：${got.length}ページ${missedY?'（きのうの日記は、もう読めません）':''}</p>`; }
 // --- 2. 今、何してる？（その地域のいまの時刻に合わせる） ---
