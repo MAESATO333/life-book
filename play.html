@@ -12819,16 +12819,16 @@ const SP_KEY='hitotsu.space.'; let _spSun='', _spSat='', _spAt=0;
 function spGet(k,ms){ try{ const v=JSON.parse(localStorage.getItem(SP_KEY+k)||'null'); if(v&&Date.now()-v.t<ms) return v.d; }catch(e){} return null; }
 function spSet(k,d){ try{ localStorage.setItem(SP_KEY+k,JSON.stringify({t:Date.now(),d})); }catch(e){} }
 async function spJSON(u){ const r=await fetch(u); if(!r.ok) throw new Error('http '+r.status); return r.json(); }
-const spJst=s=>{ const d=new Date(s); if(isNaN(d)) return ''; return `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}時${String(d.getMinutes()).padStart(2,'0')}分`; };
+const spJst=s=>{ const d=new Date(s); if(isNaN(d)) return ''; return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}時${String(d.getMinutes()).padStart(2,'0')}分`; };
 const SP_CLS=c=>{ const L=(c||'')[0]; return L==='X'?'いちばん強いXクラス':L==='M'?'強めのMクラス':L==='C'?'ふつうのCクラス':L==='B'?'弱いBクラス':'弱いクラス'; };
 
 function spaceHTML(){
   const k=(typeof dayKey==='function'?dayKey():''); const pick=UFO_ALL.slice().sort((a,b)=>dHash(k,'ufo',a[0]+a[2])-dHash(k,'ufo',b[0]+b[2])).slice(0,50).sort((a,b)=>b[0]-a[0]);
   const ufo=pick.map(x=>`<li><b>${esc(x[1])}</b>　${esc(x[2])}<small>（${esc(x[3])}）</small></li>`).join('');
   return `<div class="sp-wrap">
-  <section class="sp sp-ufo"><h4>👽 宇宙人のいま　${new Date().getFullYear()}年<small>${pick.length}件</small></h4><p class="sp-note">アメリカ国防総省や世界の国の公式発表・確かな記録だけ。毎日入れかわります。</p><ul class="sp-l">${ufo}</ul></section>
-  <section class="sp sp-sun"><h4>☀️ 太陽のいま　${new Date().getFullYear()}年</h4><p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="spSun">${_spSun||'<p class="sp-wait">太陽のようすを読みこんでいます…</p>'}</div></section>
-  <section class="sp sp-sat"><h4>🛰 衛星のいま　${new Date().getFullYear()}年</h4><p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="spSat">${_spSat||'<p class="sp-wait">宇宙のようすを読みこんでいます…</p>'}</div></section>
+  <section class="sp sp-ufo"><h4>👽 宇宙人のいま　${new Date().getFullYear()}年<small>${pick.length}件</small></h4>${skToday().replace('の情報','に選んだ50件')}<p class="sp-note">アメリカ国防総省や世界の国の公式発表・確かな記録だけ。毎日入れかわります。</p><ul class="sp-l">${ufo}</ul></section>
+  <section class="sp sp-sun"><h4>☀️ 太陽のいま　${new Date().getFullYear()}年</h4>${skToday()}<p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="spSun">${_spSun||'<p class="sp-wait">太陽のようすを読みこんでいます…</p>'}</div></section>
+  <section class="sp sp-sat"><h4>🛰 衛星のいま　${new Date().getFullYear()}年</h4>${skToday()}<p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="spSat">${_spSat||'<p class="sp-wait">宇宙のようすを読みこんでいます…</p>'}</div></section>
   </div>${(Date.now()-_spAt>60000||!_spSun)?(setTimeout(spFill,0),''):''}`; }
 async function spFill(){ _spAt=Date.now();
   const sun=document.getElementById('spSun'), sat=document.getElementById('spSat'); if(!sun&&!sat) return;
@@ -12866,14 +12866,15 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .sp-l{ max-height:105px; overflow-y:auto; -webkit-overflow-scrolling:touch; margin:0; padding:0 2px 0 0; list-style:none; }
 .sp-l>li, .sp-ul>li{ font-size:13px; line-height:1.65; padding:5px 0; border-bottom:1px dashed rgba(0,0,0,.08); } .sp-l>li small{ color:var(--muted); font-size:11px; }
 .sp-ul{ list-style:none; margin:0; padding:0; } .sp-sub{ margin:2px 0 0; padding-left:1.1em; font-size:12.5px; }
-.sp-note{ font-size:11.5px; color:var(--muted); margin:0 0 4px; } .sp-wait{ font-size:12px; color:var(--muted); margin:4px 0; } .sp-src{ font-size:9.5px; opacity:.8; margin:4px 0 0; }
+.sp-date{ font-size:12px; font-weight:700; color:#5A4E58; margin:0 0 3px; } .sp-note{ font-size:11.5px; color:var(--muted); margin:0 0 4px; } .sp-wait{ font-size:12px; color:var(--muted); margin:4px 0; } .sp-src{ font-size:9.5px; opacity:.8; margin:4px 0 0; }
 </style>`);
 // ===== 世界のいま：月・地球・小惑星・探査機・星空のいま =====
 // 月の形・距離・惑星の位置・ボイジャーの距離は、いまの日時から計算（天文の公式の式。数百kmや数日の誤差がある目安）。
 // 地震は USGS（アメリカ地質調査所）、小惑星ときょうの宇宙の写真は NASA の公開データを、その場で読みこむ。
 const RAD=Math.PI/180, n360=x=>((x%360)+360)%360;
 const skJD=d=>d.getTime()/864e5+2440587.5;
-const skDate=d=>`${d.getMonth()+1}月${d.getDate()}日`;
+const skDate=d=>`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+const skToday=()=>{ const d=new Date(); return `<p class="sp-date">📅 ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日の情報</p>`; };
 const skLi=a=>a.map(t=>`<li>${t}</li>`).join('');
 // --- 月 ---
 function skMoon(d){ const jd=skJD(d), T=(jd-2451545)/36525; const syn=29.530588853; const age=((jd-2451550.1)%syn+syn)%syn;
@@ -12916,20 +12917,20 @@ function skyHTML(){ const Y=new Date().getFullYear(); const now=new Date();
   const mo=skMoon(now);
   const moon=`<ul class="sp-ul"><li><b>今夜の月</b>　${mo.nm}（月齢${mo.age.toFixed(1)}、光っている部分は約${mo.lit}%）</li><li><b>次の満月</b>　${skDate(mo.full)}ごろ（あと${Math.round(mo.toFull)}日）</li><li><b>次の新月</b>　${skDate(mo.nw)}ごろ（あと${Math.round(mo.toNew)}日）</li><li><b>いまの月までの距離</b>　約${(Math.round(mo.dist/1000)/10).toFixed(1)}万km</li>${skLi(SK_FACT.moon.map(esc))}</ul><p class="sp-src">月の形と距離は、いまの日時から計算した目安です。</p>`;
   const pl=skPlanets(now); const vis=pl.filter(p=>p.when), hid=pl.filter(p=>!p.when);
-  const y=now.getFullYear(), t0=Date.UTC(y,now.getMonth(),now.getDate()); const ms=SK_METEOR.map(m=>{ let t=Date.UTC(y,m[0]-1,m[1]); if(t<t0) t=Date.UTC(y+1,m[0]-1,m[1]); return [m,Math.round((t-t0)/864e5)]; }).sort((a,b)=>a[1]-b[1]).slice(0,4);
-  const star=`<ul class="sp-ul">${vis.map(p=>`<li><b>${p.k}</b>　${p.when}に見える（太陽から${p.el}°はなれている）</li>`).join('')}${hid.length?`<li>${hid.map(p=>p.k).join('・')}は、いまは太陽の近くにあって見えにくい。</li>`:''}${ms.map(([m,dd])=>`<li><b>${m[2]}</b>　いちばん多く流れるのは${m[0]}月${m[1]}日ごろ（${dd===0?'きょう':`あと${dd}日`}）</li>`).join('')}${skLi(SK_FACT.star.map(esc))}</ul><p class="sp-src">惑星の位置は NASA JPL の軌道の数字から計算。流星群の日は国際流星機構の例年の目安。</p>`;
+  const y=now.getFullYear(), t0=Date.UTC(y,now.getMonth(),now.getDate()); const ms=SK_METEOR.map(m=>{ let t=Date.UTC(y,m[0]-1,m[1]); if(t<t0) t=Date.UTC(y+1,m[0]-1,m[1]); return [m,Math.round((t-t0)/864e5),new Date(t).getUTCFullYear()]; }).sort((a,b)=>a[1]-b[1]).slice(0,4);
+  const star=`<ul class="sp-ul">${vis.map(p=>`<li><b>${p.k}</b>　${p.when}に見える（太陽から${p.el}°はなれている）</li>`).join('')}${hid.length?`<li>${hid.map(p=>p.k).join('・')}は、いまは太陽の近くにあって見えにくい。</li>`:''}${ms.map(([m,dd,yy])=>`<li><b>${m[2]}</b>　いちばん多く流れるのは${yy}年${m[0]}月${m[1]}日ごろ（${dd===0?'きょう':`あと${dd}日`}）</li>`).join('')}${skLi(SK_FACT.star.map(esc))}</ul><p class="sp-src">惑星の位置は NASA JPL の軌道の数字から計算。流星群の日は国際流星機構の例年の目安。</p>`;
   const vg=skVoyager(now); const probe0=vg.map(v=>`<li><b>${v.n}</b>　太陽から約${Math.round(v.km/1e8)}億km（光で約${Math.round(v.h)}時間）</li>`).join('');
   const show=k=>_skH[k]||`<p class="sp-wait">読みこんでいます…</p>`;
   if(Date.now()-_skAt>60000) setTimeout(skFill,0);
   return `<div class="sp-wrap">
-  <section class="sp sk-moon"><h4>🌙 月のいま　${Y}年</h4><div class="sp-l">${moon}</div></section>
-  <section class="sp sk-earth"><h4>🌋 地球のいま　${Y}年</h4><p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="skEarth">${show('earth')}</div></section>
-  <section class="sp sk-neo"><h4>☄ 小惑星のいま　${Y}年</h4><p class="sp-note">この1週間に地球の近くを通る小惑星。</p><div class="sp-l" id="skNeo">${show('neo')}</div></section>
-  <section class="sp sk-probe"><h4>🚀 探査機のいま　${Y}年</h4><div class="sp-l" id="skProbe"><ul class="sp-ul">${probe0}<li id="skApod">${_skH.apod||'きょうの宇宙の写真を読みこんでいます…'}</li>${skLi(SK_FACT.probe.map(esc))}</ul><p class="sp-src">ボイジャーの距離は NASA の公表値から計算した目安。写真：NASA「きょうの天文写真」</p></div></section>
-  <section class="sp sk-star"><h4>🌌 星空のいま　${Y}年</h4><div class="sp-l">${star}</div></section></div>`; }
+  <section class="sp sk-moon"><h4>🌙 月のいま　${Y}年</h4>${skToday()}<div class="sp-l">${moon}</div></section>
+  <section class="sp sk-earth"><h4>🌋 地球のいま　${Y}年</h4>${skToday()}<p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="skEarth">${show('earth')}</div></section>
+  <section class="sp sk-neo"><h4>☄ 小惑星のいま　${Y}年</h4>${skToday()}<p class="sp-note">この1週間に地球の近くを通る小惑星。</p><div class="sp-l" id="skNeo">${show('neo')}</div></section>
+  <section class="sp sk-probe"><h4>🚀 探査機のいま　${Y}年</h4>${skToday()}<div class="sp-l" id="skProbe"><ul class="sp-ul">${probe0}<li id="skApod">${_skH.apod||'きょうの宇宙の写真を読みこんでいます…'}</li>${skLi(SK_FACT.probe.map(esc))}</ul><p class="sp-src">ボイジャーの距離は NASA の公表値から計算した目安。写真：NASA「きょうの天文写真」</p></div></section>
+  <section class="sp sk-star"><h4>🌌 星空のいま　${Y}年</h4>${skToday()}<div class="sp-l">${star}</div></section></div>`; }
 async function skFill(){ _skAt=Date.now(); const J=async u=>{ const r=await fetch(u); if(!r.ok) throw new Error('http '+r.status); return r.json(); };
   const get=(k,ms)=>{ try{ const v=JSON.parse(localStorage.getItem('hitotsu.sky.'+k)||'null'); if(v&&Date.now()-v.t<ms) return v.d; }catch(e){} return null; }, put=(k,d)=>{ try{ localStorage.setItem('hitotsu.sky.'+k,JSON.stringify({t:Date.now(),d})); }catch(e){} };
-  const jst=s=>{ const d=new Date(s); return `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}時${String(d.getMinutes()).padStart(2,'0')}分`; };
+  const jst=s=>{ const d=new Date(s); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}時${String(d.getMinutes()).padStart(2,'0')}分`; };
   // 地震
   { let rows=[]; try{ let q=get('eq',20*60e3); if(!q){ const j=await J('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson'); q=(j.features||[]).map(f=>({m:f.properties.mag,p:f.properties.place,t:f.properties.time})); put('eq',q); }
       const big=q.slice().sort((a,b)=>b.m-a.m)[0]; rows.push(`<li><b>この24時間の、マグニチュード4.5以上の地震</b>　世界で${q.length}回${big?`。いちばん大きいのは M${big.m.toFixed(1)}（${esc(big.p||'')}）`:''}</li>`);
