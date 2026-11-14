@@ -415,6 +415,7 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .frd-in .tiny.muted{ color:#7A5A66; }
 .linkish{ font:inherit; border:0; background:none; color:#C9466A; text-decoration:underline; cursor:pointer; padding:0; }
 .ih-fr{ margin-top:14px; font-size:13px; color:var(--muted); line-height:1.8; }
+.ih-site{ margin-top:10px; } .ih-site a{ text-decoration:none; }
 .ih-fr button{ display:inline-flex; align-items:center; gap:5px; margin-left:4px; font:inherit; font-weight:700; padding:4px 12px; border-radius:999px; border:2px solid #FFC2D0; background:#FFF3F6; color:#C9466A; cursor:pointer; }
 
 /* ホーム */
@@ -523,10 +524,10 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .lt-stampbox{ margin:10px 0 6px; }
 .lt-stamps .tiny{ margin:0 0 6px; color:var(--muted); }
 .lt-sbtns{ display:flex; flex-wrap:wrap; gap:6px; }
-.lt-sb{ border:1.5px solid #FFB3C4; background:#FFF5F8; color:#D94F75; border-radius:999px; padding:6px 12px; font:inherit; font-size:13px; font-weight:700; cursor:pointer; display:inline-flex; gap:4px; align-items:center; }
+.lt-sb{ border:1px solid #FFB3C4; background:#FFF5F8; color:#D94F75; border-radius:999px; padding:3px 10px; font:inherit; font-size:12px; font-weight:700; cursor:pointer; display:inline-flex; gap:4px; align-items:center; }
 .lt-sb:hover,.lt-sb:focus-visible{ background:#FFE3EB; outline:2px solid #FF8FAB; outline-offset:1px; }
 .lt-done{ display:flex; align-items:center; gap:12px; }
-.lt-hanko{ flex:0 0 auto; width:76px; height:76px; border-radius:50%; border:3px solid #E8667E; color:#E8667E; display:flex; flex-direction:column; align-items:center; justify-content:center; transform:rotate(-12deg); background:rgba(255,240,244,.85); line-height:1.1; font-weight:700; }
+.lt-hanko{ flex:0 0 auto; width:68px; height:68px; border-radius:50%; border:3px solid #E8667E; color:#E8667E; display:flex; flex-direction:column; align-items:center; justify-content:center; transform:rotate(-12deg); background:rgba(255,240,244,.85); line-height:1.1; font-weight:700; }
 .lt-hanko small{ font-size:9px; letter-spacing:.04em; } .lt-hanko b{ font-size:20px; } .lt-hanko span{ font-size:10px; }
 .lt-felt{ margin:0; font-size:13px; color:#8A6A55; }
 .lt-pop{ animation:ltpop .45s ease-out; } @keyframes ltpop{ 0%{ transform:rotate(-12deg) scale(1.8); opacity:0; } 70%{ transform:rotate(-12deg) scale(.92); opacity:1; } 100%{ transform:rotate(-12deg) scale(1); } }
@@ -11619,12 +11620,12 @@ function letterToday(P,L,age){ const k=dayKey(); const me=d2Me(P,age);
   return { body, sign:P.given }; }
 // Higher Self から「受け取ったよ」のスタンプ（1日1回。押すと、通信のすみに印が残る）
 const KEY_LTSTAMP='hitotsu.ltStamp';
-const LT_STAMPS=[['読んだよ','💌'],['受け取ったよ','✨'],['そばにいるよ','🤍'],['だいじょうぶ','🌈']];
+const LT_STAMPS=[['愛だね！','💗']];
 const LT_FELT=['ふと、だれかに見守られている気がした。','胸のあたりが、ふわっとあたたかくなった。','なんだか、ひとりじゃない気がした。','空を見上げたら、少しだけ元気が出た。'];
 function ltStampHTML(P,k){ const m=d2Get(KEY_LTSTAMP,{}); const v=m[k]; const n=Object.keys(m).length;
-  if(v!=null){ const st0=LT_STAMPS[v]||LT_STAMPS[0];
+  if(v!=null){ const st0=LT_STAMPS[0];
     return `<div class="lt-done"><span class="lt-hanko" aria-label="Higher Self のスタンプ ${esc(st0[0])}"><small>Higher Self</small><b>${st0[1]}</b><span>${esc(st0[0])}</span></span><p class="lt-felt">${esc(P.given)}は、${esc(LT_FELT[(P.seed+v+k.length)%LT_FELT.length])}</p></div><p class="tiny muted">これまでに押したスタンプ：${n}こ</p>`; }
-  return `<div class="lt-stamps"><p class="tiny">Higher Self から、受け取ったしるしを送りましょう</p><div class="lt-sbtns">${LT_STAMPS.map((x,i)=>`<button type="button" class="lt-sb" data-ltstamp="${i}"><span aria-hidden="true">${x[1]}</span>${esc(x[0])}</button>`).join('')}</div></div>`; }
+  return `<div class="lt-stamps"><div class="lt-sbtns">${LT_STAMPS.map((x,i)=>`<button type="button" class="lt-sb" data-ltstamp="${i}" aria-label="Higher Self から「${esc(x[0])}」のスタンプを押す"><span aria-hidden="true">${x[1]}</span>${esc(x[0])}</button>`).join('')}</div></div>`; }
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-ltstamp]'); if(!b) return; try{ const m=d2Get(KEY_LTSTAMP,{}); const k=dayKey(); if(m[k]==null){ m[k]=+b.dataset.ltstamp; const ks=Object.keys(m); if(ks.length>400) delete m[ks[0]]; d2Set(KEY_LTSTAMP,m); }
   const box=b.closest('.hm-letter')||b.closest('.lt-wrap'); if(box&&typeof cur!=='undefined'&&cur){ const w=box.querySelector('.lt-stampbox'); if(w){ w.innerHTML=ltStampHTML(cur.P,k); const h=w.querySelector('.lt-hanko'); if(h) h.classList.add('lt-pop'); try{ if(typeof rubyApply==='function') rubyApply(w,cur.P,cur.L); }catch(_){} } } }catch(_){} });
 function letterHTML(P,L,age){ const k=dayKey(); const got=d2Get(KEY_LETTER,[]); const last=got[got.length-1];
@@ -14425,7 +14426,7 @@ function goLife(){ ART_NEW=true; viewing=null; page='life'; render(); window.scr
 // 上の帯のボタン
 function navSync(){ const n=document.getElementById('mastnav'); if(!n) return; const has=!!st;
   const onTop=!viewing&&(!st||page==='top'), onHome=!viewing&&st&&page==='home', onLife=!viewing&&st&&page!=='home'&&page!=='top';
-  n.innerHTML=`<button type="button" class="nav-b ${onTop?'on':''}" data-nav="top" ${onTop?'aria-current="page"':''}><i class="ic ic-top" aria-hidden="true"></i>トップ</button>${has?`<button type="button" class="nav-b ${onHome?'on':''}" data-nav="home" ${onHome?'aria-current="page"':''}><i class="ic ic-home" aria-hidden="true"></i>ホーム</button>`:''}${has?`<button type="button" class="nav-b ${onLife?'on':''}" data-nav="life" ${onLife?'aria-current="page"':''}><i class="ic ic-book" aria-hidden="true"></i>人生のページ${(()=>{ const k=typeof meetBadgeCount==='function'?meetBadgeCount():0; return k?`<span class="mt-badge" aria-label="出会いのお知らせ ${k}件">${k}</span>`:''; })()}</button>`:''}`;
+  n.innerHTML=`<button type="button" class="nav-b ${onTop?'on':''}" data-nav="top" ${onTop?'aria-current="page"':''}><i class="ic ic-top" aria-hidden="true"></i>Gateway</button>${has?`<button type="button" class="nav-b ${onHome?'on':''}" data-nav="home" ${onHome?'aria-current="page"':''}><i class="ic ic-home" aria-hidden="true"></i>Life Home</button>`:''}${has?`<button type="button" class="nav-b ${onLife?'on':''}" data-nav="life" ${onLife?'aria-current="page"':''}><i class="ic ic-book" aria-hidden="true"></i>Life Record${(()=>{ const k=typeof meetBadgeCount==='function'?meetBadgeCount():0; return k?`<span class="mt-badge" aria-label="出会いのお知らせ ${k}件">${k}</span>`:''; })()}</button>`:''}`;
   n.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>b.dataset.nav==='top'?goTop():b.dataset.nav==='home'?goHome():goLife()); }
 // 心のうつりかわり（幸せの度合い）を小さなグラフに
 function homeMoodSVG(L,age){ const ys=L.years.filter(y=>y.age<=age&&y.h!=null); if(ys.length<2) return '<p class="tiny muted">まだ、グラフにするほどの年月がたっていません。</p>';
@@ -14440,7 +14441,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
   const newYears=ys.filter(y=>y.age>st.lastSeen&&y.events.length).length;
   let art=''; try{ art=c.dead?bkFarewellSVG(P):homeArt(P,L,age); }catch(e){}
   const egsNow=(()=>{ for(let i=ys.length-1;i>=0;i--) if(ys[i].egs) return ys[i].egs; return 0; })();
-  let status='', go='人生のページを読む';
+  let status='', go='Life Record を読む';
   if(st.stage==='funeral'){ status='人生は幕を閉じました。葬儀が待っています。'; go='葬儀へ'; }
   else if(st.stage==='report'){ status='人生をふり返る時間です。'; go='LIFE BOOK前世レポートを読む'; }
   else if(c.dead){ status='この人生は、幕を閉じました。'; go='最後のページを読む'; }
@@ -14484,7 +14485,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-album',`思い出のアルバム<span class="hm-n">${photos.length}枚</span>`, photos.length?`<div class="hm-photos">${photos.slice(-3).map(ph=>photoHTML(P,L,ph,true)).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。</p>', photos.length?`<button class="linkish" type="button" id="hmAlbum">アルバムをひらく</button>`:'')}
     ${homeTile('hm-belief','心に生まれた観念', bel.length?`<ul class="hm-list">${bel.map(b=>`<li><span class="hm-a">${b.age}歳</span>「${esc(b.core||b.text||'')}」</li>`).join('')}</ul>`:'<p class="tiny muted">まだ、心に残る思い込みは生まれていません。</p>', arc.length?`<button class="linkish" type="button" id="hmKmap">本棚の人生とくらべる（観念の地図）</button>`:'')}
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
-    ${homeTile('hm-friends',`紹介でつながった人<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
+    ${homeTile('hm-friends',`Group Soul /紹介でつながった人たち<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
     ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は「思い出のLIFE BOOK」になって、ここに並びます。</p>')}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
     ${typeof birthMapHTML==='function'?homeTile('hm-map','生まれた場所',birthMapHTML(P)):''}
@@ -14578,6 +14579,8 @@ const esc=(s)=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;
 let st=store.get(KEY_CUR,null);
 let cur=null;         // { P, L }
 let sinceAge=null;    // この訪問で「新しい」とみなす境目
+// サイトのはじめのページ（ブロックで人生が流れる紹介ページ）。生まれたあとも、いつでも見られる
+function siteTopURL(){ try{ if(/github\.io$/.test(location.host)) return location.origin+location.pathname.replace(/[^/]*$/,''); }catch(e){} return 'https://maesato333.github.io/life-book/'; }
 let viewing=null;     // 過去の人生のレポートを読んでいる時 { seed, country, choice }
 
 function load(){
@@ -14678,7 +14681,7 @@ function introHTML(){
       <p class="brand-sub">${SUBTITLE}</p>
       <p class="lead">世界のどこかに、<br><em>ひとりの人間</em>として生まれる。</p>
       <div class="ih-cta"><button class="born-btn" id="bornBtn" type="button"><svg class="born-heart" viewBox="0 0 28 24" shape-rendering="crispEdges" aria-hidden="true">${typeof frHeart==='function'?frHeart(0,0,4,'#FFFFFF'):''}</svg><span class="born-txt">生まれる</span><span class="born-sub">あたらしい いのちが、はじまります</span></button></div>
-      <p class="ih-fr">友だちを誘うと、ふたりの Channel が人生のどこかで出会います。<button class="fr-open" type="button">友だちに紹介する</button></p>
+      <p class="ih-fr">友だちを誘うと、ふたりの Channel が人生のどこかで出会います。<button class="fr-open" type="button">友だちに紹介する</button></p><p class="ih-site"><a class="btn ghost small" href="${siteTopURL()}">LIFE BOOK のはじめのページを見る</a></p>
     </div><div class="hero">${bkHeroSVG()}</div></div>
     <div class="body"><p>国も、家族も、家の暮らし向きも、生まれた日時も、名前も、すべて世界の統計に沿って偶然に決まります。生まれた人は「Channel」。Channel は、自分で考え、自分で選んで生きていきます。見守るあなたは「Higher Self」。Higher Self にできるのは、迷っているその人に、一生で2〜3回だけ「インスピレーション」を贈ること。届くかどうかは、その時のその人の心しだいです。</p>
     <p style="margin-top:10px">人生は、現実の約2日半で1歳ずつ進みます（80歳まで生きる人生なら、約6か月半）。ひらくたびに、前に見た時から今までに起きた出来事と、その時の気持ちが読めます。人生が終わると、葬儀のあとに、その人生を読み解く「LIFE BOOK前世レポート」が届きます。生き終えた人生は、章立てのある一冊の本になって、あなたの本棚に並びます。</p></div>
@@ -14715,7 +14718,7 @@ function kannenMapHTML(){
 // すでに生まれている人がトップを見る時は、「生まれる」を押せないようにする
 function introLock(){ ['#bornBtn','#bornBtn2'].forEach(sel=>{ const b=$(sel); if(!b) return; b.disabled=true; b.classList.add('born-off'); b.onclick=null; b.setAttribute('aria-disabled','true');
     const t=b.querySelector('.born-txt'); if(t) t.textContent='いまは、人生の途中'; const sb=b.querySelector('.born-sub'); if(sb) sb.textContent='生き終えたら、次の人生へ';
-    if(sel==='#bornBtn'&&!document.getElementById('toLifeBtn')){ const a=document.createElement('p'); a.innerHTML='<button type="button" class="btn ghost" id="toLifeBtn">人生のページへ</button>'; b.parentElement.after(a); a.querySelector('button').onclick=goLife; } }); }
+    if(sel==='#bornBtn'&&!document.getElementById('toLifeBtn')){ const a=document.createElement('p'); a.innerHTML='<button type="button" class="btn ghost" id="toLifeBtn">Life Record へ</button>'; b.parentElement.after(a); a.querySelector('button').onclick=goLife; } }); }
 function bindIntro(){
   bindLoanShelf(); bindFriend();
   $('#bornBtn').onclick=()=>born(null); const b2=$('#bornBtn2'); if(b2) b2.onclick=()=>born(null);
@@ -15419,5 +15422,103 @@ function stDeathCheck(){ try{ if(!cur||!st||viewing||isLegacy()) return; const c
 (function(){ if(typeof render!=='function') return; const _r=render; render=function(){ const r=_r.apply(this,arguments); stDeathCheck(); return r; }; })();
 // サーバーにつながったら送る
 (function(){ const t=setInterval(()=>{ if(FB&&FB.uid){ clearInterval(t); stOpen(); stDeathCheck(); stFlush(); setInterval(()=>{ stDeathCheck(); stFlush(); },60000); } },1000); setTimeout(()=>clearInterval(t),120000); })();
+// ===== Over Soul Message（運営者から、参加者みんなへのメッセージ） =====
+// 管理者ページで書いたメッセージを Firebase の os/board から読み、ホームの「人生のヒント」のすぐ上に出す。
+// os/board = { m:[ { i:記号, t:本文, d:書いた時刻(ミリ秒) }, ... ] }（新しい順・最大30件）。読むのは1回ひらくごとに1件だけ。
+// サーバーにつながらないときは、前に読んだもの（端末に保存）を出す。何も無ければ欄は出さない。
+const KEY_OSM='hitotsu.osm', KEY_OSMSEEN='hitotsu.osmSeen';
+let _osmAt=0, _osmOpen=false;
+function osmList(){ const m=store.get(KEY_OSM,[]); return Array.isArray(m)?m.filter(x=>x&&x.t):[]; }
+function osmDate(ms){ const d=new Date(ms); return isNaN(d)?'':`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; }
+function osmBody(t){ return esc(t).replace(/\n/g,'<br>'); }
+function osmHTML(){ const m=osmList(); if(!m.length) return ''; const top=m[0], seen=store.get(KEY_OSMSEEN,{}), isNew=!seen[top.i]||Date.now()-seen[top.i]<20*3600000;
+  const past=m.slice(1);
+  return `<section class="osm${isNew?' is-new':''}" aria-label="Over Soul Message"><span class="osm-ic" aria-hidden="true">${osmFig('sage')}</span><div class="osm-in">
+    <small>Over Soul Message${isNew?'<span class="osm-new">NEW</span>':''}<span class="osm-d">${osmDate(top.d)}</span></small>
+    <p class="osm-t">${osmBody(top.t)}</p>
+    ${past.length?`<details class="osm-past"${_osmOpen?' open':''}><summary>これまでのメッセージ（${past.length}）</summary>${past.map(x=>`<div class="osm-p"><span class="osm-d">${osmDate(x.d)}</span><p>${osmBody(x.t)}</p></div>`).join('')}</details>`:''}
+  </div></section>`; }
+const _osmFigC={};
+function osmFig(kind){ if(kind in _osmFigC) return _osmFigC[kind]; let v=''; try{ if(typeof bkScene==='function') v=osmFigSVG(kind); }catch(e){ console.warn('[osm]',e); } return (_osmFigC[kind]=v); }
+// ===== Over Soul（ひげの賢者）と 人生のヒント（女神）の小さなブロック絵 =====
+function osmFigSVG(kind){ const S=bkScene(); const skin='#F3CFAE';
+  const gold='#F4C75A';
+  if(kind==='sage'){ const robe='#EFE7D6', hair='#F4F2EE';
+    S.begin(1);
+    S.box(-.2,.1,0,1.6,1.1,.25,bkShade(robe,.92)); // すそ
+    S.box(0,.2,.2,1.2,.9,1.7,robe);
+    S.box(-.35,.4,1.0,.35,.5,.6,robe); S.box(1.2,.4,1.0,.35,.5,.6,robe); // そで
+    S.box(.15,.2,1.45,.9,.92,.12,gold); // 帯
+    const h=1.4, hx=-.1, hy=-.05, hz=1.9;
+    S.box(hx-.06,hy-.06,hz+h*.3,h+.12,.3,h*.75,hair); // うしろ髪
+    S.box(hx+h-.02,hy-.06,hz+h*.3,.16,h*.6,h*.6,hair); // よこ髪
+    S.box(hx,hy,hz,h,h,h,skin,bkFace(hx,hy,hz,h,60));
+    S.box(hx-.06,hy-.06,hz+h*.8,h+.12,h+.12,h*.26,hair);
+    S.box(hx+.04,hy+h,hz-.5,h-.08,.16,h*.5+.5,'#FFFFFF'); // あごひげ
+    S.box(hx+.25,hy+h,hz-.9,h-.5,.16,.4,'#FFFFFF');
+    S.box(hx+.45,hy+h,hz-1.15,h-.9,.16,.25,'#FFFFFF');
+    S.box(hx+.18,hy+h+.04,hz+h*.4,h-.36,.14,h*.12,'#FFFFFF'); // 口ひげ
+    S.end();
+  } else { const dress='#FFF4F7', hair='#F2C14E';
+    S.begin(1);
+    S.box(-.9,-.25,1.1,.9,.2,1.5,'#FFFFFF'); S.box(-1.3,-.25,1.7,.4,.2,.9,'#FFFFFF'); S.box(1.2,-.25,1.1,.9,.2,1.5,'#FFFFFF'); S.box(2.1,-.25,1.7,.4,.2,.9,'#FFFFFF'); // はね
+    S.box(-.15,.1,0,1.5,1.1,.3,bkShade(dress,.94));
+    S.box(.05,.2,.25,1.1,.9,1.6,dress);
+    S.box(-.25,.4,1.05,.3,.5,.55,skin); S.box(1.15,.4,1.05,.3,.5,.55,skin);
+    S.box(.15,.2,1.5,.9,.92,.12,'#F8A9BE');
+    const h=1.35, hx=-.07, hy=-.05, hz=1.85;
+    S.box(hx-.1,hy-.08,hz-.6,h+.2,.4,h*1.15,hair); // 長い髪
+    S.box(hx+h-.02,hy-.08,hz-.5,.22,h*.62,h*1.2,hair);
+    S.box(hx,hy,hz,h,h,h,skin,bkFace(hx,hy,hz,h,70));
+    S.box(hx-.08,hy-.08,hz+h*.78,h+.16,h+.16,h*.3,hair);
+    S.box(hx+.05,hy+h,hz+h*.82,h-.1,.1,h*.16,hair); // 前髪
+    S.end();
+  }
+  const c=S.p(.6,.5,3.85), halo=`<ellipse cx="${c[0].toFixed(1)}" cy="${c[1].toFixed(1)}" rx="15" ry="5" fill="none" stroke="${gold}" stroke-width="3" opacity=".95"/>`;
+  const g=S.p(.6,.5,1.9);
+  return `<svg class="osm-fig" viewBox="${(g[0]-40).toFixed(0)} ${(c[1]-12).toFixed(0)} 80 92" shape-rendering="crispEdges" aria-hidden="true"><circle cx="${g[0].toFixed(1)}" cy="${(g[1]-6).toFixed(1)}" r="28" fill="url(#osmGl-${kind})"/><defs><radialGradient id="osmGl-${kind}"><stop offset="0" stop-color="#FFF8D6" stop-opacity=".95"/><stop offset="1" stop-color="#FFF8D6" stop-opacity="0"/></radialGradient></defs>${S.render()}${halo}</svg>`; }
+// ホームの「人生のヒント」のすぐ上に差しこむ（ホームだけ）
+function osmPlace(){ try{ const app=document.getElementById('app'); if(!app) return; const old=app.querySelector('.osm'); if(old) old.remove();
+  if(viewing||!st||!cur||page!=='home') return;
+  const hic=app.querySelector('.hm-hint-ic'); if(hic&&!hic.querySelector('svg')){ const g=osmFig('goddess'); if(g){ hic.classList.add('osm-figbox'); hic.innerHTML=g; } }
+  const html=osmHTML(); if(!html) return;
+  const box=document.createElement('div'); box.innerHTML=html; const el=box.firstElementChild;
+  const hint=app.querySelector('.hm-hint'), home=app.querySelector('.home'); if(hint) hint.before(el); else if(home) home.prepend(el); else return;
+  const d=el.querySelector('details'); if(d) d.addEventListener('toggle',()=>{ _osmOpen=d.open; });
+  const top=osmList()[0], seen=store.get(KEY_OSMSEEN,{}); if(top&&!seen[top.i]){ seen[top.i]=Date.now(); const ks=Object.keys(seen); if(ks.length>40) delete seen[ks[0]]; store.set(KEY_OSMSEEN,seen); }
+}catch(e){ console.warn('[osm]',e); } }
+(function(){ if(typeof render1!=='function') return; const _r=render1; render1=function(){ const r=_r.apply(this,arguments); osmPlace(); return r; }; })();
+setTimeout(osmPlace,0);
+// サーバーから読む（ひらいたとき・20分以上たって画面に戻ったとき）
+async function osmFetch(){ if(!FB||!FB.db) return; if(Date.now()-_osmAt<20*60000) return; _osmAt=Date.now();
+  try{ const { doc, getDoc }=FB.D; const s=await getDoc(doc(FB.db,'os','board')); const m=s.exists()?(s.data().m||[]):[];
+    const clean=(Array.isArray(m)?m:[]).filter(x=>x&&typeof x.t==='string'&&x.t.trim()).slice(0,30).map(x=>({ i:String(x.i||x.d||''), t:String(x.t).slice(0,1000), d:Number(x.d)||0 }));
+    const before=JSON.stringify(osmList()); store.set(KEY_OSM,clean); if(before!==JSON.stringify(clean)) osmPlace();
+  }catch(e){ _osmAt=Date.now()-15*60000; try{ console.warn('[osm] 読めませんでした',e&&e.code||e); }catch(_){} } }
+(function(){ let n=0; const t=setInterval(()=>{ n++; if(FB&&FB.db){ clearInterval(t); osmFetch(); } else if(n>60) clearInterval(t); },1000);
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) osmFetch(); }); })();
+(function(){ const s=document.createElement('style'); s.textContent=`
+.osm{ display:flex; gap:12px; align-items:center; margin:18px 0 4px; padding:14px 18px; border-radius:18px; background:linear-gradient(135deg,#F1EAFF,#FFE9F0); border:2px solid #CDB8F5; color:#3A2D55; }
+.osm.is-new{ box-shadow:0 0 0 3px rgba(205,184,245,.45),0 0 22px rgba(167,127,234,.5); animation:osmGlow 2.8s ease-in-out infinite; }
+@keyframes osmGlow{ 50%{ box-shadow:0 0 0 3px rgba(205,184,245,.25),0 0 8px rgba(167,127,234,.2); } }
+@media (prefers-reduced-motion:reduce){ .osm.is-new{ animation:none; } }
+.osm + .hm-hint{ margin-top:10px; }
+.osm-in{ flex:1; min-width:0; }
+.osm small{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:11px; font-weight:700; color:#8A5CD6; letter-spacing:.08em; }
+.osm-ic, .hm-hint-ic.osm-figbox{ flex:none; align-self:center; width:58px; height:66px; background:none; -webkit-mask:none; mask:none; margin:-6px -4px -6px -8px; }
+.osm-fig{ display:block; width:100%; height:100%; overflow:visible; animation:osmFloat 3.6s ease-in-out infinite; filter:drop-shadow(0 6px 4px rgba(120,90,180,.18)); }
+.hm-hint-ic .osm-fig{ animation-delay:-1.8s; filter:drop-shadow(0 6px 4px rgba(200,140,40,.18)); }
+@keyframes osmFloat{ 0%,100%{ transform:translateY(2px); } 50%{ transform:translateY(-4px); } }
+@media (prefers-reduced-motion:reduce){ .osm-fig{ animation:none; } }
+.osm-new{ font-size:10px; color:#fff; background:#E8667E; border-radius:999px; padding:0 7px; letter-spacing:.06em; }
+.osm-d{ margin-left:auto; font-weight:500; color:#9A8DB8; letter-spacing:0; }
+.osm-t{ margin:2px 0 0; font-family:var(--serif); font-size:17px; line-height:1.8; overflow-wrap:anywhere; }
+.osm-past{ margin-top:8px; border-top:1px dashed #CDB8F5; padding-top:6px; }
+.osm-past summary{ cursor:pointer; font-size:12px; color:#8A5CD6; font-weight:700; }
+.osm-p{ padding:8px 0; border-bottom:1px dashed #E2D6FA; }
+.osm-p:last-child{ border-bottom:0; }
+.osm-p .osm-d{ display:block; margin:0; font-size:11px; }
+.osm-p p{ margin:2px 0 0; font-family:var(--serif); font-size:15px; line-height:1.75; overflow-wrap:anywhere; }
+`; document.head.appendChild(s); })();
 </script>
 </body></html>
