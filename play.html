@@ -10802,8 +10802,8 @@ function friendMeet(P,L){
   if(dirty){ const ks=Object.keys(memo); if(ks.length>200) for(const k of ks.slice(0,ks.length-200)) delete memo[k]; store.set(KEY_FRMEET,memo); }
 }
 // 画面：紹介する・紹介を受け取る（どの画面にもある「友だちに紹介」ボタン → 紹介の窓）
-const FR_LEAD='紹介した人と、紹介された人。ふたりの主人公は、それぞれの人生のどこかで、出会います。出会ったときは、お互いに「出会った！」と通知されます。';
-function friendShareText(link){ return `LIFE BOOK で、世界のどこかに生まれた一人の人生を見守っています。\nこのリンクから始めると、わたしの主人公と、あなたの主人公が、人生のどこかで出会います。\n${link}`; }
+const FR_LEAD='紹介した人と、紹介された人。ふたりの Star Seedは、それぞれの人生のどこかで、出会います。出会ったときは、お互いに「出会った！」と通知されます。';
+function friendShareText(link){ return `LIFE BOOK で、世界のどこかに生まれた一人の人生を見守っています。\nこのリンクから始めると、わたしの Star Seedと、あなたの Star Seedが、人生のどこかで出会います。\n${link}`; }
 function friendPlainLink(){ const u=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; return typeof extURL==='function'?extURL(u):u; }
 // 画面の中に置く案内（大きなボタンつき）
 function friendHTML(){ const fr=store.get(KEY_FRIEND,[]);
@@ -10826,7 +10826,7 @@ function frArtSVG(big){ let S; try{ S=bkScene(); }catch(e){ return ''; }
 function friendDialogHTML(){ const me=store.get(KEY_ME,''); const can=!!myHero(); const fr=store.get(KEY_FRIEND,[]);
   return `<div class="frd-in"><button class="frd-x" type="button" aria-label="閉じる">×</button>
     <div class="frd-art">${frArtSVG(true)}</div><h2>友だちに紹介する</h2><p class="frd-lead">${FR_LEAD}</p>${frReplyHTML()}
-    ${can?'':'<p class="tiny frd-note">まだ主人公が生まれていないので、今送れるのは LIFE BOOK の入口のリンクです。「生まれる」を押したあとに送ると、ふたりの主人公が出会います。</p>'}
+    ${can?'':'<p class="tiny frd-note">まだ Star Seed が生まれていないので、今送れるのは LIFE BOOK の入口のリンクです。「生まれる」を押したあとに送ると、ふたりの Star Seedが出会います。</p>'}
     <label class="frd-name">あなたの呼び名（友だちに表示されます）<input id="frBy" value="${esc(me)}" maxlength="20" placeholder="例：みつ"></label>
     <div class="frd-btns">
       <button class="frd-b frd-line" id="frLine" type="button"><i class="ic ic-line" aria-hidden="true"></i><span>LINEで送る</span></button>
@@ -10867,11 +10867,11 @@ function bindFriend(){ bindFriendOpeners();
 }
 function afterFriend(o,r){ if(r==='self'){ alertFriend('これは、あなた自身の紹介リンクです。'); return; }
   _fhCache=null; if(typeof load==='function'&&typeof st!=='undefined'&&st) load();
-  if(o.sv){ frReplyDone(o.id); alertFriend(`${o.by||'友だち'}さんが、あなたの紹介で LIFE BOOK を始めました。つながりました！ ふたりの主人公は、人生のどこかで出会います。`); return; }
-  if(o.re){ frReplyDone(o.id); alertFriend(`${o.by||'友だち'}さんから、返事が届きました！ ${o.by||'友だち'}さんと、おたがいにつながりました。ふたりの主人公は、人生のどこかで出会います。`); return; }
+  if(o.sv){ frReplyDone(o.id); alertFriend(`${o.by||'友だち'}さんが、あなたの紹介で LIFE BOOK を始めました。つながりました！ ふたりの Star Seedは、人生のどこかで出会います。`); return; }
+  if(o.re){ frReplyDone(o.id); alertFriend(`${o.by||'友だち'}さんから、返事が届きました！ ${o.by||'友だち'}さんと、おたがいにつながりました。ふたりの Star Seedは、人生のどこかで出会います。`); return; }
   const online=typeof fbOnline==='function'&&fbOnline();
   if(!online&&!frReplies().some(x=>x.id===o.id)) store.set(KEY_FRREPLY,[{ id:o.id, by:o.by||'' },...frReplies()].slice(0,10));
-  alertFriend(`${o.by||'友だち'}さんとつながりました。${o.by||'友だち'}さんの主人公と、あなたの主人公は、人生のどこかで出会います。`+(online?`${o.by||'友だち'}さんの画面にも、つながったことが届きます。`:`下のボタンで、${o.by||'友だち'}さんにも知らせてあげてください。`)); }
+  alertFriend(`${o.by||'友だち'}さんとつながりました。${o.by||'友だち'}さんの Star Seedと、あなたの Star Seedは、人生のどこかで出会います。`+(online?`${o.by||'友だち'}さんの画面にも、つながったことが届きます。`:`下のボタンで、${o.by||'友だち'}さんにも知らせてあげてください。`)); }
 function alertFriend(t){ if(typeof render==='function') render(); setTimeout(()=>openFriend(t),40); }
 // リンクで開いたとき
 function friendFromHash(){ try{ const h=location.hash||''; if(!/friend=/.test(h)) return; const o=readFriend(h); history.replaceState(null,'',location.pathname+location.search); if(!o) return; if(!o.re) o.lk=1; const r=receiveFriend(o); setTimeout(()=>afterFriend(o,r),300); }catch(e){} }
@@ -10893,7 +10893,7 @@ function meetArtSVG(){ let S; try{ S=bkScene(); }catch(e){ return ''; }
   return `<svg class="mt-art" viewBox="0 0 360 220" role="img" aria-label="小さな島で、ふたりのブロックの人が出会い、空にハートが浮かんでいる">${bg}<g transform="translate(0 56)">${S.render()}</g>${frHeart(162,18,7,'#FF6F92')}${frHeart(96,40,3,'#FFB3C4')}${frHeart(250,34,4,'#FFB3C4')}${frHeart(282,96,2,'#FF6F92')}</svg>`; }
 function meetOverlay(P,L,c){ if(document.getElementById('mtOv')) return; const un=meetUnseen(P,L,c); if(!un.length) return; const m=un[0];
   const d=document.createElement('div'); d.id='mtOv'; d.className='mt-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-labelledby','mtT');
-  d.innerHTML=`<div class="mt-card"><p class="mt-kicker">${esc(m.e.fr||'友だち')}さんの主人公と</p><h2 id="mtT">出会った！</h2>${meetArtSVG()}
+  d.innerHTML=`<div class="mt-card"><p class="mt-kicker">${esc(m.e.fr||'友だち')}さんの Star Seed と</p><h2 id="mtT">出会った！</h2>${meetArtSVG()}
     <p class="mt-who"><b>${esc(P.given)}</b>（${m.age}歳）と <b>${esc(m.e.frName||'')}</b></p><p class="mt-text">${esc(String(m.e.text||'').replace(/\{名\}/g,P.given))}</p>
     ${m.e.sync?`<p class="tiny muted">${esc(m.e.fr||'友だち')}さんの LIFE BOOK にも、同じころに「出会った！」が届きます。</p>`:''}
     <div class="mt-btns"><button type="button" class="fr-big" id="mtGo">出会いのページを読む</button><button type="button" class="mt-close" id="mtX">あとで</button></div></div>`;
@@ -11610,7 +11610,7 @@ function letterHTML(P,L,age){ const k=dayKey(); const got=d2Get(KEY_LETTER,[]); 
   if(last!==k){ got.push(k); d2Set(KEY_LETTER,got.slice(-400)); }
   const y=new Date(); y.setDate(y.getDate()-1); const missedY=got.length>1&&!got.includes(dayKey(y));
   const lt=letterToday(P,L,age);
-  return `<div class="lt-letter"><p class="lt-to">見守ってくれている、あなたへ</p>${lt.body.split('\n').map(s=>`<p>${esc(s)}</p>`).join('')}<p class="lt-sign">${esc(lt.sign)}より</p></div>
+  return `<div class="lt-letter"><p class="lt-to">見守ってくれている Over Soul へ</p>${lt.body.split('\n').map(s=>`<p>${esc(s)}</p>`).join('')}<p class="lt-sign">${esc(lt.sign)}より</p></div>
     <p class="tiny muted">手紙は1日に1通。その日にひらかないと読めません。これまでに受け取った手紙：${got.length}通${missedY?'（きのうの手紙は、もう読めません）':''}</p>`; }
 // --- 2. 今、何してる？（その地域のいまの時刻に合わせる） ---
 function nowDoing(P,age){ const t=(typeof localNow==='function'&&localNow(P))||{ h:new Date().getHours() }; const h=t.h; const wd=new Date().getDay(); const off=wd===0||wd===6;
@@ -11648,7 +11648,7 @@ function voteTileHTML(P,L,age){ const k=dayKey(); const y=new Date(); y.setDate(
   const hasPrev=v[yk]&&v[yk].seed===P.seed, hasMine=v[k]&&v[k].seed===P.seed; if(!voteDay(P,age,k)&&!hasMine&&!hasPrev) return '';
   return `<section class="hm-tile hm-vote"><h3>ふたつの選択に一票</h3><div class="hm-body">${voteHTML(P,L,age)}</div></section>`; }
 function voteHTML(P,L,age){ const k=dayKey(); const y=new Date(); y.setDate(y.getDate()-1); const yk=dayKey(y); const v=d2Get(KEY_VOTE,{}); const q=voteQ(P,age,k);
-  let prev=''; if(v[yk]&&v[yk].seed===P.seed){ const r=voteResult(P,L,v[yk].age,yk,v[yk].pick); if(r) prev=`<p class="vt-prev">きのうの一票（${esc(r.q[0])}）：${esc(P.given)}は「${esc(r.q[1+r.chose])}」を選んだ。${r.reach?'あなたの気持ちは、ちゃんと心に届いていたみたい。':'あなたの一票は届かなかったけれど、それも本人が選んだ道。'}</p>`; }
+  let prev=''; if(v[yk]&&v[yk].seed===P.seed){ const r=voteResult(P,L,v[yk].age,yk,v[yk].pick); if(r) prev=`<p class="vt-prev">きのうの一票（${esc(r.q[0])}）：${esc(P.given)}は「${esc(r.q[1+r.chose])}」を選んだ。${r.reach?'Over Soul の気持ちは、ちゃんと心に届いていたみたい。':'Over Soul の一票は届かなかったけれど、それも本人が選んだ道。'}</p>`; }
   const mine=v[k]&&v[k].seed===P.seed?v[k].pick:null;
   if(mine==null&&!voteDay(P,age,k)) return prev;
   return `${prev}<p class="vt-q">${esc(P.given)}は、いま迷っています。<b>${esc(q[0])}</b>、どっちにしよう？</p>
@@ -14462,7 +14462,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-album',`思い出のアルバム<span class="hm-n">${photos.length}枚</span>`, photos.length?`<div class="hm-photos">${photos.slice(-3).map(ph=>photoHTML(P,L,ph,true)).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。</p>', photos.length?`<button class="linkish" type="button" id="hmAlbum">アルバムをひらく</button>`:'')}
     ${homeTile('hm-belief','心に生まれた観念', bel.length?`<ul class="hm-list">${bel.map(b=>`<li><span class="hm-a">${b.age}歳</span>「${esc(b.core||b.text||'')}」</li>`).join('')}</ul>`:'<p class="tiny muted">まだ、心に残る思い込みは生まれていません。</p>', arc.length?`<button class="linkish" type="button" id="hmKmap">本棚の人生とくらべる（観念の地図）</button>`:'')}
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
-    ${homeTile('hm-friends',`紹介でつながった人<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの主人公が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
+    ${homeTile('hm-friends',`紹介でつながった人<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Star Seed が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
     ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は「思い出のLIFE BOOK」になって、ここに並びます。</p>')}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
     ${typeof birthMapHTML==='function'?homeTile('hm-map','生まれた場所',birthMapHTML(P)):''}
@@ -14656,9 +14656,9 @@ function introHTML(){
       <p class="brand-sub">${SUBTITLE}</p>
       <p class="lead">世界のどこかに、<br><em>ひとりの人間</em>として生まれる。</p>
       <div class="ih-cta"><button class="born-btn" id="bornBtn" type="button"><svg class="born-heart" viewBox="0 0 28 24" shape-rendering="crispEdges" aria-hidden="true">${typeof frHeart==='function'?frHeart(0,0,4,'#FFFFFF'):''}</svg><span class="born-txt">生まれる</span><span class="born-sub">あたらしい いのちが、はじまります</span></button></div>
-      <p class="ih-fr">友だちを誘うと、ふたりの主人公が人生のどこかで出会います。<button class="fr-open" type="button">友だちに紹介する</button></p>
+      <p class="ih-fr">友だちを誘うと、ふたりの Star Seed が人生のどこかで出会います。<button class="fr-open" type="button">友だちに紹介する</button></p>
     </div><div class="hero">${bkHeroSVG()}</div></div>
-    <div class="body"><p>国も、家族も、家の暮らし向きも、生まれた日時も、名前も、すべて世界の統計に沿って偶然に決まります。その人は、自分で考え、自分で選んで生きていきます。あなたにできるのは、迷っているその人に、一生で2〜3回だけ「インスピレーション」を贈ること。届くかどうかは、その時のその人の心しだいです。</p>
+    <div class="body"><p>国も、家族も、家の暮らし向きも、生まれた日時も、名前も、すべて世界の統計に沿って偶然に決まります。生まれた人は「Star Seed」。Star Seed は、自分で考え、自分で選んで生きていきます。見守るあなたは「Over Soul」。Over Soul にできるのは、迷っているその人に、一生で2〜3回だけ「インスピレーション」を贈ること。届くかどうかは、その時のその人の心しだいです。</p>
     <p style="margin-top:10px">人生は、現実の約2日半で1歳ずつ進みます（80歳まで生きる人生なら、約6か月半）。ひらくたびに、前に見た時から今までに起きた出来事と、その時の気持ちが読めます。人生が終わると、葬儀のあとに、その人生を読み解く「LIFE BOOK前世レポート」が届きます。生き終えた人生は、章立てのある一冊の本になって、あなたの本棚に並びます。</p></div>
     <div class="cta2"><button class="born-btn" id="bornBtn2" type="button"><svg class="born-heart" viewBox="0 0 28 24" shape-rendering="crispEdges" aria-hidden="true">${typeof frHeart==='function'?frHeart(0,0,4,'#FFFFFF'):''}</svg><span class="born-txt">生まれる</span><span class="born-sub">あたらしい いのちが、はじまります</span></button></div>
     <p class="tiny muted">世界189か国の中から、その年の出生数の比率に沿って生まれる国が決まります。</p>
@@ -14713,7 +14713,7 @@ function profileFacts(P,age){
 
 function seasonLabel(i,cid){ const cl=climateOf(cid); return cl==='n'?SEASON_NAME[i]:cl==='s'?['秋','冬','春','夏'][i]:['1〜3月ごろ','4〜6月ごろ','7〜9月ごろ','10〜12月ごろ'][i]; }
 function evHTML(e){
-  return `<div class="ev ${e.fresh?'ev-new':''} ${e.big?'big':''} ${e.kind==='death'?'death':''} k-${e.kind}"><p class="t">${esc(e.text)}</p>${e.feel?`<p class="f">${esc(e.feel)}</p>`:''}${e.kind==='dream'?(e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:'')+(e.result?`<p class="rs">${esc(e.result)}</p>`:''):(e.result?`<p class="rs">${esc(e.result)}</p>`:'')+(e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:'')}${e.fr?`<p class="fr-tag">紹介でつながった人：${esc(e.fr)}さんの人生の主人公</p>`:''}</div>`;
+  return `<div class="ev ${e.fresh?'ev-new':''} ${e.big?'big':''} ${e.kind==='death'?'death':''} k-${e.kind}"><p class="t">${esc(e.text)}</p>${e.feel?`<p class="f">${esc(e.feel)}</p>`:''}${e.kind==='dream'?(e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:'')+(e.result?`<p class="rs">${esc(e.result)}</p>`:''):(e.result?`<p class="rs">${esc(e.result)}</p>`:'')+(e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:'')}${e.fr?`<p class="fr-tag">紹介でつながった人：${esc(e.fr)}さんの人生の Star Seed</p>`:''}</div>`;
 }
 function yearHTML(y, isNew){
   return `<div class="year ${isNew?'fade':''}"><div class="yage">${y.age===0?'0':y.age}<small>${ageSpan(cur&&cur.P?cur.P:{year:y.year-y.age,month:1},y.age)}</small></div><div>${isNew?'<div class="new-badge">あたらしい出来事</div>':''}${cur&&cur.P?yearArt(cur.P,cur.L,y):''}${(()=>{ let last=null, o=''; const cid=cur&&cur.P?cur.P.countryId:'jp'; for(const e of y.events){ if(e._mo!=null && e.kind!=='death' && e.kind!=='birth' && e.kind!=='birthsit' && e._mo!==last){ o+=`<div class="season-h">${e._mo}月</div>`; last=e._mo; } else if(e._mo==null && e.season!=null && e.kind!=='death' && e.kind!=='birth' && e.season!==last){ o+=`<div class="season-h">${seasonLabel(e.season,cid)}</div>`; last=e.season; } o+=evHTML(e); } return o; })()}${y.mood&&!y.events.some(e=>e.kind==='death')?`<p class="mood">${esc(y.mood)}</p>`:''}${y.egs?egsTagHTML(y.egs):''}</div></div>`;
@@ -14852,7 +14852,7 @@ function inspCardHTML(P,pd){
     <p class="prompt">${esc(pd.prompt)}</p>
     <p class="lean">${nm}の心は、いま<b>${esc(qt(pd.leanLabel))}</b>のほうへ傾いています。</p>
     <div class="insp-meta">
-      <div><span class="k">あなたが贈れる光</span><span class="orbs" aria-label="あと${left}回">${'<i class="on"></i>'.repeat(left)}${'<i></i>'.repeat(pd.inspMax-left)}</span><span class="v">あと${left}回</span></div>
+      <div><span class="k">Over Soul が贈れる光</span><span class="orbs" aria-label="あと${left}回">${'<i class="on"></i>'.repeat(left)}${'<i></i>'.repeat(pd.inspMax-left)}</span><span class="v">あと${left}回</span></div>
       <div><span class="k">${nm}の心</span><span class="calm c${cw[2]}" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="v">${cw[0]}${cw[1]?`（${cw[1]}）`:''}</span></div>
       ${(()=>{ const ys=cur&&cur.L?cur.L.years.filter(y=>y.age<pd.age&&y.egs):[]; const n=ys.length?ys[ys.length-1].egs:null; return n?`<div><span class="k">感情</span><span class="v">${esc(egsName(n))}</span></div>`:''; })()}
     </div>
@@ -14881,7 +14881,7 @@ function sendInsp(){
     msg.innerHTML=res.heard?`<b>聞こえた。</b><br>${nm}は、ふと立ち止まり、${esc(qt(res.label))}を選んだ。`
       : res.near?`${nm}は、一瞬だけ振り返った。<br>けれど、届かなかった。${nm}は${esc(qt(res.label))}を選んだ。`
       : `光は、${nm}の心にふれる前に、静かに消えていった。<br>${nm}は${esc(qt(res.label))}を選んだ。`;
-    $('#inspAfter').innerHTML=`<p class="tiny muted">${res.inspLeft>0?`あなたが贈れる光は、あと${res.inspLeft}回です。`:'あなたが贈れる光は、もう残っていません。ここからは、見守るだけです。'}</p><div><button class="btn" type="button" id="inspGo">人生の続きを見る</button></div>`;
+    $('#inspAfter').innerHTML=`<p class="tiny muted">${res.inspLeft>0?`Over Soul が贈れる光は、あと${res.inspLeft}回です。`:'Over Soul が贈れる光は、もう残っていません。ここからは、見守るだけです。'}</p><div><button class="btn" type="button" id="inspGo">人生の続きを見る</button></div>`;
     $('#inspGo').onclick=()=>{ inspAnim=false; render(); };
     $('#inspGo').focus();
   }, T[2]);
@@ -15003,7 +15003,7 @@ function reportHTML(P,L,isPast){
         <div class="legend"><span><i></i>この人生</span><span><i class="alt"></i>${esc(qt(altLabel))}の人生</span></div>`;
     }
     ch4=`<section class="chap"><div class="no">第4章</div><h2>贈った光</h2>
-      <div class="prose"><p>${name}の一生には、迷う場面が${CH.length}回ありました。あなたが贈れる光は${L.inspMax}回。${sentN?`そのうち<strong>${sentN}回</strong>を贈り、<strong>${heardN}回</strong>が届きました。`:'あなたは一度も光を贈らず、すべてを見守りました。'}</p></div>
+      <div class="prose"><p>${name}の一生には、迷う場面が${CH.length}回ありました。Over Soul が贈れる光は${L.inspMax}回。${sentN?`そのうち<strong>${sentN}回</strong>を贈り、<strong>${heardN}回</strong>が届きました。`:'Over Soul は一度も光を贈らず、すべてを見守りました。'}</p></div>
       <div class="insp-list">${CH.map(c=>`<div class="ir"><div class="ia">${c.age}歳<br><span class="muted">${esc(c.stage)}</span></div><div><p>${esc(c.prompt)}</p><p class="tiny">${c.sent&&c.heard?`傾いていたのは${esc(qt(c.leanLabel))}。光が届き、<b>${esc(qt(c.label))}</b>を選んだ。`:`<b>${esc(qt(c.label))}</b>を選んだ。`} ${tag(c)}</p>${c.linkedText?`<p class="tiny muted">${esc(qt(c.linkedText))}という観念と向き合う場面でした。</p>`:''}</div></div>`).join('')}</div>
       ${altH}
     </section>`;
@@ -15034,7 +15034,7 @@ function reportHTML(P,L,isPast){
         ${a.ev2.slice(0,4).map(e=>`<p class="tiny"><span class="muted">${e.age}歳</span>　${esc(e.text)}</p>`).join('')}</div>`).join('')}
     </section>`;
   } else {
-    ch4=`<section class="chap"><div class="no">第4章</div><h2>贈った光</h2><div class="prose"><p>${L.deathAge<19?`${name}が大きく迷う日が来る前に、人生は幕を下ろしました。光を贈る時はありませんでした。それでも、見守ってくれた人がいたことは、ちゃんと残っています。`:'この人生では、光を贈る時は訪れませんでした。'}</p></div></section>`;
+    ch4=`<section class="chap"><div class="no">第4章</div><h2>贈った光</h2><div class="prose"><p>${L.deathAge<19?`${name}が大きく迷う日が来る前に、人生は幕を下ろしました。光を贈る時はありませんでした。それでも、見守ってくれた Over Soul がいたことは、ちゃんと残っています。`:'この人生では、光を贈る時は訪れませんでした。'}</p></div></section>`;
   }
   // 第5章
   const qs=[]; negB.forEach(b=>{ if(qs.length<3) qs.push(b.question||BELIEFS[b.id].question); }); posB.forEach(b=>{ if(qs.length<3) qs.push(b.question||BELIEFS[b.id].question); });
@@ -15301,7 +15301,7 @@ function fbListen(){ const { collection, onSnapshot }=FB.D;
     if(!changed) return;
     try{ _fhCache=null; }catch(_){}
     fbPush(); // 新しい相手に、こちらの主人公も届ける
-    if(accepted.length){ const o=accepted[accepted.length-1]; alertFriend(`${o.by||'友だち'}さんが受けてくれました。${o.by||'友だち'}さんと、つながりました！ ふたりの主人公は、人生のどこかで出会います。`); }
+    if(accepted.length){ const o=accepted[accepted.length-1]; alertFriend(`${o.by||'友だち'}さんが受けてくれました。${o.by||'友だち'}さんと、つながりました！ ふたりの Star Seedは、人生のどこかで出会います。`); }
     else if(fresh.length){ const o=fresh[fresh.length-1]; afterFriend(o,'ok'); }
     else { try{ if(typeof load==='function'&&typeof st!=='undefined'&&st) load(); if(typeof render==='function') render(); }catch(_){} }
   },e=>{ try{ console.warn('[fbsync] 受け箱を読めませんでした',e&&e.code||e); }catch(_){} }); }
@@ -15342,7 +15342,7 @@ function fbFofHTML(){ if(!fbOnline()) return ''; const reqs=FB_REQS, cands=fbCan
   let h='<div class="fof">';
   if(reqs.length) h+=`<h3 class="fof-h">つながりたいと届いています</h3><ul class="fof-l">${reqs.map(x=>`<li><span class="fof-n"><b>${esc(x.by||'だれか')}さん</b><small>${esc(fbViaName(x.via))}さんの友だち</small></span><span class="fof-b"><button type="button" class="fof-ok" data-acc="${esc(x.from)}">つながる</button><button type="button" class="fof-no" data-dec="${esc(x.from)}">今はしない</button></span></li>`).join('')}</ul>`;
   if(cands.length) h+=`<h3 class="fof-h">友だちの友だち</h3><p class="tiny muted">共通の友だちがいる人だけが出ます。「つながる」を押すと相手に届き、相手がOKするとつながります。</p><ul class="fof-l">${cands.map(c=>{ const v=c.via.map(x=>esc(x.by)+'さん').join('、');
-      return `<li><span class="fof-n"><small>${v}の友だち</small><b>${esc(c.by||'友だち')}さん</b></span><span class="fof-b">${asked.includes(c.id)?'<span class="fof-wait">返事を待っています</span>':`<button type="button" class="fof-ok" data-ask="${esc(c.id)}"${can?'':' disabled'}>つながる</button>`}</span></li>`; }).join('')}</ul>${can?'':'<p class="tiny muted">主人公が生まれると、「つながりたい」を送れます。</p>'}`;
+      return `<li><span class="fof-n"><small>${v}の友だち</small><b>${esc(c.by||'友だち')}さん</b></span><span class="fof-b">${asked.includes(c.id)?'<span class="fof-wait">返事を待っています</span>':`<button type="button" class="fof-ok" data-ask="${esc(c.id)}"${can?'':' disabled'}>つながる</button>`}</span></li>`; }).join('')}</ul>${can?'':'<p class="tiny muted">Star Seed が生まれると、「つながりたい」を送れます。</p>'}`;
   h+='<p class="fof-note">つながっても、メッセージのやり取りは出来ません。</p>';
   return h+'</div>'; }
 function fbDlgRefresh(msg){ const d=document.getElementById('frDlg'); if(!d||d.hidden) return; const m=msg||(($('#frMsg')||{}).textContent||''); try{ openFriend(m); }catch(_){} }
@@ -15351,7 +15351,7 @@ function fbDlgRefresh(msg){ const d=document.getElementById('frDlg'); if(!d||d.h
 (function(){ const _bf=bindFriend; bindFriend=function(){ const r=_bf.apply(this,arguments); const d=document.getElementById('frDlg'); if(!d||d.hidden) return r;
   const say=t=>fbDlgRefresh(t);
   d.querySelectorAll('[data-ask]').forEach(b=>{ b.onclick=async()=>{ b.disabled=true; const c=fbCandidates().find(x=>x.id===b.dataset.ask); const ok=await fbAsk(b.dataset.ask); say(ok?`${(c&&c.by)||'相手'}さんに「つながりたい」を送りました。OKが届いたら、お知らせします。`:'送れませんでした。少したってから、もう一度ためしてください。'); }; });
-  d.querySelectorAll('[data-acc]').forEach(b=>{ b.onclick=async()=>{ b.disabled=true; const x=FB_REQS.find(r=>r.from===b.dataset.acc); const ok=await fbAccept(b.dataset.acc); say(ok?`${(x&&x.by)||'相手'}さんと、つながりました！ ふたりの主人公は、人生のどこかで出会います。`:'うまくつながれませんでした。少したってから、もう一度ためしてください。'); }; });
+  d.querySelectorAll('[data-acc]').forEach(b=>{ b.onclick=async()=>{ b.disabled=true; const x=FB_REQS.find(r=>r.from===b.dataset.acc); const ok=await fbAccept(b.dataset.acc); say(ok?`${(x&&x.by)||'相手'}さんと、つながりました！ ふたりの Star Seedは、人生のどこかで出会います。`:'うまくつながれませんでした。少したってから、もう一度ためしてください。'); }; });
   d.querySelectorAll('[data-dec]').forEach(b=>{ b.onclick=()=>fbDecline(b.dataset.dec); });
   return r; }; })();
 // 紹介リンクに招待の印を入れる
