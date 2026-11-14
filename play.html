@@ -10925,12 +10925,18 @@ function friendDialogHTML(){ const me=store.get(KEY_ME,''); const can=!!myHero()
     </details>
     ${fr.length?`<p class="tiny muted">つながっている人：${fr.map(f=>esc(f.by||'友だち')+'さん').join('、')}</p>`:''}</div>`; }
 function openFriend(msgText){ let d=document.getElementById('frDlg');
-  if(!d){ d=document.createElement('div'); d.id='frDlg'; d.className='frd'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','友だちに紹介する'); document.body.appendChild(d);
+  if(!d){ d=document.createElement('div'); d.hidden=true; d.id='frDlg'; d.className='frd'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','友だちに紹介する'); document.body.appendChild(d);
     d.addEventListener('click',e=>{ if(e.target===d) closeFriend(); }); document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!d.hidden) closeFriend(); }); }
-  d.innerHTML=friendDialogHTML(); d.hidden=false; document.body.classList.add('frd-on'); bindFriend();
+  // すでに開いているときは、出し直さずに中身だけ静かに入れかえる（サーバーからのお知らせのたびに、ポップが何度も飛び出して見えないように）
+  const was=!d.hidden, html=friendDialogHTML();
+  if(was&&d._h===html){ if(msgText){ const m=$('#frMsg'); if(m) m.textContent=msgText; } return; }
+  const inOld=d.querySelector('.frd-in'), top=inOld?inOld.scrollTop:0, byOld=$('#frBy'), byVal=byOld?byOld.value:null, byFocus=byOld&&document.activeElement===byOld;
+  d.innerHTML=html; d._h=html; d.hidden=false; document.body.classList.add('frd-on');
+  if(was){ const inNew=d.querySelector('.frd-in'); if(inNew){ inNew.style.animation='none'; inNew.scrollTop=top; } const bi=$('#frBy'); if(bi&&byVal!=null){ bi.value=byVal; if(byFocus) bi.focus(); } }
+  bindFriend();
   if(msgText){ const m=$('#frMsg'); if(m) m.textContent=msgText; }
-  const f=d.querySelector('#frLine'); if(f) f.focus(); }
-function closeFriend(){ const d=document.getElementById('frDlg'); if(d) d.hidden=true; document.body.classList.remove('frd-on'); }
+  if(!was){ const f=d.querySelector('#frLine'); if(f) f.focus(); } }
+function closeFriend(){ const d=document.getElementById('frDlg'); if(d){ d.hidden=true; d._h=''; } document.body.classList.remove('frd-on'); }
 function bindFriendOpeners(){ document.querySelectorAll('.fr-open').forEach(b=>{ b.onclick=()=>openFriend(); }); }
 function bindFriend(){ bindFriendOpeners();
   const d=document.getElementById('frDlg'); if(!d||d.hidden) return;
