@@ -11967,9 +11967,9 @@ function mapIslandSVG(id){ const z=geoZoom(id), c=GEO.cs[id]; if(!z) return ''; 
   const H=top+bodyH+40;
   return `<svg class="mp-island" viewBox="0 0 360 ${H.toFixed(0)}" role="img" aria-label="${esc((c&&P_NAME_OF(id))||'')}を、空に浮かぶブロックの島にした地図。生まれた国に旗が立っている">${cloud(22,14,1)}${cloud(280,10,.8)}${out}${blocks}${mapFlag(fx,fy,1.2)}</svg>`; }
 function P_NAME_OF(id){ try{ return (COUNTRIES.find(x=>x.id===id)||{}).name||''; }catch(e){ return ''; } }
-function birthMapHTML(P){ const id=P.countryId; if(typeof GEO==='undefined'||!GEO.cs[id]) return '';
+function birthMapHTML(P){ const id=P.countryId; if(typeof GEO==='undefined'||!GEO.cs[id]) return typeof wikiBoxHTML==='function'?wikiBoxHTML(P):'';
   return `<div class="mp-wrap"><div class="mp-main">${mapIslandSVG(id)}</div><div class="mp-side">${mapGlobeSVG(id,150)}<p class="mp-cap"><b>${esc(P.country.name)}</b>の<br>${esc(P.city||'')}で生まれた</p></div></div>
-    <p class="tiny muted">旗は国のまんなかあたりに立てています（生まれた町の正確な位置ではありません）。地図のもと：Natural Earth</p>`; }
+    <p class="tiny muted">旗は国のまんなかあたりに立てています（生まれた町の正確な位置ではありません）。地図のもと：Natural Earth</p>${typeof wikiBoxHTML==='function'?wikiBoxHTML(P):''}`; }
 // ロゴ：空に浮かぶ小さなブロックの島（木と家）
 function lbIsleSVG(){ let S; try{ S=bkScene(); }catch(e){ return ''; }
   S.box(.3,.3,-1.6,2.4,2.4,.8,'#8E6A4C'); S.box(0,0,-.8,3,3,.8,'#B08463');
@@ -11978,6 +11978,53 @@ function lbIsleSVG(){ let S; try{ S=bkScene(); }catch(e){ return ''; }
   S.box(1.4,.2,.3,1.3,1.2,1.1,'#FFE7B8'); S.box(1.3,.1,1.4,1.5,1.4,.35,'#E9705A'); S.box(1.5,.3,1.75,1.1,1,.3,'#F08A72');
   const sv=S.render(); return `<svg viewBox="128 30 104 120">${sv}</svg>`; }
 setTimeout(()=>{ try{ const el=document.getElementById('lbIsle'); if(el&&!el.innerHTML) el.innerHTML=lbIsleSVG(); const a=el&&el.closest('a'); if(a) a.onclick=ev=>{ ev.preventDefault(); try{ if(typeof cur!=='undefined'&&cur&&typeof goHome==='function') goHome(); else window.scrollTo(0,0); }catch(_){} }; }catch(e){} },0);
+// ===== 生まれた国のことを読む（日本語版 Wikipedia の記事を、ゲームの中で読めるように） =====
+// 記事は開いたときにだけ Wikipedia から読みこむ（ゲームの中に文章は入れない）。出典とライセンス（CC BY-SA 4.0）を必ず添える。
+const WK_TITLE={ 'アメリカ':'アメリカ合衆国','中国':'中華人民共和国','韓国':'大韓民国','北朝鮮':'朝鮮民主主義人民共和国','パレスチナ':'パレスチナ国','コンゴ共和国':'コンゴ共和国','ジョージア':'ジョージア (国)','ドミニカ国':'ドミニカ国' };
+const WK_SKIP=/^(脚注|注釈|出典|参考文献|関連項目|外部リンク|関連文献|参考資料|注|脚注・出典)$/;
+const _wkCache={};
+function wkTitle(P){ const n=P.country.name; return WK_TITLE[n]||n; }
+function wkUrl(t){ return 'https://ja.wikipedia.org/wiki/'+encodeURIComponent(t.replace(/ /g,'_')); }
+function wikiBoxHTML(P){ const t=wkTitle(P);
+  return `<section class="wk" data-wk="${esc(t)}"><h4 class="wk-h"><span aria-hidden="true">📖</span> ${esc(P.country.name)}のこと</h4>
+    <p class="wk-l">${esc(P.given)}が生まれた国のことを、Wikipedia の記事で読めます。</p>
+    <div class="wk-btns"><button type="button" class="wk-go">この国のことを読む</button><a class="wk-out" href="${wkUrl(t)}" target="_blank" rel="noopener">Wikipedia で開く</a></div>
+    <div class="wk-body" hidden></div></section>`; }
+function wkParse(txt){ const lines=String(txt||'').split('\n'); const out={ lead:[], secs:[] }; let sec=null, sub=null, skip=false;
+  for(let ln of lines){ ln=ln.trim(); if(!ln) continue; let m;
+    if((m=ln.match(/^==\s*([^=].*?)\s*==$/))){ skip=WK_SKIP.test(m[1]); sec=skip?null:{ h:m[1], parts:[] }; if(sec) out.secs.push(sec); sub=null; continue; }
+    if((m=ln.match(/^={3,}\s*(.*?)\s*={3,}$/))){ if(sec&&!skip){ sub={ h:m[1], p:[] }; sec.parts.push(sub); } continue; }
+    if(skip) continue; if(!sec){ out.lead.push(ln); continue; }
+    if(!sub){ sub={ h:'', p:[] }; sec.parts.push(sub); } sub.p.push(ln); }
+  out.secs=out.secs.filter(s=>s.parts.some(p=>p.p.length)); return out; }
+function wkRender(t,o){ const ps=a=>a.map(x=>`<p>${esc(x)}</p>`).join('');
+  return `<div class="wk-lead">${ps(o.lead.slice(0,6))}</div>
+    ${o.secs.map(s=>`<details class="wk-sec"><summary>${esc(s.h)}</summary>${s.parts.map(p=>(p.h?`<h5>${esc(p.h)}</h5>`:'')+ps(p.p)).join('')}</details>`).join('')}
+    <p class="wk-src">この文章は、Wikipedia 日本語版「<a href="${wkUrl(t)}" target="_blank" rel="noopener">${esc(t)}</a>」より（<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" target="_blank" rel="noopener">CC BY-SA 4.0</a>）。内容は Wikipedia の執筆者によるもので、ゲームの人生とは関係ありません。</p>`; }
+async function wkLoad(t){ if(_wkCache[t]) return _wkCache[t];
+  const u='https://ja.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&exsectionformat=wiki&redirects=1&format=json&formatversion=2&origin=*&titles='+encodeURIComponent(t);
+  const r=await fetch(u); if(!r.ok) throw new Error('http '+r.status); const j=await r.json(); const pg=j&&j.query&&j.query.pages&&j.query.pages[0];
+  if(!pg||pg.missing||!pg.extract) throw new Error('missing'); const o=wkParse(pg.extract); o.title=pg.title||t; _wkCache[t]=o; return o; }
+document.addEventListener('click',async e=>{ const b=e.target.closest&&e.target.closest('.wk-go'); if(!b) return; const box=b.closest('.wk'); if(!box) return; const body=box.querySelector('.wk-body'); const t=box.dataset.wk;
+  if(!body.hidden&&body.dataset.ok){ body.hidden=true; b.textContent='この国のことを読む'; return; }
+  body.hidden=false; b.disabled=true; b.textContent='読みこんでいます…'; body.innerHTML='<p class="wk-wait">Wikipedia から読みこんでいます…</p>';
+  try{ const o=await wkLoad(t); body.innerHTML=wkRender(o.title,o); body.dataset.ok='1'; b.textContent='とじる'; }
+  catch(err){ body.innerHTML=`<p class="wk-ng">いまは読みこめませんでした。通信のよいところで、もう一度押すか、「Wikipedia で開く」から読んでください。</p>`; b.textContent='この国のことを読む'; }
+  b.disabled=false; });
+(function(){ if(typeof document==='undefined') return; const c=document.createElement('style'); c.textContent=`.wk{ margin-top:14px; padding:12px 14px 14px; border-radius:18px; background:#F2F8FF; border:2px solid #CFE3F5; box-shadow:0 3px 0 #D3E3F1; }
+.wk-h{ margin:0 0 4px; font-size:16px; color:#2E5D86; }
+.wk-l{ margin:0 0 10px; font-size:13px; color:#4A5A6A; }
+.wk-btns{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; }
+.wk-go{ font:inherit; font-size:14px; font-weight:700; padding:8px 18px; border-radius:999px; border:2px solid #E86A88; background:#FF8FAA; color:#fff; box-shadow:0 3px 0 #D85878; cursor:pointer; }
+.wk-go:disabled{ opacity:.7; cursor:wait; }
+.wk-out{ font-size:13px; color:#2E6DA4; }
+.wk-body{ margin-top:12px; font-size:14px; line-height:1.85; color:#2A3440; }
+.wk-body p{ margin:0 0 .7em; }
+.wk-sec{ margin:6px 0; padding:6px 12px; border-radius:12px; background:#fff; border:1px solid #DCE8F3; }
+.wk-sec summary{ cursor:pointer; font-weight:700; color:#2E5D86; padding:4px 0; }
+.wk-sec h5{ margin:10px 0 4px; font-size:14px; color:#4A6A8A; }
+.wk-src{ margin-top:10px!important; font-size:11px; color:#6A7A8A; line-height:1.6; }
+.wk-ng,.wk-wait{ font-size:13px; color:#6A7A8A; }`; document.head.appendChild(c); })();
 // ===== 地球アルバム：生まれた国の名所を、ブロックの絵はがきにして集める =====
 // 名所はすべて実在。説明は、よく知られた事実だけ（年や高さが確かなものだけ書く）。
 // [名所の名前, 形, 色, ひとこと]
