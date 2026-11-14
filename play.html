@@ -12039,6 +12039,7 @@ function wkUrl(t){ return 'https://ja.wikipedia.org/wiki/'+encodeURIComponent(t.
 function wikiBoxHTML(P){ const t=wkTitle(P);
   return `<section class="wk" data-wk="${esc(t)}"><h4 class="wk-h"><span aria-hidden="true">📖</span> ${esc(P.country.name)}のこと</h4>
     <p class="wk-l">${esc(P.given)}が生まれた国のことを、Wikipedia の記事で読めます。</p>
+    <p class="wk-now">※ ${new Date().getFullYear()}年いまの情報です（${esc(P.given)}が生まれた年のようすではありません）。</p>
     <div class="wk-btns"><button type="button" class="wk-go">この国のことを読む</button><a class="wk-out" href="${wkUrl(t)}" target="_blank" rel="noopener">Wikipedia で開く</a></div>
     <div class="wk-body" hidden></div></section>`; }
 function wkParse(txt){ const lines=String(txt||'').split('\n'); const out={ lead:[], secs:[] }; let sec=null, sub=null, skip=false;
@@ -12064,7 +12065,8 @@ document.addEventListener('click',async e=>{ const b=e.target.closest&&e.target.
   b.disabled=false; });
 (function(){ if(typeof document==='undefined') return; const c=document.createElement('style'); c.textContent=`.wk{ margin-top:14px; padding:12px 14px 14px; border-radius:18px; background:#F2F8FF; border:2px solid #CFE3F5; box-shadow:0 3px 0 #D3E3F1; }
 .wk-h{ margin:0 0 4px; font-size:16px; color:#2E5D86; }
-.wk-l{ margin:0 0 10px; font-size:13px; color:#4A5A6A; }
+.wk-now{ margin:-4px 0 10px; font-size:12px; font-weight:700; color:#C9466A; }
+.wk-l{ margin:0 0 6px; font-size:13px; color:#4A5A6A; }
 .wk-btns{ display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; }
 .wk-go{ font:inherit; font-size:14px; font-weight:700; padding:8px 18px; border-radius:999px; border:2px solid #E86A88; background:#FF8FAA; color:#fff; box-shadow:0 3px 0 #D85878; cursor:pointer; }
 .wk-go:disabled{ opacity:.7; cursor:wait; }
