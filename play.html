@@ -10640,7 +10640,20 @@ const KEY_LOAN='hitotsu.loans', KEY_LENT='hitotsu.lent', KEY_ME='hitotsu.myname'
 const b64e=s=>{ const u=new TextEncoder().encode(s); let b=''; u.forEach(x=>b+=String.fromCharCode(x)); return btoa(b).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); };
 const b64d=s=>{ const b=atob(s.replace(/-/g,'+').replace(/_/g,'/')); return new TextDecoder().decode(Uint8Array.from(b,c=>c.charCodeAt(0))); };
 function loanCode(a,by,due,ans){ return 'LIFEBOOK1.'+b64e(JSON.stringify({ s:a.seed, c:a.country||null, f:a.force||null, ch:a.choice||null, n:a.name, na:a.nation, a:a.age, by, due, ab:(ans&&ans.atogaki)||'', ob:ans&&ans.obi!=null?ans.obi:null, t:Date.now() })); }
-function readLoan(txt){ const m=(txt||'').match(/LIFEBOOK1\.([A-Za-z0-9_-]+)/); if(!m) return null; try{ const o=JSON.parse(b64d(m[1])); if(typeof o.s!=='number') return null; return o; }catch(e){ return null; } }
+function readLoan(txt){ const m=(txt||'').match(/(?:LIFEBOOK1\.|#loan=)([A-Za-z0-9_-]+)/); if(!m) return null; try{ const o=JSON.parse(b64d(m[1])); if(typeof o.s!=='number') return null; return o; }catch(e){ return null; } }
+// 貸し出しリンク（押すと、相手の Life Home の「友だちからLIFE BOOKを借りる」に並ぶ）
+function loanLink(code){ const base=/github\.io$/.test(location.host)?location.origin+location.pathname:(typeof FRIEND_URL!=='undefined'?FRIEND_URL:'https://maesato333.github.io/life-book/play.html'); return base+'#loan='+String(code).replace('LIFEBOOK1.',''); }
+function loanFromHash(){ try{ const m=(location.hash||'').match(/^#loan=([A-Za-z0-9_-]+)/); if(!m) return; history.replaceState(null,'',location.pathname+location.search);
+  const o=readLoan('LIFEBOOK1.'+m[1]); if(!o) return; const r=receiveLoan(o); if(typeof st!=='undefined'&&st&&typeof goHome==='function') goHome(); else if(typeof render==='function') render();
+  setTimeout(()=>{ const t=document.getElementById('loanMsg'); const box=document.querySelector('.hm-borrow'); if(box) box.scrollIntoView({ behavior:'smooth', block:'center' }); if(t) t.textContent=r==='already'?'このLIFE BOOKは、もう並んでいます。':`${o.by||'友だち'}さんから「${o.n}」のLIFE BOOKを借りました。`; },120); }catch(_){} }
+window.addEventListener('hashchange',loanFromHash);
+// Life Home の欄：友だちからLIFE BOOKを借りる
+function borrowTileHTML(){ const L=store.get(KEY_LOAN,[]);
+  return `${L.length?`<div class="shelf hm-shelf-row loans">${L.slice(0,8).map((o,i)=>{ const late=o.due&&Date.now()>o.due+86400000; return `<button type="button" class="spine borrowed" data-loan="${i}" style="height:${Math.round(150+Math.min(100,o.a||60)*.9)}px;width:38px" aria-label="${esc(o.by||'友だち')}さんから借りた、${esc(o.n)}の人生を読む"><span class="sp-t">${esc(o.n)}</span><span class="sp-y">${esc(o.by||'友だち')}さんから${late?'・返す日をすぎています':''}</span></button>`; }).join('')}</div>`:`<p class="tiny muted">友だちが「LIFE BOOK前世レポート」の「この本を、友だちに貸す」で送ったリンクを押すと、ここに本が並びます。</p>`}
+    <details class="loan-in"><summary>コードやファイルで借りる</summary>
+      <textarea id="loanCode" rows="2" placeholder="届いたリンク、または LIFEBOOK1. からはじまるコード"></textarea>
+      <div class="obi-btns"><button class="btn small" id="loanGet" type="button">本棚に並べる</button><label class="btn ghost small loan-file">ファイルから<input type="file" id="loanFile" accept=".txt,.lifebook,text/plain" hidden></label></div></details>
+    <p class="tiny" id="loanMsg" role="status"></p>`; }
 const ymd=t=>{ const d=new Date(t); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; };
 function receiveLoan(o){ const L=store.get(KEY_LOAN,[]); if(L.some(x=>x.s===o.s&&x.by===o.by)) return 'already'; L.unshift(Object.assign({ got:Date.now() },o)); store.set(KEY_LOAN,L.slice(0,40)); return 'ok'; }
 // 本棚：借りている本
@@ -10654,7 +10667,7 @@ function loanShelfHTML(){ const L=store.get(KEY_LOAN,[]);
       <p class="tiny" id="loanMsg" role="status"></p></details></div>`; }
 function bindLoanShelf(){
   const msg=t=>{ const m=$('#loanMsg'); if(m) m.textContent=t; };
-  const take=txt=>{ const o=readLoan(txt); if(!o) return msg('コードが読み取れませんでした。最初から最後まで、まるごとはりつけてください。'); const r=receiveLoan(o); if(r==='already') return msg('このLIFE BOOK（前世）は、もう本棚にあります。'); render(); setTimeout(()=>{ const m=$('#loanMsg'); if(m){ m.closest('details').open=true; m.textContent=`${o.by||'友だち'}さんから「${o.n}」のLIFE BOOK（前世）を借りました。`; } },30); };
+  const take=txt=>{ const o=readLoan(txt); if(!o) return msg('コードが読み取れませんでした。最初から最後まで、まるごとはりつけてください。'); const r=receiveLoan(o); if(r==='already') return msg('このLIFE BOOK（前世）は、もう本棚にあります。'); render(); setTimeout(()=>{ const m=$('#loanMsg'); if(m){ const d=m.closest('details'); if(d) d.open=true; m.textContent=`${o.by||'友だち'}さんから「${o.n}」のLIFE BOOK（前世）を借りました。`; } },30); };
   const g=$('#loanGet'); if(g) g.onclick=()=>take($('#loanCode').value);
   const f=$('#loanFile'); if(f) f.onchange=()=>{ const fl=f.files&&f.files[0]; if(!fl) return; fl.text().then(take).catch(()=>msg('ファイルを読めませんでした。')); };
   document.querySelectorAll('[data-loan]').forEach(b=>b.onclick=()=>{ const o=store.get(KEY_LOAN,[])[+b.dataset.loan]; if(!o) return; viewing={ seed:o.s, country:o.c, force:o.f, choice:o.ch, loan:+b.dataset.loan }; render(); window.scrollTo(0,0); });
@@ -10687,8 +10700,9 @@ function bindLoanReport(P,L){
     const arc=store.get(KEY_ARC,[]); const a=arc.find(x=>x.seed===P.seed)||{ seed:P.seed, country:viewing.country, force:viewing.force, choice:viewing.choice, name:P.full, nation:P.country.name, age:L.deathAge };
     const code=loanCode(a,by,due,store.get(KEY_ANS+P.seed,{}));
     const lent=store.get(KEY_LENT,[]); lent.push({ s:P.seed, at:Date.now(), due }); store.set(KEY_LENT,lent.slice(-60));
-    $('#lendOut').innerHTML=`<p class="tiny muted">このコードを、メッセージで友だちに送ってください。受け取った人は、LIFE BOOK の最初の画面の「友だちからLIFE BOOK（前世）を借りる」にはりつけます。</p><textarea class="loan-code" rows="3" readonly>${esc(code)}</textarea><div class="obi-btns"><button class="btn small" id="lendCopy" type="button">コードをコピー</button><button class="btn ghost small" id="lendFile" type="button">ファイルにする</button></div><div id="lendFileOut"></div>`;
-    $('#lendCopy').onclick=e=>copyText(code,e.target);
+    const link=loanLink(code), share=`${by||'友だち'}から、LIFE BOOK を貸します。「${P.full}」の一生です。\nリンクを押すと、あなたの Life Home の「友だちからLIFE BOOKを借りる」に並びます。\n${link}`;
+    $('#lendOut').innerHTML=`<p class="tiny muted">LINE やメッセージで友だちに送ってください。友だちがリンクを押すと、Life Home の「友だちからLIFE BOOKを借りる」に、この本が並びます。</p><div class="obi-btns"><a class="btn small" id="lendLine" href="https://line.me/R/msg/text/?${encodeURIComponent(share)}" target="_blank" rel="noopener">LINEで貸す</a><button class="btn ghost small" id="lendCopy" type="button">リンクをコピー</button><button class="btn ghost small" id="lendFile" type="button">ファイルにする</button></div><textarea class="loan-code" rows="3" readonly>${esc(share)}</textarea><div id="lendFileOut"></div>`;
+    $('#lendCopy').onclick=e=>copyText(share,e.target);
     $('#lendFile').onclick=()=>saveText(`${P.given}_LIFEBOOK.txt`,`LIFE BOOK 貸し出しコード\n「${P.full}」の一生（${by||'友だち'}さんより）\n\n${code}\n`,$('#lendFileOut')); };
   const rt=$('#loanReturn'); if(rt) rt.onclick=()=>{ const Ls=store.get(KEY_LOAN,[]); const o=Ls[viewing.loan]; if(!o) return; const note=($('#retNote').value||'').trim();
     Ls.splice(viewing.loan,1); store.set(KEY_LOAN,Ls);
@@ -14429,7 +14443,7 @@ function goLife(){ ART_NEW=true; viewing=null; page='life'; render(); window.scr
 // 上の帯のボタン
 function navSync(){ const n=document.getElementById('mastnav'); if(!n) return; const has=!!st;
   const onTop=!viewing&&(!st||page==='top'), onHome=!viewing&&st&&page==='home', onLife=!viewing&&st&&page!=='home'&&page!=='top';
-  n.innerHTML=`<a class="nav-b" href="${typeof siteTopURL==='function'?siteTopURL():'./'}"><i class="ic ic-top" aria-hidden="true"></i>Gateway</a><button type="button" class="nav-b ${onTop?'on':''}" data-nav="top" ${onTop?'aria-current="page"':''}><i class="ic ic-heart" aria-hidden="true"></i>Birth</button>${has?`<button type="button" class="nav-b ${onHome?'on':''}" data-nav="home" ${onHome?'aria-current="page"':''}><i class="ic ic-home" aria-hidden="true"></i>Life Home</button>`:''}${has?`<button type="button" class="nav-b ${onLife?'on':''}" data-nav="life" ${onLife?'aria-current="page"':''}><i class="ic ic-book" aria-hidden="true"></i>Life Record${(()=>{ const k=typeof meetBadgeCount==='function'?meetBadgeCount():0; return k?`<span class="mt-badge" aria-label="出会いのお知らせ ${k}件">${k}</span>`:''; })()}</button>`:''}`;
+  n.innerHTML=`<a class="nav-b" href="${typeof siteTopURL==='function'?siteTopURL():'./'}"><i class="ic ic-top" aria-hidden="true"></i>Gateway</a>${has?`<button type="button" class="nav-b ${onHome?'on':''}" data-nav="home" ${onHome?'aria-current="page"':''}><i class="ic ic-home" aria-hidden="true"></i>Life Home</button>`:''}${has?`<button type="button" class="nav-b ${onLife?'on':''}" data-nav="life" ${onLife?'aria-current="page"':''}><i class="ic ic-book" aria-hidden="true"></i>Life Record${(()=>{ const k=typeof meetBadgeCount==='function'?meetBadgeCount():0; return k?`<span class="mt-badge" aria-label="出会いのお知らせ ${k}件">${k}</span>`:''; })()}</button>`:''}`;
   n.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>b.dataset.nav==='top'?goTop():b.dataset.nav==='home'?goHome():goLife()); }
 // 心のうつりかわり（幸せの度合い）を小さなグラフに
 function homeMoodSVG(L,age){ const ys=L.years.filter(y=>y.age<=age&&y.h!=null); if(ys.length<2) return '<p class="tiny muted">まだ、グラフにするほどの年月がたっていません。</p>';
@@ -14490,6 +14504,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
     ${homeTile('hm-friends',`Group Soul /紹介でつながった人たち<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
     ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は「思い出のLIFE BOOK」になって、ここに並びます。</p>')}
+    ${typeof borrowTileHTML==='function'?homeTile('hm-borrow',`友だちからLIFE BOOKを借りる<span class="hm-n">${store.get(KEY_LOAN,[]).length}冊</span>`,borrowTileHTML()):''}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
     ${typeof birthMapHTML==='function'?homeTile('hm-map','生まれた場所',birthMapHTML(P)):''}
     ${typeof eaTileHTML==='function'?homeTile('hm-ea','地球アルバム',eaTileHTML(P)):''}
@@ -14499,7 +14514,6 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-zukan','図鑑', `<div class="hm-zk">${zk.map(z=>`<div class="hm-z"><span class="tiny muted">${esc(z[0])}</span><b>${z[1]}<small>${z[3]}</small></b></div>`).join('')}</div>`)}
   </div>
   <section class="hm-move"><div><h3>携帯とパソコンで、同じ人生を</h3><p class="tiny">この端末の人生と本棚を、もう一方の端末に引き継げます。QRコードを読みとるだけです。</p></div><button class="hm-btn ghost" type="button" id="hmMove">ほかの端末で続ける</button></section>
-  <section class="hm-loans">${loanShelfHTML()}</section>
   </div>`; }
 function bindHome(){ bindFriend(); if(typeof bindLoanShelf==='function') bindLoanShelf();
   const r=$('#hmRead'); if(r) r.onclick=goLife; const mv=$('#hmMove'); if(mv) mv.onclick=openMove;
@@ -15235,7 +15249,7 @@ function navFromHash(){ try{ const m=(location.hash||'').match(/^#(gateway|birth
   if((k==='home'||k==='record')&&typeof st!=='undefined'&&st){ if(k==='home') goHome(); else goLife(); return; }
   if(typeof goTop==='function') goTop(); }catch(_){} }
 window.addEventListener('hashchange',navFromHash);
-function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); render(); navFromHash(); if(typeof friendFromHash==='function') friendFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
+function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); render(); navFromHash(); if(typeof friendFromHash==='function') friendFromHash(); if(typeof loanFromHash==='function') loanFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
 start();
 setInterval(()=>{ if(st && st.stage==='life' && !viewing && !inspAnim && document.visibilityState==='visible' && !document.activeElement.matches('textarea')) render(); }, 30000);
 
