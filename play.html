@@ -11159,7 +11159,9 @@ function msRebalance(){ const g=document.querySelector('.hm-grid.hm-cols'); if(!
 window.addEventListener('resize',()=>{ clearTimeout(window._msT); window._msT=setTimeout(()=>{ try{ if(typeof render==='function'&&typeof page!=='undefined'&&page==='home'&&!document.querySelector('.frd:not([hidden]),.mt-ov')) render(); }catch(_){} },300); });
 (function(){ const c=document.createElement('style'); c.textContent=`.hm-grid.hm-cols{ display:flex; flex-wrap:wrap; align-items:flex-start; gap:14px; }
 .hm-grid.hm-cols > .hm-col{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:14px; }
-.hm-grid.hm-cols > .hm-tile{ flex:1 1 100%; }`; document.head.appendChild(c); })();
+.hm-grid.hm-cols > .hm-tile{ flex:1 1 100%; }
+/* 携帯（1列）で軽くする：画面の外のカードは、描くのを休む（見た目は同じ） */
+@media (max-width:720px){ .hm-tile{ content-visibility:auto; contain-intrinsic-size:auto 640px; } }`; document.head.appendChild(c); })();
 // ===== 「出会った！」の瞬間 =====
 // 紹介でつながった友だちの主人公と出会う出来事が、物語の時間で起きたら、画面いっぱいにお知らせする。
 // 出会いの年は、ふたりの種から決まるので、友だちの側でも同じ年に、同じように出会いが起きる（お互いに知らされる）。
@@ -17356,10 +17358,13 @@ function hmiBuild(){
   // 「動きを減らす」設定でも、ゆっくり流れ続ける（紹介サイトと同じ）
   const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let x=0, last=0; const speed=reduce?20:32;
-  const step=t=>{ if(!last) last=t; const dt=Math.min(.1,(t-last)/1000); last=t;
-    if(wrap.isConnected){ x-=speed*dt; const first=track.firstElementChild;
-      if(first){ const w=first.getBoundingClientRect().width; if(w&&-x>=w){ x+=w; track.appendChild(first); fill(first); } }
-      track.style.transform='translateX('+x.toFixed(2)+'px)'; }
+  // 軽くする：見えている時だけ動かす。島の幅は毎フレーム測らず、覚えておく（携帯で重くならないように）
+  let vis=true; try{ new IntersectionObserver(es=>{ vis=es[es.length-1].isIntersecting; }).observe(wrap); }catch(e){}
+  let fw=0;
+  const step=t=>{ const dt=last?Math.min(.1,(t-last)/1000):0; last=t;
+    if(wrap.isConnected&&vis&&!document.hidden){ x-=speed*dt; const first=track.firstElementChild;
+      if(first){ if(!fw) fw=first.offsetWidth; if(fw&&-x>=fw){ x+=fw; track.appendChild(first); fill(first); fw=0; } }
+      track.style.transform='translate3d('+x.toFixed(2)+'px,0,0)'; }
     requestAnimationFrame(step); };
   requestAnimationFrame(step);
   return wrap;
