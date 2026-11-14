@@ -11923,12 +11923,15 @@ function newsHTML(P,year){ const r=newsFor(P,year); const nm=id=>{ try{ return (
   return `<ul class="nw-list">${items.join('')}</ul><p class="tiny muted">${esc(P.given)}が生きている物語の中の${year}年に、実際に起きた出来事です。</p>`; }
 // ===== その年のNEWS（ふやした版）：日本語版 Wikipedia の「〇〇年」の記事の「できごと」から、その年に世界で実際に起きたことを読みこむ =====
 // 文章はゲームに入れず、開いたときに読みこむ（出典と CC BY-SA 4.0 を表示）。読みこめないときは、上の確かめずみの一覧だけを出す。
-const NW_CAT=[['スポーツ',/五輪|オリンピック|ワールドカップ|選手権|優勝|大会|野球|サッカー|テニス|ゴルフ|マラソン|ボクシング|相撲|横綱|F1|グランプリ|リーグ|記録/],
-  ['映画',/映画|アカデミー賞|カンヌ|ベネチア|ベルリン国際|公開/],['エンタメ',/歌手|アルバム|シングル|コンサート|テレビ|放送|番組|ドラマ|アニメ|ゲーム|発売|ビートルズ|音楽|紅白|ミュージカル|バンド/],
-  ['経済',/株|円|ドル|銀行|経済|企業|会社|上場|破綻|市場|通貨|ユーロ|景気|価格|原油|貿易|民営化/],['科学',/打ち上げ|宇宙|衛星|探査|発見|開発|コンピュータ|インターネット|ロケット|月面|ノーベル|技術|医学/],
-  ['災害',/地震|津波|台風|噴火|ハリケーン|洪水|事故|墜落|沈没|火災|爆発|テロ|感染|流行/],
-  ['政治',/大統領|首相|政府|選挙|議会|条約|独立|戦争|侵攻|内戦|革命|国連|首脳|政権|憲法|協定|宣言|クーデター|王|就任|辞任|成立/]];
-function nwCat(t){ for(const [c,re] of NW_CAT) if(re.test(t)) return c; return 'できごと'; }
+// 分類：分野ごとに当てはまることばの数をかぞえ、いちばん多い分野にする（同じ数なら、政治→経済→…の順）
+const NW_CAT=[['政治',/大統領|首相|政府|選挙|議会|国会|条約|独立|戦争|侵攻|内戦|革命|国連|首脳|政権|憲法|協定|宣言|クーデター|国王|女王|皇帝|就任|辞任|成立|書記|党|司令官|軍|大臣|外交|国交|併合|統一|崩壊|制裁|デモ|暗殺|元首|首長/g],
+  ['経済',/株|円高|円安|ドル|銀行|経済|企業|会社|上場|破綻|市場|通貨|ユーロ|景気|価格|原油|貿易|民営化|買収|合併|倒産|バブル|インフレ/g],
+  ['スポーツ',/五輪|オリンピック|ワールドカップ|選手権|優勝|大会|野球|サッカー|テニス|ゴルフ|マラソン|ボクシング|相撲|横綱|F1|グランプリ|リーグ|世界記録|金メダル|ラグビー|スーパーボウル/g],
+  ['映画',/映画|アカデミー賞|カンヌ|ベネチア|ベルリン国際映画|ロードショー|監督作品/g],
+  ['エンタメ',/歌手|アルバム|シングル|コンサート|テレビ番組|番組|ドラマ|アニメ|ゲーム機|ゲームソフト|ビートルズ|音楽|紅白|ミュージカル|バンド|俳優|女優|ライブ|ヒット|漫画|小説|ファミコン|ディズニー/g],
+  ['科学',/打ち上げ|宇宙|衛星|探査|発見|開発|コンピュータ|インターネット|ロケット|月面|ノーベル|技術|医学|アルゴリズム|研究所|発明|遺伝子/g],
+  ['災害',/地震|津波|台風|噴火|ハリケーン|洪水|事故|墜落|沈没|火災|爆発|テロ|感染|流行|干ばつ|飢饉/g]];
+function nwCat(t){ let best='できごと', bn=0; for(const [c,re] of NW_CAT){ const n=(String(t).match(re)||[]).length; if(n>bn){ bn=n; best=c; } } return best; }
 const _nwCache={};
 function nwKey(y){ return 'hitotsu.nw.'+y; }
 function nwParse(txt){ const out=[]; let on=false, mon='';
@@ -11943,13 +11946,18 @@ async function nwLoad(y){ if(_nwCache[y]) return _nwCache[y]; try{ const c=JSON.
   const u='https://ja.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&exsectionformat=wiki&redirects=1&format=json&formatversion=2&origin=*&titles='+encodeURIComponent(y+'年');
   const r=await fetch(u); if(!r.ok) throw new Error('http'); const j=await r.json(); const pg=j&&j.query&&j.query.pages&&j.query.pages[0]; if(!pg||!pg.extract) throw new Error('missing');
   const items=nwParse(pg.extract); if(!items.length) throw new Error('empty'); _nwCache[y]=items; try{ sessionStorage.setItem(nwKey(y),JSON.stringify(items)); }catch(_){} return items; }
-// いろいろな分野が、まんべんなく並ぶように選ぶ（日付の順）
-function nwPick(items,n){ const by={}; items.forEach((x,i)=>{ (by[x.c]=by[x.c]||[]).push(i); }); const cats=Object.keys(by); const got=new Set(); let k=0;
-  while(got.size<Math.min(n,items.length)&&k<items.length*2){ for(const c of cats){ const a=by[c]; if(a.length){ got.add(a.shift()); if(got.size>=n) break; } } k++; }
+// いろいろな分野が、まんべんなく並ぶように選ぶ（日付の順）。選び方と本数は、毎日かわる
+function nwDay(){ const d=new Date(); return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
+function nwRng(seed){ let h=seed>>>0; return ()=>{ h=Math.imul(h^h>>>15,2246822507)>>>0; h=Math.imul(h^h>>>13,3266489909)>>>0; h^=h>>>16; return (h>>>0)/4294967296; }; }
+function nwPick(items,n,y){ const R=nwRng(nwDay()*31+y); const by={}; items.forEach((x,i)=>{ const c=nwCat(x.t); (by[c]=by[c]||[]).push(i); });
+  const cats=Object.keys(by); for(const c of cats){ const a=by[c]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(R()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
+  for(let i=cats.length-1;i>0;i--){ const j=Math.floor(R()*(i+1)); [cats[i],cats[j]]=[cats[j],cats[i]]; }
+  const got=new Set(); const N=Math.min(n,items.length); let k=0;
+  while(got.size<N&&k<items.length*2){ for(const c of cats){ const a=by[c]; const take=1+(R()<.35?1:0); for(let t=0;t<take&&a.length&&got.size<N;t++) got.add(a.shift()); } k++; }
   return [...got].sort((a,b)=>a-b).map(i=>items[i]); }
-function nwListHTML(y,items,all){ const show=all?items:nwPick(items,30);
-  return `<ul class="nw-list nw-wiki">${show.map(x=>`<li><span class="nw-tag nw-c-${esc(x.c)}">${esc(x.c)}</span>${x.d?`<span class="nw-d">${esc(x.d)}</span>`:''}${esc(x.t)}</li>`).join('')}</ul>
-    ${!all&&items.length>show.length?`<button type="button" class="nw-more" data-nwall="${y}">ぜんぶ見る（${items.length}本）</button>`:''}
+function nwListHTML(y,items,all){ const show=all?items:nwPick(items,26+Math.floor(nwRng(nwDay()+y*7)()*9),y);
+  return `<ul class="nw-list nw-wiki">${show.map(x=>`<li>${(c=>`<span class="nw-tag nw-c-${esc(c)}">${esc(c)}</span>`)(nwCat(x.t))}${x.d?`<span class="nw-d">${esc(x.d)}</span>`:''}${esc(x.t)}</li>`).join('')}</ul>
+    ${!all&&items.length>show.length?`<button type="button" class="nw-more" data-nwall="${y}">全部読む（${items.length}本）</button>`:''}
     <p class="nw-src">出典：Wikipedia 日本語版「<a href="https://ja.wikipedia.org/wiki/${encodeURIComponent(y+'年')}" target="_blank" rel="noopener">${y}年</a>」の「できごと」（<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" target="_blank" rel="noopener">CC BY-SA 4.0</a>）</p>`; }
 const _newsHTML0=newsHTML;
 newsHTML=function(P,year){ let base=_newsHTML0(P,year); const nowY=new Date().getFullYear();
