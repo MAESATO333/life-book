@@ -10881,7 +10881,7 @@ function friendMeet(P,L){
 }
 // 画面：紹介する・紹介を受け取る（どの画面にもある「友だちに紹介」ボタン → 紹介の窓）
 const FR_LEAD='紹介した人と、紹介された人。ふたりの Channel は、それぞれの人生のどこかで、出会います。出会ったときは、お互いに「出会った！」と通知されます。';
-function friendShareText(link){ return `LIFE BOOK で、世界のどこかに生まれた一人の人生を見守っています。\nこのリンクから始めると、わたしの Channel と、あなたの Channel が、人生のどこかで出会います。\n${link}`; }
+function friendShareText(link){ return String(link||''); } // 紹介文は付けず、リンクだけを送る（受け取った人がコピーしやすいように）
 function friendPlainLink(){ const u=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; return typeof extURL==='function'?extURL(u):u; }
 // 画面の中に置く案内（大きなボタンつき）
 function friendHTML(){ const fr=store.get(KEY_FRIEND,[]);
@@ -10943,7 +10943,7 @@ function bindFriend(){ bindFriendOpeners();
     const done=()=>msg(what+'をコピーしました。LINEやメールにはりつけて、友だちに送ってください。'), fail=()=>msg('下の欄の文を選んで、コピーしてください。');
     try{ navigator.clipboard.writeText(t).then(done).catch(fail); }catch(e){ fail(); } };
   const ln=$('#frLine'); if(ln) ln.onclick=()=>{ store.set(KEY_FRSENT,(store.get(KEY_FRSENT,0)||0)+1); const t=friendShareText(link()); window.open('https://line.me/R/msg/text/?'+encodeURIComponent(t),'_blank','noopener'); msg('LINEがひらきます。送る相手を選んでください。ひらかないときは「リンクをコピー」を使ってください。'); };
-  const sh=$('#frShare'); if(sh&&navigator.share){ sh.hidden=false; sh.onclick=()=>{ const l=link(); navigator.share({ title:'LIFE BOOK', text:friendShareText(l).replace('\n'+l,''), url:l }).then(()=>msg('送りました。')).catch(()=>{}); }; }
+  const sh=$('#frShare'); if(sh&&navigator.share){ sh.hidden=false; sh.onclick=()=>{ const l=link(); navigator.share({ url:l }).then(()=>msg('送りました。')).catch(()=>{}); }; }
   const l=$('#frLink'); if(l) l.onclick=()=>{ store.set(KEY_FRSENT,(store.get(KEY_FRSENT,0)||0)+1); copy(link(),'リンク'); };
   const ml=$('#frMail'); if(ml) ml.onclick=()=>{ location.href='mailto:?subject='+encodeURIComponent('LIFE BOOK で、人生のどこかで出会いませんか')+'&body='+encodeURIComponent(friendShareText(link())); };
   const c=$('#frCode'); if(c) c.onclick=()=>{ by(); const t=friendCode(); if(t) copy(t,'紹介コード'); };
