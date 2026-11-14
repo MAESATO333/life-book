@@ -69,6 +69,16 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; white-space
 .err{ color:var(--pink); font-weight:700; }
 .who{ font-size:13px; color:var(--ink2); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 [hidden]{ display:none !important; }
+/* Over Soul Message */
+.osm-card{ border:2px solid #CDB8F5; }
+.osm-card h2{ color:#8A5CD6; }
+textarea{ width:100%; font-family:var(--sans); font-size:16px; line-height:1.8; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:12px 14px; resize:vertical; }
+textarea:focus{ outline:2px solid var(--pink2); }
+.osm-item{ border-top:1px dashed var(--line); padding:10px 0; display:flex; gap:12px; align-items:flex-start; }
+.osm-item .tx{ flex:1; min-width:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+.osm-item .dt{ font-size:12px; color:var(--muted); display:block; }
+.btn.small{ font-size:13px; padding:6px 14px; }
+
 </style>
 </head>
 <body>
@@ -92,6 +102,16 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; white-space
       </div>
       <span class="note" id="updated"></span>
     </div>
+
+    <section class="card osm-card" id="osmCard">
+      <h2>Over Soul Message</h2>
+      <p class="sub">ここに書いて「送る」を押すと、ゲームのホームの「人生のヒント」のすぐ上に、参加者みんなに表示されます。いちばん新しいメッセージが大きく出て、前のものは「これまでのメッセージ」にたまります。</p>
+      <textarea id="osmText" rows="4" maxlength="400" placeholder="魂に響くメッセージを書いてください（400字まで・改行できます）"></textarea>
+      <div class="row" style="margin:8px 0 0"><span class="note" id="osmCount" style="margin:0">0 / 400字</span><button class="btn" id="osmSend" type="button">送る</button></div>
+      <p class="note" id="osmMsg"></p>
+      <h2 style="font-size:15px;margin-top:14px">送ったメッセージ</h2>
+      <div id="osmList"><p class="empty">読みこみ中…</p></div>
+    </section>
 
     <div class="tiles" id="tiles"></div>
 
@@ -170,10 +190,31 @@ U.onAuthStateChanged(auth,async user=>{
   if(!user||user.isAnonymous){ $('#gate').hidden=false; $('#main').hidden=true; $('#who').hidden=true; return; }
   $('#whoName').textContent=user.displayName||user.email||''; $('#who').hidden=false;
   $('#gate').querySelector('h2').textContent='読みこみ中…'; $('#login').hidden=true;
-  try{ await loadAll(); $('#gate').hidden=true; $('#main').hidden=false; draw(); }
+  try{ await loadAll(); $('#gate').hidden=true; $('#main').hidden=false; draw(); osmLoad(); }
   catch(e){ $('#gate').querySelector('h2').textContent='このアカウントでは見られません'; $('#login').hidden=false;
     $('#gateMsg').innerHTML=e&&e.code==='permission-denied'?'運営者として登録したGoogleアカウントでログインしてください。':'<span class="err">読みこめませんでした</span>（'+esc(e.code||e.message)+'）'; console.warn(e); }
 });
+
+// ---- Over Soul Message（os/board = { m:[{i,t,d}] } 新しい順・最大30件） ----
+let OSM=[], osmArm=0;
+async function osmLoad(){ const { doc, getDoc }=D;
+  try{ const s=await getDoc(doc(db,'os','board')); OSM=s.exists()?(s.data().m||[]):[]; osmDraw(); }
+  catch(e){ $('#osmList').innerHTML=e&&e.code==='permission-denied'?'<p class="empty">まだ使えません。Firebase のルールを新しいものに貼り替えると使えるようになります。</p>':'<p class="empty">読みこめませんでした（'+esc(e.code||e.message)+'）</p>'; } }
+function osmDraw(){ const dt=ms=>{ const d=new Date(ms); return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+  $('#osmList').innerHTML=OSM.length?OSM.map((x,k)=>`<div class="osm-item"><div class="tx"><span class="dt">${dt(x.d)}${k===0?'　（いま表示中）':''}</span>${esc(x.t)}</div><button class="btn ghost small" type="button" data-del="${esc(x.i)}">消す</button></div>`).join(''):'<p class="empty">まだ送ったメッセージはありません</p>';
+  $('#osmList').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>osmDel(b)); }
+async function osmSave(m){ const { doc, setDoc }=D; await setDoc(doc(db,'os','board'),{ m:m.slice(0,30) }); OSM=m.slice(0,30); osmDraw(); }
+$('#osmText').oninput=()=>{ $('#osmCount').textContent=$('#osmText').value.length+' / 400字'; };
+$('#osmSend').onclick=async()=>{ const t=$('#osmText').value.trim(); if(!t){ $('#osmMsg').innerHTML='<span class="err">メッセージを書いてください</span>'; return; }
+  if(Date.now()-osmArm>6000){ osmArm=Date.now(); $('#osmSend').textContent='みんなに送る（もう一度押す）'; $('#osmMsg').textContent='送ると、すぐに参加者みんなのゲームに表示されます。'; setTimeout(()=>{ if(Date.now()-osmArm>=6000) $('#osmSend').textContent='送る'; },6100); return; }
+  osmArm=0; $('#osmSend').disabled=true;
+  try{ const { doc, getDoc }=D; const s=await getDoc(doc(db,'os','board')); const now=s.exists()?(s.data().m||[]):[];
+    await osmSave([{ i:'m'+Date.now().toString(36), t:t.slice(0,400), d:Date.now() }].concat(now));
+    $('#osmText').value=''; $('#osmCount').textContent='0 / 400字'; $('#osmMsg').textContent='送りました。ゲームをひらくと表示されます。'; }
+  catch(e){ $('#osmMsg').innerHTML='<span class="err">送れませんでした</span>（'+esc(e.code||e.message)+'）'; }
+  finally{ $('#osmSend').disabled=false; $('#osmSend').textContent='送る'; } };
+async function osmDel(b){ if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent='本当に消す'; setTimeout(()=>{ b.dataset.arm=''; b.textContent='消す'; },5000); return; }
+  b.disabled=true; try{ await osmSave(OSM.filter(x=>x.i!==b.dataset.del)); $('#osmMsg').textContent='消しました。'; }catch(e){ b.disabled=false; $('#osmMsg').innerHTML='<span class="err">消せませんでした</span>（'+esc(e.code||e.message)+'）'; } }
 
 // ---- 読みこみ ----
 // 過ぎた日は sum/{日付} にまとめて保存し、次からはまとめだけを読む（読み取りの回数を少なくするため）
