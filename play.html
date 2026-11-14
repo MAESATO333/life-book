@@ -430,8 +430,13 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .frd-sky{ background:#D7EEFF; } .frd-lemon{ background:#FFF1A8; } .frd-lilac{ background:#E9DEFF; }
 .frd-msg{ min-height:1.2em; margin:12px 0 4px; font-size:13px; color:#2F7A55; text-align:center; }
 .frd-in textarea{ width:100%; font-size:12px; margin:4px 0; box-sizing:border-box; border:2px solid #F3D3DC; border-radius:12px; padding:8px; background:#fff; color:#3A2A33; }
-.frd-get{ margin-top:12px; font-size:13px; } .frd-get summary{ cursor:pointer; color:#7A5A66; }
-.frd-get .btn{ border-radius:999px; background:#8EC3E6; border-color:#8EC3E6; color:#13324A; }
+.frd-get{ margin-top:14px; padding:12px 14px 14px; border-radius:18px; background:#FFF1F5; border:2px solid #FFC2D0; box-shadow:0 3px 0 #F4B6C6; text-align:left; }
+.frd-get h3{ margin:0 0 6px; font-size:16px; color:#C9466A; }
+.frd-get-l{ margin:0 0 8px; font-size:13px; line-height:1.7; color:#5A3A48; }
+.frd-get textarea{ background:#fff; }
+.frd-get-b{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:6px; font:inherit; font-size:15px; font-weight:700; padding:10px 16px; border-radius:999px; border:2px solid #E86A88; background:#FF8FAA; color:#fff; box-shadow:0 3px 0 #D85878; cursor:pointer; }
+.frd-get-b .ic{ background:#fff; }
+.frd-get-b:active{ transform:translateY(2px); box-shadow:0 1px 0 #D85878; }
 .frd-in .tiny.muted{ color:#7A5A66; }
 .linkish{ font:inherit; border:0; background:none; color:#C9466A; text-decoration:underline; cursor:pointer; padding:0; }
 .ih-fr{ margin-top:14px; font-size:13px; color:var(--muted); line-height:1.8; }
@@ -600,24 +605,24 @@ a.nav-b{ text-decoration:none; }
 .frr-btns .frd-b{ width:auto; }
 .frr-out{ width:100%; font-size:12px; }
 .frr-ok{ margin:10px 0; padding:8px 12px; border-radius:12px; background:#EAF7E3; }
-/* Life Record の上の絵：ゆっくり動く（この1枚だけ） */
-.life-art .bk-isl{ animation:bkFloat 6s ease-in-out infinite; }
-.life-art .bk-cl{ animation:bkCloud 26s ease-in-out infinite alternate; }
-.life-art .bk-cl:nth-of-type(2n){ animation-duration:34s; animation-delay:-9s; }
-.life-art .bk-cl:nth-of-type(3n){ animation-duration:41s; animation-delay:-17s; }
-.life-art .bk-glow{ transform-box:fill-box; transform-origin:center; animation:bkGlow 4.5s ease-in-out infinite; }
-.life-art .bk-star{ animation:bkTwinkle 3.2s ease-in-out infinite; }
-.life-art .bk-moon{ animation:bkGlow2 5s ease-in-out infinite; }
-.life-art .bk-baby{ transform-box:fill-box; transform-origin:50% 100%; animation:bkBreath 3.4s ease-in-out infinite; }
-.life-art .bk-who{ transform-box:fill-box; transform-origin:50% 100%; animation:bkBob 4s ease-in-out infinite; }
-.life-art .bk-who:nth-of-type(2n){ animation-delay:-1.3s; }
-.life-art .bk-pet{ animation:bkHop 2.6s ease-in-out infinite; }
-.life-art .bk-fall{ animation:bkRain 1.1s linear infinite; }
-.life-art .bk-snow{ animation:bkSnow 7s linear infinite; }
+/* Life Record の上の絵と「いま、何してる？」の絵：ゆっくり動く */
+.life-art .bk-isl, .nd-art .bk-isl{ animation:bkFloat 6s ease-in-out infinite; }
+.life-art .bk-cl, .nd-art .bk-cl{ animation:bkCloud 26s ease-in-out infinite alternate; }
+.life-art .bk-cl:nth-of-type(2n), .nd-art .bk-cl:nth-of-type(2n){ animation-duration:34s; animation-delay:-9s; }
+.life-art .bk-cl:nth-of-type(3n), .nd-art .bk-cl:nth-of-type(3n){ animation-duration:41s; animation-delay:-17s; }
+.life-art .bk-glow, .nd-art .bk-glow{ transform-box:fill-box; transform-origin:center; animation:bkGlow 4.5s ease-in-out infinite; }
+.life-art .bk-star, .nd-art .bk-star{ animation:bkTwinkle 3.2s ease-in-out infinite; }
+.life-art .bk-moon, .nd-art .bk-moon{ animation:bkGlow2 5s ease-in-out infinite; }
+.life-art .bk-baby, .nd-art .bk-baby{ transform-box:fill-box; transform-origin:50% 100%; animation:bkBreath 3.4s ease-in-out infinite; }
+.life-art .bk-who, .nd-art .bk-who{ transform-box:fill-box; transform-origin:50% 100%; animation:bkBob 4s ease-in-out infinite; }
+.life-art .bk-who:nth-of-type(2n), .nd-art .bk-who:nth-of-type(2n){ animation-delay:-1.3s; }
+.life-art .bk-pet, .nd-art .bk-pet{ animation:bkHop 2.6s ease-in-out infinite; }
+.life-art .bk-fall, .nd-art .bk-fall{ animation:bkRain 1.1s linear infinite; }
+.life-art .bk-snow, .nd-art .bk-snow{ animation:bkSnow 7s linear infinite; }
 .bk-z{ display:none; }
-.life-art .bk-z{ display:inline; }
-.life-art .bk-z text{ opacity:0; animation:bkZ 4.2s ease-out infinite; }
-.life-art .bk-z .bk-z2{ animation-delay:1.4s; } .life-art .bk-z .bk-z3{ animation-delay:2.8s; }
+.life-art .bk-z, .nd-art .bk-z{ display:inline; }
+.life-art .bk-z text, .nd-art .bk-z text{ opacity:0; animation:bkZ 4.2s ease-out infinite; }
+.life-art .bk-z .bk-z2, .nd-art .bk-z .bk-z2{ animation-delay:1.4s; } .life-art .bk-z .bk-z3{ animation-delay:2.8s; }
 @keyframes bkZ{ 0%{ opacity:0; transform:translate(0,0) } 15%{ opacity:.9 } 100%{ opacity:0; transform:translate(10px,-18px) } }
 @keyframes bkFloat{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-3px) } }
 @keyframes bkCloud{ from{ transform:translateX(-14px) } to{ transform:translateX(18px) } }
@@ -629,7 +634,17 @@ a.nav-b{ text-decoration:none; }
 @keyframes bkHop{ 0%,70%,100%{ transform:translateY(0) } 80%{ transform:translateY(-2.5px) } }
 @keyframes bkRain{ from{ transform:translateY(-10px) } to{ transform:translateY(14px) } }
 @keyframes bkSnow{ 0%{ transform:translate(0,-8px) } 50%{ transform:translate(4px,6px) } 100%{ transform:translate(0,20px) } }
-@media (prefers-reduced-motion:reduce){ .life-art svg *{ animation:none!important; } }
+@media (prefers-reduced-motion:reduce){ .life-art svg *, .nd-art svg *{ animation:none!important; } }
+.gs-list li{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; }
+.gs-cheer{ display:inline-flex; flex-wrap:wrap; align-items:center; gap:5px; }
+.gs-hs{ font-family:var(--serif); font-style:italic; font-size:11px; color:#B77A92; }
+.gs-cb{ display:inline-flex; align-items:center; gap:3px; font:inherit; font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; border:2px solid #FFB3C6; background:#FFF0F4; color:#C9466A; box-shadow:0 2px 0 #F4B6C6; cursor:pointer; }
+.gs-cb:hover{ background:#FFE1EA; } .gs-cb:active{ transform:translateY(1px); box-shadow:0 1px 0 #F4B6C6; }
+.gs-got{ display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:999px; background:#FF8FAA; color:#fff; font-size:12px; font-weight:700; box-shadow:0 2px 0 #D85878; }
+.gs-got small{ font-family:var(--serif); font-style:italic; font-weight:400; font-size:10px; opacity:.9; }
+.gs-pop{ animation:gsPop .45s cubic-bezier(.3,1.6,.5,1); }
+@keyframes gsPop{ 0%{ transform:scale(.4); opacity:0 } 100%{ transform:scale(1); opacity:1 } }
+@media (prefers-reduced-motion:reduce){ .gs-pop{ animation:none; } }
 </style>
 
 <div class="wrap">
@@ -10918,11 +10933,11 @@ function friendDialogHTML(){ const me=store.get(KEY_ME,''); const can=!!myHero()
     </div>
     <div class="frd-url"><span class="frd-ul">あなたの紹介リンク（LINEで押しても、外部のブラウザで開きます）</span><div class="frd-urow"><input id="frUrl" type="text" readonly aria-label="あなたの紹介リンク" onclick="this.select()"><button class="frd-uc" type="button" data-cp="frUrl">コピー</button></div></div>
     <p class="frd-msg" id="frMsg" role="status"></p>${typeof fbStatusHTML==='function'?fbStatusHTML():''}<textarea id="frOut" rows="3" readonly hidden aria-label="紹介の文とリンク"></textarea>
-    <details class="frd-get"><summary>友だちから届いたリンクやコードを受け取る</summary>
-      <p class="tiny muted">届いたリンクを押せば、自動でつながります。うまくいかないときは、ここにはりつけてください。</p>
-      <textarea id="frCodeIn" rows="2" placeholder="届いたリンク、または LIFEFRIEND1. からはじまるコード"></textarea><button class="btn small" id="frGet" type="button">受け取る</button>
+    <section class="frd-get" aria-labelledby="frGetH"><h3 id="frGetH"><span aria-hidden="true">💌</span> 友だちから紹介が届いたとき</h3>
+      <p class="frd-get-l">友だちから届いたリンクを押せば、それだけでつながります。<br>つながらなかったときは、届いたリンク（またはコード）を下の枠に貼りつけて、「受け取る」を押してください。</p>
+      <textarea id="frCodeIn" rows="2" placeholder="ここに、届いたリンクを貼りつける"></textarea><button class="frd-get-b" id="frGet" type="button"><i class="ic ic-mail" aria-hidden="true"></i><span>受け取る</span></button>
       ${can?'<p class="tiny"><button class="linkish" id="frCode" type="button">紹介コードだけをコピー</button></p>':''}
-    </details>
+    </section>
     ${fr.length?`<p class="tiny muted">つながっている人：${fr.map(f=>esc(f.by||'友だち')+'さん').join('、')}</p>`:''}</div>`; }
 function openFriend(msgText){ let d=document.getElementById('frDlg');
   if(!d){ d=document.createElement('div'); d.hidden=true; d.id='frDlg'; d.className='frd'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','友だちに紹介する'); document.body.appendChild(d);
@@ -11841,7 +11856,15 @@ function growthSignHTML(P,L,c){ const now=snapNow(P,L,c); let s=d2Get(KEY_SNAP,n
   if(now.bel>base.bel) ch.push(`心に新しい観念が ${now.bel-base.bel}こ 生まれた`);
   if(now.ev>base.ev) ch.push(`出来事が ${now.ev-base.ev}こ 起きた`);
   if(!ch.length) return `<p>前に見た日（${days}日前）から、まだ大きな変化はありません。</p>`;
-  return `<p class="gs-lead">前に見た日（${days}日前）から</p><ul class="gs-list">${ch.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`; }
+  return `<p class="gs-lead">前に見た日（${days}日前）から</p><ul class="gs-list">${ch.map(x=>`<li><span class="gs-tx">${esc(x)}</span>${gsCheerHTML(now.day+'|'+x)}</li>`).join('')}</ul>`; }
+// 成長のしるしに、Higher Self から小さな応援を贈る（ひとつのしるしに1回。押すと、かわいい印が残る）
+const KEY_GSCHEER='hitotsu.gsCheer';
+const GS_CHEERS=[['いいね！','💗'],['やった！','🎉'],['がんばったね','🌸']];
+function gsCheerHTML(id){ const m=d2Get(KEY_GSCHEER,{}); const v=m[id];
+  if(v!=null&&GS_CHEERS[v]){ const c=GS_CHEERS[v]; return `<span class="gs-got" aria-label="Higher Self から ${esc(c[0])}"><small>Higher Self</small><b aria-hidden="true">${c[1]}</b>${esc(c[0])}</span>`; }
+  return `<span class="gs-cheer" data-gsid="${esc(id)}"><small class="gs-hs">Higher Self より</small>${GS_CHEERS.map((c,i)=>`<button type="button" class="gs-cb" data-gscheer="${i}" aria-label="Higher Self から「${esc(c[0])}」を贈る"><span aria-hidden="true">${c[1]}</span>${esc(c[0])}</button>`).join('')}</span>`; }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-gscheer]'); if(!b) return; try{ const w=b.closest('[data-gsid]'); if(!w) return; const id=w.dataset.gsid; const m=d2Get(KEY_GSCHEER,{}); if(m[id]==null){ m[id]=+b.dataset.gscheer; const ks=Object.keys(m); if(ks.length>300) delete m[ks[0]]; d2Set(KEY_GSCHEER,m); }
+  const t=document.createElement('span'); t.innerHTML=gsCheerHTML(id); const n=t.firstElementChild; n.classList.add('gs-pop'); w.replaceWith(n); }catch(_){} });
 // ---- ホームにまとめて置く ----
 function dailyPlusHTML(P,L,age,c){ if(c.dead) return '';
   const tz=teaser(P,L,c); const gf=giftHTML(P,c); const gs=growthSignHTML(P,L,c);
