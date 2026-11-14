@@ -10688,10 +10688,13 @@ const FRIEND_URL='https://maesato333.github.io/life-book/play.html';
 function myId(){ let id=store.get(KEY_MYID,''); if(!id){ id=Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); store.set(KEY_MYID,id); } return id; }
 function myHero(){ if(typeof st!=='undefined'&&st&&st.seed!=null) return { s:st.seed, c:st.country||null, f:st.force||null, ch:st.choice||null };
   const a=store.get(KEY_ARC,[])[0]; return a?{ s:a.seed, c:a.country||null, f:a.force||null, ch:a.choice||null }:null; }
-function friendCode(re){ const h=myHero(); if(!h) return null; return 'LIFEFRIEND1.'+b64e(JSON.stringify(Object.assign({ id:myId(), by:store.get(KEY_ME,'')||'' },h,{ t:Date.now() },re?{ re:1 }:{}))); }
-function friendLink(re){ const c=friendCode(re); if(!c) return null; const base=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; const u=base+'#friend='+c.replace('LIFEFRIEND1.',''); return typeof extURL==='function'?extURL(u):u; }
+function friendCode(re,g){ const h=myHero(); if(!h) return null; return 'LIFEFRIEND1.'+b64e(JSON.stringify(Object.assign({ id:myId(), by:store.get(KEY_ME,'')||'' },h,{ t:Date.now() },re?{ re:1 }:{},g?{ g }:{}))); }
+function friendLink(re,g){ const c=friendCode(re,g); if(!c) return null; const base=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; const u=base+'#friend='+c.replace('LIFEFRIEND1.',''); return typeof extURL==='function'?extURL(u):u; }
 function readFriend(txt){ const m=(txt||'').match(/(?:LIFEFRIEND1\.|#friend=)([A-Za-z0-9_-]+)/); if(!m) return null; try{ const o=JSON.parse(b64d(m[1])); if(typeof o.s!=='number'||!o.id) return null; return o; }catch(e){ return null; } }
-function receiveFriend(o){ if(o.id===myId()) return 'self'; const L=store.get(KEY_FRIEND,[]); const i=L.findIndex(x=>x.id===o.id); const rec=Object.assign({},o,{ got:(i>=0?L[i].got:Date.now()) });
+function receiveFriend(o){ if(o.id===myId()) return 'self'; const L=store.get(KEY_FRIEND,[]); const i=L.findIndex(x=>x.id===o.id); const now=Date.now(), old=i>=0?L[i]:null;
+  // 出会いの日の起点（ふたりで同じになるように）：リンクを押した側は押した時、届いた側は相手が押した時
+  const a0=old&&old.a0?old.a0:(old&&old.got?old.got:(o.lk||(!o.re&&!o.g&&typeof o.t!=='number')?now:Math.min(now,typeof o.g==='number'?o.g:(typeof o.t==='number'?o.t:now))));
+  const rec=Object.assign({},o,{ got:(old?old.got:now), a0, g:(typeof o.g==='number'?o.g:(old&&old.g)||undefined) }); delete rec.lk;
   if(i>=0){ L[i]=rec; store.set(KEY_FRIEND,L); return 'update'; } L.unshift(rec); store.set(KEY_FRIEND,L.slice(0,20)); return 'ok'; }
 // 紹介を受けた人から、紹介した人へ「つながったよ」を知らせる（サーバーを使わないので、返事のリンクを送ってもらう）
 function frReplies(){ return store.get(KEY_FRREPLY,[]); }
@@ -10700,7 +10703,7 @@ function frReplyText(by,link){ return `${by||'友だち'}さん、紹介あり�
 function frReplyHTML(){ const rp=frReplies(); if(!rp.length||(typeof fbOnline==='function'&&fbOnline())) return ''; const can=!!myHero();
   return `<div class="frr">${rp.map(x=>`<p class="frr-t">💌 <b>${esc(x.by||'友だち')}さん</b>に、つながったことを知らせましょう。知らせると、${esc(x.by||'友だち')}さんの画面にも「つながった人」としてあなたが出ます。</p>`+(can?`<div class="frr-btns"><button class="frd-b frd-line" type="button" data-frr="${esc(x.id)}" data-frr-by="${esc(x.by||'')}"><i class="ic ic-line" aria-hidden="true"></i><span>LINEで知らせる</span></button><button class="linkish" type="button" data-frr-copy="${esc(x.id)}" data-frr-by="${esc(x.by||'')}">知らせるリンクをコピー</button></div>`:`<p class="tiny muted">「生まれる」を押したあとに、知らせることができます。</p>`)).join('')}</div>`; }
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-frr],[data-frr-copy]'); if(!b) return; try{
-  const id=b.dataset.frr||b.dataset.frrCopy, by=b.dataset.frrBy; const l=friendLink(true); if(!l) return; const t=frReplyText(by,l);
+  const id=b.dataset.frr||b.dataset.frrCopy, by=b.dataset.frrBy; const fx=store.get(KEY_FRIEND,[]).find(x=>x.id===id); const l=friendLink(true,fx&&(fx.a0||fx.got)||undefined); if(!l) return; const t=frReplyText(by,l);
   if(b.dataset.frr){ window.open('https://line.me/R/msg/text/?'+encodeURIComponent(t),'_blank','noopener'); }
   else { try{ navigator.clipboard.writeText(t).catch(()=>{}); }catch(_){} }
   frReplyDone(id); const box=b.closest('.frr'); if(box) box.outerHTML=`<p class="frr-ok">${esc(by||'友だち')}さんへの知らせを用意しました。${b.dataset.frr?'LINEで送ってください。':'LINEなどにはりつけて送ってください。'}</p>`+(b.dataset.frr?'':`<textarea class="frr-out" rows="4" readonly>${esc(t)}</textarea>`); }catch(_){} });
@@ -10734,7 +10737,7 @@ const FM_FUTURE=['夢の中で、{名}という名前の人に会った。まだ
 const FM_FUTURE_TINY=['ねむりながら、にっこり笑った。夢の中で、まだ生まれていない{名}という子に、会っていたのかもしれない。'];
 const FM_ECHO=['ふと、{名}のことを思い出した。今ごろ、どうしているだろう。','{名}に、手紙を書いた。長い返事が届いたのは、季節がひとつ変わったころだった。','{名}の近況を、人づてに聞いた。元気そうで、うれしくなった。'];
 const FM_ECHO_FAR=['{名}のことを、ときどき思い出した。会えなかった人なのに、ふしぎと心の支えになっていた。'];
-const KEY_FRMEET='hitotsu.frMeet';
+const KEY_FRMEET='hitotsu.frMeet2';
 // いまの主人公なら、つながった時の年齢がわかる。出会いは、つながってから現実の時間で1〜2か月あと（すぐには答えを出さない）
 function frAgeAt(P,t){ try{ if(typeof st==='undefined'||!st||st.seed!==P.seed||!st.birthTime||typeof msPerYear!=='function') return null; return Math.max(0,(t+(st.shift||0)-st.birthTime-(st.pause||0))/msPerYear(P)); }catch(e){ return null; } }
 // 出会う年と形を決める（二人の種から。決めたら覚えておく）
@@ -10749,6 +10752,12 @@ function fmPlan(P,Q,h,minAge,maxAge){ if(maxAge==null) maxAge=minAge?minAge+2:99
   const lo=Math.min(Math.max(minAge, minAge?0:(P.deathAge>=14?10:0)), P.deathAge), hi=Math.min(P.deathAge, minAge?Math.max(lo,maxAge):lo+30);
   const age=lo+Math.floor(pairHash(P.seed,Q.seed,8)*(hi-lo+1)); const y=P.year+age;
   return { age, mode:y<Q.year?'future':y>h.end?'past':'alive', sync:0 }; }
+// ふたりで同じ「出会いの日」：つながった日（ふたりで同じ起点）から、現実の時間で30〜60日後。日数は、ふたりのidから決まる
+function frAnchor(f){ const a=f.a0||f.got||Date.now(); return typeof f.g==='number'?Math.min(a,f.g):a; }
+function frIdHash(a,b){ const s=[String(a),String(b)].sort().join('|'); let x=2166136261; for(let i=0;i<s.length;i++){ x^=s.charCodeAt(i); x=Math.imul(x,16777619)>>>0; } x^=x>>>15; x=Math.imul(x,2246822519)>>>0; x^=x>>>13; return (x>>>0)/4294967296; }
+function frMeetDay(f){ const DAY=86400000, d0=Math.floor(frAnchor(f)/DAY); return (d0+30+Math.floor(frIdHash(myId(),f.id)*31))*DAY+3*3600000; }
+function fmPlanDay(P,Q,h,D){ const aD=frAgeAt(P,D); let age=Math.floor(aD), frac=aD-age; if(age>=P.deathAge){ age=P.deathAge; frac=0; }
+  const y=P.year+age; return { age, frac, D, mode:y<Q.year?'future':y>h.end?'past':'alive' }; }
 function fmPick(pool,P,Q,k){ return pool[Math.floor(pairHash(P.seed,Q.seed,k)*pool.length)%pool.length]; }
 function fmText(P,Q,plan){ const myA=plan.age, year=P.year+myA, thA=year-Q.year, same=P.countryId===Q.countryId, first=P.seed<Q.seed;
   let pool, side=0;
@@ -10773,12 +10782,13 @@ function friendMeet(P,L){
   const key=fr.map(f=>f.id+':'+f.s).join(','); if(!_fhCache||_fhCache.key!==key) _fhCache={ key, list:friendHeroes() };
   const memo=store.get(KEY_FRMEET,{}); let dirty=false; const used=new Set();
   for(const h of _fhCache.list){ const Q=h.P; if(Q.seed===P.seed&&Q.year===P.year) continue; if(L._fm[h.f.id]) continue;
-    const mk=P.seed+'|'+h.f.id; let plan=memo[mk];
-    if(!plan){ const ga=frAgeAt(P,h.f.got||Date.now()); let mn=0, mx=null; if(ga!=null){ const yd=86400000*30/msPerYear(P); mn=Math.ceil(ga+yd); mx=Math.max(mn,Math.floor(ga+2*yd)); } plan=fmPlan(P,Q,h,mn,mx); if(ga!=null){ memo[mk]=plan; dirty=true; } }
-    let age=Math.min(plan.age,P.deathAge); while(used.has(age)&&age<P.deathAge) age++; used.add(age);
+    const mk=P.seed+'|'+h.f.id; let plan=memo[mk]; const D=frMeetDay(h.f);
+    if(frAgeAt(P,D)!=null){ if(!plan||plan.D!==D){ plan=fmPlanDay(P,Q,h,D); memo[mk]=plan; dirty=true; } }
+    else if(!plan) plan=fmPlan(P,Q,h,0);
+    let age=Math.min(plan.age,P.deathAge); if(plan.D==null){ while(used.has(age)&&age<P.deathAge) age++; used.add(age); }
     const y=L.years.find(x=>x.age===age); if(!y) continue; L._fm[h.f.id]=1;
     const text=fmText(P,Q,Object.assign({},plan,{age}));
-    const ev={ kind:'meet', big:true, d:3, text, feel:'なぜか、ずっと前から知っている人のような気がした。', inner:plan.mode==='past'?'どんな一生だったんだろう':plan.mode==='future'?'いつか、どこかで':'また、どこかで会えるかな', season:pairHash(P.seed,Q.seed,6)<.5?1:2, fr:h.f.by||'友だち', frName:Q.full, sync:plan.sync?1:0 };
+    const ev={ kind:'meet', big:true, d:3, text, feel:'なぜか、ずっと前から知っている人のような気がした。', inner:plan.mode==='past'?'どんな一生だったんだろう':plan.mode==='future'?'いつか、どこかで':'また、どこかで会えるかな', season:plan.D!=null?(Math.floor((plan.frac||0)*4)+Math.floor((P.month-1)/3))%4:(pairHash(P.seed,Q.seed,6)<.5?1:2), fr:h.f.by||'友だち', frName:Q.full, sync:plan.D!=null?1:0 };
     const i=y.events.findIndex(e=>e.kind==='death'); if(i>=0) y.events.splice(i,0,ev); else y.events.push(ev);
     // そのあとも、ときどき縁がつづく
     const ea=age+3+Math.floor(pairHash(P.seed,Q.seed,9)*6);
@@ -10850,7 +10860,7 @@ function bindFriend(){ bindFriendOpeners();
   const l=$('#frLink'); if(l) l.onclick=()=>{ store.set(KEY_FRSENT,(store.get(KEY_FRSENT,0)||0)+1); copy(friendShareText(link()),'紹介の文とリンク'); };
   const ml=$('#frMail'); if(ml) ml.onclick=()=>{ location.href='mailto:?subject='+encodeURIComponent('LIFE BOOK で、人生のどこかで出会いませんか')+'&body='+encodeURIComponent(friendShareText(link())); };
   const c=$('#frCode'); if(c) c.onclick=()=>{ by(); const t=friendCode(); if(t) copy(t,'紹介コード'); };
-  const g=$('#frGet'); if(g) g.onclick=()=>{ const o=readFriend($('#frCodeIn').value); if(!o) return msg('読み取れませんでした。リンクやコードを、最初から最後まで、まるごとはりつけてください。'); afterFriend(o,receiveFriend(o)); };
+  const g=$('#frGet'); if(g) g.onclick=()=>{ const o=readFriend($('#frCodeIn').value); if(!o) return msg('読み取れませんでした。リンクやコードを、最初から最後まで、まるごとはりつけてください。'); if(!o.re) o.lk=1; afterFriend(o,receiveFriend(o)); };
 }
 function afterFriend(o,r){ if(r==='self'){ alertFriend('これは、あなた自身の紹介リンクです。'); return; }
   _fhCache=null; if(typeof load==='function'&&typeof st!=='undefined'&&st) load();
@@ -10861,7 +10871,7 @@ function afterFriend(o,r){ if(r==='self'){ alertFriend('これは、あなた自
   alertFriend(`${o.by||'友だち'}さんとつながりました。${o.by||'友だち'}さんの主人公と、あなたの主人公は、人生のどこかで出会います。`+(online?`${o.by||'友だち'}さんの画面にも、つながったことが届きます。`:`下のボタンで、${o.by||'友だち'}さんにも知らせてあげてください。`)); }
 function alertFriend(t){ if(typeof render==='function') render(); setTimeout(()=>openFriend(t),40); }
 // リンクで開いたとき
-function friendFromHash(){ try{ const h=location.hash||''; if(!/friend=/.test(h)) return; const o=readFriend(h); history.replaceState(null,'',location.pathname+location.search); if(!o) return; const r=receiveFriend(o); setTimeout(()=>afterFriend(o,r),300); }catch(e){} }
+function friendFromHash(){ try{ const h=location.hash||''; if(!/friend=/.test(h)) return; const o=readFriend(h); history.replaceState(null,'',location.pathname+location.search); if(!o) return; if(!o.re) o.lk=1; const r=receiveFriend(o); setTimeout(()=>afterFriend(o,r),300); }catch(e){} }
 window.addEventListener('hashchange',()=>{ if(typeof friendFromHash==='function') friendFromHash(); });
 // ===== 「出会った！」の瞬間 =====
 // 紹介でつながった友だちの主人公と出会う出来事が、物語の時間で起きたら、画面いっぱいにお知らせする。
@@ -10882,7 +10892,7 @@ function meetOverlay(P,L,c){ if(document.getElementById('mtOv')) return; const u
   const d=document.createElement('div'); d.id='mtOv'; d.className='mt-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-labelledby','mtT');
   d.innerHTML=`<div class="mt-card"><p class="mt-kicker">${esc(m.e.fr||'友だち')}さんの主人公と</p><h2 id="mtT">出会った！</h2>${meetArtSVG()}
     <p class="mt-who"><b>${esc(P.given)}</b>（${m.age}歳）と <b>${esc(m.e.frName||'')}</b></p><p class="mt-text">${esc(String(m.e.text||'').replace(/\{名\}/g,P.given))}</p>
-    ${m.e.sync?`<p class="tiny muted">${esc(m.e.fr||'友だち')}さんの LIFE BOOK でも、同じ年に、この出会いが起きています。</p>`:''}
+    ${m.e.sync?`<p class="tiny muted">${esc(m.e.fr||'友だち')}さんの LIFE BOOK にも、同じころに「出会った！」が届きます。</p>`:''}
     <div class="mt-btns"><button type="button" class="fr-big" id="mtGo">出会いのページを読む</button><button type="button" class="mt-close" id="mtX">あとで</button></div></div>`;
   document.body.appendChild(d); try{ rubyApply(d,P,L); }catch(_){} const close=()=>{ meetMarkSeen([m.key]); d.remove(); navSync&&navSync(); };
   d.querySelector('#mtX').onclick=close; d.querySelector('#mtGo').onclick=()=>{ close(); if(typeof goLife==='function') goLife(); setTimeout(()=>{ const el=document.querySelector('.k-meet'); if(el) el.scrollIntoView({ behavior:'smooth', block:'center' }); },120); };
