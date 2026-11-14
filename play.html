@@ -465,7 +465,10 @@ a.nav-b{ text-decoration:none; }
 .hm-btn:hover{ transform:translateY(-1px); } .hm-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 #5E9FD0; } .hm-btn:focus-visible{ outline:3px solid #E86A88; outline-offset:2px; }
 .hm-btn.ghost{ background:var(--surface); color:var(--ink); border-color:var(--line); box-shadow:0 3px 0 var(--line); }
 .hm-new{ font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#FFE27A; color:#5A4500; }
-.hm-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.hm-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; grid-auto-flow:row dense; }
+/* 本がまだないときの本棚は、横長の細い帯にして、すき間を作らない */
+.hm-grid .hm-tile.hm-empty{ grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 14px; padding-top:10px; padding-bottom:10px; }
+.hm-tile.hm-empty h3{ margin:0; } .hm-tile.hm-empty p{ margin:0; }
 .hm-tile{ padding:14px 16px; border-radius:18px; border:2px solid var(--line); background:var(--surface); min-width:0; }
 .hm-tile h3{ display:flex; align-items:baseline; gap:8px; margin:0 0 10px; font-family:var(--serif); font-size:16px; }
 .hm-tile h3::before{ content:""; width:10px; height:10px; border-radius:2px; background:var(--tc,#8EC3E6); flex:none; transform:translateY(-1px); }
@@ -14841,7 +14844,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-belief','心に生まれた観念', bel.length?`<ul class="hm-list">${bel.map(b=>`<li><span class="hm-a">${b.age}歳</span>「${esc(b.core||b.text||'')}」</li>`).join('')}</ul>`:'<p class="tiny muted">まだ、心に残る思い込みは生まれていません。</p>', arc.length?`<button class="linkish" type="button" id="hmKmap">本棚の人生とくらべる（観念の地図）</button>`:'')}
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
     ${homeTile('hm-friends',`Group Soul /紹介でつながった人たち<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, (typeof gsTreeHTML==='function'?gsTreeHTML(fr):'')+`<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
-    ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は「思い出のLIFE BOOK」になって、ここに並びます。</p>')}
+    ${homeTile('hm-shelf'+(arc.length?'':' hm-empty'),`私の本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は「思い出のLIFE BOOK」になって、ここに並びます。</p>')}
     ${typeof borrowTileHTML==='function'?homeTile('hm-borrow',`友だちからLIFE BOOKを借りる<span class="hm-n">${store.get(KEY_LOAN,[]).length}冊</span>`,borrowTileHTML()):''}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
     ${typeof birthMapHTML==='function'?homeTile('hm-map','生まれた場所',birthMapHTML(P)):''}
@@ -15042,7 +15045,7 @@ function introHTML(){
     <p style="margin-top:10px">人生は、現実の約2日半で1歳ずつ進みます（80歳まで生きる人生なら、約6か月半）。ひらくたびに、前に見た時から今までに起きた出来事と、その時の気持ちが読めます。人生が終わると、葬儀のあとに、その人生を読み解く「LIFE BOOK前世レポート」が届きます。生き終えた人生は、章立てのある一冊の本になって、あなたの本棚に並びます。</p></div>
     <div class="cta2"><button class="born-btn" id="bornBtn2" type="button"><svg class="born-heart" viewBox="0 0 28 24" shape-rendering="crispEdges" aria-hidden="true">${typeof frHeart==='function'?frHeart(0,0,4,'#FFFFFF'):''}</svg><span class="born-txt">生まれる</span><span class="born-sub">あたらしい いのちが、はじまります</span></button></div>
     <p class="tiny muted">世界189か国の中から、その年の出生数の比率に沿って生まれる国が決まります。</p>
-    ${arc.length?`<div class="shelf-wrap"><h3>わたしの本棚</h3><p class="tiny muted">生き終えた人生が「思い出のLIFE BOOK」になって、一冊ずつ並びます。背表紙を押すと、その人生の LIFE BOOK前世レポートが読めます。</p><div class="shelf">${arc.map((a,i)=>spineHTML(a,i)).join('')}</div><div class="reels"><span class="tiny muted">思い出の動画</span>${arc.map((a,i)=>`<button type="button" class="reel" data-mov="${i}" aria-label="${esc(a.name)}の思い出の動画を再生"><span class="reel-ic" aria-hidden="true"></span><span>${esc(a.name)}</span></button>`).join('')}</div><div class="obi-btns"><button class="btn ghost small" id="kmapBtn" type="button">観念の地図をひらく</button></div><div id="kmapOut"></div></div>`:''}
+    ${arc.length?`<div class="shelf-wrap"><h3>私の本棚</h3><p class="tiny muted">生き終えた人生が「思い出のLIFE BOOK」になって、一冊ずつ並びます。背表紙を押すと、その人生の LIFE BOOK前世レポートが読めます。</p><div class="shelf">${arc.map((a,i)=>spineHTML(a,i)).join('')}</div><div class="reels"><span class="tiny muted">思い出の動画</span>${arc.map((a,i)=>`<button type="button" class="reel" data-mov="${i}" aria-label="${esc(a.name)}の思い出の動画を再生"><span class="reel-ic" aria-hidden="true"></span><span>${esc(a.name)}</span></button>`).join('')}</div><div class="obi-btns"><button class="btn ghost small" id="kmapBtn" type="button">観念の地図をひらく</button></div><div id="kmapOut"></div></div>`:''}
     ${loanShelfHTML()}
     ${friendHTML()}
   </section>`;
