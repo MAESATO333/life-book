@@ -12606,7 +12606,8 @@ function seenId(t){ let h=2166136261; for(let i=0;i<t.length;i++){ h^=t.charCode
 function seenPick(key,pool,rnd){ let seen=[]; try{ seen=JSON.parse(localStorage.getItem(key)||'[]'); }catch(e){} const S=new Set(seen);
   let cand=pool.filter(t=>!S.has(seenId(t))); if(!cand.length){ seen=[]; cand=pool.slice(); }
   const t=cand[Math.floor((rnd==null?Math.random():rnd)*cand.length)]; seen.push(seenId(t)); try{ localStorage.setItem(key,JSON.stringify(seen)); }catch(e){} return t; }
-function hintNow(){ return seenPick('hitotsu.hintSeen',hintPool()); }
+let _hintK='', _hintT=''; // 同じページを見ているあいだは、同じヒント（自動の描き直しで変わらない）
+function hintNow(){ const k=(typeof ART_KEY!=='undefined'?ART_KEY:'')+'|'+(typeof ART_SALT!=='undefined'?ART_SALT:''); if(_hintT&&k===_hintK) return _hintT; _hintK=k; _hintT=seenPick('hitotsu.hintSeen',hintPool()); return _hintT; }
 // ===== 世界のいま：毎日20項目を、スクロールで読む =====
 // すべて事実だけ。数字は WSTAT（Gapminder／国連・世界銀行）、時刻と日の出・日の入りと月の形はブラウザで計算、
 // あいさつ・料理・動物・楽器・スポーツ・祝日は、よく知られた実在のものだけ。
@@ -12719,7 +12720,7 @@ function worldNowHTML(P,year){ let items=[]; try{ items=wnPick(wnPool(P,year),20
   <div class="wn-box"><ul class="wn-list">${items.map(x=>`<li><span class="wn-tag">${x.ic} ${esc(x.cat)}</span><small class="wn-when">${esc(x.src||(new Date().getFullYear()+'年の情報'))}</small><p>${esc(x.t)}</p></li>`).join('')}</ul></div>
   <p class="wn-src">数字の出典：世界銀行・国連・Gapminder の統計。時刻・日の出・月の形は、いまの日時から計算しています。</p>`; }
 document.head.insertAdjacentHTML('beforeend',`<style>
-.wn-box{ max-height:220px; overflow-y:auto; padding:2px 10px 6px; border-radius:14px; background:#F6FBF4; border:1px solid #D7EBD0; -webkit-overflow-scrolling:touch; }
+.wn-box{ max-height:66px; overflow-y:auto; padding:2px 10px 6px; border-radius:14px; background:#F6FBF4; border:1px solid #D7EBD0; -webkit-overflow-scrolling:touch; }
 .wn-list{ list-style:none; margin:0; padding:0; } .wn-list li{ padding:8px 0; border-bottom:1px dashed #D7E3D2; } .wn-list li:last-child{ border-bottom:0; }
 .wn-list p{ margin:3px 0 0; font-size:14px; line-height:1.7; } .wn-tag{ display:inline-block; font-size:11px; background:#E6F4E0; color:#3F7F3A; border-radius:999px; padding:1px 9px; }
 .wn-when{ margin-left:6px; font-size:10.5px; color:var(--muted); } .wn-h{ font-size:15px; font-weight:700; color:#3F7F3A; margin:4px 0 6px; } .wn-h small{ display:block; font-weight:400; font-size:11.5px; color:var(--muted); } .wn-src{ font-size:9.5px; opacity:.8; margin:6px 2px 0; }
@@ -12826,9 +12827,9 @@ function spaceHTML(){
   const k=(typeof dayKey==='function'?dayKey():''); const pick=UFO_ALL.slice().sort((a,b)=>dHash(k,'ufo',a[0]+a[2])-dHash(k,'ufo',b[0]+b[2])).slice(0,50).sort((a,b)=>b[0]-a[0]);
   const ufo=pick.map(x=>`<li><b>${esc(x[1])}</b>　${esc(x[2])}<small>（${esc(x[3])}）</small></li>`).join('');
   return `<div class="sp-wrap">
-  <section class="sp sp-ufo"><h4>👽 宇宙人のいま　${new Date().getFullYear()}年<small>${pick.length}件</small></h4>${skToday().replace('の情報','に選んだ50件')}<p class="sp-note">アメリカ国防総省や世界の国の公式発表・確かな記録だけ。毎日入れかわります。</p><ul class="sp-l">${ufo}</ul></section>
-  <section class="sp sp-sun"><h4>☀️ 太陽のいま　${new Date().getFullYear()}年</h4>${skToday()}<p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="spSun">${_spSun||'<p class="sp-wait">太陽のようすを読みこんでいます…</p>'}</div></section>
-  <section class="sp sp-sat"><h4>🛰 衛星のいま　${new Date().getFullYear()}年</h4>${skToday()}<p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="spSat">${_spSat||'<p class="sp-wait">宇宙のようすを読みこんでいます…</p>'}</div></section>
+  <section class="sp sp-ufo"><h4>👽 宇宙人のいま　${new Date().getFullYear()}年<small>${pick.length}件</small>${skToday().replace('の情報','に選んだ50件')}</h4><p class="sp-note">アメリカ国防総省や世界の国の公式発表・確かな記録だけ。毎日入れかわります。</p><ul class="sp-l">${ufo}</ul></section>
+  <section class="sp sp-sun"><h4>☀️ 太陽のいま　${new Date().getFullYear()}年${skToday()}</h4><div class="sp-l" id="spSun">${_spSun||'<p class="sp-wait">太陽のようすを読みこんでいます…</p>'}</div></section>
+  <section class="sp sp-sat"><h4>🛰 衛星のいま　${new Date().getFullYear()}年${skToday()}</h4><div class="sp-l" id="spSat">${_spSat||'<p class="sp-wait">宇宙のようすを読みこんでいます…</p>'}</div></section>
   </div>${(Date.now()-_spAt>60000||!_spSun)?(setTimeout(spFill,0),''):''}`; }
 async function spFill(){ _spAt=Date.now();
   const sun=document.getElementById('spSun'), sat=document.getElementById('spSat'); if(!sun&&!sat) return;
@@ -12842,7 +12843,7 @@ async function spFill(){ _spAt=Date.now();
       fl.slice(0,30).forEach(x=>rows.push(`<li>${spJst(x.max_time)}ごろ　${esc(x.max_class)} のフレア（${SP_CLS(x.max_class)}）</li>`)); }catch(e){}
     try{ let sc=spGet('scl',30*60e3); if(!sc){ sc=await spJSON('https://services.swpc.noaa.gov/products/noaa-scales.json'); spSet('scl',sc); } const n=sc&&sc['0'];
       if(n) rows.unshift(`<li><b>いまの宇宙天気</b>　電波への影響 R${esc(n.R&&n.R.Scale||'0')}・放射線 S${esc(n.S&&n.S.Scale||'0')}・磁気嵐 G${esc(n.G&&n.G.Scale||'0')}（0がおだやか、5がいちばん強い）</li>`); }catch(e){}
-    sun.innerHTML=`<ul class="sp-ul">${rows.join('')}${sunBase}</ul>${rows.length?'<p class="sp-src">出典：NOAA 宇宙天気予報センター（いまのデータ）</p>':'<p class="sp-wait">いまのフレアのデータは読みこめませんでした。通信のよいところで開き直してください。</p>'}`; }
+    skFillKeep(sun,`<ul class="sp-ul">${rows.join('')}${sunBase}</ul>${rows.length?'<p class="sp-src">出典：NOAA 宇宙天気予報センター（いまのデータ）</p>':'<p class="sp-wait">いまのフレアのデータは読みこめませんでした。通信のよいところで開き直してください。</p>'}`); }
   if(sat){ const base=SAT_FACTS.map(t=>`<li>${esc(t)}</li>`).join(''); let rows=[];
     try{ const p=await spJSON('https://api.wheretheiss.at/v1/satellites/25544'); rows.push(`<li><b>いまの国際宇宙ステーション</b>　緯度${(+p.latitude).toFixed(1)}°・経度${(+p.longitude).toFixed(1)}°の上空、高さ${Math.round(p.altitude)}km、時速${Math.round(p.velocity).toLocaleString()}kmで飛んでいる。</li>`); }catch(e){}
     try{ let A=spGet('ppl2',3*3600e3); if(!A){ const j=await spJSON('https://ll.thespacedevs.com/2.2.0/astronaut/?in_space=true&limit=30&mode=list'); A={n:j.count,l:(j.results||[]).map(x=>({n:x.name,a:(x.agency&&(x.agency.abbrev||x.agency.name))||x.agency_abbrev||''}))}; spSet('ppl2',A); }
@@ -12853,12 +12854,17 @@ async function spFill(){ _spAt=Date.now();
     try{ let L=spGet('prv',3*3600e3); if(!L){ const j=await spJSON('https://ll.thespacedevs.com/2.2.0/launch/previous/?limit=10&mode=list'); L=(j.results||[]).map(LL); spSet('prv',L); }
       const ok=s=>/Success/i.test(s)?'成功':/Fail/i.test(s)?'失敗':'';
       if(L&&L.length) rows.push(`<li><b>さいきんの打ち上げ（${L.length}件）</b><ul class="sp-sub">${L.map(x=>`<li>${spJst(x.t)}　${esc(x.n)}${ok(x.s)?`…${ok(x.s)}`:''}</li>`).join('')}</ul></li>`); }catch(e){}
-    sat.innerHTML=`<ul class="sp-ul">${rows.join('')}${base}</ul>${rows.length?'<p class="sp-src">出典：Where the ISS at?・The Space Devs（いまのデータ）</p>':'<p class="sp-wait">いまのデータは読みこめませんでした。通信のよいところで開き直してください。</p>'}`; }
+    skFillKeep(sat,`<ul class="sp-ul">${rows.join('')}${base}</ul>${rows.length?'<p class="sp-src">出典：Where the ISS at?・The Space Devs（いまのデータ）</p>':'<p class="sp-wait">いまのデータは読みこめませんでした。通信のよいところで開き直してください。</p>'}`); }
   if(sun) _spSun=sun.innerHTML; if(sat) _spSat=sat.innerHTML;
   try{ if(typeof msRebalance==='function') msRebalance(); }catch(_){} }
 function spRank(c){ const m=/^([ABCMX])([\d.]+)?/.exec(c||''); if(!m) return 0; return 'ABCMX'.indexOf(m[1])*100+(+m[2]||0); }
 document.head.insertAdjacentHTML('beforeend',`<style>
-.sp-wrap{ display:grid; gap:10px; margin:6px 0 12px; }
+.sp-wrap{ display:grid; gap:8px; margin:6px 0 12px; }
+/* 欄ぜんたいを短くして、中でスクロール。タイトルと日付は上に残る */
+.sp{ max-height:68px; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding:0 12px 6px !important; }
+.sp>h4{ position:sticky; top:0; z-index:1; background:inherit; padding:7px 0 3px; margin:0 !important; font-size:14px !important; }
+.sp>h4 .sp-date{ display:inline-block; margin-left:8px !important; font-size:11px !important; font-weight:700; color:#5A4E58 !important; }
+.sp .sp-l{ max-height:none !important; overflow:visible !important; }
 .sp{ border-radius:14px; padding:10px 12px; border:1.5px solid; } .sp h4{ margin:0 0 4px; font-size:15px; } .sp h4 small{ margin-left:8px; font-size:11px; font-weight:400; color:var(--muted); }
 .sp-ufo{ background:#F4F0FD; border-color:#D9CCF5; } .sp-ufo h4{ color:#6A4BB8; }
 .sp-sun{ background:#FFF6E6; border-color:#FBD9A0; } .sp-sun h4{ color:#C0701A; }
@@ -12874,7 +12880,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 const RAD=Math.PI/180, n360=x=>((x%360)+360)%360;
 const skJD=d=>d.getTime()/864e5+2440587.5;
 const skDate=d=>`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
-const skToday=()=>{ const d=new Date(); return `<p class="sp-date">📅 ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日の情報</p>`; };
+const skToday=()=>{ const d=new Date(); return `<small class="sp-date">📅 ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日の情報</small>`; };
 const skLi=a=>a.map(t=>`<li>${t}</li>`).join('');
 // --- 月 ---
 function skMoon(d){ const jd=skJD(d), T=(jd-2451545)/36525; const syn=29.530588853; const age=((jd-2451550.1)%syn+syn)%syn;
@@ -12923,11 +12929,11 @@ function skyHTML(){ const Y=new Date().getFullYear(); const now=new Date();
   const show=k=>_skH[k]||`<p class="sp-wait">読みこんでいます…</p>`;
   if(Date.now()-_skAt>60000) setTimeout(skFill,0);
   return `<div class="sp-wrap">
-  <section class="sp sk-moon"><h4>🌙 月のいま　${Y}年</h4>${skToday()}<div class="sp-l">${moon}</div></section>
-  <section class="sp sk-earth"><h4>🌋 地球のいま　${Y}年</h4>${skToday()}<p class="sp-note">いまのデータと、確かな事実。</p><div class="sp-l" id="skEarth">${show('earth')}</div></section>
-  <section class="sp sk-neo"><h4>☄ 小惑星のいま　${Y}年</h4>${skToday()}<p class="sp-note">この1週間に地球の近くを通る小惑星。</p><div class="sp-l" id="skNeo">${show('neo')}</div></section>
-  <section class="sp sk-probe"><h4>🚀 探査機のいま　${Y}年</h4>${skToday()}<div class="sp-l" id="skProbe"><ul class="sp-ul">${probe0}<li id="skApod">${_skH.apod||'きょうの宇宙の写真を読みこんでいます…'}</li>${skLi(SK_FACT.probe.map(esc))}</ul><p class="sp-src">ボイジャーの距離は NASA の公表値から計算した目安。写真：NASA「きょうの天文写真」</p></div></section>
-  <section class="sp sk-star"><h4>🌌 星空のいま　${Y}年</h4>${skToday()}<div class="sp-l">${star}</div></section></div>`; }
+  <section class="sp sk-moon"><h4>🌙 月のいま　${Y}年${skToday()}</h4><div class="sp-l">${moon}</div></section>
+  <section class="sp sk-earth"><h4>🌋 地球のいま　${Y}年${skToday()}</h4><div class="sp-l" id="skEarth">${show('earth')}</div></section>
+  <section class="sp sk-neo"><h4>☄ 小惑星のいま　${Y}年${skToday()}</h4><p class="sp-note">この1週間に地球の近くを通る小惑星。</p><div class="sp-l" id="skNeo">${show('neo')}</div></section>
+  <section class="sp sk-probe"><h4>🚀 探査機のいま　${Y}年${skToday()}</h4><div class="sp-l" id="skProbe"><ul class="sp-ul">${probe0}<li id="skApod">${_skH.apod||'きょうの宇宙の写真を読みこんでいます…'}</li>${skLi(SK_FACT.probe.map(esc))}</ul><p class="sp-src">ボイジャーの距離は NASA の公表値から計算した目安。写真：NASA「きょうの天文写真」</p></div></section>
+  <section class="sp sk-star"><h4>🌌 星空のいま　${Y}年${skToday()}</h4><div class="sp-l">${star}</div></section></div>`; }
 async function skFill(){ _skAt=Date.now(); const J=async u=>{ const r=await fetch(u); if(!r.ok) throw new Error('http '+r.status); return r.json(); };
   const get=(k,ms)=>{ try{ const v=JSON.parse(localStorage.getItem('hitotsu.sky.'+k)||'null'); if(v&&Date.now()-v.t<ms) return v.d; }catch(e){} return null; }, put=(k,d)=>{ try{ localStorage.setItem('hitotsu.sky.'+k,JSON.stringify({t:Date.now(),d})); }catch(e){} };
   const jst=s=>{ const d=new Date(s); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}時${String(d.getMinutes()).padStart(2,'0')}分`; };
@@ -12948,7 +12954,7 @@ async function skFill(){ _skAt=Date.now(); const J=async u=>{ const r=await fetc
   // きょうの宇宙の写真
   try{ let p=get('apod',6*3600e3); if(!p){ const j=await J('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&thumbs=true'); p={t:j.title,u:j.media_type==='image'?j.url:(j.thumbnail_url||''),d:j.date}; put('apod',p); }
     _skH.apod=`<b>きょうの宇宙の写真（${esc(p.d||'')}）</b>　${esc(p.t||'')}${p.u?`<img class="sk-apod" src="${esc(p.u)}" alt="${esc(p.t||'宇宙の写真')}" loading="lazy">`:''}`; }catch(e){ _skH.apod='きょうの宇宙の写真は、いまは読みこめませんでした。'; }
-  const set=(id,h)=>{ const el=document.getElementById(id); if(el) el.innerHTML=h; }; set('skEarth',_skH.earth); set('skNeo',_skH.neo); set('skApod',_skH.apod);
+  const set=(id,h)=>{ const el=document.getElementById(id); if(el) skFillKeep(el,h); }; set('skEarth',_skH.earth); set('skNeo',_skH.neo); set('skApod',_skH.apod);
   try{ if(typeof msRebalance==='function') msRebalance(); }catch(_){} }
 document.head.insertAdjacentHTML('beforeend',`<style>
 .sk-moon{ background:#FFFBEA; border-color:#F2E2A6; } .sk-moon h4{ color:#A4801A; }
@@ -16371,7 +16377,7 @@ function navFromHash(){ try{ const m=(location.hash||'').match(/^#(gateway|birth
 window.addEventListener('hashchange',navFromHash);
 function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); render(); navFromHash(); if(typeof friendFromHash==='function') friendFromHash(); if(typeof loanFromHash==='function') loanFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
 start();
-setInterval(()=>{ if(st && st.stage==='life' && !viewing && !inspAnim && document.visibilityState==='visible' && !document.activeElement.matches('textarea')) render(); }, 30000);
+setInterval(()=>{ if(st && st.stage==='life' && !viewing && !inspAnim && document.visibilityState==='visible' && !document.activeElement.matches('textarea')){ window._skAuto=true; try{ render(); }finally{ window._skAuto=false; } } }, 30000);
 
 function refSecHTML(){
   return `<section class="chap"><details><summary class="tiny muted">この人生の心の動きと暮らしは、どんな研究をもとに計算しているか</summary>
@@ -16383,6 +16389,22 @@ function refSecHTML(){
   const R=`{ --ink:#3A2E38; --muted:#6B5E68; color:#3A2E38; }`;
   const sel=p=>B.split(',').map(x=>p+' '+x).join(',');
   const c=document.createElement('style'); c.textContent=`@media (prefers-color-scheme: dark){ ${sel(':root:not([data-theme="light"])')}${R} } ${sel(':root[data-theme="dark"]')}${R}`; document.head.appendChild(c); })();
+// ===== 読んでいる場所が、勝手に最初にもどらないようにする =====
+// 1) 画面を描き直すとき、スクロールできる箱の位置とページの位置を覚えて、もとにもどす
+// 2) さわってから20秒は、30秒ごとの自動の描き直しをお休みする
+let _skLastTouch=0; // スクロールそのもの（プログラムによる）でも記録されるので、wheel/touch/key/mouse だけで判定する
+['wheel','touchmove','touchstart','keydown','mousedown'].forEach(e=>window.addEventListener(e,()=>{ _skLastTouch=Date.now(); },{ capture:true, passive:true }));
+function skKey(el){ if(el.id) return '#'+el.id; const c=(el.getAttribute('class')||'').trim(); if(!c) return null;
+  const all=[...document.querySelectorAll('#app [class]')].filter(x=>(x.getAttribute('class')||'').trim()===c); return c+'#'+all.indexOf(el); }
+function skSave(){ const m={}; document.querySelectorAll('#app *').forEach(el=>{ if(el.scrollTop>0&&el.scrollHeight>el.clientHeight+2) { const k=skKey(el); if(k) m[k]=el.scrollTop; } }); return { m, y:window.scrollY }; }
+function skRestore(s){ if(!s||!s.m) return; const put=()=>{ document.querySelectorAll('#app *').forEach(el=>{ if(el.scrollHeight>el.clientHeight+2){ const k=skKey(el); const v=k&&s.m[k]; if(v!=null) el.scrollTop=v; } }); };
+  const safe=()=>{ try{ put(); }catch(e){} }; safe(); requestAnimationFrame(safe); setTimeout(safe,120); }
+(function(){ if(typeof render!=='function') return; const _r=render;
+  render=function(){ const auto=window._skAuto; if(auto&&Date.now()-_skLastTouch<20000) return; let s=null; try{ s=skSave(); }catch(e){} const y=window.scrollY; const r=_r.apply(this,arguments);
+    if(auto){ skRestore(s); if(Math.abs(window.scrollY-y)>2) window.scrollTo(0,y); const back=()=>{ if(Date.now()-_skLastTouch>400&&Math.abs(window.scrollY-y)>2) window.scrollTo(0,y); }; requestAnimationFrame(back); [150,400,900].forEach(t=>setTimeout(back,t)); } else if(s){ skRestore({ m:s.m }); }
+    return r; }; })();
+// 中身だけ入れかえるとき（いまのデータが届いたとき）も、箱の位置をたもつ
+function skFillKeep(el,html){ if(!el) return; if(el.innerHTML===html) return; const t=el.scrollTop; el.innerHTML=html; el.scrollTop=t; }
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
