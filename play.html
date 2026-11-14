@@ -544,7 +544,8 @@ a.nav-b{ text-decoration:none; }
 .ea-card figcaption{ font-size:.82em; line-height:1.5; padding:6px 4px 0; } .ea-card figcaption small{ display:block; color:var(--muted); } .ea-card figcaption span{ display:block; color:var(--muted); font-size:.95em; }
 .ea-big{ transform:rotate(-1.2deg); max-width:420px; } .ea-count{ margin:.8em 0 .5em; } .ea-count b{ font-size:1.3em; color:#E0577B; }
 .ea-open{ border:0; border-radius:999px; padding:9px 18px; background:#5BA7DD; color:#fff; font-weight:700; box-shadow:0 4px 0 #3E80B5; cursor:pointer; font-family:inherit; }
-.ea-dlg{ max-width:760px; width:calc(100vw - 32px); max-height:86vh; overflow:auto; } .ea-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin:12px 0; }
+.ea-sh{ margin:14px 0 2px; font-size:16px; color:#2E5D86; } .ea-mine{ outline:3px solid #FFC2D0; }
+.ea-dlg{ box-sizing:border-box; max-width:760px; width:calc(100vw - 32px); max-height:86vh; overflow:auto; } .ea-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin:12px 0; }
 .hm-daily{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin:14px 0; }
 .lt-letter{ background:#FFFDF6; border:1px solid #F0E3C4; border-radius:10px; padding:14px 16px; background-image:repeating-linear-gradient(transparent 0 27px,#F3E9D2 27px 28px); line-height:28px; }
 .lt-letter p{ margin:0; } .lt-to{ color:#B07A55; font-size:.9em; } .lt-sign{ text-align:right; color:#B07A55; }
@@ -11850,13 +11851,13 @@ function growthSignHTML(P,L,c){ const now=snapNow(P,L,c); let s=d2Get(KEY_SNAP,n
   if(s.day!==now.day){ base=s; d2Set(KEY_SNAP+'.base',base); }
   d2Set(KEY_SNAP,now); if(!base||base.seed!==P.seed) return '';
   const days=Math.max(1,Math.round((now.t-base.t)/864e5)); const ch=[];
-  if(now.age>base.age) ch.push(`${now.age-base.age}つ年をとって、${now.age}歳に`);
-  if(now.h&&base.h&&now.h>base.h) ch.push(`背が ${(now.h-base.h).toFixed(1)}cm のびた`);
-  if(now.ppl>base.ppl) ch.push(`出会った人が ${now.ppl-base.ppl}人 ふえた`);
-  if(now.bel>base.bel) ch.push(`心に新しい観念が ${now.bel-base.bel}こ 生まれた`);
-  if(now.ev>base.ev) ch.push(`出来事が ${now.ev-base.ev}こ 起きた`);
+  if(now.age>base.age) ch.push(['age',`${now.age-base.age}つ年をとって、${now.age}歳に`]);
+  if(now.h&&base.h&&now.h>base.h) ch.push(['h',`背が ${(now.h-base.h).toFixed(1)}cm のびた`]);
+  if(now.ppl>base.ppl) ch.push(['ppl',`出会った人が ${now.ppl-base.ppl}人 ふえた`]);
+  if(now.bel>base.bel) ch.push(['bel',`心に新しい観念が ${now.bel-base.bel}こ 生まれた`]);
+  if(now.ev>base.ev) ch.push(['ev',`出来事が ${now.ev-base.ev}こ 起きた`]);
   if(!ch.length) return `<p>前に見た日（${days}日前）から、まだ大きな変化はありません。</p>`;
-  return `<p class="gs-lead">前に見た日（${days}日前）から</p><ul class="gs-list">${ch.map(x=>`<li><span class="gs-tx">${esc(x)}</span>${gsCheerHTML(now.day+'|'+x)}</li>`).join('')}</ul>`; }
+  return `<p class="gs-lead">前に見た日（${days}日前）から</p><ul class="gs-list">${ch.map(([kd,x])=>`<li><span class="gs-tx">${esc(x)}</span>${gsCheerHTML(P.seed+'|'+base.t+'|'+kd)}</li>`).join('')}</ul>`; }
 // 成長のしるしに、Higher Self から小さな応援を贈る（ひとつのしるしに1回。押すと、かわいい印が残る）
 const KEY_GSCHEER='hitotsu.gsCheer';
 const GS_CHEERS=[['いいね！','💗'],['やった！','🎉'],['がんばったね','🌸']];
@@ -12239,13 +12240,17 @@ function eaName(id){ try{ return (COUNTRIES.find(c=>c.id===id)||{}).name||id; }c
 function eaTileHTML(P){ const got=eaCollected(); const id=P&&P.countryId; const L=EA_LM[id]; const tod=(typeof localTod==='function'&&localTod(P))||'day';
   return `<div class="ea-tile">${L?`<figure class="ea-card ea-big"><div class="ea-art">${eaCardSVG(id,{tod})}</div><figcaption><b>${esc(L[0])}</b>（${esc(eaName(id))}）<span>${esc(L[3]||'')}</span></figcaption></figure>`:''}
     <p class="ea-count">集めた絵はがき <b>${got.length}</b> 枚</p>
-    <button type="button" class="ea-open" id="eaOpen">地球アルバムをひらく</button></div>`; }
+    <button type="button" class="ea-open" id="eaOpen">地球アルバムをひらく（きょうの世界の名所30か所）</button></div>`; }
 function eaAlbumHTML(){ const got=new Set(eaCollected()); const ids=Object.keys(EA_LM);
-  const cards=ids.filter(id=>got.has(id)).map(id=>{ const L=EA_LM[id]; return `<figure class="ea-card"><div class="ea-art">${eaCardSVG(id)}</div><figcaption><b>${esc(L[0])}</b><small>${esc(eaName(id))}</small></figcaption></figure>`; }).join('');
-  const rest=ids.length-got.size;
-  return `<div class="ea-grid">${cards}</div><p class="tiny muted">新しい人生が、まだ絵はがきのない国に生まれると、その国の絵はがきが1枚ふえます。</p>`; }
+  const card=(id,mine)=>{ const L=EA_LM[id]; return `<figure class="ea-card${mine?' ea-mine':''}"><div class="ea-art">${eaCardSVG(id)}</div><figcaption><b>${esc(L[0])}</b><small>${esc(eaName(id))}</small><span>${esc(L[3]||'')}</span></figcaption></figure>`; };
+  const mine=ids.filter(id=>got.has(id));
+  // きょうの世界の名所：まだ集めていない国から、日ごとにちがう30か所
+  const k=(typeof dayKey==='function'?dayKey():new Date().toDateString()); const h=x=>{ let v=2166136261>>>0; x=k+'|'+x; for(let i=0;i<x.length;i++){ v^=x.charCodeAt(i); v=Math.imul(v,16777619)>>>0; } return v; };
+  const today=ids.filter(id=>!got.has(id)).sort((a,b)=>h(a)-h(b)).slice(0,30);
+  return `<h3 class="ea-sh">きょうの世界の名所（${today.length}か所）</h3><p class="tiny muted">世界の国々に実在する遺跡・名所・自然です。毎日、ちがう場所に入れかわります。</p><div class="ea-grid">${today.map(id=>card(id,false)).join('')}</div>
+    <h3 class="ea-sh">集めた絵はがき（${mine.length}枚）</h3><div class="ea-grid">${mine.map(id=>card(id,true)).join('')}</div><p class="tiny muted">新しい人生が、まだ絵はがきのない国に生まれると、その国の絵はがきが1枚ふえます。</p>`; }
 function eaOpenDialog(){ if(document.getElementById('eaOv')) return; const d=document.createElement('div'); d.id='eaOv'; d.className='mt-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','地球アルバム');
-  d.innerHTML=`<div class="mt-card ea-dlg"><h2>地球アルバム</h2><p class="tiny muted">これまでの人生が生まれた国の名所を、ブロックの絵はがきにして集めています。</p>${eaAlbumHTML()}<div class="mt-btns"><button type="button" class="mt-close" id="eaX">とじる</button></div></div>`;
+  d.innerHTML=`<div class="mt-card ea-dlg"><h2>地球アルバム</h2><p class="tiny muted">世界の名所を、ブロックの絵はがきで見られます。</p>${eaAlbumHTML()}<div class="mt-btns"><button type="button" class="mt-close" id="eaX">とじる</button></div></div>`;
   document.body.appendChild(d); const close=()=>d.remove(); d.querySelector('#eaX').onclick=close; d.addEventListener('click',e=>{ if(e.target===d) close(); }); }
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('#eaOpen'); if(b) eaOpenDialog(); });
 // ===== ホームを毎日たのしく：今日のひとこと・今日の小さな場面・身近な人のいま・世界のいま・図鑑・見守りスタンプ・時間帯で変わる空 =====
