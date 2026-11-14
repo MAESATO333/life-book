@@ -520,6 +520,17 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .hm-daily{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin:14px 0; }
 .lt-letter{ background:#FFFDF6; border:1px solid #F0E3C4; border-radius:10px; padding:14px 16px; background-image:repeating-linear-gradient(transparent 0 27px,#F3E9D2 27px 28px); line-height:28px; }
 .lt-letter p{ margin:0; } .lt-to{ color:#B07A55; font-size:.9em; } .lt-sign{ text-align:right; color:#B07A55; }
+.lt-stampbox{ margin:10px 0 6px; }
+.lt-stamps .tiny{ margin:0 0 6px; color:var(--muted); }
+.lt-sbtns{ display:flex; flex-wrap:wrap; gap:6px; }
+.lt-sb{ border:1.5px solid #FFB3C4; background:#FFF5F8; color:#D94F75; border-radius:999px; padding:6px 12px; font:inherit; font-size:13px; font-weight:700; cursor:pointer; display:inline-flex; gap:4px; align-items:center; }
+.lt-sb:hover,.lt-sb:focus-visible{ background:#FFE3EB; outline:2px solid #FF8FAB; outline-offset:1px; }
+.lt-done{ display:flex; align-items:center; gap:12px; }
+.lt-hanko{ flex:0 0 auto; width:76px; height:76px; border-radius:50%; border:3px solid #E8667E; color:#E8667E; display:flex; flex-direction:column; align-items:center; justify-content:center; transform:rotate(-12deg); background:rgba(255,240,244,.85); line-height:1.1; font-weight:700; }
+.lt-hanko small{ font-size:9px; letter-spacing:.04em; } .lt-hanko b{ font-size:20px; } .lt-hanko span{ font-size:10px; }
+.lt-felt{ margin:0; font-size:13px; color:#8A6A55; }
+.lt-pop{ animation:ltpop .45s ease-out; } @keyframes ltpop{ 0%{ transform:rotate(-12deg) scale(1.8); opacity:0; } 70%{ transform:rotate(-12deg) scale(.92); opacity:1; } 100%{ transform:rotate(-12deg) scale(1); } }
+@media (prefers-reduced-motion:reduce){ .lt-pop{ animation:none; } }
 .nd-art svg{ width:100%; height:auto; display:block; border-radius:10px; } .nd-t{ margin:.6em 0 0; } .nd-time{ display:inline-block; background:#EEF4FB; border-radius:999px; padding:1px 9px; margin-right:6px; font-size:.85em; }
 .tz-t{ font-size:1.15em; font-weight:700; color:#6E57C8; margin:.2em 0; }
 .vt-q{ margin:.2em 0 .6em; } .vt-btns{ display:flex; gap:8px; flex-wrap:wrap; } .vt-b{ flex:1 1 120px; border:2px solid #9B87E8; background:#fff; color:#4E3FA0; border-radius:12px; padding:10px; font-weight:700; cursor:pointer; font-family:inherit; }
@@ -11584,7 +11595,7 @@ function relChartHTML(P){ const d=PEW2020[P.countryId]; if(!d) return '<p class=
 const KEY_LETTER='hitotsu.letters', KEY_VOTE='hitotsu.votes', KEY_GIFT='hitotsu.gifts', KEY_SNAP='hitotsu.snap';
 function d2Get(k,d){ try{ return store.get(k,d); }catch(e){ return d; } } function d2Set(k,v){ try{ store.set(k,v); }catch(e){} }
 function d2Me(P,age){ return age<13?(P.gender==='女性'?'わたし':'ぼく'):(P.gender==='女性'?'わたし':age<20?'ぼく':'わたし'); }
-// --- 1. 今日のひとこと手紙（その日にひらいた人だけが読める） ---
+// --- 1. 今日のチャネリング通信（その日にひらいた人だけが読める） ---
 function letterToday(P,L,age){ const k=dayKey(); const me=d2Me(P,age);
   // 年齢に合わせた言葉：赤ちゃんはひとこと、そこから少しずつ言葉が増える
   const mo=new Date().getMonth()+1, cold=mo===12||mo<=2, hot=mo>=6&&mo<=8;
@@ -11601,17 +11612,28 @@ function letterToday(P,L,age){ const k=dayKey(); const me=d2Me(P,age);
   const ev=[]; L.years.filter(y=>y.age<=age&&y.age>=age-1).forEach(y=>y.events.forEach(e=>{ if(e.kind!=='death'&&e.kind!=='birth'&&e.text&&!/亡くな|死|葬/.test(e.text)) ev.push(e); }));
   let body; if(ev.length){ const e=dPick(ev,P.seed,k,'lt'); let t=(e.text.split('。')[0]+'。').replace(/^\d+歳。/,'');
     t=t.split(P.given+'は、').join(me+'は、').split(P.given+'は').join(me+'は').split(P.given+'が').join(me+'が').split(P.given+'の').join(me+'の').split(P.given+'に').join(me+'に').split(P.given+'を').join(me+'を').split(P.given).join(me);
-    const open=dPick(['ねえ、聞いて。','元気？　こっちは、まあまあ元気だよ。','きょうのこと、だれかに話したくて。','ひさしぶりに、手紙を書くね。'],P.seed,k,'op');
+    const open=dPick(['ねえ、聞いて。','元気？　こっちは、まあまあ元気だよ。','きょうのこと、だれかに話したくて。','ひさしぶりに、通信を送るね。'],P.seed,k,'op');
     const close=e.inner?`そのとき思ったこと。「${e.inner}」`:dPick(['それだけ。またね。','あした、また書くね。','読んでくれて、ありがとう。','なんでもない日だけど、残しておきたかった。'],P.seed,k,'cl');
     body=age<10?`${t}\n${dPick(['またね。','きょうは、それだけ。','あしたも かくね。'],P.seed,k,'cl2')}`:`${open}\n${t}\n${close}`; }
   else body=hitokoto(P,L,age);
   return { body, sign:P.given }; }
+// Over Soul から「受け取ったよ」のスタンプ（1日1回。押すと、通信のすみに印が残る）
+const KEY_LTSTAMP='hitotsu.ltStamp';
+const LT_STAMPS=[['読んだよ','💌'],['受け取ったよ','✨'],['そばにいるよ','🤍'],['だいじょうぶ','🌈']];
+const LT_FELT=['ふと、だれかに見守られている気がした。','胸のあたりが、ふわっとあたたかくなった。','なんだか、ひとりじゃない気がした。','空を見上げたら、少しだけ元気が出た。'];
+function ltStampHTML(P,k){ const m=d2Get(KEY_LTSTAMP,{}); const v=m[k]; const n=Object.keys(m).length;
+  if(v!=null){ const st0=LT_STAMPS[v]||LT_STAMPS[0];
+    return `<div class="lt-done"><span class="lt-hanko" aria-label="Over Soul のスタンプ ${esc(st0[0])}"><small>Over Soul</small><b>${st0[1]}</b><span>${esc(st0[0])}</span></span><p class="lt-felt">${esc(P.given)}は、${esc(LT_FELT[(P.seed+v+k.length)%LT_FELT.length])}</p></div><p class="tiny muted">これまでに押したスタンプ：${n}こ</p>`; }
+  return `<div class="lt-stamps"><p class="tiny">Over Soul から、受け取ったしるしを送りましょう</p><div class="lt-sbtns">${LT_STAMPS.map((x,i)=>`<button type="button" class="lt-sb" data-ltstamp="${i}"><span aria-hidden="true">${x[1]}</span>${esc(x[0])}</button>`).join('')}</div></div>`; }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-ltstamp]'); if(!b) return; try{ const m=d2Get(KEY_LTSTAMP,{}); const k=dayKey(); if(m[k]==null){ m[k]=+b.dataset.ltstamp; const ks=Object.keys(m); if(ks.length>400) delete m[ks[0]]; d2Set(KEY_LTSTAMP,m); }
+  const box=b.closest('.hm-letter')||b.closest('.lt-wrap'); if(box&&typeof cur!=='undefined'&&cur){ const w=box.querySelector('.lt-stampbox'); if(w){ w.innerHTML=ltStampHTML(cur.P,k); const h=w.querySelector('.lt-hanko'); if(h) h.classList.add('lt-pop'); try{ if(typeof rubyApply==='function') rubyApply(w,cur.P,cur.L); }catch(_){} } } }catch(_){} });
 function letterHTML(P,L,age){ const k=dayKey(); const got=d2Get(KEY_LETTER,[]); const last=got[got.length-1];
   if(last!==k){ got.push(k); d2Set(KEY_LETTER,got.slice(-400)); }
   const y=new Date(); y.setDate(y.getDate()-1); const missedY=got.length>1&&!got.includes(dayKey(y));
   const lt=letterToday(P,L,age);
   return `<div class="lt-letter"><p class="lt-to">見守ってくれている Over Soul へ</p>${lt.body.split('\n').map(s=>`<p>${esc(s)}</p>`).join('')}<p class="lt-sign">${esc(lt.sign)}より</p></div>
-    <p class="tiny muted">手紙は1日に1通。その日にひらかないと読めません。これまでに受け取った手紙：${got.length}通${missedY?'（きのうの手紙は、もう読めません）':''}</p>`; }
+    <div class="lt-stampbox">${ltStampHTML(P,k)}</div>
+    <p class="tiny muted">チャネリング通信は1日に1通。その日にひらかないと受け取れません。これまでに受け取った通信：${got.length}通${missedY?'（きのうの通信は、もう読めません）':''}</p>`; }
 // --- 2. 今、何してる？（その地域のいまの時刻に合わせる） ---
 function nowDoing(P,age){ const t=(typeof localNow==='function'&&localNow(P))||{ h:new Date().getHours() }; const h=t.h; const wd=new Date().getDay(); const off=wd===0||wd===6;
   const st=age<1?'baby':age<3?'toddler':age<6?'kid':age<18?'school':age<65?'adult':'elder';
@@ -11700,7 +11722,7 @@ function dailyPlusHTML(P,L,age,c){ if(c.dead) return '';
   const T=(cls,h,b)=>`<section class="hm-tile ${cls}"><h3>${h}</h3><div class="hm-body">${b}</div></section>`;
   return `<div class="hm-daily">
     ${gs?T('hm-grow-sign','成長のしるし',gs):''}
-    ${T('hm-letter','今日のひとこと手紙',letterHTML(P,L,age))}
+    ${T('hm-letter','今日のチャネリング通信',letterHTML(P,L,age))}
     ${T('hm-now',`いま、何してる？`,nowDoingHTML(P,L,age))}
     ${tz?T('hm-tease','明日の予告',`<p class="tz-t">${esc(tz)}</p><p class="tiny muted">あしたまた、ひらいてみてください。</p>`):''}
     ${voteTileHTML(P,L,age)}
