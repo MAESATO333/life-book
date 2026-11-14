@@ -532,7 +532,9 @@ a.nav-b{ text-decoration:none; }
 .lt-letter p{ margin:0; } .lt-to{ color:#B07A55; font-size:.9em; } .lt-sign{ text-align:right; color:#B07A55; }
 .lt-stampbox{ margin:10px 0 6px; }
 .lt-stamps .tiny{ margin:0 0 6px; color:var(--muted); }
-.lt-sbtns{ display:flex; flex-wrap:wrap; gap:6px; }
+.lt-sbtns{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.lt-hs{ font-family:var(--serif); font-size:12px; font-weight:700; color:#9A6BC9; letter-spacing:.04em; }
+.chn-tag{ display:inline-block; vertical-align:middle; margin-right:10px; padding:2px 10px; border-radius:999px; background:#FFE6EE; border:1.5px solid #F4B6C8; color:#D6457A; font-family:var(--sans,inherit); font-size:12px; font-weight:700; line-height:1.6; letter-spacing:.04em; transform:translateY(-2px); }
 .lt-sb{ border:1px solid #FFB3C4; background:#FFF5F8; color:#D94F75; border-radius:999px; padding:3px 10px; font:inherit; font-size:12px; font-weight:700; cursor:pointer; display:inline-flex; gap:4px; align-items:center; }
 .lt-sb:hover,.lt-sb:focus-visible{ background:#FFE3EB; outline:2px solid #FF8FAB; outline-offset:1px; }
 .lt-done{ display:flex; align-items:center; gap:12px; }
@@ -11683,7 +11685,7 @@ const LT_FELT=['ふと、だれかに見守られている気がした。','胸�
 function ltStampHTML(P,k){ const m=d2Get(KEY_LTSTAMP,{}); const v=m[k]; const n=Object.keys(m).length;
   if(v!=null){ const st0=LT_STAMPS[0];
     return `<div class="lt-done"><span class="lt-hanko" aria-label="Higher Self のスタンプ ${esc(st0[0])}"><small>Higher Self</small><b>${st0[1]}</b><span>${esc(st0[0])}</span></span><p class="lt-felt">${esc(P.given)}は、${esc(LT_FELT[(P.seed+v+k.length)%LT_FELT.length])}</p></div><p class="tiny muted">これまでに押したスタンプ：${n}こ</p>`; }
-  return `<div class="lt-stamps"><div class="lt-sbtns">${LT_STAMPS.map((x,i)=>`<button type="button" class="lt-sb" data-ltstamp="${i}" aria-label="Higher Self から「${esc(x[0])}」のスタンプを押す"><span aria-hidden="true">${x[1]}</span>${esc(x[0])}</button>`).join('')}</div></div>`; }
+  return `<div class="lt-stamps"><div class="lt-sbtns"><span class="lt-hs">Higher Self より</span>${LT_STAMPS.map((x,i)=>`<button type="button" class="lt-sb" data-ltstamp="${i}" aria-label="Higher Self から「${esc(x[0])}」のスタンプを押す"><span aria-hidden="true">${x[1]}</span>${esc(x[0])}</button>`).join('')}</div></div>`; }
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-ltstamp]'); if(!b) return; try{ const m=d2Get(KEY_LTSTAMP,{}); const k=dayKey(); if(m[k]==null){ m[k]=+b.dataset.ltstamp; const ks=Object.keys(m); if(ks.length>400) delete m[ks[0]]; d2Set(KEY_LTSTAMP,m); }
   const box=b.closest('.hm-letter')||b.closest('.lt-wrap'); if(box&&typeof cur!=='undefined'&&cur){ const w=box.querySelector('.lt-stampbox'); if(w){ w.innerHTML=ltStampHTML(cur.P,k); const h=w.querySelector('.lt-hanko'); if(h) h.classList.add('lt-pop'); try{ if(typeof rubyApply==='function') rubyApply(w,cur.P,cur.L); }catch(_){} } } }catch(_){} });
 function letterHTML(P,L,age){ const k=dayKey(); const got=d2Get(KEY_LETTER,[]); const last=got[got.length-1];
@@ -14526,7 +14528,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
   <section class="hm-hero">
     <div class="hm-art">${art}${todOverlay()}${c.dead?'':`<div class="hm-bubble" role="note"><small>今日の${esc(P.given)}</small>${esc(hk)}</div>`}</div>
     <div class="hm-id">
-      <div class="hm-name">${esc(P.full)}</div>${kana}${typeof nbMeaningHTML==='function'?nbMeaningHTML(P):''}
+      <div class="hm-name"><span class="chn-tag">Channel</span>${esc(P.full)}</div>${kana}${typeof nbMeaningHTML==='function'?nbMeaningHTML(P):''}
       <div class="hm-age">${c.dead?L.deathAge:age}<small>歳</small></div>
       <div class="hm-facts">${profileFacts(P,age).map(f=>`<span>${esc(f)}</span>`).join('')}</div>
       <p class="hm-status ${c.pending?'pend':''}">${esc(status)}</p>${typeof localTimeHTML==='function'?localTimeHTML(P):''}
@@ -14900,7 +14902,7 @@ function lifeHTML(){
   const olderShown=showAll?older:older.slice(-LIMIT);
   let art=''; try{ art=c.dead?bkFarewellSVG(P):(typeof homeArt==='function'?homeArt(P,L,c.age):blockSceneSVG(P,sceneState(P,L,c.age))); }catch(e){}
   return `<div class="life-art fade">${art}</div><section class="card idcard fade">
-      <div><div class="who">${esc(P.full)}</div>${P.fullKana!==P.full?`<div class="kana">${esc(P.fullKana)}</div>`:''}${typeof nbMeaningHTML==='function'?nbMeaningHTML(P):''}</div>
+      <div><div class="who"><span class="chn-tag">Channel</span>${esc(P.full)}</div>${P.fullKana!==P.full?`<div class="kana">${esc(P.fullKana)}</div>`:''}${typeof nbMeaningHTML==='function'?nbMeaningHTML(P):''}</div>
       <div class="age">${ageTxt}<small>歳</small></div>
       <div class="facts">${profileFacts(P,c.age).map(f=>`<span>${esc(f)}</span>`).join('')}</div>
       <div class="clockline">${esc(clockTxt)}</div>${typeof localTimeHTML==='function'?localTimeHTML(P):''}${typeof growthLine==='function'&&!c.dead&&c.age<18?`<div class="gr-line">いまの${esc(growthLine(P,L,Math.min(c.ageF||c.age,L.deathAge)))}</div>`:''}
