@@ -658,6 +658,9 @@ a.nav-b{ text-decoration:none; }
 .gs-pop{ animation:gsPop .45s cubic-bezier(.3,1.6,.5,1); }
 @keyframes gsPop{ 0%{ transform:scale(.4); opacity:0 } 100%{ transform:scale(1); opacity:1 } }
 @media (prefers-reduced-motion:reduce){ .gs-pop{ animation:none; } }
+.frd-get-msg{ margin:8px 0 0; font-size:14px; line-height:1.6; border-radius:12px; padding:0; } .frd-get-msg:empty{ display:none; }
+.frd-get-msg.is-ok{ background:#E9F7EC; color:#2E7D46; border:1.5px solid #A9DDB6; padding:9px 12px; animation:frPop .3s ease-out; } .frd-get-msg.is-ng{ background:#FFF0F0; color:#B23B3B; border:1.5px solid #F2B8B8; padding:9px 12px; animation:frPop .3s ease-out; }
+@keyframes frPop{ from{ transform:scale(.96); opacity:0; } to{ transform:none; opacity:1; } }
 </style>
 
 <div class="wrap">
@@ -10803,7 +10806,8 @@ function myHero(){ if(typeof st!=='undefined'&&st&&st.seed!=null) return { s:st.
   const a=store.get(KEY_ARC,[])[0]; return a?{ s:a.seed, c:a.country||null, f:a.force||null, ch:a.choice||null }:null; }
 function friendCode(re,g){ const h=myHero(); if(!h) return null; return 'LIFEFRIEND1.'+b64e(JSON.stringify(Object.assign({ id:myId(), by:store.get(KEY_ME,'')||'' },h,{ t:Date.now() },re?{ re:1 }:{},g?{ g }:{}))); }
 function friendLink(re,g){ const c=friendCode(re,g); if(!c) return null; const base=/github\.io$/.test(location.host)?location.origin+location.pathname:FRIEND_URL; const u=base+'#friend='+c.replace('LIFEFRIEND1.',''); return typeof extURL==='function'?extURL(u):u; }
-function readFriend(txt){ const m=(txt||'').match(/(?:LIFEFRIEND1\.|#friend=)([A-Za-z0-9_-]+)/); if(!m) return null; try{ const o=JSON.parse(b64d(m[1])); if(typeof o.s!=='number'||!o.id) return null; return o; }catch(e){ return null; } }
+function readFriend(txt){ let t=String(txt||''); try{ t=decodeURIComponent(t); }catch(e){} t=t.replace(/\s+/g,'');
+  let m=t.match(/(?:LIFEFRIEND1\.|friend=)([A-Za-z0-9_+\/=-]+)/); if(!m&&/^[A-Za-z0-9_+\/=-]{24,}$/.test(t)) m=[t,t]; if(!m) return null; m[1]=m[1].replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); try{ const o=JSON.parse(b64d(m[1])); if(typeof o.s!=='number'||!o.id) return null; return o; }catch(e){ return null; } }
 function receiveFriend(o){ if(o.id===myId()) return 'self'; const L=store.get(KEY_FRIEND,[]); const i=L.findIndex(x=>x.id===o.id); const now=Date.now(), old=i>=0?L[i]:null;
   // 出会いの日の起点（ふたりで同じになるように）：リンクを押した側は押した時、届いた側は相手が押した時
   const a0=old&&old.a0?old.a0:(old&&old.got?old.got:(o.lk||(!o.re&&!o.g&&typeof o.t!=='number')?now:Math.min(now,typeof o.g==='number'?o.g:(typeof o.t==='number'?o.t:now))));
@@ -10948,7 +10952,7 @@ function friendDialogHTML(){ const me=store.get(KEY_ME,''); const can=!!myHero()
     <p class="frd-msg" id="frMsg" role="status"></p>${typeof fbStatusHTML==='function'?fbStatusHTML():''}<textarea id="frOut" rows="3" readonly hidden aria-label="紹介の文とリンク"></textarea>
     <section class="frd-get" aria-labelledby="frGetH"><h3 id="frGetH"><span aria-hidden="true">💌</span> 友だちから紹介が届いたとき</h3>
       <p class="frd-get-l">友だちから届いたリンクを押せば、それだけでつながります。<br>つながらなかったときは、届いたリンク（またはコード）を下の枠に貼りつけて、「受け取る」を押してください。</p>
-      <textarea id="frCodeIn" rows="2" placeholder="ここに、届いたリンクを貼りつける"></textarea><button class="frd-get-b" id="frGet" type="button"><i class="ic ic-mail" aria-hidden="true"></i><span>受け取る</span></button>
+      <textarea id="frCodeIn" rows="2" placeholder="ここに、届いたリンクを貼りつける"></textarea><button class="frd-get-b" id="frGet" type="button"><i class="ic ic-mail" aria-hidden="true"></i><span>受け取る</span></button><p class="frd-get-msg" id="frGetMsg" role="status" aria-live="polite"></p>
       ${can?'<p class="tiny"><button class="linkish" id="frCode" type="button">紹介コードだけをコピー</button></p>':''}
     </section>
     ${fr.length?`<p class="tiny muted">つながっている人：${fr.map(f=>esc(f.by||'友だち')+'さん').join('、')}</p>`:''}</div>`; }
@@ -10986,8 +10990,19 @@ function bindFriend(){ bindFriendOpeners();
   const l=$('#frLink'); if(l) l.onclick=()=>{ store.set(KEY_FRSENT,(store.get(KEY_FRSENT,0)||0)+1); copy(link(),'リンク'); };
   const ml=$('#frMail'); if(ml) ml.onclick=()=>{ location.href='mailto:?subject='+encodeURIComponent('LIFE BOOK で、人生のどこかで出会いませんか')+'&body='+encodeURIComponent(friendShareText(link())); };
   const c=$('#frCode'); if(c) c.onclick=()=>{ by(); const t=friendCode(); if(t) copy(t,'紹介コード'); };
-  const g=$('#frGet'); if(g) g.onclick=()=>{ const o=readFriend($('#frCodeIn').value); if(!o) return msg('読み取れませんでした。リンクやコードを、最初から最後まで、まるごとはりつけてください。'); if(!o.re) o.lk=1; afterFriend(o,receiveFriend(o)); };
+  const g=$('#frGet'); if(g) g.onclick=()=>{ const v=($('#frCodeIn').value||'').trim();
+    if(!v) return frGetShow('枠が空っぽです。友だちから届いたリンク（またはコード）を、貼りつけてから押してください。',false);
+    const o=readFriend(v); if(!o) return frGetShow('読み取れませんでした。届いたリンク（またはコード）を、最初から最後まで、まるごと貼りつけてください。途中で切れていると読めません。',false);
+    if(!o.re) o.lk=1; const r=receiveFriend(o);
+    if(r==='self') return frGetShow('これは、あなた自身の紹介コードです。友だちから届いたリンク（またはコード）を貼りつけてください。',false);
+    _frGetMsg={ t:r==='update'?`${o.by||'友だち'}さんとは、もうつながっています。情報を新しくしました。`:`受け取りました！ ${o.by||'友だち'}さんとつながりました。`, ok:true, at:Date.now() };
+    afterFriend(o,r); };
+  frGetShow();
 }
+let _frGetMsg=null;
+function frGetShow(t,ok){ if(t!=null) _frGetMsg={ t, ok:!!ok, at:Date.now() }; const g=_frGetMsg; const m=document.getElementById('frGetMsg'); if(!m||!g||Date.now()-g.at>90000) return;
+  m.textContent=g.t; m.className='frd-get-msg '+(g.ok?'is-ok':'is-ng'); m.style.animation='none'; void m.offsetWidth; m.style.animation='';
+  try{ m.scrollIntoView({ block:'nearest', behavior:'smooth' }); }catch(e){} }
 function afterFriend(o,r){ if(r==='self'){ alertFriend('これは、あなた自身の紹介リンクです。'); return; }
   _fhCache=null; if(typeof load==='function'&&typeof st!=='undefined'&&st) load();
   if(o.sv){ frReplyDone(o.id); alertFriend(`${o.by||'友だち'}さんが、あなたの紹介で LIFE BOOK を始めました。つながりました！ ふたりの Channel は、人生のどこかで出会います。`); return; }
@@ -15797,8 +15812,9 @@ function fbCandidates(){ const me=myId(), fr=fbFriends(), mine=new Set(fr.map(f=
 // 「つながる」を押した：相手に申請を書く
 async function fbAsk(id){ const c=fbCandidates().find(x=>x.id===id), h=myHero(); if(!FB||!c||!h) return false; const me=myId();
   for(const v of c.via){ try{ await FB.D.setDoc(FB.D.doc(FB.db,'ids',id,'req',me),{ from:me, by:String(store.get(KEY_ME,'')||'').slice(0,20), via:v.id, s:h.s, c:h.c||null, f:h.f||null, ch:h.ch||null, t:Date.now() });
-    const a=store.get(KEY_FOFASK,[]); if(!a.includes(id)) store.set(KEY_FOFASK,a.concat([id]).slice(-50)); return true; }catch(e){} }
+    const a=store.get(KEY_FOFASK,[]); if(!a.includes(id)) store.set(KEY_FOFASK,a.concat([id]).slice(-50)); return true; }catch(e){ FB_LASTERR=(e&&e.code)||String(e).slice(0,40); try{ console.warn('[fbsync] つながりたいを送れませんでした',e); }catch(_){} } }
   return false; }
+let FB_LASTERR='', _fofMsg=null;
 // 申請に OK した：相手を友だちに入れて、相手の受け箱に書き、申請を消す
 async function fbAccept(from){ const x=FB_REQS.find(r=>r.from===from); if(!FB||!x) return false;
   const o={ id:from, by:x.by||'', s:x.s, c:x.c||null, f:x.f||null, ch:x.ch||null, t:x.t||Date.now() };
@@ -15809,18 +15825,22 @@ async function fbDecline(from){ const n=store.get(KEY_FOFNO,[]); if(!n.includes(
 // 紹介の窓に足す欄
 function fbFofHTML(){ if(!fbOnline()) return ''; const reqs=FB_REQS, cands=fbCandidates(), asked=store.get(KEY_FOFASK,[]), can=!!myHero(); if(!reqs.length&&!cands.length) return '';
   let h='<div class="fof">';
-  if(reqs.length) h+=`<h3 class="fof-h">つながりたいと届いています</h3><ul class="fof-l">${reqs.map(x=>`<li><span class="fof-n"><b>${esc(x.by||'だれか')}さん</b><small>${esc(fbViaName(x.via))}さんの友だち</small></span><span class="fof-b"><button type="button" class="fof-ok" data-acc="${esc(x.from)}">つながる</button><button type="button" class="fof-no" data-dec="${esc(x.from)}">今はしない</button></span></li>`).join('')}</ul>`;
-  if(cands.length) h+=`<h3 class="fof-h">友だちの友だち</h3><p class="tiny muted">共通の友だちがいる人だけが出ます。「つながる」を押すと相手に届き、相手がOKするとつながります。</p><ul class="fof-l">${cands.map(c=>{ const v=c.via.map(x=>esc(x.by)+'さん').join('、');
-      return `<li><span class="fof-n"><small>${v}の友だち</small><b>${esc(c.by||'友だち')}さん</b></span><span class="fof-b">${asked.includes(c.id)?'<span class="fof-wait">返事を待っています</span>':`<button type="button" class="fof-ok" data-ask="${esc(c.id)}"${can?'':' disabled'}>つながる</button>`}</span></li>`; }).join('')}</ul>${can?'':'<p class="tiny muted">Channel が生まれると、「つながりたい」を送れます。</p>'}`;
+  if(reqs.length) h+=`<h3 class="fof-h fof-h-in">💌 あなたに「つながりたい」が届いています</h3><p class="tiny muted">「つながる」を押すと、すぐにつながります。</p><ul class="fof-l">${reqs.map(x=>`<li><span class="fof-n"><b>${esc(x.by||'だれか')}さん</b><small>${esc(fbViaName(x.via))}さんの友だち</small></span><span class="fof-b"><button type="button" class="fof-ok" data-acc="${esc(x.from)}">つながる</button><button type="button" class="fof-no" data-dec="${esc(x.from)}">今はしない</button></span></li>${fofRes(x.from)}`).join('')}</ul>`;
+  if(cands.length) h+=`<h3 class="fof-h">友だちの友だち</h3><p class="tiny muted">共通の友だちがいる人だけが出ます。「つながる」を押すと、相手に「つながりたい」が届きます。<b>相手がOKを押すと、つながります。</b></p><ul class="fof-l">${cands.map(c=>{ const v=c.via.map(x=>esc(x.by)+'さん').join('、');
+      return `<li><span class="fof-n"><small>${v}の友だち</small><b>${esc(c.by||'友だち')}さん</b></span><span class="fof-b">${asked.includes(c.id)?'<span class="fof-wait">申しこみました<small>相手がOKすると、つながります</small></span>':`<button type="button" class="fof-ok" data-ask="${esc(c.id)}"${can?'':' disabled'}>つながる</button>`}</span></li>${fofRes(c.id)}`; }).join('')}</ul>${can?'':'<p class="tiny muted">Channel が生まれると、「つながりたい」を送れます。</p>'}`;
   h+='<p class="fof-note">つながっても、メッセージのやり取りは出来ません。</p>';
   return h+'</div>'; }
+function fofRes(id){ const m=_fofMsg; if(!m||m.id!==id||Date.now()-m.at>120000) return ''; return `<li class="fof-res ${m.ok?'is-ok':'is-ng'}" role="status">${esc(m.t)}</li>`; }
+function fofShow(id,t,ok){ _fofMsg={ id, t, ok, at:Date.now() }; fbDlgRefresh(); setTimeout(()=>{ const e=document.querySelector('.fof-res'); if(e) try{ e.scrollIntoView({ block:'nearest', behavior:'smooth' }); }catch(_){} },80); }
 function fbDlgRefresh(msg){ const d=document.getElementById('frDlg'); if(!d||d.hidden) return; const m=msg||(($('#frMsg')||{}).textContent||''); try{ openFriend(m); }catch(_){} }
-(function(){ if(!document.getElementById('fofCss')){ const st=document.createElement('style'); st.id='fofCss'; st.textContent=`.fof{margin-top:14px;padding-top:12px;border-top:2px dashed #F6C9D4;text-align:left}.fof-h{font-size:15px;margin:8px 0 6px;color:#C2476B}.fof-l{list-style:none;margin:0;padding:0}.fof-l li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;margin:6px 0;border-radius:14px;background:#FFF1F5}.fof-n{display:flex;flex-direction:column;min-width:0}.fof-n small{font-size:11px;color:#8a6f78}.fof-b{display:flex;gap:6px;flex-shrink:0}.fof-ok{border:0;border-radius:999px;padding:8px 14px;background:#FF7E9A;color:#fff;font-weight:700;cursor:pointer}.fof-ok:disabled{opacity:.5;cursor:default}.fof-no{border:1.5px solid #F2B8C6;border-radius:999px;padding:7px 10px;background:#fff;color:#a35a70;cursor:pointer}.fof-wait{font-size:12px;color:#8a6f78}.fof-note{font-size:12px;color:#8a6f78;background:#FFF8E6;border-radius:12px;padding:8px 10px;margin:10px 0 0}`; document.head.appendChild(st); } })();
+(function(){ if(!document.getElementById('fofCss')){ const st=document.createElement('style'); st.id='fofCss'; st.textContent=`.fof{margin-top:14px;padding-top:12px;border-top:2px dashed #F6C9D4;text-align:left}.fof-h{font-size:15px;margin:8px 0 6px;color:#C2476B}.fof-h-in{background:#FFE3EC;border-radius:12px;padding:8px 10px}.fof-b .fof-wait{display:flex;flex-direction:column;align-items:flex-end;font-size:12.5px;color:#C2476B;font-weight:700;text-align:right}.fof-b .fof-wait small{font-weight:400;color:#8A6B76;font-size:11px}.fof-l li.fof-res{display:block;font-size:13.5px;line-height:1.6;margin:-2px 0 8px;animation:frPop .3s ease-out}.fof-l li.fof-res.is-ok{background:#E9F7EC;color:#2E7D46;border:1.5px solid #A9DDB6}.fof-l li.fof-res.is-ng{background:#FFF0F0;color:#B23B3B;border:1.5px solid #F2B8B8}.fof-l{list-style:none;margin:0;padding:0}.fof-l li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;margin:6px 0;border-radius:14px;background:#FFF1F5}.fof-n{display:flex;flex-direction:column;min-width:0}.fof-n small{font-size:11px;color:#8a6f78}.fof-b{display:flex;gap:6px;flex-shrink:0}.fof-ok{border:0;border-radius:999px;padding:8px 14px;background:#FF7E9A;color:#fff;font-weight:700;cursor:pointer}.fof-ok:disabled{opacity:.5;cursor:default}.fof-no{border:1.5px solid #F2B8C6;border-radius:999px;padding:7px 10px;background:#fff;color:#a35a70;cursor:pointer}.fof-wait{font-size:12px;color:#8a6f78}.fof-note{font-size:12px;color:#8a6f78;background:#FFF8E6;border-radius:12px;padding:8px 10px;margin:10px 0 0}`; document.head.appendChild(st); } })();
 (function(){ const _dh=friendDialogHTML; friendDialogHTML=function(){ const h=_dh.apply(this,arguments); const add=fbFofHTML(); if(!add) return h; const i=h.lastIndexOf('</div>'); return i<0?h+add:h.slice(0,i)+add+h.slice(i); }; })();
 (function(){ const _bf=bindFriend; bindFriend=function(){ const r=_bf.apply(this,arguments); const d=document.getElementById('frDlg'); if(!d||d.hidden) return r;
-  const say=t=>fbDlgRefresh(t);
-  d.querySelectorAll('[data-ask]').forEach(b=>{ b.onclick=async()=>{ b.disabled=true; const c=fbCandidates().find(x=>x.id===b.dataset.ask); const ok=await fbAsk(b.dataset.ask); say(ok?`${(c&&c.by)||'相手'}さんに「つながりたい」を送りました。OKが届いたら、お知らせします。`:'送れませんでした。少したってから、もう一度ためしてください。'); }; });
-  d.querySelectorAll('[data-acc]').forEach(b=>{ b.onclick=async()=>{ b.disabled=true; const x=FB_REQS.find(r=>r.from===b.dataset.acc); const ok=await fbAccept(b.dataset.acc); say(ok?`${(x&&x.by)||'相手'}さんと、つながりました！ ふたりの Channel は、人生のどこかで出会います。`:'うまくつながれませんでした。少したってから、もう一度ためしてください。'); }; });
+  d.querySelectorAll('[data-ask]').forEach(b=>{ b.onclick=async()=>{ if(b.disabled) return; b.disabled=true; b.textContent='送っています…'; const id=b.dataset.ask; const c=fbCandidates().find(x=>x.id===id); FB_LASTERR=''; let ok=false; try{ ok=await fbAsk(id); }catch(e){ FB_LASTERR=(e&&e.code)||''; }
+    fofShow(id, ok?`${(c&&c.by)||'相手'}さんに「つながりたい」を送りました！ ${(c&&c.by)||'相手'}さんがOKを押すと、つながります。つながったら、お知らせします。`:`送れませんでした。通信のよいところで、もう一度押してください。${FB_LASTERR?'（'+FB_LASTERR+'）':''}`, ok); }; });
+  d.querySelectorAll('[data-acc]').forEach(b=>{ b.onclick=async()=>{ if(b.disabled) return; b.disabled=true; b.textContent='つないでいます…'; const id=b.dataset.acc; const x=FB_REQS.find(r=>r.from===id); let ok=false; try{ ok=await fbAccept(id); }catch(e){}
+    if(ok) fbDlgRefresh(`${(x&&x.by)||'相手'}さんと、つながりました！ ふたりの Channel は、人生のどこかで出会います。`); fofShow(id, ok?`${(x&&x.by)||'相手'}さんと、つながりました！`:'うまくつながれませんでした。通信のよいところで、もう一度押してください。', ok);
+    if(ok){ setTimeout(()=>{ const m=document.getElementById('frMsg'); if(m) try{ m.scrollIntoView({ block:'center', behavior:'smooth' }); }catch(_){} },120); } }; });
   d.querySelectorAll('[data-dec]').forEach(b=>{ b.onclick=()=>fbDecline(b.dataset.dec); });
   return r; }; })();
 // 紹介リンクに招待の印を入れる
