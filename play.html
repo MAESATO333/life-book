@@ -548,6 +548,15 @@ a.nav-b{ text-decoration:none; }
 .ea-big{ transform:rotate(-1.2deg); max-width:420px; } .ea-count{ margin:.8em 0 .5em; } .ea-count b{ font-size:1.3em; color:#E0577B; }
 .ea-open{ border:0; border-radius:999px; padding:9px 18px; background:#5BA7DD; color:#fff; font-weight:700; box-shadow:0 4px 0 #3E80B5; cursor:pointer; font-family:inherit; }
 .ea-sh{ margin:14px 0 2px; font-size:16px; color:#2E5D86; } .ea-mine{ outline:3px solid #FFC2D0; }
+.ea-click{ cursor:pointer; transition:transform .15s; } .ea-click:hover{ transform:translateY(-2px); } .ea-click:focus-visible{ outline:3px solid #F28CB1; outline-offset:2px; }
+.ea-how{ background:#FFF1F6; border:1.5px solid #F7C3D6; border-radius:16px; padding:12px 16px; margin:10px 0 6px; text-align:left; } .ea-how h3{ margin:0 0 6px; font-size:16px; color:#C2456A; } .ea-how ol{ margin:0 0 6px; padding-left:1.4em; line-height:1.7; font-size:14px; } .ea-how p{ margin:0; font-size:13px; color:#7A5A66; }
+.ea-rule{ margin:2px 0 6px; }
+.ea-zm-ov{ z-index:1200; } .ea-zm{ box-sizing:border-box; max-width:620px; width:calc(100vw - 32px); max-height:88vh; overflow:auto; text-align:left; animation:eaZmIn .22s ease-out; }
+@keyframes eaZmIn{ from{ transform:scale(.94); opacity:0; } to{ transform:none; opacity:1; } }
+.ea-zm-art svg{ width:100%; height:auto; display:block; border-radius:14px; } .ea-zm h2{ margin:12px 0 0; text-align:left; } .ea-zm-c{ margin:2px 0 6px; color:var(--muted); font-size:14px; } .ea-zm-one{ font-size:15px; line-height:1.7; margin:0 0 8px; }
+.ea-zm-st{ font-size:13px; background:#F4F6FA; border-radius:10px; padding:7px 10px; margin:0 0 8px; } .ea-zm-st.on{ background:#FFE9EF; color:#C2456A; }
+.ea-zm-more h3{ font-size:15px; margin:10px 0 4px; } .ea-zm-more p{ font-size:14px; line-height:1.8; margin:0 0 8px; } .ea-src{ font-size:9.5px !important; opacity:.8; }
+@media (prefers-reduced-motion:reduce){ .ea-zm{ animation:none; } .ea-click{ transition:none; } }
 .ea-dlg{ box-sizing:border-box; max-width:760px; width:calc(100vw - 32px); max-height:86vh; overflow:auto; } .ea-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin:12px 0; }
 .hm-daily{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin:14px 0; }
 .lt-letter{ background:#FFFDF6; border:1px solid #F0E3C4; border-radius:10px; padding:14px 16px; background-image:repeating-linear-gradient(transparent 0 27px,#F3E9D2 27px 28px); line-height:28px; }
@@ -12278,21 +12287,42 @@ function eaCollected(){ let s=[]; try{ s=JSON.parse(localStorage.getItem(KEY_EA)
 function eaName(id){ try{ return (COUNTRIES.find(c=>c.id===id)||{}).name||id; }catch(e){ return id; } }
 // ホームの小さな欄
 function eaTileHTML(P){ const got=eaCollected(); const id=P&&P.countryId; const L=EA_LM[id]; const tod=(typeof localTod==='function'&&localTod(P))||'day';
-  return `<div class="ea-tile">${L?`<figure class="ea-card ea-big"><div class="ea-art">${eaCardSVG(id,{tod})}</div><figcaption><b>${esc(L[0])}</b>（${esc(eaName(id))}）<span>${esc(L[3]||'')}</span></figcaption></figure>`:''}
-    <p class="ea-count">集めた絵はがき <b>${got.length}</b> 枚</p>
+  return `<div class="ea-tile">${L?`<figure class="ea-card ea-big ea-click" data-ea="${id}" tabindex="0" role="button" aria-label="${esc(L[0])}を大きく見る"><div class="ea-art">${eaCardSVG(id,{tod})}</div><figcaption><b>${esc(L[0])}</b>（${esc(eaName(id))}）<span>${esc(L[3]||'')}</span></figcaption></figure>`:''}
+    <p class="ea-count">集めた絵はがき <b>${got.length}</b> 枚</p><p class="tiny muted ea-rule">新しい人生が生まれた国の絵はがきが、1枚ずつ集まります。</p>
     <button type="button" class="ea-open" id="eaOpen">地球アルバムをひらく（きょうの世界の名所30か所）</button></div>`; }
 function eaAlbumHTML(){ const got=new Set(eaCollected()); const ids=Object.keys(EA_LM);
-  const card=(id,mine)=>{ const L=EA_LM[id]; return `<figure class="ea-card${mine?' ea-mine':''}"><div class="ea-art">${eaCardSVG(id)}</div><figcaption><b>${esc(L[0])}</b><small>${esc(eaName(id))}</small><span>${esc(L[3]||'')}</span></figcaption></figure>`; };
+  const card=(id,mine)=>{ const L=EA_LM[id]; return `<figure class="ea-card ea-click${mine?' ea-mine':''}" data-ea="${id}" tabindex="0" role="button" aria-label="${esc(L[0])}を大きく見る"><div class="ea-art">${eaCardSVG(id)}</div><figcaption><b>${esc(L[0])}</b><small>${esc(eaName(id))}</small><span>${esc(L[3]||'')}</span></figcaption></figure>`; };
   const mine=ids.filter(id=>got.has(id));
   // きょうの世界の名所：まだ集めていない国から、日ごとにちがう30か所
   const k=(typeof dayKey==='function'?dayKey():new Date().toDateString()); const h=x=>{ let v=2166136261>>>0; x=k+'|'+x; for(let i=0;i<x.length;i++){ v^=x.charCodeAt(i); v=Math.imul(v,16777619)>>>0; } return v; };
   const today=ids.filter(id=>!got.has(id)).sort((a,b)=>h(a)-h(b)).slice(0,30);
-  return `<h3 class="ea-sh">きょうの世界の名所（${today.length}か所）</h3><p class="tiny muted">世界の国々に実在する遺跡・名所・自然です。毎日、ちがう場所に入れかわります。</p><div class="ea-grid">${today.map(id=>card(id,false)).join('')}</div>
-    <h3 class="ea-sh">集めた絵はがき（${mine.length}枚）</h3><div class="ea-grid">${mine.map(id=>card(id,true)).join('')}</div><p class="tiny muted">新しい人生が、まだ絵はがきのない国に生まれると、その国の絵はがきが1枚ふえます。</p>`; }
+  return `<div class="ea-how"><h3>💌 絵はがきの集め方</h3><ol><li>新しい人生が生まれると、<b>その人が生まれた国の絵はがき</b>が1枚、自動でアルバムに入ります。</li><li>まだ持っていない国に生まれるたびに、1枚ずつふえていきます。</li><li>本棚にしまった人生の国の絵はがきも、ずっと残ります。</li></ol><p>いま持っている絵はがき：<b>${mine.length}枚</b>　・　絵はがきをタップすると、大きく見られます。</p></div>
+    <h3 class="ea-sh">きょうの世界の名所（${today.length}か所）</h3><p class="tiny muted">世界の国々に実在する遺跡・名所・自然です。毎日、ちがう場所に入れかわります。</p><div class="ea-grid">${today.map(id=>card(id,false)).join('')}</div>
+    <h3 class="ea-sh">集めた絵はがき（${mine.length}枚）</h3><div class="ea-grid">${mine.map(id=>card(id,true)).join('')}</div>`; }
 function eaOpenDialog(){ if(document.getElementById('eaOv')) return; const d=document.createElement('div'); d.id='eaOv'; d.className='mt-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','地球アルバム');
   d.innerHTML=`<div class="mt-card ea-dlg"><h2>地球アルバム</h2><p class="tiny muted">世界の名所を、ブロックの絵はがきで見られます。</p>${eaAlbumHTML()}<div class="mt-btns"><button type="button" class="mt-close" id="eaX">とじる</button></div></div>`;
   document.body.appendChild(d); const close=()=>d.remove(); d.querySelector('#eaX').onclick=close; d.addEventListener('click',e=>{ if(e.target===d) close(); }); }
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('#eaOpen'); if(b) eaOpenDialog(); });
+
+// ---- 絵はがきを大きく見る ----
+const _eaWk={};
+async function eaWiki(id){ if(_eaWk[id]!==undefined) return _eaWk[id]; const L=EA_LM[id]; const q=L[0].replace(/[（(].*?[）)]/g,'').trim();
+  const u='https://ja.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts&exintro=1&explaintext=1&format=json&formatversion=2&origin=*&gsrsearch='+encodeURIComponent(q);
+  const r=await fetch(u); if(!r.ok) throw new Error('http'); const j=await r.json(); const pgs=((j.query||{}).pages||[]).sort((a,b)=>(a.index||0)-(b.index||0));
+  const norm=x=>String(x||'').replace(/[\s・＝=（）()]/g,''); const key=norm(q).slice(0,3);
+  const pg=pgs.find(p=>p.extract&&(norm(p.title).includes(key)||norm(q).includes(norm(p.title).slice(0,3))));
+  _eaWk[id]=pg?{t:pg.title,x:pg.extract.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,3)}:null; return _eaWk[id]; }
+function eaZoom(id){ const L=EA_LM[id]; if(!L) return; const got=new Set(eaCollected()).has(id); const old=document.getElementById('eaZm'); if(old) old.remove();
+  const d=document.createElement('div'); d.id='eaZm'; d.className='mt-ov ea-zm-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label',L[0]);
+  d.innerHTML=`<div class="mt-card ea-zm"><div class="ea-zm-art">${eaCardSVG(id)}</div><h2>${esc(L[0])}</h2><p class="ea-zm-c">${esc(eaName(id))}</p><p class="ea-zm-one">${esc(L[3]||'')}</p>
+    <p class="ea-zm-st ${got?'on':''}">${got?'💌 この絵はがきは、あなたのアルバムに入っています。':`まだ集めていない絵はがきです。${esc(eaName(id))}に人生が生まれると、アルバムに入ります。`}</p>
+    <div class="ea-zm-more" id="eaZmMore"><p class="tiny muted">くわしい説明を読みこんでいます…</p></div>
+    <div class="mt-btns"><button type="button" class="mt-close" id="eaZmX">もどる</button></div></div>`;
+  document.body.appendChild(d); const close=()=>d.remove(); d.querySelector('#eaZmX').onclick=close; d.addEventListener('click',e=>{ if(e.target===d) close(); }); d.querySelector('#eaZmX').focus();
+  eaWiki(id).then(w=>{ const m=document.getElementById('eaZmMore'); if(!m) return; m.innerHTML=w?`<h3>くわしく</h3>${w.x.map(p=>`<p>${esc(p)}</p>`).join('')}<p class="ea-src">出典：<a href="${wkUrl(w.t)}" target="_blank" rel="noopener">${esc(w.t)}</a>（CC BY-SA 4.0）</p>`:''; })
+    .catch(()=>{ const m=document.getElementById('eaZmMore'); if(m) m.innerHTML=''; }); }
+document.addEventListener('click',e=>{ const c=e.target.closest&&e.target.closest('.ea-click[data-ea]'); if(c) eaZoom(c.dataset.ea); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const z=document.getElementById('eaZm'); if(z){ z.remove(); e.stopPropagation(); } return; } if(e.key!=='Enter'&&e.key!==' ') return; const c=e.target.closest&&e.target.closest('.ea-click[data-ea]'); if(c){ e.preventDefault(); eaZoom(c.dataset.ea); } },true);
 // ===== ホームを毎日たのしく：今日のひとこと・今日の小さな場面・身近な人のいま・世界のいま・図鑑・見守りスタンプ・時間帯で変わる空 =====
 // どれも表示だけ。人生の流れ（乱数）は変えない。日付で変わるので、毎日ちがうものが見られる。
 const KEY_STAMP='hitotsu.stamps';
