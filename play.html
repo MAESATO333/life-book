@@ -9716,28 +9716,19 @@ function pbQuad(S,x,y,b){ const k=b.k, f=b.fluff*.05*k; const pats=(b.pat||'').s
   if(b.ear==='L') S.box(hx-.07*k,hy+hs*.3,hz-.05,.08*k,.28*k,.62*k,bkShade(earC,.9));
   // 頭
   const headC=has('van')?b.c:(has('mask')?c2:c);
-  const face=p=>{ const q=(a,h)=>p(hx+a*hs,hy+hs,hz+h*hs); const e1=q(.27,.62), e2=q(.7,.62); let s='';
+  const face=p=>{ const q=(a,h)=>p(hx+a*hs,hy+hs,hz+h*hs); const e1=b.kind==='cat'?q(.17,.62):q(.27,.62), e2=b.kind==='cat'?q(.81,.62):q(.7,.62); let s=''; const ew=b.kind==='cat'?2.4:2.8, eh=b.kind==='cat'?3.2:3.4;
     if(has('hachi')){ const A=q(0,0),B=q(1,0),C=q(1,.5),D=q(0,.5),M=q(.5,.85); s+=`<polygon points="${A[0]},${A[1]} ${B[0]},${B[1]} ${C[0]},${C[1]} ${M[0]},${M[1]} ${D[0]},${D[1]}" fill="${c2}"/>`; }
     if(has('point')){ const m=q(.5,.4); s+=`<ellipse cx="${m[0].toFixed(1)}" cy="${m[1].toFixed(1)}" rx="${(6*k).toFixed(1)}" ry="${(5*k).toFixed(1)}" fill="${c2}" opacity=".85"/>`; }
     if(has('stripe')){ const m=q(.5,.92); s+=`<rect x="${(m[0]-4*k).toFixed(1)}" y="${(m[1]).toFixed(1)}" width="${(8*k).toFixed(1)}" height="1.4" fill="${c2}"/><rect x="${(m[0]-3*k).toFixed(1)}" y="${(m[1]+2.4).toFixed(1)}" width="${(6*k).toFixed(1)}" height="1.4" fill="${c2}"/>`; }
     if(has('tan')){ [q(.27,.8),q(.7,.8)].forEach(m=>s+=`<rect x="${(m[0]-1.4).toFixed(1)}" y="${(m[1]-1).toFixed(1)}" width="2.8" height="1.8" fill="${c2}"/>`); }
     const dark=['#2A2523','#2F2A28','#3A332F','#3A302C','#3A2E26','#5E4636'].includes(headC);
-    if(b.kind==='cat'){ // 猫：どんな毛色でも顔が見えるように、白目つきの目・口元・ひげをはっきり描く
-      const lum=(h=>{ const v=parseInt(String(h).slice(1),16); return isNaN(v)?.6:((v>>16&255)*.3+(v>>8&255)*.59+(v&255)*.11)/255; })(has('point')?c2:headC), dk=lum<.45;
-      const m=q(.49,.3); s+=`<ellipse cx="${m[0].toFixed(1)}" cy="${(m[1]+.4).toFixed(1)}" rx="3.6" ry="2.4" fill="${dk?'#F4ECE6':'#FFFFFF'}" opacity="${dk?.9:.75}"/>`;
-      const c1=q(.22,.62), c2e=q(.76,.62);
-      s+=[c1,c2e].map(e=>`<rect x="${(e[0]-1.9).toFixed(1)}" y="${(e[1]-2.2).toFixed(1)}" width="3.8" height="4.2" rx="1.4" fill="${dk?'#FFE680':'#FFFFFF'}" stroke="${dk?'#FFFFFF':'#2B2230'}" stroke-width=".5"/><rect x="${(e[0]-1).toFixed(1)}" y="${(e[1]-1.6).toFixed(1)}" width="2" height="3.2" rx=".8" fill="#2B2230"/><rect x="${(e[0]-.7).toFixed(1)}" y="${(e[1]-1.4).toFixed(1)}" width=".9" height=".9" fill="#FFFFFF"/>`).join('');
-      const n=q(.49,.36); s+=`<path d="M${(n[0]-1.5).toFixed(1)} ${(n[1]-.9).toFixed(1)} h3 l-1.5 1.7 z" fill="#E86A88"/>`;
-      s+=`<path d="M${(n[0]-1.6).toFixed(1)} ${(n[1]+1.6).toFixed(1)} q.8 .9 1.6 0 q.8 .9 1.6 0" fill="none" stroke="${dk?'#FFFFFF':'#5A4650'}" stroke-width=".45" stroke-linecap="round"/>`;
-      const wc=dk?'#FFFFFF':'#7A6670'; [[-1,-.4],[-1,.5],[1,-.4],[1,.5]].forEach(([d,o])=>{ const x0=n[0]+d*2.6, y0=n[1]+.4+o; s+=`<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${(x0+d*3.6).toFixed(1)}" y2="${(y0+o*1.2).toFixed(1)}" stroke="${wc}" stroke-width=".35" stroke-linecap="round" opacity=".9"/>`; });
-      return s; }
-    s+=[e1,e2].map(e=>`<rect x="${(e[0]-1.4).toFixed(1)}" y="${(e[1]-1.8).toFixed(1)}" width="2.8" height="3.4" rx=".7" fill="${dark?'#F5E9C8':'#2B2230'}"/>`+(dark?`<rect x="${(e[0]-.6).toFixed(1)}" y="${(e[1]-1).toFixed(1)}" width="1.3" height="2" fill="#2B2230"/>`:'')).join('');
+    s+=[e1,e2].map(e=>`<rect x="${(e[0]-ew/2).toFixed(1)}" y="${(e[1]-eh/2-.1).toFixed(1)}" width="${ew}" height="${eh}" rx=".7" fill="${dark?'#F5E9C8':'#2B2230'}"/>`+(dark?`<rect x="${(e[0]-.6).toFixed(1)}" y="${(e[1]-1).toFixed(1)}" width="1.3" height="2" fill="#2B2230"/>`:'')).join('');
     if(b.snout==='F'){ const n=q(.49,.36); s+=`<rect x="${(n[0]-1.6).toFixed(1)}" y="${(n[1]-1).toFixed(1)}" width="3.2" height="2.2" rx="1" fill="${b.kind==='cat'?'#E89AA6':'#2B2230'}"/>`; }
     if(b.kind==='cat'&&b.snout!=='F'){ const n=q(.49,.36); s+=`<rect x="${(n[0]-1.3).toFixed(1)}" y="${(n[1]-1).toFixed(1)}" width="2.6" height="1.8" rx=".8" fill="#E89AA6"/>`; }
     return s; };
   S.box(hx,hy,hz,hs,hs,hs,headC,face);
-  if(has('mask')) S.box(hx-.01,hy-.01,hz+hs*.55,hs+.02,hs+.02,hs*.47,c,b.kind==='cat'?face:undefined);
-  if(has('van')) S.box(hx-.01,hy-.01,hz+hs*.7,hs+.02,hs+.02,hs*.32,c2,b.kind==='cat'?face:undefined);
+  if(has('mask')) S.box(hx-.01,hy-.01,hz+hs*.55,hs+.02,hs+.02,hs*.47,c);
+  if(has('van')) S.box(hx-.01,hy-.01,hz+hs*.7,hs+.02,hs+.02,hs*.32,c2);
   if(has('beard')) S.box(hx+hs*.2,hy+hs-.02,hz-.04*k,hs*.6,.14*k,hs*.32,b.c2==='#2A2523'?'#3A3532':b.c2);
   if(has('hairless')) S.box(hx+hs*.25,hy+hs*.2,hz+hs,hs*.5,hs*.5,.08*k,'#F4F1EA');
   // 鼻
@@ -9775,7 +9766,7 @@ function pbRabbit(S,x,y,b){ const k=b.k, f=b.fluff*.05*k;
   S.box(hx,hy,hz,hs,hs,hs,dutch?b.c2:b.c,p=>{ const q=(a,h)=>p(hx+a*hs,hy+hs,hz+h*hs); const e1=q(.28,.62), e2=q(.7,.62); let s='';
     if(dutch){ const A=q(.38,0),B=q(.62,0),C=q(.56,1),D=q(.44,1); s+=`<polygon points="${A} ${B} ${C} ${D}" fill="#FFFFFF"/>`; }
     const eye=b.pat==='red'?'#D9363E':'#2B2230';
-    s+=[e1,e2].map(e=>(b.pat==='eye'?`<rect x="${(e[0]-2.4).toFixed(1)}" y="${(e[1]-2.6).toFixed(1)}" width="4.8" height="5.2" rx="1.6" fill="${b.c2}"/>`:'')+`<rect x="${(e[0]-1.3).toFixed(1)}" y="${(e[1]-1.6).toFixed(1)}" width="2.6" height="3.2" rx=".8" fill="${eye}" stroke="#FFFFFF" stroke-width=".4"/><rect x="${(e[0]-.8).toFixed(1)}" y="${(e[1]-1.2).toFixed(1)}" width=".9" height=".9" fill="#FFFFFF"/>`).join('');
+    s+=[e1,e2].map(e=>(b.pat==='eye'?`<rect x="${(e[0]-2.4).toFixed(1)}" y="${(e[1]-2.6).toFixed(1)}" width="4.8" height="5.2" rx="1.6" fill="${b.c2}"/>`:'')+`<rect x="${(e[0]-1.3).toFixed(1)}" y="${(e[1]-1.6).toFixed(1)}" width="2.6" height="3.2" rx=".8" fill="${eye}"/>`).join('');
     const n=q(.49,.34); s+=`<rect x="${(n[0]-1.3).toFixed(1)}" y="${(n[1]-.9).toFixed(1)}" width="2.6" height="1.8" rx=".8" fill="#E89AA6"/>`; return s; });
   if(b.ear==='U'){ const ec=dutch?b.c2:b.c; S.box(hx+.07*k,hy+hs*.35,hz+hs,.11*k,.08*k,.5*k,ec,p=>{ const a=p(hx+.12*k,hy+hs*.35+.08*k,hz+hs+.1*k); return `<rect x="${(a[0]-.8).toFixed(1)}" y="${(a[1]-8*k).toFixed(1)}" width="1.6" height="${(6*k).toFixed(1)}" fill="#F2B8C2"/>`; }); S.box(hx+hs-.18*k,hy+hs*.35,hz+hs,.11*k,.08*k,.5*k,ec); }
   if(b.ear==='L') S.box(hx+hs,hy+hs*.3,hz-.12*k,.07*k,.24*k,.5*k,bkShade(b.c2==='#FFFFFF'?b.c:b.c2,.9)); }
