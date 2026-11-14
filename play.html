@@ -12039,7 +12039,7 @@ function wkUrl(t){ return 'https://ja.wikipedia.org/wiki/'+encodeURIComponent(t.
 function wikiBoxHTML(P){ const t=wkTitle(P);
   return `<section class="wk" data-wk="${esc(t)}"><h4 class="wk-h"><span aria-hidden="true">📖</span> ${esc(P.country.name)}のこと</h4>
     <p class="wk-l">${esc(P.given)}が生まれた国のことを、Wikipedia の記事で読めます。</p>
-    <p class="wk-now">※ ${new Date().getFullYear()}年いまの情報です（${esc(P.given)}が生まれた年のようすではありません）。</p>
+    <p class="wk-now">※ ${new Date().getFullYear()}年いまの情報です。</p>
     <div class="wk-btns"><button type="button" class="wk-go">この国のことを読む</button><a class="wk-out" href="${wkUrl(t)}" target="_blank" rel="noopener">Wikipedia で開く</a></div>
     <div class="wk-body" hidden></div></section>`; }
 function wkParse(txt){ const lines=String(txt||'').split('\n'); const out={ lead:[], secs:[] }; let sec=null, sub=null, skip=false;
