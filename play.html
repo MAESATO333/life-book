@@ -406,6 +406,10 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .frd-lead{ margin:0 0 12px; font-size:14px; line-height:1.8; text-align:center; }
 .frd-note{ margin:0 0 12px; padding:8px 12px; border-radius:12px; background:#FFF0D6; color:#6A4A20; }
 .frd-x{ position:absolute; top:10px; right:10px; z-index:2; width:34px; height:34px; border-radius:50%; border:2px solid #FFC2D0; background:#fff; color:#C9466A; font-size:18px; line-height:1; cursor:pointer; }
+.fbs{ margin:6px 0 0; font-size:11.5px; color:#7A6A74; text-align:center; }
+.fbs-ok{ color:#3D9A5B; } .fbs-ng{ color:#C2416B; } .fbs-try{ color:#9A8A94; }
+.fbs .linkish{ margin-left:6px; font-size:11.5px; }
+.fbs-why{ display:block; color:#9A8A94; }
 .frd-url{ margin:10px 0 0; display:grid; gap:3px; }
 .frd-ul{ font-size:11px; color:#7A5A66; }
 .frd-urow{ display:flex; gap:6px; margin-bottom:6px; }
@@ -10913,7 +10917,7 @@ function friendDialogHTML(){ const me=store.get(KEY_ME,''); const can=!!myHero()
       <button class="frd-b frd-lilac" id="frMail" type="button"><i class="ic ic-mail" aria-hidden="true"></i><span>メールで送る</span></button>
     </div>
     <div class="frd-url"><span class="frd-ul">あなたの紹介リンク（LINEで押しても、外部のブラウザで開きます）</span><div class="frd-urow"><input id="frUrl" type="text" readonly aria-label="あなたの紹介リンク" onclick="this.select()"><button class="frd-uc" type="button" data-cp="frUrl">コピー</button></div></div>
-    <p class="frd-msg" id="frMsg" role="status"></p><textarea id="frOut" rows="3" readonly hidden aria-label="紹介の文とリンク"></textarea>
+    <p class="frd-msg" id="frMsg" role="status"></p>${typeof fbStatusHTML==='function'?fbStatusHTML():''}<textarea id="frOut" rows="3" readonly hidden aria-label="紹介の文とリンク"></textarea>
     <details class="frd-get"><summary>友だちから届いたリンクやコードを受け取る</summary>
       <p class="tiny muted">届いたリンクを押せば、自動でつながります。うまくいかないときは、ここにはりつけてください。</p>
       <textarea id="frCodeIn" rows="2" placeholder="届いたリンク、または LIFEFRIEND1. からはじまるコード"></textarea><button class="btn small" id="frGet" type="button">受け取る</button>
@@ -10938,6 +10942,7 @@ function bindFriend(){ bindFriendOpeners();
     ok.onclick=save; bi.onkeydown=e=>{ if(e.key==='Enter'&&!e.isComposing){ e.preventDefault(); save(); } }; bi.oninput=()=>{ ok.textContent='OK！'; ok.classList.remove('is-done'); if(sv){ sv.textContent=''; sv.classList.remove('is-ok'); } }; }
   const urlShow=()=>{ const u=$('#frUrl'), up=$('#frUrlP'); try{ by(); const L=friendLink()||friendPlainLink(); if(u) u.value=L; if(up) up.value=L.replace(/[?&]openExternalBrowser=1/,'').replace('.html&','.html?'); }catch(e){} };
   d.querySelectorAll('.frd-uc').forEach(b=>b.onclick=()=>{ urlShow(); const i=$('#'+b.dataset.cp); if(!i) return; i.select(); const ok=()=>{ b.textContent='コピーしました ✓'; setTimeout(()=>{ b.textContent='コピー'; },2000); }; if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(i.value).then(ok,()=>{ try{ document.execCommand('copy'); ok(); }catch(e){} }); else { try{ document.execCommand('copy'); ok(); }catch(e){} } }); urlShow(); { const bi2=$('#frBy'); if(bi2) bi2.addEventListener('input',()=>{ clearTimeout(bi2._ut); bi2._ut=setTimeout(urlShow,400); }); }
+  const rt=$('#fbRetry'); if(rt) rt.onclick=()=>{ rt.disabled=true; rt.textContent='つないでいます…'; if(typeof fbStart==='function') fbStart(); };
   const x=d.querySelector('.frd-x'); if(x) x.onclick=closeFriend;
   const copy=(t,what)=>{ const o=$('#frOut'); if(o&&what!=='リンク'){ o.hidden=false; o.value=t; o.select(); } else { const u=$('#frUrl'); if(u){ u.value=t; u.select(); } }
     const done=()=>msg(what+'をコピーしました。LINEやメールにはりつけて、友だちに送ってください。'), fail=()=>msg('下の欄の文を選んで、コピーしてください。');
@@ -15479,20 +15484,32 @@ async function fbMakeIv(){ try{ const k=fbKey(), want=store.get(KEY_FBIV+'.k',''
   store.set(KEY_FBIV,iv); store.set(KEY_FBIV+'.k',k.slice(0,6)); return iv; }catch(e){ return ''; } }
 function fbFriends(){ return store.get(KEY_FRIEND,[]).filter(f=>f&&f.id); }
 function fbFrList(except){ return fbFriends().filter(f=>f.id!==except).slice(0,20).map(f=>({ i:String(f.id), b:String(f.by||'').slice(0,20) })); }
+// つながり具合：FB_ST = 'off'（まだ）/'try'（つなぎ中）/'ok'/'ng'。FB_ERR = うまくいかなかった理由。失敗したら、時間をおいて自動でやり直す
+let FB_ST='off', FB_ERR='', _fbTry=0, _fbBusyStart=false, _fbHooks=false;
 async function fbStart(){
-  if(!FB_CONFIG||FB||!/^https?:$/.test(location.protocol)) return;
+  if(!FB_CONFIG||FB||_fbBusyStart||!/^https?:$/.test(location.protocol)) return; _fbBusyStart=true; FB_ST='try'; _fbTry++;
+  if(!_fbHooks){ _fbHooks=true; window.addEventListener('online',()=>{ if(!FB) fbStart(); }); document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&!FB) fbStart(); }); }
+  let step='load';
   try{
     const base='https://www.gstatic.com/firebasejs/'+FB_VER+'/';
     const [A,U,D]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]);
     const app=A.initializeApp(FB_CONFIG,'lifebook'); const auth=U.getAuth(app); const db=D.getFirestore(app);
     if(window.FB_EMU){ U.connectAuthEmulator(auth,'http://127.0.0.1:'+FB_EMU.auth,{ disableWarnings:true }); D.connectFirestoreEmulator(db,'127.0.0.1',FB_EMU.fs); }
-    const cred=await U.signInAnonymously(auth);
+    step='auth'; const cred=await U.signInAnonymously(auth);
     FB={ U, D, auth, db, uid:cred.user.uid, seenOnce:false };
-    await fbMakeIv(); await fbRegister(); fbListen(); fbListenReq(); await fbPush();
+    step='register'; await fbMakeIv(); await fbRegister(); step='listen'; FB_ST='ok'; FB_ERR=''; fbListen(); fbListenReq(); await fbPush();
     setInterval(()=>fbPush(),60000);
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden) fbPush(); });
-  }catch(e){ FB=null; try{ console.warn('[fbsync] サーバーにつながりませんでした',e&&e.code||e); }catch(_){} }
+  }catch(e){ const code=(e&&(e.code||e.message))||String(e);
+    if(step==='listen'&&FB){ try{ console.warn('[fbsync]',code); }catch(_){} }
+    else { FB=null; FB_ST='ng'; FB_ERR=step+':'+code; try{ console.warn('[fbsync] サーバーにつながりませんでした',FB_ERR); }catch(_){} setTimeout(()=>{ if(!FB) fbStart(); },Math.min(120000,5000*Math.pow(2,Math.min(5,_fbTry-1)))); } }
+  finally{ _fbBusyStart=false; try{ if(typeof fbDlgRefresh==='function') fbDlgRefresh(); }catch(_){} }
 }
+// 画面に出す、つながり具合のひとこと
+function fbStatusHTML(){ if(!/^https?:$/.test(location.protocol)) return '';
+  const t=FB_ST==='ok'?'<span class="fbs-ok">● サーバーにつながっています</span>':FB_ST==='ng'?`<span class="fbs-ng">● サーバーにつながっていません</span><button class="linkish" type="button" id="fbRetry">もう一度つなぐ</button><small class="fbs-why">（${esc(fbWhy(FB_ERR))}）</small>`:'<span class="fbs-try">● サーバーにつないでいます…</span>';
+  return `<p class="fbs" role="status">${t}</p>`; }
+function fbWhy(e){ e=String(e||''); if(/load/.test(e)) return '通信が不安定か、ブラウザが読み込みを止めています'; if(/auth/.test(e)) return 'ログインできませんでした。プライベートモードや、アプリの中のブラウザでは つながらないことがあります'; if(/register.*permission/.test(e)) return 'この端末の合言葉が、ほかの端末と合っていません'; if(/network|unavailable/.test(e)) return '通信が不安定です'; return e.slice(0,60); }
 // 自分の myId に、この端末のログインを結びつける（1回だけ）
 async function fbRegister(){ const id=myId(), iv=fbIv(), tag=id+'|'+FB.uid+'|'+iv, reg=store.get(KEY_FBREG,'');
   if(reg===tag) return;
