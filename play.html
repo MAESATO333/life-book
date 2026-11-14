@@ -15265,9 +15265,10 @@ async function fbPush(){ if(!FB) return; if(_fbBusy){ _fbAgain=true; return; } _
   }finally{ _fbBusy=false; if(_fbAgain){ _fbAgain=false; setTimeout(fbPush,500); } } }
 // ひとりの相手の受け箱に書く。書けたら true
 async function fbPushOne(f,h){ h=h||myHero(); if(!FB||!h||!f||!f.id) return false; const me=myId(), by=store.get(KEY_ME,'')||'';
-  const fr=fbFrList(f.id), sig=fbHeroSig(h,by)+'#'+fr.map(x=>x.i+':'+x.b).join(','), done=store.get(KEY_FBPUSH,{});
+  // t には「つながった日」（出会いの日の起点）を入れる。ルールを変えずに相手へ届けるため、g ではなく t を使う。
+  const g=f.a0||f.got||Date.now(), fr=fbFrList(f.id), sig=fbHeroSig(h,by)+'#'+fr.map(x=>x.i+':'+x.b).join(',')+'#g'+g, done=store.get(KEY_FBPUSH,{});
   if(done[f.id]===sig) return true;
-  const data={ from:me, by:String(by).slice(0,20), s:h.s, c:h.c||null, f:h.f||null, ch:h.ch||null, t:Date.now(), fr };
+  const data={ from:me, by:String(by).slice(0,20), s:h.s, c:h.c||null, f:h.f||null, ch:h.ch||null, t:g, fr };
   if(f.iv) data.iv=String(f.iv);
   try{ await FB.D.setDoc(FB.D.doc(FB.db,'ids',String(f.id),'inbox',me),data);
     const d2=store.get(KEY_FBPUSH,{}); d2[f.id]=sig; store.set(KEY_FBPUSH,d2); if(typeof frReplyDone==='function') try{ frReplyDone(f.id); }catch(_){} return true;
@@ -15284,10 +15285,10 @@ function fbListen(){ const { collection, onSnapshot }=FB.D;
     const fof=store.get(KEY_FOF,{}); let fofCh=false, asked=store.get(KEY_FOFASK,[]); const accepted=[];
     snap.docChanges().forEach(ch=>{ if(ch.type==='removed') return; const d=ch.doc.data();
       if(typeof d.s!=='number'||!d.from) return;
-      const o={ id:String(d.from), by:d.by||'', s:d.s, c:d.c||null, f:d.f||null, ch:d.ch||null, t:d.t||Date.now() };
+      const o={ id:String(d.from), by:d.by||'', s:d.s, c:d.c||null, f:d.f||null, ch:d.ch||null, t:d.t||Date.now(), g:(typeof d.t==='number'?d.t:undefined) };
       if(Array.isArray(d.fr)){ fof[o.id]={ by:o.by, fr:d.fr.filter(x=>x&&x.i).slice(0,20).map(x=>({ i:String(x.i), b:String(x.b||'').slice(0,20) })) }; fofCh=true; }
       const old=store.get(KEY_FRIEND,[]).find(x=>x.id===o.id);
-      if(old&&old.s===o.s&&(old.c||null)===o.c&&(old.by||'')===o.by) return; // 変わりなし
+      if(old&&old.s===o.s&&(old.c||null)===o.c&&(old.by||'')===o.by&&(o.g==null||old.g===o.g)) return; // 変わりなし
       const r=receiveFriend(o); if(r==='self') return; changed=true;
       if(typeof frReplyDone==='function') try{ frReplyDone(o.id); }catch(_){}
       if(r==='ok'){ if(asked.includes(o.id)){ accepted.push(o); asked=asked.filter(x=>x!==o.id); store.set(KEY_FOFASK,asked); } else fresh.push(Object.assign({},o,{ re:1, sv:1 })); }
