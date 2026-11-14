@@ -11032,6 +11032,19 @@ function gsTreeHTML(fr){ fr=(fr||[]).slice(0,10); const fof=(typeof store!=='und
 .gs-tree .gs-ht{ animation:gsHt 4s ease-in-out infinite; }
 @keyframes gsHt{ 0%,100%{ transform:translateY(0); opacity:.85 } 50%{ transform:translateY(-5px); opacity:1 } }
 @media (prefers-reduced-motion:reduce){ .gs-tree .gs-ht{ animation:none; } }`; document.head.appendChild(c); })();
+// ===== Life Home のカードを、中身の高さに合わせて詰めて並べる（となりのカードに引っぱられて、下がスカスカにならないように） =====
+// 2列のときだけ。行の高さを 4px にして、カードごとに「何行ぶん使うか」を中身の高さから決める。中身が後から変わっても（NEWSの読みこみなど）見張って合わせる。
+const MS_ROW=4, MS_GAP=14; let _msRO=null;
+function msFit(t){ const g=t.parentElement; if(!g||!g.classList.contains('hm-ms')) return; t.style.gridRowEnd=''; const h=t.getBoundingClientRect().height; t.style.gridRowEnd='span '+Math.max(1,Math.ceil((h+MS_GAP)/MS_ROW)); }
+function msApply(){ const g=document.querySelector('.hm-grid'); if(!g) return; const two=getComputedStyle(g).gridTemplateColumns.split(' ').length>1;
+  g.classList.toggle('hm-ms',two); const tiles=[...g.children];
+  if(!two){ tiles.forEach(t=>t.style.gridRowEnd=''); return; }
+  tiles.forEach(msFit);
+  if(typeof ResizeObserver!=='undefined'){ if(!_msRO) _msRO=new ResizeObserver(es=>{ for(const e of es) msFit(e.target); }); tiles.forEach(t=>{ if(!t._msObs){ t._msObs=1; _msRO.observe(t); } }); } }
+(function(){ if(typeof render!=='function') return; const _r=render; render=function(){ const r=_r.apply(this,arguments); try{ msApply(); }catch(_){} return r; }; })();
+window.addEventListener('resize',()=>{ clearTimeout(window._msT); window._msT=setTimeout(()=>{ try{ msApply(); }catch(_){} },150); });
+(function(){ const c=document.createElement('style'); c.textContent=`.hm-grid.hm-ms{ grid-auto-rows:${MS_ROW}px; row-gap:0; align-items:start; }
+.hm-grid.hm-ms > *{ margin-bottom:${MS_GAP}px; }`; document.head.appendChild(c); })();
 // ===== 「出会った！」の瞬間 =====
 // 紹介でつながった友だちの主人公と出会う出来事が、物語の時間で起きたら、画面いっぱいにお知らせする。
 // 出会いの年は、ふたりの種から決まるので、友だちの側でも同じ年に、同じように出会いが起きる（お互いに知らされる）。
