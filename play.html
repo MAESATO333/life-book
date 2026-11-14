@@ -16510,7 +16510,7 @@ async function fbStart(){
     if(window.FB_EMU){ U.connectAuthEmulator(auth,'http://127.0.0.1:'+FB_EMU.auth,{ disableWarnings:true }); D.connectFirestoreEmulator(db,'127.0.0.1',FB_EMU.fs); }
     step='auth'; const cred=await U.signInAnonymously(auth);
     FB={ U, D, auth, db, uid:cred.user.uid, seenOnce:false };
-    step='register'; await fbMakeIv(); await fbRegister(); step='listen'; FB_ST='ok'; FB_ERR=''; fbListen(); fbListenReq(); await fbPush();
+    step='register'; await fbMakeIv(); await fbRegister(); step='listen'; FB_ST='ok'; FB_ERR=''; fbListen(); fbListenReq(); try{ fbDlgRefresh(); }catch(_){} await fbPush();
     setInterval(()=>fbPush(),60000);
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden) fbPush(); });
   }catch(e){ const code=(e&&(e.code||e.message))||String(e);
@@ -16607,11 +16607,18 @@ async function fbAccept(from){ const x=FB_REQS.find(r=>r.from===from); if(!FB||!
   return ok; }
 async function fbDecline(from){ const n=store.get(KEY_FOFNO,[]); if(!n.includes(from)) store.set(KEY_FOFNO,n.concat([from]).slice(-200)); await fbDelReq(from); FB_REQS=FB_REQS.filter(r=>r.from!==from); fbDlgRefresh(); }
 // 紹介の窓に足す欄
-function fbFofHTML(){ if(!fbOnline()) return ''; const reqs=FB_REQS, cands=fbCandidates(), asked=store.get(KEY_FOFASK,[]), can=!!myHero(); if(!reqs.length&&!cands.length) return '';
+// もうつながった「友だちの友だち」（候補から、友だちに移った人）
+function fbFofJoined(){ const me=myId(), fr=fbFriends(), mine=new Map(fr.map(f=>[f.id,f])), fof=store.get(KEY_FOF,{}), out={};
+  for(const f of fr){ const e=fof[f.id]; if(!e) continue; for(const x of e.fr){ if(x.i===me||!mine.has(x.i)) continue; const c=out[x.i]||(out[x.i]={ id:x.i, by:(mine.get(x.i).by||x.b), via:[] }); c.via.push(f.by||'友だち'); } }
+  return Object.values(out).slice(0,30); }
+function fbFofHTML(){ const on=fbOnline(); const reqs=on?FB_REQS:[], cands=fbCandidates(), asked=store.get(KEY_FOFASK,[]), can=!!myHero()&&on, joined=fbFofJoined(); if(!fbFriends().length) return '';
   let h='<div class="fof">';
+  if(!on) h+='<p class="tiny muted">サーバーにつながるのを待っています。つながると、「つながる」を押せます。</p>';
   if(reqs.length) h+=`<h3 class="fof-h fof-h-in">💌 あなたに「つながりたい」が届いています</h3><p class="tiny muted">「つながる」を押すと、すぐにつながります。</p><ul class="fof-l">${reqs.map(x=>`<li><span class="fof-n"><b>${esc(x.by||'だれか')}さん</b><small>${esc(fbViaName(x.via))}さんの友だち</small></span><span class="fof-b"><button type="button" class="fof-ok" data-acc="${esc(x.from)}">つながる</button><button type="button" class="fof-no" data-dec="${esc(x.from)}">今はしない</button></span></li>${fofRes(x.from)}`).join('')}</ul>`;
   if(cands.length) h+=`<h3 class="fof-h">友だちの友だち</h3><p class="tiny muted">共通の友だちがいる人だけが出ます。「つながる」を押すと、相手に「つながりたい」が届きます。<b>相手がOKを押すと、つながります。</b></p><ul class="fof-l">${cands.map(c=>{ const v=c.via.map(x=>esc(x.by)+'さん').join('、');
-      return `<li><span class="fof-n"><small>${v}の友だち</small><b>${esc(c.by||'友だち')}さん</b></span><span class="fof-b">${asked.includes(c.id)?'<span class="fof-wait">申しこみました<small>相手がOKすると、つながります</small></span>':`<button type="button" class="fof-ok" data-ask="${esc(c.id)}"${can?'':' disabled'}>つながる</button>`}</span></li>${fofRes(c.id)}`; }).join('')}</ul>${can?'':'<p class="tiny muted">Channel が生まれると、「つながりたい」を送れます。</p>'}`;
+      return `<li><span class="fof-n"><small>${v}の友だち</small><b>${esc(c.by||'友だち')}さん</b></span><span class="fof-b">${asked.includes(c.id)?'<span class="fof-wait">申しこみました<small>相手がOKすると、つながります</small></span>':`<button type="button" class="fof-ok" data-ask="${esc(c.id)}"${can?'':' disabled'}>つながる</button>`}</span></li>${fofRes(c.id)}`; }).join('')}</ul>${myHero()?'':'<p class="tiny muted">Channel が生まれると、「つながりたい」を送れます。</p>'}`;
+  if(!cands.length&&!reqs.length) h+=`<h3 class="fof-h">友だちの友だち</h3><p class="tiny muted">${joined.length?'いまは、新しい「友だちの友だち」はいません。下の人たちとは、もうつながっています。':'いまは、まだ「友だちの友だち」はいません。友だちが、ほかの人ともつながると、ここに出ます。'}</p>`;
+  if(joined.length) h+=`<h3 class="fof-h">友だちの友だちで、もうつながった人</h3><ul class="fof-l">${joined.map(c=>`<li><span class="fof-n"><small>${c.via.map(v=>esc(v)+'さん').join('、')}の友だち</small><b>${esc(c.by||'友だち')}さん</b></span><span class="fof-b"><span class="fof-wait">つながっています</span></span></li>`).join('')}</ul>`;
   h+='<p class="fof-note">つながっても、メッセージのやり取りは出来ません。</p>';
   return h+'</div>'; }
 function fofRes(id){ const m=_fofMsg; if(!m||m.id!==id||Date.now()-m.at>120000) return ''; return `<li class="fof-res ${m.ok?'is-ok':'is-ng'}" role="status">${esc(m.t)}</li>`; }
