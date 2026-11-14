@@ -15688,6 +15688,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-album',`思い出のアルバム<span class="hm-n">${photos.length}枚</span>`, photos.length?`<div class="hm-photos">${photos.slice(-3).map(ph=>photoHTML(P,L,ph,true)).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。</p>', photos.length?`<button class="linkish" type="button" id="hmAlbum">アルバムをひらく</button>`:'')}
     ${homeTile('hm-belief','心に生まれた観念', bel.length?`<ul class="hm-list">${bel.map(b=>`<li><span class="hm-a">${b.age}歳</span>「${esc(b.core||b.text||'')}」</li>`).join('')}</ul>`:'<p class="tiny muted">まだ、心に残る思い込みは生まれていません。</p>', arc.length?`<button class="linkish" type="button" id="hmKmap">本棚の人生とくらべる（観念の地図）</button>`:'')}
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
+    ${typeof mpTileHTML==='function'?homeTile('hm-mypet','うちのペット',mpTileHTML()):''}
     ${homeTile('hm-friends',`Group Soul /紹介でつながった人たち<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, (typeof gsTreeHTML==='function'?gsTreeHTML(fr):'')+`<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
     ${homeTile('hm-shelf'+(arc.length?'':' hm-empty'),`私の本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は「思い出のLIFE BOOK」になって、ここに並びます。</p>')}
     ${typeof borrowTileHTML==='function'?homeTile('hm-borrow',`友だちからLIFE BOOKを借りる<span class="hm-n">${store.get(KEY_LOAN,[]).length}冊</span>`,borrowTileHTML()):''}
@@ -15789,7 +15790,7 @@ let viewing=null;     // 過去の人生のレポートを読んでいる時 { s
 function load(){
   if(!st){ cur=null; return; }
   const P=makeBirth(st.seed,{country:st.country||null,force:st.force||null});
-  const L=simulate(P, st.choice||undefined); if(typeof birthSitApply==='function'){ if(!st.bs&&st.bsNew){ st.bs=bsChoose(P,L); delete st.bsNew; save(); } birthSitApply(P,L,st.bs||null); } if(typeof momentsApply==='function') momentsApply(P,L); if(typeof petExtraApply==='function') petExtraApply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(typeof dreamApply==='function') dreamApply(P,L); if(typeof friendMeet==='function') friendMeet(P,L);
+  const L=simulate(P, st.choice||undefined); if(typeof birthSitApply==='function'){ if(!st.bs&&st.bsNew){ st.bs=bsChoose(P,L); delete st.bsNew; save(); } birthSitApply(P,L,st.bs||null); } if(typeof momentsApply==='function') momentsApply(P,L); if(typeof mpLifeApply==='function') mpLifeApply(P,L); if(typeof petExtraApply==='function') petExtraApply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(typeof dreamApply==='function') dreamApply(P,L); if(typeof friendMeet==='function') friendMeet(P,L);
   cur={P,L};
   // 速さを変えた前から続いている人生は、今の年齢を保ったまま新しい速さに切りかえる
   if(st.spd!==3){ const t=Date.now()+(st.shift||0)-st.birthTime-(st.pause||0); const a=Math.max(0,t/(st.spd===2?mpy2(P):oldMpy(P))); st.birthTime=Date.now()+(st.shift||0)-(st.pause||0)-a*msPerYear(P); st.spd=3; save(); }
@@ -16466,6 +16467,104 @@ function skRestore(s){ if(!s||!s.m) return; const put=()=>{ document.querySelect
     return r; }; })();
 // 中身だけ入れかえるとき（いまのデータが届いたとき）も、箱の位置をたもつ
 function skFillKeep(el,html){ if(!el) return; if(el.innerHTML===html) return; const t=el.scrollTop; el.innerHTML=html; el.scrollTop=t; }
+// ===== うちのペット：Higher Self（プレイヤー）が、自分でペットを迎えて見守る =====
+// Channel の人生（乱数）とは関係なし。この端末だけに保存。種類は petbreed.js の本当の犬種・猫種など。
+// 時間の進み方は Channel と同じくらい（約2.5日で1歳）。寿命は種類ごとの平均的な範囲（日本ペットフード協会の調査では、犬の平均は約14.6歳、猫は約15.8歳）。
+const MP_KEY='hitotsu.mypet', MP_PAST='hitotsu.mypetPast', MP_DAY=864e5, MP_MPY=2.5*864e5;
+const MP_KIND=[['dog','犬','🐶'],['cat','猫','🐱'],['bird','インコ・小鳥','🐦'],['rabbit','うさぎ','🐰'],['fish','金魚','🐟']];
+const MP_LIFE={ dog:[12,15], cat:[13,19], bird:[7,12], rabbit:[7,11], fish:[6,12] };
+function mpGet(){ try{ return JSON.parse(localStorage.getItem(MP_KEY)||'null'); }catch(e){ return null; } }
+function mpSet(p){ try{ localStorage.setItem(MP_KEY,JSON.stringify(p)); }catch(e){} }
+function mpBreeds(kind){ const a={ dog:PB_DOG, cat:PB_CAT, bird:PB_BIRD, rabbit:PB_RABBIT, fish:PB_FISH }[kind]||[]; return a.map(x=>({ id:x[0], name:x[1] })).sort((p,q)=>(/雑種|の猫$|^白猫$|^黒猫$/.test(p.name)?1:0)-(/雑種|の猫$|^白猫$|^黒猫$/.test(q.name)?1:0)); }
+function mpHuman(p){ const a=mpAge(p); if(p.kind!=='dog'&&p.kind!=='cat') return null; const big=p.kind==='dog'&&((PB_ALL[p.breed]||{}).k||1)>=1.25; return Math.round(a<1?a*(big?12:15):a<2?(big?12:15)+(a-1)*(big?10:9):(big?22:24)+(a-2)*(big?7:4)); }
+function mpAge(p){ return Math.max(0,(Date.now()-p.at)/MP_MPY); }
+function mpDays(p){ const a=new Date(p.at); a.setHours(0,0,0,0); const b=new Date(); b.setHours(0,0,0,0); return Math.round((b-a)/MP_DAY)+1; }
+function mpGone(p){ return mpAge(p)>=p.life; }
+function mpStage(p){ const a=mpAge(p), k=p.kind;
+  if(k==='dog'||k==='cat'){ const baby=k==='dog'?'子犬':'子猫'; return a<1?[baby,.62]:a<2?['わかもの',.85]:a<7?['おとな',1]:a<11?['シニア',1]:['おじいちゃん・おばあちゃん',1]; }
+  if(k==='bird') return a<.5?['ひな',.6]:a<5?['おとな',1]:['シニア',1];
+  if(k==='rabbit') return a<.5?['子うさぎ',.6]:a<5?['おとな',1]:['シニア',1];
+  return a<1?['小さな金魚',.6]:a<3?['わかもの',.85]:['おとな',1]; }
+function mpArt(p,k){ const s=petPortraitSVG(p.breed,p.name+'（'+(PB_ALL[p.breed]||{}).name+'）'); return s.replace(/scale\(([\d.]+)\)/,(m,x)=>`scale(${(+x*(k||1)).toFixed(2)})`); }
+const MP_ACT={ pet:['なでる','💗',['{p}が、気持ちよさそうに目を細めた。','{p}が、もっと、と手に頭をこすりつけてきた。','{p}の体が、あたたかかった。']],
+  food:['ごはん','🍚',['{p}は、あっという間にごはんを食べた。','{p}が、ごはんの前でおすわりして待っていた。','{p}は、ゆっくり味わって食べた。']],
+  play:['あそぶ','🎾',['{p}と、たくさん遊んだ。','{p}が、おもちゃを持ってきてくれた。','{p}は、遊び疲れて、すぐに眠ってしまった。']] };
+function mpToday(p){ const d=dayKey(); return (p.acts&&p.acts[d])||[]; }
+function mpTileHTML(){ const p=mpGet();
+  if(!p) return `<p class="tiny">あなたも、ペットを家族に迎えられます。犬や猫などから、本当の種類を選んで、名前をつけてください。Channel と同じように、成長を見守れます。</p><button type="button" class="mp-btn" data-mp="new">🐾 ペットをお迎えする</button>`;
+  const gone=mpGone(p), st=mpStage(p), a=Math.floor(Math.min(mpAge(p),p.life)), b=PB_ALL[p.breed]||{};
+  return `<div class="mp-card" data-mp="open" role="button" tabindex="0">${mpArt(p,st[1])}<div class="mp-info"><b>${esc(p.name)}</b><small>${esc(b.name||'')}</small>
+    <span class="mp-day">${gone?`🌈 虹の橋をわたりました（${p.life}歳）`:`うちに来て <b>${mpDays(p)}</b> 日目`}</span>${gone?'':`<span class="mp-age">${a}歳・${st[0]}${mpHuman(p)!=null?`（人なら約${mpHuman(p)}歳）`:''}</span>`}<span class="mp-love">💗 愛情 ${p.love||0}</span></div></div>
+    <button type="button" class="linkish" data-mp="open">${esc(p.name)}のページをひらく</button>`; }
+function mpAnniv(p){ const d=mpDays(p); const m={7:'うちに来て1週間！',30:'うちに来て30日！',100:'うちに来て100日の記念日！',365:'うちに来て1年！'}[d]; if(m) return `🎉 ${m} ${p.name}と、これからもいっしょに。`; const a=Math.floor(mpAge(p)); if(a>=1&&p.lastBd!==a&&!mpGone(p)){ p.lastBd=a; p.anMsg={ d:dayKey(), t:`🎂 ${p.name}が${a}歳になりました！ おめでとう。` }; mpSet(p); } return p.anMsg&&p.anMsg.d===dayKey()?p.anMsg.t:''; }
+function mpOpen(view){ let d=document.getElementById('mpDlg'); if(!d){ d=document.createElement('div'); d.id='mpDlg'; d.className='mp-ov'; document.body.appendChild(d); }
+  d.hidden=false; d.innerHTML=`<div class="mp-box" role="dialog" aria-modal="true" aria-label="うちのペット">${view==='new'||!mpGet()?mpNewHTML():mpPageHTML()}</div>`; d.onclick=e=>{ if(e.target===d) mpClose(); }; }
+function mpClose(){ const d=document.getElementById('mpDlg'); if(d) d.hidden=true; try{ render(); }catch(_){} }
+let _mpPick={ kind:'dog', breed:null };
+function mpNewHTML(){ const k=_mpPick.kind, list=mpBreeds(k); if(!_mpPick.breed||!list.some(x=>x.id===_mpPick.breed)) _mpPick.breed=list[0]&&list[0].id;
+  const nm=(PET_SPECIES.find(s=>s.id===k)||{names:['ポチ']}).names;
+  return `<h3 class="mp-h">🐾 ペットをお迎えする</h3><p class="tiny muted">1. どの動物にしますか？</p><div class="mp-kinds">${MP_KIND.map(x=>`<button type="button" class="mp-k${x[0]===k?' on':''}" data-mpk="${x[0]}">${x[2]} ${x[1]}</button>`).join('')}</div>
+  <p class="tiny muted">2. 種類を選んでください（本当にいる種類です）</p><select id="mpBreed" class="mp-sel">${list.map(x=>`<option value="${x.id}"${x.id===_mpPick.breed?' selected':''}>${esc(x.name)}</option>`).join('')}</select>
+  <div class="mp-prev" id="mpPrev">${petPortraitSVG(_mpPick.breed,'')}</div>
+  <p class="tiny muted">3. 名前をつけてください</p><input id="mpName" class="mp-in" maxlength="12" placeholder="${esc(nm[0])}" value="">
+  <div class="mp-row"><button type="button" class="mp-btn" data-mp="adopt">家族に迎える</button><button type="button" class="linkish" data-mp="close">やめる</button></div>`; }
+function mpPageHTML(){ const p=mpGet(); const gone=mpGone(p), st=mpStage(p), b=PB_ALL[p.breed]||{}, a=Math.min(mpAge(p),p.life), done=mpToday(p);
+  const days=[]; const t=new Date(); for(let i=13;i>=0;i--){ const x=new Date(t); x.setDate(t.getDate()-i); days.push(x); } const S=new Set(Object.keys(p.acts||{}));
+  const W='日月火水木金土'; const ph=(p.photos||[]).slice().reverse();
+  return `<div class="mp-top">${mpArt(p,st[1])}<div><h3 class="mp-h">${esc(p.name)}</h3><p class="mp-sub">${esc(b.name||'')}</p>
+    <p class="mp-big">${gone?`🌈 ${esc(p.name)}は、${p.life}歳で虹の橋をわたりました。`:`うちに来て <b>${mpDays(p)}</b> 日目`}</p>
+    ${gone?'':`<p class="mp-sub">${Math.floor(a)}歳${Math.floor((a%1)*12)}か月・${st[0]}${mpHuman(p)!=null?`（人の年齢なら約${mpHuman(p)}歳）`:''}</p>`}<p class="mp-sub">💗 愛情 ${p.love||0}　📷 写真 ${(p.photos||[]).length}枚</p></div></div>
+  ${gone?`<p class="tiny">${esc(p.name)}と過ごした${mpDays(p)}日間の写真は、ずっとここに残ります。</p>`:`<div class="mp-acts">${Object.keys(MP_ACT).map(k=>`<button type="button" class="mp-a${done.includes(k)?' done':''}" data-mpa="${k}">${MP_ACT[k][1]} ${k==='play'&&p.kind==='dog'?'さんぽ・あそぶ':MP_ACT[k][0]}${done.includes(k)?' ✓':''}</button>`).join('')}<button type="button" class="mp-a mp-cam" data-mp="photo">📷 写真をとる</button></div>
+  ${(an=>an?`<p class="mp-anniv">${esc(an)}</p>`:'')(mpAnniv(p))}<p class="mp-msg" id="mpMsg" role="status">${esc(p.msg||'きょうも、見守ってあげてね。')}</p>`}
+  <p class="tiny muted">見守った日</p><div class="stp-row">${days.map(x=>{ const on=S.has(dayKey(x)); return `<span class="stp ${on?'on':''} ${dayKey(x)===dayKey()?'today':''}"><small>${W[x.getDay()]}</small>${on?'<i aria-hidden="true"></i>':x.getDate()}</span>`; }).join('')}</div>
+  <h4 class="mp-h4">📷 ${esc(p.name)}のアルバム</h4>${ph.length?`<div class="mp-album">${ph.map(x=>`<figure class="mp-ph">${mpArt(p,x.k)}<figcaption>${esc(x.c)}</figcaption></figure>`).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。「写真をとる」を押すと、いまの姿がアルバムに残ります。</p>'}
+  <div class="mp-row">${gone?`<button type="button" class="mp-btn" data-mp="again">新しい家族を迎える</button>`:''}<button type="button" class="linkish" data-mp="close">もどる</button></div>
+  <p class="mp-src">寿命の目安：犬の平均は約14.6歳、猫は約15.8歳（日本ペットフード協会 2023年）。この中では、約2.5日で1歳、年をとります。</p>`; }
+function mpAdopt(){ const k=_mpPick.kind, br=(document.getElementById('mpBreed')||{}).value||_mpPick.breed; const inp=document.getElementById('mpName'); let nm=(inp&&inp.value||'').trim().slice(0,12)||(inp&&inp.placeholder)||'ポチ';
+  const kk=(PB_ALL[br]||{}).k||1; const L=k==='dog'?(kk>=1.25?[10,13]:kk<=.8?[13,17]:[12,15]):(MP_LIFE[k]||[10,14]); const life=L[0]+Math.floor(Math.random()*(L[1]-L[0]+1));
+  let chS=null, chA=null; try{ if(typeof st!=='undefined'&&st&&cur&&!viewing){ const c=clock(); if(!c.dead){ chS=st.seed; chA=c.ageF||c.age; } } }catch(e){}
+  mpSet({ kind:k, breed:br, name:nm, at:Date.now(), life, chS, chA, love:0, acts:{}, photos:[], msg:`${nm}が、家族になりました！ これから、よろしくね。` }); try{ if(typeof load==='function'&&typeof st!=='undefined'&&st) load(); }catch(_){} mpOpen(); }
+function mpAct(k){ const p=mpGet(); if(!p||mpGone(p)) return; const d=dayKey(); p.acts=p.acts||{}; const a=p.acts[d]||[]; if(a.includes(k)){ p.msg=`きょうの「${MP_ACT[k][0]}」は、もうしました。また明日ね。`; }
+  else { a.push(k); p.acts[d]=a; p.love=(p.love||0)+1; const L=MP_ACT[k][2]; p.msg=L[Math.floor(Math.random()*L.length)].replace(/\{p\}/g,p.name)+' 💗+1'; }
+  const ks=Object.keys(p.acts).sort(); if(ks.length>400) ks.slice(0,ks.length-400).forEach(x=>delete p.acts[x]); mpSet(p); mpOpen(); }
+function mpPhoto(){ const p=mpGet(); if(!p||mpGone(p)) return; const st=mpStage(p), a=mpAge(p), t=new Date();
+  p.photos=p.photos||[]; p.photos.push({ t:Date.now(), k:st[1], c:`${t.getFullYear()}年${t.getMonth()+1}月${t.getDate()}日・うちに来て${mpDays(p)}日目・${Math.floor(a)}歳（${st[0]}）` }); if(p.photos.length>60) p.photos=p.photos.slice(-60);
+  p.msg=`パシャ！ ${p.name}の写真を、アルバムに残しました。`; mpSet(p); mpOpen(); }
+function mpAgain(){ const p=mpGet(); if(p){ try{ const a=JSON.parse(localStorage.getItem(MP_PAST)||'[]'); a.push(p); localStorage.setItem(MP_PAST,JSON.stringify(a.slice(-10))); }catch(e){} } try{ localStorage.removeItem(MP_KEY); }catch(e){} mpOpen('new'); }
+document.addEventListener('click',e=>{ const t=e.target.closest&&e.target.closest('[data-mp],[data-mpa],[data-mpk]'); if(!t) return;
+  if(t.dataset.mpk){ _mpPick.kind=t.dataset.mpk; _mpPick.breed=null; mpOpen('new'); return; } if(t.dataset.mpa){ mpAct(t.dataset.mpa); return; }
+  const v=t.dataset.mp; if(v==='new') mpOpen('new'); else if(v==='open') mpOpen(); else if(v==='close') mpClose(); else if(v==='adopt') mpAdopt(); else if(v==='photo') mpPhoto(); else if(v==='again') mpAgain(); });
+document.addEventListener('change',e=>{ if(e.target&&e.target.id==='mpBreed'){ _mpPick.breed=e.target.value; const pv=document.getElementById('mpPrev'); if(pv) pv.innerHTML=petPortraitSVG(_mpPick.breed,''); } });
+document.addEventListener('keydown',e=>{ const d=document.getElementById('mpDlg'); if(e.key==='Escape'&&d&&!d.hidden) mpClose(); if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('mp-card')) mpOpen(); });
+document.head.insertAdjacentHTML('beforeend',`<style>
+.mp-btn{ font:inherit; font-weight:700; font-size:14px; padding:9px 18px; border-radius:999px; border:2px solid #E86A88; background:#FF8FAA; color:#fff; box-shadow:0 3px 0 #D85878; cursor:pointer; }
+.mp-card{ display:flex; gap:12px; align-items:center; cursor:pointer; } .mp-card .pet-art{ width:140px; height:auto; flex:none; }
+.mp-info{ display:flex; flex-direction:column; gap:2px; font-size:13px; } .mp-info b{ font-size:17px; } .mp-info small{ color:var(--muted); }
+.mp-day{ font-size:14px; color:#C2476B; } .mp-day b{ font-size:20px; } .mp-age{ color:#6A5A64; } .mp-love{ color:#C2476B; font-weight:700; }
+.mp-ov{ position:fixed; inset:0; z-index:60; background:rgba(40,25,35,.45); display:flex; align-items:flex-start; justify-content:center; overflow-y:auto; padding:24px 12px; } .mp-ov[hidden]{ display:none; }
+.mp-box{ background:#FFFBFC; color:#3A2E38; --ink:#3A2E38; --muted:#7A6B75; width:min(560px,100%); border-radius:20px; padding:18px; box-shadow:0 10px 40px rgba(0,0,0,.25); }
+.mp-h{ margin:0 0 6px; font-size:19px; color:#C2476B; } .mp-h4{ margin:16px 0 6px; font-size:15px; color:#C2476B; } .mp-sub{ margin:2px 0; font-size:13px; color:#7A6B75; } .mp-big{ margin:6px 0 2px; font-size:16px; } .mp-big b{ font-size:26px; color:#C2476B; }
+.mp-top{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; } .mp-top .pet-art{ width:190px; height:auto; }
+.mp-kinds{ display:flex; flex-wrap:wrap; gap:6px; } .mp-k{ font:inherit; font-size:14px; padding:7px 12px; border-radius:999px; border:2px solid #F4B6C8; background:#fff; color:#3A2E38; cursor:pointer; } .mp-k.on{ background:#FFE3EC; border-color:#E86A88; font-weight:700; }
+.mp-sel,.mp-in{ font:inherit; font-size:15px; width:100%; padding:9px 10px; border-radius:12px; border:2px solid #F4B6C8; background:#fff; color:#3A2E38; box-sizing:border-box; }
+.mp-prev{ margin:8px 0; } .mp-prev .pet-art{ width:180px; height:auto; }
+.mp-row{ display:flex; gap:12px; align-items:center; margin-top:14px; flex-wrap:wrap; }
+.mp-acts{ display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 4px; } .mp-a{ font:inherit; font-size:14px; font-weight:700; padding:8px 14px; border-radius:999px; border:2px solid #E86A88; background:#fff; color:#C2476B; cursor:pointer; } .mp-a.done{ background:#FFE3EC; } .mp-cam{ background:#FF8FAA; color:#fff; }
+.mp-anniv{ margin:8px 0 0; padding:8px 12px; border-radius:12px; background:#FFF3D6; color:#8A5A10; font-weight:700; font-size:14px; } .mp-msg{ min-height:1.6em; font-size:14px; margin:6px 0 10px; color:#3A2E38; }
+.mp-album{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; } .mp-ph{ margin:0; background:#fff; padding:6px 6px 8px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,.12); } .mp-ph .pet-art{ width:100%; height:auto; } .mp-ph figcaption{ font-size:11px; line-height:1.5; color:#6A5A64; margin-top:4px; }
+.mp-src{ font-size:10px; color:#8A7B85; margin:12px 0 0; }
+</style>`);
+
+// Channel の Life Record にも、うちのペットのことを書く（迎えた時の Channel の年から。表示だけ）
+function mpLifeApply(P,L){ const p=mpGet(); if(!p||!L||L._mp||p.chS==null||typeof st==='undefined'||!st||P.seed!==st.seed||p.chS!==st.seed) return; L._mp=1;
+  const a0=Math.floor(p.chA), end=Math.min(Math.floor(p.chA+p.life),P.deathAge), b=PB_ALL[p.breed]||{}; const H=k=>pbHash(String(p.at)+'|'+k);
+  const add=(age,ev)=>{ const y=L.years.find(y=>y.age===age); if(y) y.events.splice(H('pos'+age+ev.text.length)%(y.events.length+1),0,Object.assign({ feel:'', inner:null, d:2, season:H('s'+age)%4 },ev)); };
+  add(a0,{ kind:'pet', big:true, d:7, text:`Higher Self が見守る${b.name||''}の${p.name}が、家族になった。`, feel:`${p.name}が来てから、家の中が少しにぎやかになった。` });
+  const sp=p.kind; const pool=(PET_DAY[sp]||[]).concat(PET_DAY.any);
+  for(let age=a0+1;age<end;age++){ const k=age-p.chA; const e=pool[H('e'+age)%pool.length]; const f=x=>(x||'').replace(/\{p\}/g,p.name).replace(/\{名\}/g,P.given||'');
+    add(age,{ kind:'pet', text:f(e[0]), feel:f(e[1]), d:e[2], inner:e[3]?f(e[3]):null });
+    const g=(typeof PX_GROW!=='undefined'&&PX_GROW[sp]||[]).find(x=>Math.floor(k)===x[0]); if(g) add(age,{ kind:'pet', text:f(g[1]) }); }
+  if(p.chA+p.life<P.deathAge) add(Math.floor(p.chA+p.life),{ kind:'pet', big:true, d:-11, text:`${p.name}が、${p.life}年の命を終えた。`, feel:`${p.name}と過ごした日々は、家族みんなの宝物になった。` }); }
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
