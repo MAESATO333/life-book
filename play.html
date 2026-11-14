@@ -14619,7 +14619,7 @@ function moveConfirmHTML(o,diff){ const P=o.cur?(()=>{ try{ return makeBirth(o.c
   ${diff?`<p class="tiny frd-note">この端末でいま見守っている${esc(diff)}の人生は、引き継ぐ人生に置きかわります。</p>`:''}
   <div class="frd-btns"><button class="frd-b frd-sky" id="mvYes" type="button" style="grid-column:1/-1;font-size:16px;padding:14px">引き継ぐ</button><button class="frd-b" id="mvNo" type="button" style="grid-column:1/-1">やめる</button></div></div>`; }
 // 「ほかの端末で続ける」は外した（2026-11-14）。いま受け取るのは、iPhone などでホーム画面のアイコンを作るときの引き継ぎ（#pmove=）だけ。古い #move= のリンクは、何もせずに消す
-async function moveFromHash(){ const h=location.hash||''; if(!/move=/.test(h)) return; if(!/pmove=/.test(h)){ history.replaceState(null,'',location.pathname+location.search); return; } const t=h.split('pmove=')[1]||''; history.replaceState(null,'',location.pathname+location.search);
+async function moveFromHash(){ const h=location.hash||''; if(!/move=/.test(h)) return; history.replaceState(null,'',location.pathname+location.search); return; /* 引き継ぎはすべて外した（2026-11-14） */ const t=h.split('pmove=')[1]||''; history.replaceState(null,'',location.pathname+location.search);
   let o=null; try{ o=JSON.parse(await moveUnzip(t)); }catch(e){}
   if(!o||o.v!==1){ return; }
   if(o.id&&o.id===store.get(KEY_MYID,'')) return; // 同じ人のデータ（ホーム画面のアイコンから開くたびに付いてくる分など）は、何もしない
@@ -15778,12 +15778,12 @@ function pwaNoteHTML(pos){ if(typeof IN_APP!=='undefined'&&IN_APP) return ''; co
     <p class="pwa-nl">検索から入ると、別の人として始まってしまうことがあります。一度だけ、下のやり方で LIFE BOOK のアイコンを作ってください。そのあとは、<b>そのアイコンから入れば、毎回同じ自分</b>です。</p>
     ${_pwaDone?'<p class="pwa-ok">アイコンを作りました。これからは、アイコンから開いてください。</p>':_pwaPrompt?'<button class="pwa-go" type="button" id="pwaGo">アイコンを作る</button>':''}
     <ul class="pwa-rows">${rows.map(([k,n,t])=>`<li${k===PWA_DEV?' class="is-me"':''}><b class="pwa-dn">${n}${k===PWA_DEV?'<span class="pwa-you">いまの端末</span>':''}</b><span>${t}</span></li>`).join('')}</ul>
-    ${carry?'<p class="pwa-cy">いま見守っている人生も、アイコンのほうへ引き継がれます。アイコンから初めて開いたら「引き継ぐ」を押してください。</p>':''}`;
+    ${carry?'<p class="pwa-cy">iPhone では、アイコンから初めて開くと、新しい人生から始まります。そのあとは、アイコンから入れば毎回同じ人生です。</p>':''}`;
   if(pos==='bottom') return `<details class="pwa-note pwa-bottom" aria-label="いつも同じ自分で入る方法"><summary class="pwa-nh">※ いつも同じ自分で入るために（設定ずみ）</summary>${inner}</details>`;
   return `<aside class="pwa-note" aria-label="いつも同じ自分で入る方法"><p class="pwa-nh">※ いつも同じ自分で入るために</p>${inner}</aside>`; }
 function pwaShareSVG(){ return `<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 8H5v9h10V8h-1.5"/><path d="M10 12V2.5M6.8 5.5 10 2.5l3.2 3"/></svg>`; }
 let _pwaHashAt=0;
-async function pwaCarryLife(){ // iPhone：追加するときのアドレスに、今の人生を付けておく（同じ Safari では何も起きない）
+async function pwaCarryLife(){ return; /* 2026-11-14 MITSUさんの指示で、ホーム画面アイコンへの引き継ぎも外した */ // iPhone：追加するときのアドレスに、今の人生を付けておく（同じ Safari では何も起きない）
   if(!(PWA_IOS||PWA_MACSAFARI)||PWA_STANDALONE||typeof moveData!=='function'||typeof st==='undefined'||!st) return;
   if(Date.now()-_pwaHashAt<60000&&/#pmove=/.test(location.hash)) return;
   try{ const z=await moveZip(JSON.stringify(moveData())); history.replaceState(null,'',location.pathname+location.search+'#pmove='+z); _pwaHashAt=Date.now(); }catch(e){} }
