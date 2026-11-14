@@ -252,7 +252,10 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .shelf{ display:flex; align-items:flex-end; gap:3px; flex-wrap:wrap; padding:14px 8px 0; margin-top:10px; border-bottom:10px solid #6B4F36; box-shadow:0 6px 0 -2px #4A3524; min-height:120px; }
 .spine{ writing-mode:vertical-rl; display:flex; flex-direction:column; justify-content:space-between; align-items:center; padding:12px 0; border:0; cursor:pointer; color:#F4EFE6; font-family:var(--serif); background:linear-gradient(90deg,var(--sp) 0 12%,var(--sp2) 12% 82%,var(--sp) 82%); border-radius:2px 2px 0 0; box-shadow:inset 0 0 0 1px rgba(0,0,0,.15); transition:transform .15s; }
 .spine:hover,.spine:focus-visible{ transform:translateY(-6px); }
-.sp-t{ font-size:13px; letter-spacing:.12em; max-height:70%; overflow:hidden; }
+.sp-t{ font-size:13px; letter-spacing:.12em; max-height:52%; overflow:hidden; }
+.sp-b{ font-family:var(--sans); font-size:8px; letter-spacing:.02em; opacity:.9; white-space:nowrap; }
+.rp-title{ text-align:center; font-size:clamp(22px,6vw,30px); margin:6px 0 18px; line-height:1.3; color:#E8667E; }
+.rp-brand{ color:#9B7FD9; letter-spacing:.04em; }
 .sp-y{ font-family:var(--sans); font-size:9px; opacity:.85; letter-spacing:.04em; }
 
 /* あとがき・帯・製本 */
@@ -14417,7 +14420,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
   const egsNow=(()=>{ for(let i=ys.length-1;i>=0;i--) if(ys[i].egs) return ys[i].egs; return 0; })();
   let status='', go='人生のページを読む';
   if(st.stage==='funeral'){ status='人生は幕を閉じました。葬儀が待っています。'; go='葬儀へ'; }
-  else if(st.stage==='report'){ status='人生をふり返る時間です。'; go='振り返りを読む'; }
+  else if(st.stage==='report'){ status='人生をふり返る時間です。'; go='LIFE BOOK前世レポートを読む'; }
   else if(c.dead){ status='この人生は、幕を閉じました。'; go='最後のページを読む'; }
   else if(c.pending){ status=`${P.given}は、いま迷っています。インスピレーションを贈れます。`; go='迷っている場面をひらく'; }
   else { const sn=storyNow(P,c.ageF); status=`物語の中は、いま${sn.y}年${sn.m}月。${age+1}歳の誕生日まで あと${dur(c.nextIn)}`; }
@@ -14460,7 +14463,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-belief','心に生まれた観念', bel.length?`<ul class="hm-list">${bel.map(b=>`<li><span class="hm-a">${b.age}歳</span>「${esc(b.core||b.text||'')}」</li>`).join('')}</ul>`:'<p class="tiny muted">まだ、心に残る思い込みは生まれていません。</p>', arc.length?`<button class="linkish" type="button" id="hmKmap">本棚の人生とくらべる（観念の地図）</button>`:'')}
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
     ${homeTile('hm-friends',`紹介でつながった人<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの主人公が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
-    ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は、一冊の本になってここに並びます。</p>')}
+    ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は「思い出のLIFE BOOK」になって、ここに並びます。</p>')}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
     ${typeof birthMapHTML==='function'?homeTile('hm-map','生まれた場所',birthMapHTML(P)):''}
     ${typeof eaTileHTML==='function'?homeTile('hm-ea','地球アルバム',eaTileHTML(P)):''}
@@ -14641,7 +14644,7 @@ function render1(){
   if(!st){ app.innerHTML=introHTML(); bindIntro(); $('#mastmeta').textContent=''; renderDev(); return; }
   if(!viewing&&page==='top'){ app.innerHTML=introHTML(); bindIntro(); introLock(); $('#mastmeta').textContent=''; renderDev(); return; }
   if(st.stage==='funeral'){ app.innerHTML=funeralHTML(cur.P,cur.L); bindFuneral(); $('#mastmeta').textContent='葬儀'; renderDev(); return; }
-  if(st.stage==='report'){ app.innerHTML=reportHTML(cur.P,cur.L,false); bindReport(cur.P,cur.L); $('#mastmeta').textContent='振り返り'; renderDev(); return; }
+  if(st.stage==='report'){ app.innerHTML=reportHTML(cur.P,cur.L,false); bindReport(cur.P,cur.L); $('#mastmeta').textContent='LIFE BOOK前世レポート'; renderDev(); return; }
   app.innerHTML=lifeHTML(); bindLife(); renderDev();
 }
 
@@ -14656,10 +14659,10 @@ function introHTML(){
       <p class="ih-fr">友だちを誘うと、ふたりの主人公が人生のどこかで出会います。<button class="fr-open" type="button">友だちに紹介する</button></p>
     </div><div class="hero">${bkHeroSVG()}</div></div>
     <div class="body"><p>国も、家族も、家の暮らし向きも、生まれた日時も、名前も、すべて世界の統計に沿って偶然に決まります。その人は、自分で考え、自分で選んで生きていきます。あなたにできるのは、迷っているその人に、一生で2〜3回だけ「インスピレーション」を贈ること。届くかどうかは、その時のその人の心しだいです。</p>
-    <p style="margin-top:10px">人生は、現実の約2日半で1歳ずつ進みます（80歳まで生きる人生なら、約6か月半）。ひらくたびに、前に見た時から今までに起きた出来事と、その時の気持ちが読めます。人生が終わると、葬儀のあとに、その人生を読み解く振り返りが届きます。生き終えた人生は、章立てのある一冊の本になって、あなたの本棚に並びます。</p></div>
+    <p style="margin-top:10px">人生は、現実の約2日半で1歳ずつ進みます（80歳まで生きる人生なら、約6か月半）。ひらくたびに、前に見た時から今までに起きた出来事と、その時の気持ちが読めます。人生が終わると、葬儀のあとに、その人生を読み解く「LIFE BOOK前世レポート」が届きます。生き終えた人生は、章立てのある一冊の本になって、あなたの本棚に並びます。</p></div>
     <div class="cta2"><button class="born-btn" id="bornBtn2" type="button"><svg class="born-heart" viewBox="0 0 28 24" shape-rendering="crispEdges" aria-hidden="true">${typeof frHeart==='function'?frHeart(0,0,4,'#FFFFFF'):''}</svg><span class="born-txt">生まれる</span><span class="born-sub">あたらしい いのちが、はじまります</span></button></div>
     <p class="tiny muted">世界189か国の中から、その年の出生数の比率に沿って生まれる国が決まります。</p>
-    ${arc.length?`<div class="shelf-wrap"><h3>わたしの本棚</h3><p class="tiny muted">生き終えた人生が、一冊ずつ並びます。背表紙を押すと、その人生の振り返りが読めます。</p><div class="shelf">${arc.map((a,i)=>spineHTML(a,i)).join('')}</div><div class="reels"><span class="tiny muted">思い出の動画</span>${arc.map((a,i)=>`<button type="button" class="reel" data-mov="${i}" aria-label="${esc(a.name)}の思い出の動画を再生"><span class="reel-ic" aria-hidden="true"></span><span>${esc(a.name)}</span></button>`).join('')}</div><div class="obi-btns"><button class="btn ghost small" id="kmapBtn" type="button">観念の地図をひらく</button></div><div id="kmapOut"></div></div>`:''}
+    ${arc.length?`<div class="shelf-wrap"><h3>わたしの本棚</h3><p class="tiny muted">生き終えた人生が「思い出のLIFE BOOK」になって、一冊ずつ並びます。背表紙を押すと、その人生の LIFE BOOK前世レポートが読めます。</p><div class="shelf">${arc.map((a,i)=>spineHTML(a,i)).join('')}</div><div class="reels"><span class="tiny muted">思い出の動画</span>${arc.map((a,i)=>`<button type="button" class="reel" data-mov="${i}" aria-label="${esc(a.name)}の思い出の動画を再生"><span class="reel-ic" aria-hidden="true"></span><span>${esc(a.name)}</span></button>`).join('')}</div><div class="obi-btns"><button class="btn ghost small" id="kmapBtn" type="button">観念の地図をひらく</button></div><div id="kmapOut"></div></div>`:''}
     ${loanShelfHTML()}
     ${friendHTML()}
   </section>`;
@@ -14671,7 +14674,7 @@ function spineHTML(a,i){
   let el='風', yr='';
   try{ const P=makeBirth(a.seed,{country:a.country||null,force:a.force||null}); el=fortuneOf(P.year,P.month,P.day,P.hour,P.minute,P.gender).sunEl; yr=`${P.year}–${deathYearOf(P,{deathAge:a.age})}`; }catch(e){}
   const c=SPINE_COL[el]||SPINE_COL['風']; const h=Math.round(150+Math.min(100,a.age)*.9); const w=34+((a.seed>>>3)%14);
-  return `<button type="button" class="spine" data-arc="${i}" style="--sp:${c[0]};--sp2:${c[1]};height:${h}px;width:${w}px" aria-label="${esc(a.name)}の人生を読む"><span class="sp-t">${esc(a.name)}</span><span class="sp-y">${esc(a.nation)}　${yr}</span></button>`;
+  return `<button type="button" class="spine" data-arc="${i}" style="--sp:${c[0]};--sp2:${c[1]};height:${h}px;width:${w}px" aria-label="思い出のLIFE BOOK　${esc(a.name)}の人生を読む"><span class="sp-b">思い出のLIFE BOOK</span><span class="sp-t">${esc(a.name)}</span><span class="sp-y">${esc(a.nation)}　${yr}</span></button>`;
 }
 
 // --- 観念の地図：本棚の人生に、何度も現れた観念 ---
@@ -14904,7 +14907,7 @@ function funeralHTML(P,L){
     ${(X.far.length||X.stranger||F.absent.length)?sec('届いた便りと、来なかった人',`<div class="prose">${ps(X.far.map(f=>f.text))}${X.stranger?`<p>${esc(X.stranger)}</p>`:''}${F.absent.length?`<p>${F.absent.map(a=>`${esc(a.label)}の${esc(a.name)}`).join('、')}は、来なかった。</p>`:''}</div>`):''}
     ${sec('そのあと',`<div class="prose">${ps(X.after)}</div>`)}
     <section class="fn-high"><h2 class="fn-h">高いところから</h2><p class="tiny muted">${esc(P.given)}は、自分の葬儀を見ていた。</p><div class="high-body">${X.high.map(t=>`<p>${esc(t)}</p>`).join('')}</div></section>
-    <div class="end"><button class="btn" id="toReport" type="button">振り返りを読む</button></div>
+    <div class="end"><button class="btn" id="toReport" type="button">LIFE BOOK前世レポートを読む</button></div>
   </section>`;
 }
 function bindFuneral(){ $('#toReport').onclick=()=>{ st.stage='report'; save(); render(); window.scrollTo(0,0); }; }
@@ -15082,6 +15085,7 @@ function reportHTML(P,L,isPast){
   const endSec=isPast?`<div class="end"><button class="btn ghost" id="backIntro" type="button">はじめの画面へ</button></div>`
     :`<div class="end"><p style="font-family:var(--serif)">${name}の人生は、これで本当に終わりです。</p><button class="born-btn" id="reborn" type="button"><svg class="born-heart" viewBox="0 0 28 24" shape-rendering="crispEdges" aria-hidden="true">${typeof frHeart==='function'?frHeart(0,0,4,'#FFFFFF'):''}</svg><span class="born-txt">次の人生に生まれる</span></button><p class="tiny muted">これまでの人生から受け継ぐものは、第2段階で加わります。</p></div>`;
   return `<section class="report fade">
+    <h1 class="rp-title"><span class="rp-brand">LIFE BOOK</span>前世レポート</h1>
     <div class="odds"><p class="pre">${esc(P.full)}　${P.year}年〜${deathYearOf(P,L)}年　${esc(P.country.name)}</p><p class="pre">この人生が生まれる確率は</p><p class="num">約${odds}<span>分の1</span></p><p class="tiny muted">国、家庭、生まれた日時、名前、寿命などが、この組み合わせになる確率です。</p></div>
     ${ch1}${traitSecHTML(P,L)}${ch2}${ch3}${ch4}${typeof worldsHTML==='function'?worldsHTML(P,L):''}${ch5}${ch6}${ch7}${petSec}${egsSecHTML(P,L)}${albumHTML(P,L,L.deathAge,'思い出のアルバム')}${personsSec}${bookSecHTML(P,L)}${refSecHTML()}${endSec}</section>`;
 }
@@ -15125,7 +15129,7 @@ function coverCanvas(P,L,line,art){
 function bookHTML(P,L){
   const chs=lifeChapters(L.years); const ans=store.get(KEY_ANS+P.seed,{});
   return `<article class="bookview">
-    <div class="bv-noprint"><button class="btn ghost small" id="bookBack" type="button">振り返りに戻る</button> <button class="btn small" id="bookPrint" type="button">印刷・PDFで保存</button>
+    <div class="bv-noprint"><button class="btn ghost small" id="bookBack" type="button">前世レポートに戻る</button> <button class="btn small" id="bookPrint" type="button">印刷・PDFで保存</button>
       <p class="tiny muted">うまく印刷できない時は、ブラウザのメニューの「印刷」から、保存先に「PDF」を選んでください。</p></div>
     <section class="bv-title"><div class="bv-brand">LIFE BOOK</div><h1>${esc(P.full)}</h1><div class="bv-sub">の一生</div><div class="bv-meta">${P.year}–${deathYearOf(P,L)}　${esc(P.country.name)}・${esc(P.city)}</div></section>
     <section class="bv-toc"><h2>目次</h2>${chs.map(ch=>`<div class="bv-tr"><span>第${KANJI_NO(ch.no)}章　${esc(ch.title)}</span><span>${ch.from===ch.to?ch.from:ch.from+'〜'+ch.to}歳</span></div>`).join('')}<div class="bv-tr"><span>あとがき</span><span></span></div></section>
