@@ -17243,6 +17243,41 @@ if(typeof render==='function'){ const _pwaR=render; render=function(){ const r=_
 .pwa-paste .hm-btn{ border:2px solid #E86A88; background:#FF8FAA; color:#fff; box-shadow:0 4px 0 #D85878; font-weight:700; }
 .pwa-prow{ display:flex; gap:8px; margin-top:8px; }
 .pwa-prow input{ flex:1; min-width:0; font-size:16px; padding:10px 12px; border-radius:12px; border:2px solid #F4C6D4; }`; document.head.appendChild(c); })();
+// ===== 流れる島の中に、ペットだけの島もまぜる =====
+// ほかの島と同じく「名前 年齢歳」「国・町」を出す。国は流れる島と同じ国・町から選び、種類はその国でふつうに見かける種類だけ。
+const HMIP_NAMES={ jp:{ dog:['ポチ','モモ','コタロウ','ハナ','マロン','チョコ','リキ','コムギ','ココ','ソラ'], cat:['タマ','ミケ','キナコ','ミルク','トラ','シロ','クロ','ソラ','モチ','ニコ'], bird:['ピー','キイ','ルリ','チッチ','ハル'], rabbit:['ミミ','ユキ','モカ','ラテ'], fish:['キンちゃん','ヒレ丸','あかね'] },
+  w:{ dog:['マックス','ベラ','チャーリー','ルナ','ロッキー','デイジー','ココ','バディ','ローラ','オスカー','レオ','ミロ'], cat:['ルナ','ミア','オリバー','シンバ','ミロ','ネラ','ティガー','ロロ','ズーラ','ペッパー'], bird:['ピコ','キウィ','ソル','ブルー','ピピ'], rabbit:['ココ','スノウ','ハニー','ビスケット'], fish:['ゴールディ','ニモ','バブル'] } };
+const HMIP_KIND=[['dog',.46],['cat',.4],['bird',.06],['rabbit',.05],['fish',.03]];
+const HMIP_LIFE={ dog:15, cat:18, bird:10, rabbit:9, fish:8 };
+function hmipMake(rnd,group){ const L=HMI_L.filter(x=>!x.f); const x=L[Math.floor(rnd()*L.length)];
+  let t=rnd(), kind='dog'; for(const [k,w] of (group?[['dog',.4],['cat',.36],['rabbit',.14],['bird',.1]]:HMIP_KIND)){ if((t-=w)<=0){ kind=k; break; } }
+  const style=typeof archStyle==='function'?archStyle({ countryId:x.c }):(x.c==='jp'?'jp':'eu');
+  const pool=Object.values(PB_ALL).filter(b=>b.kind===kind&&!/_/.test(b.id)&&(()=>{ const h=b.home?b.home.split(' '):[]; return !h.length||h.includes(style); })());
+  const pickBr=()=>{ const ws=pool.map(b=>b.w*((b.home||'').split(' ').includes(style)?2:1)); let s=rnd()*ws.reduce((a,b)=>a+b,0), br=pool[0]; for(let i=0;i<pool.length;i++){ if((s-=ws[i])<=0){ br=pool[i]; break; } } return br; }; const br=pickBr();
+  if(group){ const n=4+Math.floor(rnd()*3); const brs=[]; for(let i=0;i<n;i++){ const q=pickBr(); brs.push(q&&q.id); } return { group:true, brs, kind, n:x.n, t:x.t, cnt:n }; }
+  const N=HMIP_NAMES[x.c==='jp'?'jp':'w'][kind]; const name=N[Math.floor(rnd()*N.length)]; const age=Math.floor(rnd()*HMIP_LIFE[kind]);
+  return { br:br&&br.id, name, age, n:x.n, t:x.t, kind }; }
+// ペットの島の絵（草の島＋木＋えさの皿。犬には小屋、金魚には池）
+function hmipSVG(o){ const b=PB_ALL[o.group?o.brs[0]:o.br]; if(!b) return ''; const S=bkScene(); const h=pbHash(o.br+o.name);
+  const grass=['#9ED77E','#A8DC86','#93CF74'][h%3];
+  S.box(-.9,-.6,-2.0,1.8,1.2,.5,'#8F6A48'); S.box(-1.35,-1.0,-1.5,2.7,2.0,.55,'#A8794E'); S.box(-1.7,-1.3,-.95,3.4,2.6,.6,'#B98A5A'); S.box(-1.7,-1.3,-.35,3.4,2.6,.35,grass);
+  S.begin(4);
+  // 木（奥）
+  S.box(-1.45,-1.1,0,.18,.18,.75,'#8A5A36'); S.box(-1.7,-1.35,.7,.7,.7,.45,'#6FBF5A'); S.box(-1.55,-1.2,1.1,.4,.4,.25,'#86D06E');
+  if(o.kind==='dog'&&!o.group){ S.box(.55,-1.15,0,.9,.75,.55,'#C9774A'); S.box(.5,-1.2,.55,1.0,.85,.18,'#8E3F2E'); S.box(.78,-.42,0,.42,.03,.38,'#4A2A1E'); }
+  else if(o.kind==='cat'&&!o.group){ S.box(.7,-1.1,0,.7,.7,.45,'#F2D6A2'); S.box(.75,-1.05,.45,.6,.6,.04,'#E4B8C8'); }
+  else if(o.kind==='fish'){ S.box(-.9,-.6,-.02,1.8,1.2,.05,'#7FC8EE'); }
+  // えさの皿
+  if(o.kind!=='fish'){ S.box(.95,.75,0,.32,.32,.1,'#E86A88'); S.box(1.0,.8,.1,.22,.22,.03,'#C98A4A'); }
+  // 花
+  [[-1.3,.9,'#FF8FAA'],[1.3,-.2,'#FFD84D'],[-.2,1.0,'#B9A6FF']].forEach(([fx,fy,c])=>{ S.box(fx,fy,0,.12,.12,.12,c); });
+  S.end();
+  if(o.group){ const pos=[[-1.25,-.35],[.15,-.55],[-.45,.55],[.75,.35],[-1.15,.75],[.55,-1.05]]; o.brs.slice(0,6).map((id,i)=>[id,pos[i]]).sort((u,v)=>(u[1][0]+u[1][1])-(v[1][0]+v[1][1])).forEach(([id,[px,py]])=>{ const q=PB_ALL[id]; if(!q) return; S.begin(5+px+py); pbDraw(S,px,py,q); S.end(); }); }
+  else { S.begin(5); pbDraw(S,b.kind==='fish'?-.4:-.45,-.25,b); S.end(); }
+  const c0=S.p(0,0,0); const sc=o.kind==='bird'?1.9:2.15;
+  return `<svg class="hmi-psvg" viewBox="0 0 320 220" role="img" aria-label="${esc(o.name)}（${esc(b.name)}）の島"><g transform="translate(160 118) scale(${sc}) translate(${(-c0[0]).toFixed(1)} ${(-c0[1]).toFixed(1)})">${S.render()}</g></svg>`; }
+
+const HMIP_GNAME={ dog:'犬たちの島', cat:'猫たちの島', rabbit:'うさぎたちの島', bird:'小鳥たちの島' };
 // ===== Life Home のいちばん上：いろんな国の人生の島が、横にゆっくり流れる列 =====
 // 紹介サイト（index.html）の「いろんな国の人生が、空に浮かんでいます」と同じ島。絵は play.html と同じ場所の lives/000.webp〜。
 // home.js が hmIslandHTML() で置き場所（.hmi-slot）を出し、ここで同じ列の要素をはめこむ。
@@ -17257,12 +17292,14 @@ function hmiBuild(){
   const mix=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
   const idx=[], fr=[]; HMI_L.forEach((x,i)=>(x.f?fr:idx).push(i)); mix(idx); mix(fr);
   let next=0, nf=0, nn=0;
-  const pick=()=>{ let k; if(fr.length&&next%3===1){ k=fr[nf%fr.length]; nf++; if(nf%fr.length===0) mix(fr); } else { k=idx[nn%idx.length]; nn++; } next++; return k; };
-  const fill=fig=>{ const k=pick(), x=HMI_L[k], img=fig.querySelector('img');
-    img.src='lives/'+('00'+k).slice(-3)+'.webp'; img.alt=x.n+'で暮らす'+x.g+'、'+x.a+'歳';
+  const pick=()=>{ let k; if(typeof hmipMake==='function'&&next%4===3){ next++; return -1; } if(fr.length&&next%3===1){ k=fr[nf%fr.length]; nf++; if(nf%fr.length===0) mix(fr); } else { k=idx[nn%idx.length]; nn++; } next++; return k; };
+  const fill=fig=>{ const k=pick(), img=fig.querySelector('img'), pv=fig.querySelector('.hmi-pet');
+    if(k<0){ try{ const o=hmipMake(Math.random,Math.random()<.4); pv.innerHTML=hmipSVG(o); pv.hidden=false; img.hidden=true; img.removeAttribute('src'); fig.querySelector('b').textContent=o.group?HMIP_GNAME[o.kind]+' '+o.cnt+'匹':o.name+' '+o.age+'歳'; fig.querySelector('span').textContent=o.n+(o.t?'・'+o.t:''); fig.classList.add('hmi-is-pet'); return; }catch(e){} }
+    if(pv){ pv.hidden=true; pv.innerHTML=''; } img.hidden=false; fig.classList.remove('hmi-is-pet'); const kk=k<0?0:k, x=HMI_L[kk];
+    img.src='lives/'+('00'+kk).slice(-3)+'.webp'; img.alt=x.n+'で暮らす'+x.g+'、'+x.a+'歳';
     fig.querySelector('b').textContent=x.g+' '+x.a+'歳'; fig.querySelector('span').textContent=x.n+(x.t?'・'+x.t:''); };
   const make=()=>{ const f=document.createElement('figure'); f.className='hmi-isle';
-    f.innerHTML='<img decoding="async" width="320" height="220" alt=""><figcaption><b></b><span></span></figcaption>';
+    f.innerHTML='<img decoding="async" width="320" height="220" alt=""><div class="hmi-pet" hidden></div><figcaption><b></b><span></span></figcaption>';
     f.querySelector('img').addEventListener('error',()=>{ wrap.classList.add('hmi-off'); }); fill(f); return f; };
   const need=Math.ceil((window.innerWidth||1200)/120)+3; for(let n=0;n<need;n++) track.appendChild(make());
   // 「動きを減らす」設定でも、ゆっくり流れ続ける（紹介サイトと同じ）
@@ -17293,6 +17330,7 @@ setTimeout(hmiPlace,0);
 .hmi-view{ overflow:hidden; }
 .hmi-track{ display:flex; width:max-content; will-change:transform; }
 .hmi-isle{ margin:0; flex:none; width:clamp(120px,30vw,190px); text-align:center; }
+.hmi-pet svg{ display:block; width:100%; height:auto; aspect-ratio:320/220; animation:hmiFloat 5s ease-in-out infinite; } .hmi-isle img[hidden],.hmi-pet[hidden]{ display:none; }
 .hmi-isle img{ display:block; width:100%; height:auto; aspect-ratio:320/220; animation:hmiFloat 5s ease-in-out infinite; }
 .hmi-isle:nth-child(3n+1) img{ animation-delay:-1.6s; } .hmi-isle:nth-child(3n+2) img{ animation-delay:-3.1s; }
 @keyframes hmiFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
