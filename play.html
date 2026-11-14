@@ -16541,7 +16541,7 @@ function mpPageHTML(){ const p=mpGet(); if(mpStageLog(p)) mpSet(p); if(p.per==nu
     <p class="mp-big">${gone?`🌈 ${esc(p.name)}は、${p.life}歳で虹の橋をわたりました。`:`うちに来て <b>${mpDays(p)}</b> 日目`}</p>
     ${gone?'':`<p class="mp-sub">${Math.floor(a)}歳${Math.floor((a%1)*12)}か月・${st[0]}${mpHuman(p)!=null?`（人の年齢なら約${mpHuman(p)}歳）`:''}</p>`}<p class="mp-sub">💗 愛情 ${p.love||0}　📷 写真 ${(p.photos||[]).length}枚</p></div></div>
   ${gone?`<div class="mp-rb"><p>🌈 ${esc(p.name)}は、${p.life}歳まで、たくさんの愛情に包まれて生きました。</p><p>いまは虹の橋のたもとで、元気に走りまわっています。いつかまた会える日まで、ゆっくり待っていてくれるそうです。</p><p>💗 もらった愛情 ${p.love||0}　📷 思い出の写真 ${(p.photos||[]).length}枚　🏠 いっしょにいた日 ${mpTogether(p)}日</p><p class="tiny">思い出のアルバムは、ずっとここに残ります。</p></div>`:`${(w=>w.all.length?`<p class="tiny muted">あなた（Higher Self）が、だれにお願いしますか？${w.all.some(x=>x.k==='ch')?'':'（Channel は、まだ小さくて動けません。3歳になったら、お世話できます）'}</p><div class="mp-who">${w.all.map(x=>`<button type="button" class="mp-w${x.k===w.k?' on':''}" data-mpw="${esc(x.k)}">${esc(x.call==='Channel'?x.n+'（Channel）':x.call+'の'+x.n)}</button>`).join('')}</div>`:'')(mpWho())}<div class="mp-acts">${Object.keys(MP_ACT).map(k=>`<button type="button" class="mp-a${done.includes(k)?' done':''}" data-mpa="${k}">${MP_ACT[k][1]} ${k==='play'&&p.kind==='dog'?'さんぽに行ってあげて':MP_ACT[k][0]}${done.includes(k)?' ✓':''}</button>`).join('')}<button type="button" class="mp-a mp-cam" data-mp="photo">📷 写真をとる</button></div>
-  ${mpFoodHTML(p)}${(an=>an?`<p class="mp-anniv">${esc(an)}</p>`:'')(mpAnniv(p))}${mpAnnivHTML(p)}${p.cry?`<span class="mp-cry">${esc(p.cry)}</span>`:''}<p class="mp-msg" id="mpMsg" role="status">${esc(p.msg||'きょうも、見守ってあげてね。')}</p><p class="tiny muted">${esc(p.name)}は、${esc(per.d)}。</p>${mpChatHTML(p)}`}
+  ${mpFoodHTML(p)}${(an=>an?`<p class="mp-anniv">${esc(an)}</p>`:'')(mpAnniv(p))}${mpAnnivHTML(p)}${typeof mpWcHTML==='function'?mpWcHTML(p):''}${p.cry?`<span class="mp-cry">${esc(p.cry)}</span>`:''}<p class="mp-msg" id="mpMsg" role="status">${esc(p.msg||'きょうも、見守ってあげてね。')}</p><p class="tiny muted">${esc(p.name)}は、${esc(per.d)}。</p>${mpChatHTML(p)}`}
   <p class="tiny muted">見守った日</p><div class="stp-row">${days.map(x=>{ const on=S.has(dayKey(x)); return `<span class="stp ${on?'on':''} ${dayKey(x)===dayKey()?'today':''}"><small>${W[x.getDay()]}</small>${on?'<i aria-hidden="true"></i>':x.getDate()}</span>`; }).join('')}</div>
   ${mpDiaryHTML(p)}<h4 class="mp-h4">📷 ${esc(p.name)}のアルバム</h4>${ph.length?`<div class="mp-album">${ph.map(x=>`<figure class="mp-ph">${mpArt(p,x.k)}<figcaption>${esc(x.c)}</figcaption></figure>`).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。「写真をとる」を押すと、いまの姿がアルバムに残ります。</p>'}
   <div class="mp-row">${gone?`<button type="button" class="mp-btn" data-mp="again">新しい家族を迎える</button>`:''}<button type="button" class="linkish" data-mp="close">もどる</button></div>
@@ -16813,6 +16813,22 @@ for(const k in MP_CRY_MORE) for(const m in MP_CRY_MORE[k]) MP_CRY[k][m]=(MP_CRY[
 // ===== 飼えるペットは1匹だけ。元気なあいだは、新しい子を迎えられない（虹の橋のあとだけ） =====
 { const O=mpOpen; mpOpen=function(view){ const p=mpGet(); if(view==='new'&&p&&!mpGone(p)) view=undefined; return O(view); };
   const Ad=mpAdopt; mpAdopt=function(){ const p=mpGet(); if(p&&!mpGone(p)){ mpOpen(); return; } return Ad(); }; }
+// ===== トイレ：ボタンはなし。ペットが自分ですませて、知らせてくれる（1日に数回まで。金魚はなし） =====
+const MP_WC={
+  dog:['{p}が、トイレシートで、ちゃんとトイレをすませたよ。','{p}が、トイレのあと「見て見て！」という顔で、こっちを見ている。','{p}が、さんぽの途中で、いつもの電柱の前でトイレをすませたよ。','{p}が、トイレをすませて、ごほうびを待っている。','{p}が、トイレのあと、うれしくて家の中を一周走った。','{p}が、トイレシートのまんなかに、ぴったりできた。'],
+  cat:['{p}が、猫砂のトイレで、ちゃんとトイレをすませたよ。','{p}が、トイレのあと、砂をていねいに、ていねいにかけている…まだかけている。','{p}が、トイレのあと、なぜか家じゅうを全力で走りまわった。（トイレハイ）','{p}が、トイレをすませて、すました顔で出てきた。','{p}が、トイレの砂を、少しだけ外に飛ばした。','{p}が、トイレのあと「きれいにしてね」という目でこっちを見た。'],
+  bird:['{p}が、止まり木の上で、トイレをすませたよ。','{p}が、トイレのあと、羽をぷるぷるっとふった。','{p}が、トイレをすませて、すっきりした顔で歌い出した。'],
+  rabbit:['{p}が、トイレの場所で、ちゃんとトイレをすませたよ。','{p}が、トイレのあと、牧草をもぐもぐ食べはじめた。','{p}が、トイレをおぼえて、いつも同じすみっこでできるようになった。'] };
+const MP_WC_TAIL={ sweet:['ほめて、ほめて！','えらいでしょ？'], genki:['すっきり！','さあ、遊ぼう！'], calm:['ふぅ…すっきり。'], proud:['当然のことだ。','見事であろう。'] };
+function mpWcCheck(p){ if(!p||mpGone(p)||p.kind==='fish') return false; const d=new Date(), slot=dayKey()+'|'+Math.floor(d.getHours()/6);
+  if(p.wcSlot===slot) return false; p.wcSlot=slot; if(pbHash(String(p.at)+slot)%10>=6) return false; // 6時間ごとに、だいたい6割
+  const L=MP_WC[p.kind]||MP_WC.dog; let t=L[Math.floor(Math.random()*L.length)].replace(/\{p\}/g,p.name); const n=(MP_PER50[p.per]||[''])[0];
+  const g=MP_CRY_SWEET.test(n)?'sweet':MP_CRY_GENKI.test(n)?'genki':/おっとり|のんき|ねぼすけ|マイペース|のんびり/.test(n)?'calm':/いばり|大物/.test(n)?'proud':null;
+  if(g) t+=' 「'+MP_WC_TAIL[g][Math.floor(Math.random()*MP_WC_TAIL[g].length)]+'」';
+  p.wcMsg={ t, at:Date.now(), cry:mpCry(p,'happy') }; return true; }
+{ const O2=mpOpen; mpOpen=function(view){ const p=mpGet(); if(p&&view!=='new'&&mpWcCheck(p)) mpSet(p); return O2(view); }; }
+function mpWcHTML(p){ const w=p&&p.wcMsg; if(!w||Date.now()-w.at>6*36e5) return ''; const x=new Date(w.at); return `<p class="mp-wc">🚽 <b>${esc(w.cry)}</b> ${esc(w.t)}<small>${x.getHours()}時${String(x.getMinutes()).padStart(2,'0')}分</small></p>`; }
+document.head.insertAdjacentHTML('beforeend',`<style>.mp-wc{ margin:8px 0 4px; padding:8px 12px; border-radius:12px; background:#EEF7FF; color:#2F4A66; font-size:13.5px; line-height:1.6; } .mp-wc b{ color:#C2476B; } .mp-wc small{ display:block; font-size:11px; color:#7A8BA0; }</style>`);
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
