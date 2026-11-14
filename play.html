@@ -12407,6 +12407,176 @@ function hintPool(){ const a=HINTS.slice(); try{ for(const k in BV_REF) a.push(.
 function hintNow(){ const pool=hintPool(); let last=[]; try{ last=JSON.parse(localStorage.getItem('hitotsu.hints')||'[]'); }catch(e){}
   const cand=pool.filter(t=>!last.includes(t)); const t=(cand.length?cand:pool)[Math.floor(Math.random()*(cand.length?cand.length:pool.length))];
   last.push(t); if(last.length>Math.min(150,pool.length-10)) last=last.slice(-Math.min(150,pool.length-10)); try{ localStorage.setItem('hitotsu.hints',JSON.stringify(last)); }catch(e){} return t; }
+// ===== 世界のいま：毎日20項目を、スクロールで読む =====
+// すべて事実だけ。数字は WSTAT（Gapminder／国連・世界銀行）、時刻と日の出・日の入りと月の形はブラウザで計算、
+// あいさつ・料理・動物・楽器・スポーツ・祝日は、よく知られた実在のものだけ。
+const WN_GREET={ us:['Hello','ハロー','Thank you','サンキュー','英語'], fr:['Bonjour','ボンジュール','Merci','メルシー','フランス語'], de:['Hallo','ハロー','Danke','ダンケ','ドイツ語'],
+ es:['Hola','オラ','Gracias','グラシアス','スペイン語'], mx:['Hola','オラ','Gracias','グラシアス','スペイン語'], it:['Ciao','チャオ','Grazie','グラツィエ','イタリア語'], br:['Olá','オラ','Obrigado','オブリガード','ポルトガル語'],
+ ru:['Здравствуйте','ズドラーストヴィチェ','Спасибо','スパシーバ','ロシア語'], cn:['你好','ニーハオ','谢谢','シェシェ','中国語'], kr:['안녕하세요','アンニョンハセヨ','감사합니다','カムサハムニダ','韓国語'],
+ th:['สวัสดี','サワディー','ขอบคุณ','コップン','タイ語'], vn:['Xin chào','シンチャオ','Cảm ơn','カムオン','ベトナム語'], id:['Selamat siang','スラマッ・シアン','Terima kasih','トゥリマカシ','インドネシア語'],
+ in:['नमस्ते','ナマステ','धन्यवाद','ダンニャワード','ヒンディー語'], tr:['Merhaba','メルハバ','Teşekkürler','テシェッキュルレル','トルコ語'], eg:['مرحبا','マルハバ','شكرا','シュクラン','アラビア語'],
+ ke:['Jambo','ジャンボ','Asante','アサンテ','スワヒリ語'], tz:['Jambo','ジャンボ','Asante','アサンテ','スワヒリ語'], ph:['Kumusta','クムスタ','Salamat','サラマット','フィリピノ語'],
+ nl:['Hallo','ハロー','Dank je','ダンク・ヤ','オランダ語'], se:['Hej','ヘイ','Tack','タック','スウェーデン語'], fi:['Hei','ヘイ','Kiitos','キートス','フィンランド語'],
+ gr:['Γειά σας','ヤーサス','Ευχαριστώ','エフハリストー','ギリシャ語'], il:['שלום','シャローム','תודה','トダ','ヘブライ語'], pl:['Dzień dobry','ジェン・ドブリ','Dziękuję','ジェンクイェ','ポーランド語'],
+ ua:['Привіт','プリヴィト','Дякую','ジャークユ','ウクライナ語'], np:['नमस्ते','ナマステ','धन्यवाद','ダンニャバード','ネパール語'], mn:['Сайн байна уу','サインバイノー','Баярлалаа','バヤルララー','モンゴル語'],
+ nz:['Kia ora','キア・オラ','Kia ora','キア・オラ','マオリ語（「こんにちは」にも「ありがとう」にも使う）'], pt:['Olá','オラ','Obrigado','オブリガード','ポルトガル語'] };
+const WN_FOOD={ jp:'すし・みそ汁', kr:'キムチ・ビビンバ', cn:'餃子', in:'カレー（ダール）とロティ', th:'トムヤムクン', vn:'フォー（米の麺のスープ）', id:'ナシゴレン（焼きめし）', my:'ナシレマ（ココナッツミルクで炊いたご飯）',
+ ph:'アドボ（酢としょうゆの煮込み）', tr:'ケバブ', eg:'コシャリ（米・豆・パスタのまぜごはん）', ma:'タジン（とんがり鍋の煮込み）', et:'インジェラ（酸味のある薄いパン）とワット（煮込み）', ng:'ジョロフライス（トマトで炊いたご飯）',
+ mx:'タコス', pe:'セビーチェ（魚介のマリネ）', br:'フェイジョアーダ（黒豆と肉の煮込み）', ar:'アサード（炭火の焼き肉）', us:'ハンバーガー', it:'ピザ・パスタ', fr:'バゲット・クロワッサン', es:'パエリア',
+ de:'ソーセージ（ヴルスト）', gb:'フィッシュ・アンド・チップス', ua:'ボルシチ', gr:'ムサカ', hu:'グヤーシュ（パプリカのスープ）', ca:'プーティン（ポテトにグレイビーとチーズ）', lb:'フムス（ひよこ豆のペースト）',
+ ke:'ウガリ（とうもろこし粉をねったもの）', gh:'フフ（いもをついたもの）', pl:'ピエロギ（ぎょうざに似た料理）', se:'ミートボール', ch:'チーズフォンデュ', pt:'バカリャウ（干しダラ）', mn:'ボーズ（蒸しぎょうざ）', np:'ダルバート（豆のスープとご飯）', pk:'ビリヤニ（炊きこみご飯）' };
+const WN_ANIMAL={ au:['カンガルー','国の紋章に描かれている'], nz:['キーウィ','飛べない鳥で、国のシンボル'], cn:['ジャイアントパンダ','中国の山地にだけすむ'], in:['ベンガルトラ','インドの国の動物'],
+ us:['ハクトウワシ','アメリカの国の鳥'], jp:['キジ','日本の国の鳥'], ca:['ビーバー','カナダの国のシンボル'], mg:['キツネザル','マダガスカルにだけすむサルのなかま'], za:['スプリングボック','南アフリカの国の動物'],
+ th:['ゾウ','タイの国の動物'], mx:['イヌワシ','国旗に描かれている'], pe:['ビクーニャ','国の紋章に描かれている'], ec:['ガラパゴスゾウガメ','ガラパゴス諸島にだけすむ大きなカメ'], ug:['ホオジロカンムリヅル','国旗に描かれている'],
+ pg:['ゴクラクチョウ','国旗に描かれている'], id:['コモドオオトカゲ','世界でいちばん大きなトカゲ'], my:['マレートラ','マレーシアの国の動物'], bt:['ターキン','ブータンの国の動物'], gt:['ケツァール','国の鳥で、お金の名前にもなっている'] };
+const WN_MUSIC={ jp:'三味線・琴', in:'シタール・タブラ', id:'ガムラン（たくさんの打楽器の合奏）', au:'ディジュリドゥ（先住民アボリジナルの木の笛）', ar:'バンドネオン（タンゴの楽器）', gb:'バグパイプ（スコットランド）',
+ tt:'スチールパン（ドラム缶から生まれた楽器）', ml:'コラ（ひょうたんで作った弦楽器）', pe:'ケーナ（アンデスの縦笛）', cn:'二胡（2本の弦の楽器）', kr:'カヤグム（12本の弦の琴）', mn:'馬頭琴（馬の頭の飾りがある弦楽器）',
+ ru:'バラライカ（三角形の弦楽器）', ua:'バンドゥーラ（たくさんの弦の楽器）', es:'フラメンコギター', br:'ビリンバウ（カポエイラで使う弓の形の楽器）', jm:'レゲエ（ジャマイカで生まれた音楽）', mx:'マリアッチ（楽団の音楽）',
+ tr:'サズ（長い棹の弦楽器）', ir:'サントゥール（ばちでたたく弦楽器）', ch:'アルプホルン（長い木のホルン）', pt:'ファド（哀愁のある歌）', gh:'トーキングドラム（音の高さを変えられる太鼓）' };
+const WN_SPORT={ jp:'相撲', kr:'テコンドー', in:'クリケット・カバディ', ca:'アイスホッケー・ラクロス', us:'野球・アメリカンフットボール', nz:'ラグビー', br:'サッカー', ar:'パト（馬に乗ってボールを運ぶ競技）', th:'ムエタイ',
+ bt:'弓術（アーチェリー）', lk:'バレーボール', cu:'野球', af:'ブズカシ（馬に乗って競う競技）', mn:'モンゴル相撲・競馬・弓（夏のナーダム祭り）', ke:'陸上の長距離走', et:'陸上の長距離走', cn:'卓球', fi:'ペサパッロ（フィンランド式の野球）', ie:'ハーリング（スティックでボールを打つ競技）' };
+// [月,日,国（null=世界の多くの国）,名前,ひとこと]
+const WN_HOL=[[1,1,null,'元日','新しい年のはじまり'],[1,26,'au','オーストラリアの日',''],[1,26,'in','共和国記念日','インドの憲法が始まった日'],[2,14,null,'バレンタインデー',''],
+ [3,17,'ie','聖パトリックの祝日','緑色のものを身につけて祝う'],[3,20,'ir','ノウルーズ（3月20日ごろ）','春分の日に始まる新しい年'],[4,13,'th','ソンクラーン（4月13〜15日）','タイの正月。水をかけあって祝う'],
+ [5,5,'jp','こどもの日',''],[6,24,'pe','インティ・ライミ','クスコで行われる、太陽の祭り'],[7,4,'us','独立記念日','花火で祝う'],[7,14,'fr','革命記念日','パリでパレードが行われる'],
+ [8,15,'in','独立記念日',''],[8,15,'kr','光復節',''],[9,7,'br','独立記念日',''],[9,16,'mx','独立記念日',''],[10,1,'cn','国慶節','大型の連休になる'],[10,3,'de','ドイツ統一の日',''],
+ [10,31,null,'ハロウィン','アメリカなどで、仮装してお菓子をもらう'],[11,2,'mx','死者の日（11月1〜2日）','亡くなった家族を、花と祭壇で迎える'],[11,5,'gb','ガイ・フォークス・ナイト','花火とたき火の夜'],
+ [12,5,'nl','シンタクラース祭（前夜）','子どもたちがプレゼントをもらう'],[12,13,'se','ルシア祭','白い服でろうそくを持って歌う'],[12,25,null,'クリスマス',''],[12,31,null,'大みそか','']];
+// 首都：[名前, 緯度, 経度, タイムゾーン]
+const WN_CAP={ jp:['東京',35.68,139.69,'Asia/Tokyo'], kr:['ソウル',37.57,126.98,'Asia/Seoul'], cn:['北京',39.90,116.41,'Asia/Shanghai'], in:['ニューデリー',28.61,77.21,'Asia/Kolkata'], th:['バンコク',13.76,100.50,'Asia/Bangkok'],
+ id:['ジャカルタ',-6.21,106.85,'Asia/Jakarta'], ph:['マニラ',14.60,120.98,'Asia/Manila'], au:['キャンベラ',-35.28,149.13,'Australia/Sydney'], nz:['ウェリントン',-41.29,174.78,'Pacific/Auckland'], ru:['モスクワ',55.76,37.62,'Europe/Moscow'],
+ eg:['カイロ',30.04,31.24,'Africa/Cairo'], ke:['ナイロビ',-1.29,36.82,'Africa/Nairobi'], ng:['アブジャ',9.08,7.40,'Africa/Lagos'], za:['プレトリア',-25.75,28.19,'Africa/Johannesburg'], gb:['ロンドン',51.51,-0.13,'Europe/London'],
+ fr:['パリ',48.86,2.35,'Europe/Paris'], de:['ベルリン',52.52,13.40,'Europe/Berlin'], es:['マドリード',40.42,-3.70,'Europe/Madrid'], it:['ローマ',41.90,12.50,'Europe/Rome'], is:['レイキャビク',64.15,-21.94,'Atlantic/Reykjavik'],
+ no:['オスロ',59.91,10.75,'Europe/Oslo'], us:['ワシントンD.C.',38.90,-77.04,'America/New_York'], mx:['メキシコシティ',19.43,-99.13,'America/Mexico_City'], br:['ブラジリア',-15.79,-47.88,'America/Sao_Paulo'],
+ ar:['ブエノスアイレス',-34.60,-58.38,'America/Argentina/Buenos_Aires'], pe:['リマ',-12.05,-77.04,'America/Lima'], ca:['オタワ',45.42,-75.70,'America/Toronto'], tr:['アンカラ',39.93,32.86,'Europe/Istanbul'],
+ np:['カトマンズ',27.72,85.32,'Asia/Kathmandu'], mn:['ウランバートル',47.89,106.91,'Asia/Ulaanbaatar'], ae:['アブダビ',24.45,54.38,'Asia/Dubai'], cl:['サンティアゴ',-33.45,-70.67,'America/Santiago'] };
+
+function wnName(c){ return (WSTAT[c]&&WSTAT[c].n)||(typeof eaName==='function'?eaName(c):c); }
+function wnLocal(d,tz){ try{ const f=new Intl.DateTimeFormat('ja-JP',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d); const g=t=>+((f.find(x=>x.type===t)||{}).value||0); return {h:g('hour')%24,m:g('minute')}; }catch(e){ return null; } }
+// 日の出・日の入り（NOAA の簡単な式。数分の誤差）。返り値は UTC の Date
+function wnSun(lat,lon,d){ const rad=Math.PI/180; const y0=Date.UTC(d.getUTCFullYear(),0,0); const n=Math.floor((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-y0)/864e5);
+  const g=2*Math.PI/365*(n-1); const eq=229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.040849*Math.sin(2*g));
+  const dec=0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g);
+  const c=(Math.cos(90.833*rad)/(Math.cos(lat*rad)*Math.cos(dec)))-Math.tan(lat*rad)*Math.tan(dec); if(c>1) return {polar:'night'}; if(c<-1) return {polar:'day'};
+  const ha=Math.acos(c)/rad; const base=Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());
+  return { rise:new Date(base+(720-4*(lon+ha)-eq)*6e4), set:new Date(base+(720-4*(lon-ha)-eq)*6e4) }; }
+function wnMoon(d){ const age=((d.getTime()/864e5+2440587.5-2451550.1)%29.530588853+29.530588853)%29.530588853;
+  const nm=age<1.5?'新月（ほとんど見えない）':age<5.5?'細い三日月':age<9.5?'上弦の半月':age<13.5?'ふくらんでいく月':age<16.5?'満月':age<20.5?'欠けていく月':age<24.5?'下弦の半月':age<28?'明け方の細い月':'新月（ほとんど見えない）';
+  return { age:Math.round(age*10)/10, nm }; }
+const hh=t=>t?`${t.h}時${String(t.m).padStart(2,'0')}分`:'';
+const WN_TOD=h=>h<5?'夜中':h<9?'朝':h<12?'午前':h<16?'昼すぎ':h<19?'夕方':'夜';
+
+function wnPool(P,year){ const k=dayKey(), now=new Date(), out=[]; const W=WSTAT; const f=(v,d)=>(+v).toFixed(d);
+  const pick=(ids,salt,n)=>ids.slice().sort((a,b)=>dHash(k,salt,a)-dHash(k,salt,b)).slice(0,n);
+  const sids=Object.keys(W).filter(c=>c!==P.countryId&&W[c].lex&&W[c].n);
+  const fut=year>2025?'（2025年より先は見こみの数字）':'';
+  const ST=[
+   ['lex','長生き',c=>{ const v=wsAt(W[c].lex,year); return v?`${wnName(c)}の平均寿命は、${f(v,1)}歳。`:null; }],
+   ['tfr','家族',c=>{ const v=wsAt(W[c].tfr,year); return v?`${wnName(c)}では、一人の女性が一生のあいだに産む子どもは、平均${f(v,1)}人。`:null; }],
+   ['urb','くらし',c=>{ const v=wsAt(W[c].urb,year); return v?`${wnName(c)}では、${f(v,0)}%の人が都市に住んでいる。`:null; }],
+   ['cell','くらし',c=>{ const v=wsAt(W[c].cell,year); return v>0.5?`${wnName(c)}の携帯電話は、100人あたり${f(v,0)}台。`:null; }],
+   ['net','くらし',c=>{ const v=wsAt(W[c].net,year); return v>0.5?`${wnName(c)}でインターネットを使う人は、${f(v,0)}%。`:null; }],
+   ['sch','学校',c=>{ const a=wsAt(W[c].schf,year), b=wsAt(W[c].schm,year); return a!=null&&b!=null?`${wnName(c)}の大人が学校に通った年数は、平均${f((a+b)/2,1)}年。`:null; }],
+   ['gdp','お金',c=>{ const v=wsAt(W[c].gdp,year); return v?`${wnName(c)}の、一人あたりの豊かさ（GDP）は、年に約${Math.round(v/100)*100}ドル（国ごとの物価の差をならした値）。`:null; }],
+   ['u5','子どもの命',c=>{ const v=wsAt(W[c].u5,year); return v?`${wnName(c)}では、生まれた子ども1000人のうち、5歳の誕生日をむかえられない子が${f(v,0)}人。`:null; }],
+   ['water','くらし',c=>{ const v=wsAt(W[c].water,year); return year>=2000&&v?`${wnName(c)}で、安全な飲み水を使える人は${f(v,0)}%。`:null; }]];
+  for(const [key,cat,fn] of ST){ let got=0; for(const c of pick(sids,key,12)){ const t=fn(c); if(t){ out.push({id:key+c,cat,ic:'📊',t,src:`${year}年の数字${fut}`}); if(++got>=2) break; } } }
+  // 3か国のくらし（まとめ）
+  { const cs=pick(sids,'trio',3); out.push({id:'trio',cat:'くらし',ic:'🌏',t:`${year}年の3か国のくらし：`+cs.map(c=>`${wnName(c)}は平均寿命${f(wsAt(W[c].lex,year),1)}歳・子ども${f(wsAt(W[c].tfr,year),1)}人`).join('／'),src:`${year}年の数字${fut}`}); }
+  pick(Object.keys(WN_GREET),'gr',4).forEach(c=>{ const g=WN_GREET[c]; out.push({id:'gr'+c,cat:'あいさつ',ic:'👋',t:`${wnName(c)}（${g[4]}）で「こんにちは」は ${g[0]}（${g[1]}）、「ありがとう」は ${g[2]}（${g[3]}）。`}); });
+  pick(Object.keys(WN_FOOD),'fd',4).forEach(c=>out.push({id:'fd'+c,cat:'食卓',ic:'🍽',t:`${wnName(c)}でよく食べられている料理：${WN_FOOD[c]}。`}));
+  pick(Object.keys(WN_ANIMAL),'an',3).forEach(c=>{ const a=WN_ANIMAL[c]; out.push({id:'an'+c,cat:'動物',ic:'🐾',t:`${wnName(c)}の${a[0]}。${a[1]}。`}); });
+  pick(Object.keys(WN_MUSIC),'mu',3).forEach(c=>out.push({id:'mu'+c,cat:'音楽',ic:'🎵',t:`${wnName(c)}の音楽：${WN_MUSIC[c]}。`}));
+  pick(Object.keys(WN_SPORT),'sp',3).forEach(c=>out.push({id:'sp'+c,cat:'スポーツ',ic:'⚽',t:`${wnName(c)}で愛されているスポーツ：${WN_SPORT[c]}。`}));
+  // もうすぐの祝日・お祭り（いまの本当の日付から40日以内）
+  const y=now.getFullYear(); const today=Date.UTC(y,now.getMonth(),now.getDate());
+  WN_HOL.map(h=>{ let t=Date.UTC(y,h[0]-1,h[1]); if(t<today) t=Date.UTC(y+1,h[0]-1,h[1]); return [h,Math.round((t-today)/864e5)]; }).filter(x=>x[1]<=40).sort((a,b)=>a[1]-b[1]).slice(0,4)
+   .forEach(([h,dd])=>out.push({id:'hol'+h[3]+h[2],cat:'お祭り',ic:'🎉',t:`${h[0]}月${h[1]}日、${h[2]?wnName(h[2])+'の':'世界の多くの国で'}「${h[3]}」。${h[4]?h[4]+'。':''}${dd===0?'きょうです。':`あと${dd}日。`}`,src:'きょう'}));
+  // いまの時刻と、日の出・日の入り
+  pick(Object.keys(WN_CAP),'cap',4).forEach(c=>{ const C=WN_CAP[c]; const t=wnLocal(now,C[3]); if(!t) return; const s=wnSun(C[1],C[2],now);
+    const sun=s.polar?(s.polar==='night'?'きょうは太陽がほとんどのぼらない季節。':'きょうは太陽が沈まない季節。'):`日の出は${hh(wnLocal(s.rise,C[3]))}ごろ、日の入りは${hh(wnLocal(s.set,C[3]))}ごろ。`;
+    out.push({id:'cap'+c,cat:'時差',ic:'🕰',t:`${wnName(c)}の${C[0]}は、いま${WN_TOD(t.h)}の${hh(t)}。${sun}`,src:'いま'}); });
+  // 空
+  const mo=wnMoon(now); out.push({id:'moon',cat:'空',ic:'🌙',t:`今夜の月は「${mo.nm}」（月齢${mo.age}）。世界のどこから見ても同じ形で、南半球では左右が逆に見える。`,src:'きょう'});
+  const m=now.getMonth()+1; const ns=m>=3&&m<=5?'春':m<=8&&m>=6?'夏':m>=9&&m<=11?'秋':'冬'; const ss={春:'秋',夏:'冬',秋:'春',冬:'夏'}[ns];
+  out.push({id:'season',cat:'空',ic:'🌤',t:`いま、日本など北半球は${ns}、オーストラリアやアルゼンチンなど南半球は${ss}。`,src:'きょう'});
+  out.push({id:'crux',cat:'空',ic:'✨',t:'南十字星は、南半球の空でよく見える星座。オーストラリア・ニュージーランド・ブラジル・パプアニューギニア・サモアの国旗に描かれている。'});
+  // 名前
+  try{ pick(Object.keys(NB_COUNTRY).filter(c=>c!==P.countryId&&W[c]),'nm',6).slice(0,2).forEach(c=>{ const B=NB[NB_COUNTRY[c][0][0]]; if(!B||!B.female.length||!B.male.length) return;
+    const nm=a=>a[1]&&a[1]!==a[0]?`${a[0]}（${a[1]}）`:a[0]; const fe=B.female[dHash(k,c,'f')%B.female.length], ma=B.male[dHash(k,c,'m')%B.male.length];
+    out.push({id:'nm'+c,cat:'名前',ic:'🍼',t:`${wnName(c)}でよく見られる名前：女の子なら ${nm(fe)}、男の子なら ${nm(ma)}。`}); }); }catch(e){}
+  return out; }
+function wnPick(pool,n){ const k=dayKey(); const by={}; pool.slice().sort((a,b)=>dHash(k,'o',a.id)-dHash(k,'o',b.id)).forEach(x=>(by[x.cat]=by[x.cat]||[]).push(x));
+  const cats=Object.keys(by).sort((a,b)=>dHash(k,'c',a)-dHash(k,'c',b)); const out=[]; let i=0; while(out.length<n&&cats.some(c=>by[c].length)){ const c=cats[i++%cats.length]; if(by[c].length) out.push(by[c].shift()); } return out; }
+function worldNowHTML(P,year){ let items=[]; try{ items=wnPick(wnPool(P,year),20); }catch(e){ items=[]; }
+  return `<p class="wn-h">🌏 世界のいろいろな国のこと<small>毎日20こ、入れかわります。下にスクロールして読めます。</small></p>
+  <div class="wn-box"><ul class="wn-list">${items.map(x=>`<li><span class="wn-tag">${x.ic} ${esc(x.cat)}</span>${x.src?`<small class="wn-when">${esc(x.src)}</small>`:''}<p>${esc(x.t)}</p></li>`).join('')}</ul></div>
+  <p class="wn-src">数字の出典：世界銀行・国連・Gapminder の統計。時刻・日の出・月の形は、いまの日時から計算しています。</p>`; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+.wn-box{ max-height:440px; overflow-y:auto; padding:2px 10px 6px; border-radius:14px; background:#F6FBF4; border:1px solid #D7EBD0; -webkit-overflow-scrolling:touch; }
+.wn-list{ list-style:none; margin:0; padding:0; } .wn-list li{ padding:8px 0; border-bottom:1px dashed #D7E3D2; } .wn-list li:last-child{ border-bottom:0; }
+.wn-list p{ margin:3px 0 0; font-size:14px; line-height:1.7; } .wn-tag{ display:inline-block; font-size:11px; background:#E6F4E0; color:#3F7F3A; border-radius:999px; padding:1px 9px; }
+.wn-when{ margin-left:6px; font-size:10.5px; color:var(--muted); } .wn-h{ font-size:15px; font-weight:700; color:#3F7F3A; margin:4px 0 6px; } .wn-h small{ display:block; font-weight:400; font-size:11.5px; color:var(--muted); } .wn-src{ font-size:9.5px; opacity:.8; margin:6px 2px 0; }
+</style>`);
+// ===== 世界のいま：いつも出る3つの欄（宇宙人のいま・太陽のいま・衛星のいま） =====
+// 宇宙人のいま：アメリカ国防総省（AARO など）・国家情報長官室の「公式発表」の事実だけ。推測は書かない。
+// 太陽のいま：NOAA 宇宙天気予報センター（SWPC）の公開データを、その場で読みこむ。
+// 衛星のいま：国際宇宙ステーションの位置（wheretheiss.at）と、打ち上げ予定（The Space Devs の Launch Library 2）を読みこむ。
+// 読みこめないときは、確かめ済みの事実だけを出す。
+const UFO_NEWS=[
+ ['2026年10月','国防総省が、UFO（UAP）の記録の7回目の公開を行った（5月から、ほぼ毎月公開している）。','war.gov/ufo'],
+ ['2026年7月','国防総省のAARO（全領域異常解決局）が、2024年6月〜2025年5月の年次報告を公開。新しい報告は319件。説明がついたものは、すべてふつうの原因（風船・鳥・ドローン・人工衛星の反射など）だった。','AARO 年次報告'],
+ ['2026年7月','同じ報告で、アメリカ海軍がバージニア州の沖で「約100個の空飛ぶ未確認物体」を報告していたことがわかった。AARO は「調査中」としている。','AARO 年次報告'],
+ ['2026年7月','AARO は、宇宙の報告44件を調べ、太陽の光を反射した人工衛星と一致すると説明した。宇宙人の技術や、外国の進んだ技術の証拠は見つかっていない。','AARO 年次報告'],
+ ['2026年6月16日','国家情報長官室・FBI・国防総省が作った「UAP 統治委員会」が、はじめて会合を開いた。','国家情報長官室'],
+ ['2026年5月8日','国防総省（いまは「戦争省」とも名のる）が、UFO の記録を公開するサイト「PURSUE」を始めた。政府は「宇宙人がいるという確かな証拠は示していない。判断は皆さんにゆだねる」としている。','war.gov/ufo'],
+ ['2024年3月','AARO が「歴史記録報告 第1巻」を公開。これまで調べた中に、宇宙人の技術だと示す証拠はなかった、と結論した。','AARO'],
+ ['2023年9月14日','NASA の専門家チームが報告書を公開。「宇宙人と結びつける証拠はない」としつつ、くわしいデータを集めることが大切だとした。','NASA'],
+ ['2023年7月26日','アメリカ下院で、元軍人などが証言する公聴会が開かれた。','アメリカ議会'],
+ ['2021年6月25日','国家情報長官室が、はじめての公式報告を公開。144件の報告のうち、説明がついたのは1件だけだった。','国家情報長官室'] ];
+const SP_KEY='hitotsu.space.'; let _spSun='', _spSat='', _spAt=0;
+function spGet(k,ms){ try{ const v=JSON.parse(localStorage.getItem(SP_KEY+k)||'null'); if(v&&Date.now()-v.t<ms) return v.d; }catch(e){} return null; }
+function spSet(k,d){ try{ localStorage.setItem(SP_KEY+k,JSON.stringify({t:Date.now(),d})); }catch(e){} }
+async function spJSON(u){ const r=await fetch(u); if(!r.ok) throw new Error('http '+r.status); return r.json(); }
+const spJst=s=>{ const d=new Date(s); if(isNaN(d)) return ''; return `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}時${String(d.getMinutes()).padStart(2,'0')}分`; };
+const SP_CLS=c=>{ const L=(c||'')[0]; return L==='X'?'いちばん強いXクラス':L==='M'?'強めのMクラス':L==='C'?'ふつうのCクラス':L==='B'?'弱いBクラス':'弱いクラス'; };
+
+function spaceHTML(){
+  const ufo=UFO_NEWS.map(x=>`<li><b>${esc(x[0])}</b>　${esc(x[1])}<small>（${esc(x[2])}）</small></li>`).join('');
+  return `<div class="sp-wrap">
+  <section class="sp sp-ufo"><h4>👽 宇宙人のいま</h4><p class="sp-note">アメリカ国防総省などの公式発表だけをのせています。</p><ul class="sp-l">${ufo}</ul></section>
+  <section class="sp sp-sun"><h4>☀️ 太陽のいま</h4><div class="sp-l" id="spSun">${_spSun||'<p class="sp-wait">太陽のようすを読みこんでいます…</p>'}</div></section>
+  <section class="sp sp-sat"><h4>🛰 衛星のいま</h4><div class="sp-l" id="spSat">${_spSat||'<p class="sp-wait">宇宙のようすを読みこんでいます…</p>'}</div></section>
+  </div>${(Date.now()-_spAt>60000||!_spSun)?(setTimeout(spFill,0),''):''}`; }
+async function spFill(){ _spAt=Date.now();
+  const sun=document.getElementById('spSun'), sat=document.getElementById('spSat'); if(!sun&&!sat) return;
+  const sunBase=`<li>太陽の活動は約11年ごとに強くなったり弱くなったりする。NASA と NOAA は2024年10月に「太陽は活動のいちばん強い時期に入った」と発表した。</li><li>フレアの強さは、弱い順に A・B・C・M・X。X クラスの大きなフレアは、無線や GPS に影響することがある。</li>`;
+  if(sun){ try{ let a=spGet('flr',30*60e3); if(!a){ a=await spJSON('https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json'); spSet('flr',a); }
+      const fl=(a||[]).filter(x=>x&&x.max_class).sort((p,q)=>new Date(q.max_time)-new Date(p.max_time)); const strong=fl.filter(x=>/^[MX]/.test(x.max_class));
+      const big=fl.slice().sort((p,q)=>spRank(q.max_class)-spRank(p.max_class))[0];
+      sun.innerHTML=`<ul class="sp-ul">${big?`<li><b>この7日でいちばん大きなフレア</b>　${esc(big.max_class)}（${SP_CLS(big.max_class)}）、${spJst(big.max_time)}ごろ（日本時間）。</li>`:''}
+        <li>この7日の M・X クラスのフレア：<b>${strong.length}回</b>。</li>${fl[0]?`<li><b>いちばん新しいフレア</b>　${esc(fl[0].max_class)}、${spJst(fl[0].max_time)}ごろ。</li>`:''}${sunBase}</ul><p class="sp-src">出典：NOAA 宇宙天気予報センター（いまのデータ）</p>`; }
+    catch(e){ sun.innerHTML=`<ul class="sp-ul">${sunBase}</ul><p class="sp-wait">いまのフレアのデータは読みこめませんでした。通信のよいところで開き直してください。</p>`; } }
+  if(sat){ const base=`<li>地球のまわりを回る人工衛星は、いま1万機をこえている。</li><li>国際宇宙ステーション（ISS）は、高さ約400kmを、約90分で地球を1周している。</li>`; let rows=[];
+    try{ const p=await spJSON('https://api.wheretheiss.at/v1/satellites/25544'); rows.push(`<li><b>いまの国際宇宙ステーション</b>　緯度${(+p.latitude).toFixed(1)}°・経度${(+p.longitude).toFixed(1)}°の上空、高さ${Math.round(p.altitude)}km、時速${Math.round(p.velocity).toLocaleString()}kmで飛んでいる。</li>`); }catch(e){}
+    try{ let n=spGet('ppl',3*3600e3); if(n==null){ const j=await spJSON('https://ll.thespacedevs.com/2.2.0/astronaut/?in_space=true&limit=1&mode=list'); n=j.count; spSet('ppl',n); } if(n!=null) rows.push(`<li><b>いま宇宙にいる人</b>　${n}人。</li>`); }catch(e){}
+    try{ let L=spGet('lch',3*3600e3); if(!L){ const j=await spJSON('https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=5&mode=list'); L=(j.results||[]).map(x=>({n:x.name,t:x.net,w:x.lsp_name||(x.launch_service_provider&&x.launch_service_provider.name)||'',p:x.location||(x.pad&&x.pad.location&&x.pad.location.name)||''})); spSet('lch',L); }
+      if(L&&L.length) rows.push(`<li><b>これからの打ち上げ予定</b><ul class="sp-sub">${L.slice(0,5).map(x=>`<li>${spJst(x.t)}ごろ　${esc(x.n)}${x.p?`（${esc(x.p)}）`:''}</li>`).join('')}</ul></li>`); }catch(e){}
+    sat.innerHTML=`<ul class="sp-ul">${rows.join('')}${base}</ul>${rows.length?'<p class="sp-src">出典：Where the ISS at?・The Space Devs（いまのデータ）</p>':'<p class="sp-wait">いまのデータは読みこめませんでした。通信のよいところで開き直してください。</p>'}`; }
+  if(sun) _spSun=sun.innerHTML; if(sat) _spSat=sat.innerHTML;
+  try{ if(typeof msRebalance==='function') msRebalance(); }catch(_){} }
+function spRank(c){ const m=/^([ABCMX])([\d.]+)?/.exec(c||''); if(!m) return 0; return 'ABCMX'.indexOf(m[1])*100+(+m[2]||0); }
+document.head.insertAdjacentHTML('beforeend',`<style>
+.sp-wrap{ display:grid; gap:10px; margin:6px 0 12px; }
+.sp{ border-radius:14px; padding:10px 12px; border:1.5px solid; } .sp h4{ margin:0 0 4px; font-size:15px; }
+.sp-ufo{ background:#F4F0FD; border-color:#D9CCF5; } .sp-ufo h4{ color:#6A4BB8; }
+.sp-sun{ background:#FFF6E6; border-color:#FBD9A0; } .sp-sun h4{ color:#C0701A; }
+.sp-sat{ background:#EEF6FD; border-color:#C5DDF3; } .sp-sat h4{ color:#2F6EA8; }
+.sp-l{ max-height:190px; overflow-y:auto; -webkit-overflow-scrolling:touch; margin:0; padding:0 2px 0 0; list-style:none; }
+.sp-l>li, .sp-ul>li{ font-size:13px; line-height:1.65; padding:5px 0; border-bottom:1px dashed rgba(0,0,0,.08); } .sp-l>li small{ color:var(--muted); font-size:11px; }
+.sp-ul{ list-style:none; margin:0; padding:0; } .sp-sub{ margin:2px 0 0; padding-left:1.1em; font-size:12.5px; }
+.sp-note{ font-size:11.5px; color:var(--muted); margin:0 0 4px; } .sp-wait{ font-size:12px; color:var(--muted); margin:4px 0; } .sp-src{ font-size:9.5px; opacity:.8; margin:4px 0 0; }
+</style>`);
 // ===== Life Record の文体（エッセイ風の日記・中性的・大人向けで漢字多め） =====
 // 表示するときだけ整える。人生の中身（出来事・乱数）は一切変えない。
 // ・地の文のかなを、自然な範囲で漢字にする（「」の中＝せりふは、かなのまま残す）
@@ -14933,7 +15103,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${typeof eaTileHTML==='function'?homeTile('hm-ea','地球アルバム',eaTileHTML(P)):''}
     ${typeof relChartHTML==='function'?homeTile('hm-rel',`${esc(P.country.name)}の宗教の割合`,relChartHTML(P)):''}
     ${typeof newsHTML==='function'?homeTile('hm-news',`その年のNEWS<span class="hm-n">物語の中の${sy}年</span>`,newsHTML(P,sy)):''}
-    ${homeTile('hm-world',`世界のいま<span class="hm-n">物語の中の${sy}年</span>`, `<p class="tiny muted">${esc(P.given)}が生きているこの年、ほかの国では。</p><div class="hm-wl">${wn.map(w=>`<div class="hm-w"><b>${esc(w.name)}</b><span>平均寿命 ${w.lex}歳</span><span>一人の女性が産む子 ${w.tfr}人</span>${w.urb!=='—'?`<span>都市に住む人 ${w.urb}%</span>`:''}${w.cell>0.5?`<span>携帯電話 100人に${Math.round(w.cell)}台</span>`:''}</div>`).join('')}</div>`, '<span class="tiny muted">出典：世界銀行・国連の統計。毎日、別の国に変わります。</span>')}
+    ${homeTile('hm-world',`世界のいま<span class="hm-n">物語の中の${sy}年</span>`, (typeof spaceHTML==='function'?spaceHTML():'')+(typeof worldNowHTML==='function'?worldNowHTML(P,sy):''))}
     ${homeTile('hm-zukan','図鑑', `<div class="hm-zk">${zk.map(z=>`<div class="hm-z"><span class="tiny muted">${esc(z[0])}</span><b>${z[1]}<small>${z[3]}</small></b></div>`).join('')}</div>`)}
   </div>
   ${typeof pwaNoteHTML==='function'?pwaNoteHTML('bottom'):''}
