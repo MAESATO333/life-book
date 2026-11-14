@@ -103,6 +103,10 @@ ruby.nm rt{ font-size:.5em; letter-spacing:0; font-family:var(--sans); color:var
 .ev + .ev{ margin-top:12px; }
 .ev .t{ font-family:var(--serif); font-size:16px; }
 .ev .f{ color:var(--muted); font-size:14px; }
+.ev.para .t{ line-height:2; text-align:justify; }
+.ev .pr-date{ margin:0 0 4px; font-family:var(--serif); font-size:15px; letter-spacing:.12em; color:var(--accent); }
+.ev .pr-ess{ margin:8px 0 2px; padding-left:12px; border-left:2px solid var(--line); font-family:var(--serif); font-size:14.5px; line-height:1.9; color:#5E5A6E; }
+.ev .t ruby rt, .ev .f ruby rt{ font-size:.5em; color:var(--muted); }
 .ev .rs{ font-size:14px; }
 .ev.big .t{ font-weight:600; }
 .ev.death .t{ font-size:18px; }
@@ -402,6 +406,11 @@ table.chain td.a{ white-space:nowrap; font-variant-numeric:tabular-nums; }
 .frd-lead{ margin:0 0 12px; font-size:14px; line-height:1.8; text-align:center; }
 .frd-note{ margin:0 0 12px; padding:8px 12px; border-radius:12px; background:#FFF0D6; color:#6A4A20; }
 .frd-x{ position:absolute; top:10px; right:10px; z-index:2; width:34px; height:34px; border-radius:50%; border:2px solid #FFC2D0; background:#fff; color:#C9466A; font-size:18px; line-height:1; cursor:pointer; }
+.frd-url{ margin:10px 0 0; display:grid; gap:3px; }
+.frd-ul{ font-size:11px; color:#7A5A66; }
+.frd-urow{ display:flex; gap:6px; margin-bottom:6px; }
+.frd-uc{ flex:none; font:inherit; font-size:12px; font-weight:700; padding:6px 12px; border-radius:999px; border:2px solid #E86A88; background:#FF8FAA; color:#fff; cursor:pointer; white-space:nowrap; }
+.frd-url input{ width:100%; box-sizing:border-box; font:inherit; font-size:12.5px; padding:8px 12px; border:1.5px dashed #F4B6C8; border-radius:12px; background:#FFF8FA; color:#5A4450; }
 .frd-name{ display:flex; flex-direction:column; gap:4px; font-size:12px; color:#7A5A66; margin-bottom:12px; }
 .frd-nrow{ display:flex; gap:8px; align-items:center; }
 .frd-nrow input{ flex:1; min-width:0; }
@@ -10682,7 +10691,7 @@ const b64d=s=>{ const b=atob(s.replace(/-/g,'+').replace(/_/g,'/')); return new 
 function loanCode(a,by,due,ans){ return 'LIFEBOOK1.'+b64e(JSON.stringify({ s:a.seed, c:a.country||null, f:a.force||null, ch:a.choice||null, n:a.name, na:a.nation, a:a.age, by, due, ab:(ans&&ans.atogaki)||'', ob:ans&&ans.obi!=null?ans.obi:null, t:Date.now() })); }
 function readLoan(txt){ const m=(txt||'').match(/(?:LIFEBOOK1\.|#loan=)([A-Za-z0-9_-]+)/); if(!m) return null; try{ const o=JSON.parse(b64d(m[1])); if(typeof o.s!=='number') return null; return o; }catch(e){ return null; } }
 // 貸し出しリンク（押すと、相手の Life Home の「友だちからLIFE BOOKを借りる」に並ぶ）
-function loanLink(code){ const base=/github\.io$/.test(location.host)?location.origin+location.pathname:(typeof FRIEND_URL!=='undefined'?FRIEND_URL:'https://maesato333.github.io/life-book/play.html'); return base+'#loan='+String(code).replace('LIFEBOOK1.',''); }
+function loanLink(code){ const base=/github\.io$/.test(location.host)?location.origin+location.pathname:(typeof FRIEND_URL!=='undefined'?FRIEND_URL:'https://maesato333.github.io/life-book/play.html'); const u=base+'#loan='+String(code).replace('LIFEBOOK1.',''); return typeof extURL==='function'?extURL(u):u; }
 function loanFromHash(){ try{ const m=(location.hash||'').match(/^#loan=([A-Za-z0-9_-]+)/); if(!m) return; history.replaceState(null,'',location.pathname+location.search);
   const o=readLoan('LIFEBOOK1.'+m[1]); if(!o) return; const r=receiveLoan(o); if(typeof st!=='undefined'&&st&&typeof goHome==='function') goHome(); else if(typeof render==='function') render();
   setTimeout(()=>{ const t=document.getElementById('loanMsg'); const box=document.querySelector('.hm-borrow'); if(box) box.scrollIntoView({ behavior:'smooth', block:'center' }); if(t) t.textContent=r==='already'?'このLIFE BOOKは、もう並んでいます。':`${o.by||'友だち'}さんから「${o.n}」のLIFE BOOKを借りました。`; },120); }catch(_){} }
@@ -10903,6 +10912,7 @@ function friendDialogHTML(){ const me=store.get(KEY_ME,''); const can=!!myHero()
       <button class="frd-b frd-lemon" id="frLink" type="button"><i class="ic ic-link" aria-hidden="true"></i><span>リンクをコピー</span></button>
       <button class="frd-b frd-lilac" id="frMail" type="button"><i class="ic ic-mail" aria-hidden="true"></i><span>メールで送る</span></button>
     </div>
+    <div class="frd-url"><span class="frd-ul">あなたの紹介リンク（LINEで押しても、外部のブラウザで開きます）</span><div class="frd-urow"><input id="frUrl" type="text" readonly aria-label="あなたの紹介リンク" onclick="this.select()"><button class="frd-uc" type="button" data-cp="frUrl">コピー</button></div></div>
     <p class="frd-msg" id="frMsg" role="status"></p><textarea id="frOut" rows="3" readonly hidden aria-label="紹介の文とリンク"></textarea>
     <details class="frd-get"><summary>友だちから届いたリンクやコードを受け取る</summary>
       <p class="tiny muted">届いたリンクを押せば、自動でつながります。うまくいかないときは、ここにはりつけてください。</p>
@@ -10926,13 +10936,15 @@ function bindFriend(){ bindFriendOpeners();
   const ok=$('#frByOk'), bi=$('#frBy'), sv=$('#frBySaved');
   if(ok&&bi){ const save=()=>{ by(); const v=store.get(KEY_ME,''); if(sv){ sv.textContent=v?`「${v}」で保存しました。友だちには、この名前で届きます。`:'呼び名を入れてから、OK！を押してください。'; sv.classList.toggle('is-ok',!!v); } if(v){ ok.textContent='保存しました ✓'; ok.classList.add('is-done'); } };
     ok.onclick=save; bi.onkeydown=e=>{ if(e.key==='Enter'&&!e.isComposing){ e.preventDefault(); save(); } }; bi.oninput=()=>{ ok.textContent='OK！'; ok.classList.remove('is-done'); if(sv){ sv.textContent=''; sv.classList.remove('is-ok'); } }; }
+  const urlShow=()=>{ const u=$('#frUrl'), up=$('#frUrlP'); try{ by(); const L=friendLink()||friendPlainLink(); if(u) u.value=L; if(up) up.value=L.replace(/[?&]openExternalBrowser=1/,'').replace('.html&','.html?'); }catch(e){} };
+  d.querySelectorAll('.frd-uc').forEach(b=>b.onclick=()=>{ urlShow(); const i=$('#'+b.dataset.cp); if(!i) return; i.select(); const ok=()=>{ b.textContent='コピーしました ✓'; setTimeout(()=>{ b.textContent='コピー'; },2000); }; if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(i.value).then(ok,()=>{ try{ document.execCommand('copy'); ok(); }catch(e){} }); else { try{ document.execCommand('copy'); ok(); }catch(e){} } }); urlShow(); { const bi2=$('#frBy'); if(bi2) bi2.addEventListener('input',()=>{ clearTimeout(bi2._ut); bi2._ut=setTimeout(urlShow,400); }); }
   const x=d.querySelector('.frd-x'); if(x) x.onclick=closeFriend;
-  const copy=(t,what)=>{ const o=$('#frOut'); if(o){ o.hidden=false; o.value=t; o.select(); }
+  const copy=(t,what)=>{ const o=$('#frOut'); if(o&&what!=='リンク'){ o.hidden=false; o.value=t; o.select(); } else { const u=$('#frUrl'); if(u){ u.value=t; u.select(); } }
     const done=()=>msg(what+'をコピーしました。LINEやメールにはりつけて、友だちに送ってください。'), fail=()=>msg('下の欄の文を選んで、コピーしてください。');
     try{ navigator.clipboard.writeText(t).then(done).catch(fail); }catch(e){ fail(); } };
   const ln=$('#frLine'); if(ln) ln.onclick=()=>{ store.set(KEY_FRSENT,(store.get(KEY_FRSENT,0)||0)+1); const t=friendShareText(link()); window.open('https://line.me/R/msg/text/?'+encodeURIComponent(t),'_blank','noopener'); msg('LINEがひらきます。送る相手を選んでください。ひらかないときは「リンクをコピー」を使ってください。'); };
   const sh=$('#frShare'); if(sh&&navigator.share){ sh.hidden=false; sh.onclick=()=>{ const l=link(); navigator.share({ title:'LIFE BOOK', text:friendShareText(l).replace('\n'+l,''), url:l }).then(()=>msg('送りました。')).catch(()=>{}); }; }
-  const l=$('#frLink'); if(l) l.onclick=()=>{ store.set(KEY_FRSENT,(store.get(KEY_FRSENT,0)||0)+1); copy(friendShareText(link()),'紹介の文とリンク'); };
+  const l=$('#frLink'); if(l) l.onclick=()=>{ store.set(KEY_FRSENT,(store.get(KEY_FRSENT,0)||0)+1); copy(link(),'リンク'); };
   const ml=$('#frMail'); if(ml) ml.onclick=()=>{ location.href='mailto:?subject='+encodeURIComponent('LIFE BOOK で、人生のどこかで出会いませんか')+'&body='+encodeURIComponent(friendShareText(link())); };
   const c=$('#frCode'); if(c) c.onclick=()=>{ by(); const t=friendCode(); if(t) copy(t,'紹介コード'); };
   const g=$('#frGet'); if(g) g.onclick=()=>{ const o=readFriend($('#frCodeIn').value); if(!o) return msg('読み取れませんでした。リンクやコードを、最初から最後まで、まるごとはりつけてください。'); if(!o.re) o.lk=1; afterFriend(o,receiveFriend(o)); };
@@ -10948,6 +10960,48 @@ function alertFriend(t){ if(typeof render==='function') render(); setTimeout(()=
 // リンクで開いたとき
 function friendFromHash(){ try{ const h=location.hash||''; if(!/friend=/.test(h)) return; const o=readFriend(h); history.replaceState(null,'',location.pathname+location.search); if(!o) return; if(!o.re) o.lk=1; const r=receiveFriend(o); setTimeout(()=>afterFriend(o,r),300); }catch(e){} }
 window.addEventListener('hashchange',()=>{ if(typeof friendFromHash==='function') friendFromHash(); });
+// ===== Group Soul の木：紹介でつながった人たちを、一本の木の枝として描く =====
+// 幹＝あなたの Channel。枝の先の葉＝紹介でつながった人。そのさらに先の小枝＝その人とつながっている人（わかる範囲だけ）。
+function gsHash(s){ let h=2166136261>>>0; s=String(s); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return h; }
+const GS_SHIRT=['#FF8FAA','#8EC3E6','#F4C75A','#A6DC8E','#C9B6F2','#F7A86B'], GS_SKIN=['#F3CFAE','#E3B48A','#C68E62','#8D5A3B'], GS_HAIR=['#3A2A24','#5B3A29','#1E1A1A','#B4783C','#2B2230'];
+function gsShort(s,n){ s=String(s||''); return s.length>n?s.slice(0,n-1)+'…':s; }
+// ブロックの小さな人（顔と髪と服）
+function gsPerson(x,y,k,id){ const h=gsHash(id), sh=GS_SHIRT[h%6], sk=GS_SKIN[(h>>3)%4], hr=GS_HAIR[(h>>6)%5];
+  return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${k})"><rect x="-6" y="2" width="12" height="9" rx="1.5" fill="${sh}"/><rect x="-6" y="2" width="12" height="2.5" fill="#fff" opacity=".25"/><rect x="-5.5" y="-9" width="11" height="11" rx="1.5" fill="${sk}"/><rect x="-6" y="-10" width="12" height="4.5" rx="1.5" fill="${hr}"/><rect x="-3" y="-3.5" width="1.6" height="2.2" fill="#2B2230"/><rect x="1.4" y="-3.5" width="1.6" height="2.2" fill="#2B2230"/><rect x="-4.6" y="-1" width="2" height="1.2" fill="#FF9FB2" opacity=".7"/><rect x="2.6" y="-1" width="2" height="1.2" fill="#FF9FB2" opacity=".7"/></g>`; }
+function gsLeaves(x,y,s,c1,c2){ return `<g><rect x="${(x-s).toFixed(1)}" y="${(y-s*.7).toFixed(1)}" width="${(s*1.1).toFixed(1)}" height="${(s*1.1).toFixed(1)}" rx="2" fill="${c1}"/><rect x="${(x-s*.1).toFixed(1)}" y="${(y-s*.9).toFixed(1)}" width="${(s*1.1).toFixed(1)}" height="${(s*1.1).toFixed(1)}" rx="2" fill="${c2}"/><rect x="${(x-s*.55).toFixed(1)}" y="${(y-s*1.45).toFixed(1)}" width="${(s*1.1).toFixed(1)}" height="${(s*1.1).toFixed(1)}" rx="2" fill="${c1}"/></g>`; }
+function gsLabel(x,y,t,cls){ const w=Math.max(28,t.length*9+12); return `<g class="${cls||''}"><rect x="${(x-w/2).toFixed(1)}" y="${(y-8).toFixed(1)}" width="${w}" height="15" rx="7.5" fill="#fff" stroke="#F4C6D4"/><text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#6A4A58">${esc(t)}</text></g>`; }
+function gsTreeHTML(fr){ fr=(fr||[]).slice(0,10); const fof=(typeof store!=='undefined'&&store.get('hitotsu.fof',{}))||{};
+  const W=360, H=fr.length>5?270:220, cx=W/2, base=H-34, top=base-62;
+  const myName=(typeof cur!=='undefined'&&cur&&cur.P)?cur.P.given:'';
+  let back='', br='', lv='', ppl='', lab='';
+  // 地面と幹
+  back+=`<rect x="${cx-70}" y="${base}" width="140" height="10" rx="2" fill="#A6DC8E"/><rect x="${cx-62}" y="${base+8}" width="124" height="7" rx="2" fill="#B08463"/>`;
+  br+=`<path d="M${cx-9} ${base} L${cx-6} ${top} L${cx+6} ${top} L${cx+9} ${base} Z" fill="#9A6B47"/><rect x="${cx-6}" y="${top}" width="4" height="${base-top}" fill="#B08463" opacity=".6"/>`;
+  const n=fr.length;
+  if(!n){ lv+=gsLeaves(cx+3,top-4,14,'#A6DC8E','#86C878'); lab+=`<text x="${cx}" y="${top-34}" text-anchor="middle" font-size="10.5" fill="#8A7A84">友だちを紹介すると、ここに枝がのびていきます</text>`; }
+  fr.forEach((f,i)=>{ const a=n===1?-Math.PI/2:(-Math.PI+0.32)+(Math.PI-0.64)*(i/(n-1)); const R=n>5?(i%2?72:132):112;
+    const ex=Math.max(46,Math.min(W-46,cx+Math.cos(a)*R*1.25)), ey=top-8+Math.sin(a)*R*(n>5?.9:.78); const mx=cx+Math.cos(a)*R*.45, my=top-6+Math.sin(a)*R*.18;
+    br+=`<path d="M${cx} ${top+4} Q${mx.toFixed(1)} ${my.toFixed(1)} ${ex.toFixed(1)} ${(ey+10).toFixed(1)}" stroke="#9A6B47" stroke-width="${n>6?4:5}" fill="none" stroke-linecap="round"/>`;
+    // その人の先の小枝（わかる範囲で最大3人）
+    const e=fof[f.id]; const sub=e&&Array.isArray(e.fr)?e.fr.filter(x=>x&&x.i&&x.b).slice(0,3):[];
+    sub.forEach((x,j)=>{ const b=a+(j-(sub.length-1)/2)*.32; const sx=Math.max(14,Math.min(W-14,ex+Math.cos(b)*34)), sy=ey+Math.sin(b)*26-6;
+      br+=`<path d="M${ex.toFixed(1)} ${(ey+4).toFixed(1)} L${sx.toFixed(1)} ${sy.toFixed(1)}" stroke="#B9967A" stroke-width="2" stroke-dasharray="3 2" fill="none"/>`;
+      lv+=`<rect x="${(sx-4).toFixed(1)}" y="${(sy-4).toFixed(1)}" width="8" height="8" rx="2" fill="#C9E7B8"/>`;
+      lab+=`<text x="${sx.toFixed(1)}" y="${(sy-7).toFixed(1)}" text-anchor="middle" font-size="7.5" fill="#8A7A84">${esc(gsShort(x.b,5))}</text>`; });
+    lv+=gsLeaves(ex,ey+6,13,i%2?'#A6DC8E':'#86C878',i%2?'#86C878':'#B7E3A0');
+    ppl+=gsPerson(ex,ey-6,1,f.id||f.by||i);
+    lab+=gsLabel(ex,ey+19,gsShort((f.by||'友だち')+'さん',7),'gs-name'); });
+  // 幹のところの「あなたの Channel」
+  ppl+=gsPerson(cx,base-8,1.25,'me'+(myName||''));
+  lab+=gsLabel(cx,base+20,myName?gsShort(myName,6)+'（Channel）':'あなたの Channel','gs-me');
+  const hearts=[[cx-110,40],[cx+118,52],[cx+20,24]].map(([x,y],i)=>`<g class="gs-ht" style="animation-delay:${-i*1.3}s" fill="#FF9FB2"><rect x="${x}" y="${y}" width="4" height="4"/><rect x="${x+5}" y="${y}" width="4" height="4"/><rect x="${x-1}" y="${y+3}" width="11" height="4"/><rect x="${x+1}" y="${y+6}" width="7" height="3"/><rect x="${x+3}" y="${y+8}" width="3" height="2"/></g>`).join('');
+  return `<figure class="gs-tree"><svg viewBox="0 ${n>5?-30:0} ${W} ${H+(n>5?30:0)}" role="img" aria-label="Group Soul の木。あなたの Channel から、紹介でつながった${n}人へ枝がのびている">${back}${hearts}${br}${lv}${ppl}${lab}</svg><figcaption>あなたの Channel を幹に、紹介でつながった人が枝の先に。点線の先は、その人とつながっている人です。</figcaption></figure>`; }
+(function(){ if(typeof document==='undefined') return; const c=document.createElement('style'); c.textContent=`.gs-tree{ margin:0 0 12px; padding:8px 6px 6px; border-radius:16px; background:linear-gradient(180deg,#E7F4FF 0%,#FFF3F6 100%); }
+.gs-tree svg{ display:block; width:100%; height:auto; max-height:300px; shape-rendering:geometricPrecision; }
+.gs-tree figcaption{ margin:4px 8px 0; font-size:11px; color:#8A7A84; text-align:center; }
+.gs-tree .gs-ht{ animation:gsHt 4s ease-in-out infinite; }
+@keyframes gsHt{ 0%,100%{ transform:translateY(0); opacity:.85 } 50%{ transform:translateY(-5px); opacity:1 } }
+@media (prefers-reduced-motion:reduce){ .gs-tree .gs-ht{ animation:none; } }`; document.head.appendChild(c); })();
 // ===== 「出会った！」の瞬間 =====
 // 紹介でつながった友だちの主人公と出会う出来事が、物語の時間で起きたら、画面いっぱいにお知らせする。
 // 出会いの年は、ふたりの種から決まるので、友だちの側でも同じ年に、同じように出会いが起きる（お互いに知らされる）。
@@ -12121,6 +12175,95 @@ function hintPool(){ const a=HINTS.slice(); try{ for(const k in BV_REF) a.push(.
 function hintNow(){ const pool=hintPool(); let last=[]; try{ last=JSON.parse(localStorage.getItem('hitotsu.hints')||'[]'); }catch(e){}
   const cand=pool.filter(t=>!last.includes(t)); const t=(cand.length?cand:pool)[Math.floor(Math.random()*(cand.length?cand.length:pool.length))];
   last.push(t); if(last.length>Math.min(150,pool.length-10)) last=last.slice(-Math.min(150,pool.length-10)); try{ localStorage.setItem('hitotsu.hints',JSON.stringify(last)); }catch(e){} return t; }
+// ===== Life Record の文体（エッセイ風の日記・中性的・大人向けで漢字多め） =====
+// 表示するときだけ整える。人生の中身（出来事・乱数）は一切変えない。
+// ・地の文のかなを、自然な範囲で漢字にする（「」の中＝せりふは、かなのまま残す）
+// ・同じ年の中で、同じ一文がくり返されたら、二度目は省く
+// ・その年でいちばん心が動いた出来事のあとに、短い考察を一つだけ添える（余韻）
+// ・生まれた日は、日記のような日付の一行で始める
+const PR_KANJI=[
+ ['いっしょうけんめい','一生懸命'],['いっしょに','一緒に'],['いっしょ','一緒'],['だいじょうぶ','大丈夫'],['ほんとうに','本当に'],['ほんとう','本当'],
+ ['ぜんぶ','全部'],['なんとなく','何となく'],['なんども','何度も'],['なにも','何も'],['なにか','何か'],['はじめての','初めての'],['はじめて、','初めて、'],['いちばん','一番'],
+ ['ひとりで','一人で'],['ひとりきり','一人きり'],['ふたりで','二人で'],['ふたりは','二人は'],['ふたりの','二人の'],
+ ['あたたかかった','温かかった'],['あたたかい','温かい'],['うれしかった','嬉しかった'],['うれしい','嬉しい'],['かなしかった','悲しかった'],['かなしい','悲しい'],
+ ['さびしかった','寂しかった'],['さびしい','寂しい'],['くやしかった','悔しかった'],['くやしい','悔しい'],['はずかしかった','恥ずかしかった'],
+ ['ちいさな','小さな'],['おおきな','大きな'],['あかちゃん','赤ちゃん'],['おとなに','大人に'],['おとなの','大人の'],['からだが','体が'],['からだを','体を'],['からだの','体の'],['からだに','体に'],['ことばを','言葉を'],['ことばが','言葉が'],['ことばは','言葉は'],['まわりを','周りを'],['まわりの','周りの'],
+ ['くちびる','唇'],['まぶた','瞼'],['ひざを','膝を'],['ひざに','膝に'],['なみだ','涙'],['えがお','笑顔'],['ゆうがた','夕方'],['よなか','夜中'],
+ ['きれいな','綺麗な'],['すこし','少し'],['ときどき','時々'],['いろいろな','色々な'],['いろいろ','色々'],['ほとんど','殆ど'],
+ ['のぞきこんだ','覗き込んだ'],['のぞきこむ','覗き込む'],['のぞかせた','覗かせた'],['かかえて','抱えて'],['ながめていた','眺めていた'],['ながめた','眺めた'],
+ ['しかられて','叱られて'],['ほめられた','褒められた'],['わすれられない','忘れられない'],['わすれた','忘れた'],['おぼえている','覚えている'],['おぼえた','覚えた'],
+ ['はなさなかった','離さなかった'],['ねむった','眠った'],['ねむれなかった','眠れなかった'],['ねむれない','眠れない'],['すりむいた','擦りむいた'],
+ ['しかられた','叱られた'],['すんでいた','澄んでいた'],['つめたかった','冷たかった'],['つめたい','冷たい'],['まっかに','真っ赤に'],['ねむって','眠って'],['にぎった','握った'],['ふしぎそうに','不思議そうに'],
+ ['よごした','汚した'],['ちがった','違った'],['すみで','隅で'],['くり返','繰り返'],['においに','匂いに'],['においが','匂いが'],['においを','匂いを'],['においのする','匂いのする'],['まるくした','丸くした'],['まるい','丸い'],
+ ['あまい','甘い'],['うすい','薄い'],['目がさめた','目が覚めた'],['目をさまし','目を覚まし'],['ほえられて','吠えられて'],['しゃがみこんで','しゃがみ込んで'],['のばした','伸ばした'],['そろった','揃った'],['とくに','特に'],
+ ['だれかが','誰かが'],['だれかに','誰かに'],['ふれた','触れた'],['まねして','真似して'],['まねをして','真似をして'],['さしこんで','差し込んで'],['ころがって','転がって'],['ひとつ','一つ'],['ふたつ','二つ'],
+ ['おなかが','お腹が'],['おなかの','お腹の'],['なでた','撫でた'],['つかまって','掴まって'],['よちよち','よちよち'],['ほおばった','頬張った'],['ながめて','眺めて'],['うとうと','うとうと'],['あわてて','慌てて'],
+ ['やさしい','優しい'],['やさしく','優しく'],['しずかな','静かな'],['しずかに','静かに'],['きこえた','聞こえた'],['きこえて','聞こえて'],['みつけた','見つけた'],['たのしかった','楽しかった'],['たのしそうに','楽しそうに']
+];
+const PR_RUBY={ '頬張':'ほおば', '撫':'な', '掴':'つか', '吠':'ほ', '瞼':'まぶた', '睫毛':'まつげ', '覗':'のぞ', '擦':'す', '眺':'なが', '褒':'ほ', '叱':'しか' };
+const PR_RUBY_RE=new RegExp(Object.keys(PR_RUBY).join('|'),'g');
+function prKanji(s){ // 「」の外だけを変える
+  return String(s||'').split(/(「[^」]*」)/).map(part=>{ if(part[0]==='「') return part; let t=part; for(const [a,b] of PR_KANJI) if(t.indexOf(a)>=0) t=t.split(a).join(b); return t; }).join(''); }
+function prRubyHTML(escaped){ return escaped.replace(PR_RUBY_RE,k=>`<ruby>${k}<rt>${PR_RUBY[k]}</rt></ruby>`); }
+function prSentences(s){ return String(s||'').match(/[^。！？]+[。！？」]*|.+$/g)||[]; }
+// 同じ年の中で、すでに出た一文は省く（その出来事の文が一文だけなら、省かない）
+function prDedupe(s,seen){ const ss=prSentences(s); if(ss.length<2){ ss.forEach(x=>seen.add(x.trim())); return s; }
+  const keep=ss.filter((x,i)=>{ const k=x.trim(); if(k.length>=8&&seen.has(k)) return false; seen.add(k); return true; });
+  return keep.length?keep.join(''):s; }
+function prHTML(s,ctx){ let t=String(s||''); if(ctx&&ctx.seen) t=prDedupe(t,ctx.seen); t=prKanji(t); return prRubyHTML(esc(t)); }
+const PR_KNUM=['〇','一','二','三','四','五','六','七','八','九'];
+function prKanjiNum(n){ n=+n; if(n<=10) return n===10?'十':PR_KNUM[n]; if(n<20) return '十'+PR_KNUM[n-10]; if(n<100){ const a=Math.floor(n/10), b=n%10; return PR_KNUM[a]+'十'+(b?PR_KNUM[b]:''); } return String(n); }
+function prMonth(m){ return prKanjiNum(m)+'月'; }
+function prYearK(y){ return String(y).split('').map(d=>PR_KNUM[+d]).join(''); }
+function prTod(h){ h=+h; return h<4?'真夜中':h<6?'夜明け前':h<9?'朝':h<12?'午前':h<15?'昼下がり':h<18?'夕方':h<20?'日暮れ':'夜'; }
+// 生まれた日の書き出し：「1990年5月18日、19時14分。」→ 日記の一行「一九九〇年五月十八日、日暮れ。」＋「十九時十四分。」
+function prBirthLead(text){ const m=String(text||'').match(/^(\d{3,4})年(\d{1,2})月(\d{1,2})日、(\d{1,2})時(\d{1,2})分。/); if(!m) return null;
+  return { lead:`${prYearK(m[1])}年${prMonth(m[2])}${prKanjiNum(m[3])}日、${prTod(m[4])}。`, rest:`${prKanjiNum(m[4])}時${prKanjiNum(m[5])}分。`+text.slice(m[0].length) }; }
+
+// ---- 考察の一文（テーマごと）。事実は足さず、静かな気づきだけを書く ----
+const PR_REFL={
+ baby:['言葉を持たないうちから、人はもう、たくさんのことを受け取っているのかもしれない。','小さな体のどこに、これほどの力がしまわれているのだろう。','世界は、まず手ざわりと匂いでできているらしい。','何も知らない、ということは、何でも新しい、ということでもある。','眠りと目覚めのあいだで、毎日が少しずつ形になっていく。','この時期のことを、本人は覚えていない。それでも、確かにここにあった時間だった。','泣くことも笑うことも、まだ同じくらい大切な言葉だった。','小さな「できた」が、毎日どこかで生まれていた。'],
+ family:['家族というものは、言葉より先に、気配で伝わるのかもしれない。','同じ屋根の下にいても、見ている景色は少しずつ違う。それでいいのだと思う。','一緒に過ごした時間は、目立たない形で、後になって効いてくる。','近すぎて見えないものが、家族のあいだには多い。','誰かが待っていてくれる場所は、それだけで一つの答えなのかもしれない。','言わなかったことの中に、本当の気持ちがあることもある。','食卓を囲む時間は、思っているよりずっと短い。'],
+ school:['教室で学ぶことと、教室の外で学ぶことは、たいてい別のものだった。','正解のある問題ばかりではないことを、少しずつ知っていく。','分からない、と言えることも、一つの賢さなのかもしれない。','覚えたことの多くは忘れても、その日の空気だけは残る。','机の並ぶ部屋には、それぞれの小さな世界が詰まっていた。','学ぶというのは、世界の見え方が少し変わることらしい。'],
+ friend:['友だちとは、理由なく一緒にいられる相手のことかもしれない。','誰かと笑い合った記憶は、思いがけないときに支えになる。','分かり合えない日があっても、関係はそれだけで終わるものではない。','同じ時間を過ごした相手は、どこかで自分の一部になっていく。','言葉が少なくても通じ合える人が、世界にはいる。','人と人との距離は、近づいたり離れたりしながら続いていく。'],
+ love:['誰かを想うと、見慣れた景色まで違って見える。','好きという気持ちは、本人にもうまく説明できないものらしい。','心を開くことは、少しだけ怖くて、少しだけ嬉しい。','誰かと生きると決めることは、たぶん毎日決め直すことでもある。','愛情は、大きな言葉より、小さな気づかいの中に宿る。','一緒にいる理由は、ときどき、言葉にしない方がうまくいく。'],
+ work:['働くことは、生活のためであり、ときに自分を知るためでもある。','役割を果たす毎日の中で、人は少しずつ形を変えていく。','誰にも見えない努力が、たいていの仕事を支えている。','疲れて帰る道にも、その日なりの景色があった。','やりがいという言葉では、とても言い表せない日々がある。','誰かの役に立てたという実感は、静かに長く残る。'],
+ money:['お金の心配は、目に見えない重さで、暮らしの上にのしかかる。','足りない、という経験は、何が本当に必要かを教えてくれることもある。','豊かさの形は、家計簿の数字だけでは測れない。','やりくりの中にも、工夫と、ささやかな誇りがあった。','根拠のない「何とかなる」に、救われる夜もある。'],
+ loss:['いなくなった人は、思い出の中で、かえって近くなることがある。','別れは、一緒にいた時間の重さを、遅れて教えてくれる。','悲しみは消えるのではなく、少しずつ形を変えていくらしい。','言いそびれた言葉は、心のどこかにしまわれたまま残る。','失ったものの大きさは、残されたものの大きさでもある。','涙のあとの静けさにも、何かが宿っていた。'],
+ illness:['体が弱ると、当たり前だったことの有り難さが見えてくる。','誰かに看病される時間には、言葉にならない優しさがある。','健康なときには気づかない世界が、熱の向こうに広がっていた。','痛みは、体が何かを伝えようとしている声なのかもしれない。','回復していく日々は、一日ずつ、確かに明るくなっていった。'],
+ nature:['空や水や風は、いつも何も言わずに、そこにあった。','自然の中にいると、時間の流れ方が少し変わる。','季節の移り変わりは、人の気持ちよりも少しだけ確かだった。','小さな生き物にも、それぞれの一日があるらしい。','見上げた空の色を、なぜかずっと覚えていることがある。','雨の音には、心を静かにする何かがある。'],
+ move:['住む場所が変わると、自分の中の何かも、少しだけ入れ替わる。','新しい土地では、見るものすべてが少しずつ違って見えた。','故郷というものは、離れてから形になるのかもしれない。','知らない場所に立つと、人は少し素直になる。'],
+ joy:['嬉しい日は、たいてい何でもない日の顔をしてやって来る。','笑い声は、その場にいた全員の記憶を、少しだけ明るくする。','幸せは、振り返ったときに初めて名前がつくものらしい。','こういう日のために、人は毎日を重ねていくのかもしれない。','心が弾む瞬間は、短いからこそ、いつまでも残る。','小さな喜びを数えられる人は、たぶん強い。'],
+ sorrow:['うまくいかない日にも、明日はちゃんとやって来る。','つらい時間は、後になって、誰かの痛みを分かる力になることがある。','泣きたい夜を越えるたびに、人は少しずつ変わっていく。','思い通りにならないことの方が、人生にはずっと多い。','落ち込んだ心にも、やがて小さな光は差し込む。','弱さを知ることは、優しさの始まりなのかもしれない。'],
+ dream:['眠りの中で、人は別の誰かの人生を、少しだけ借りているのかもしれない。','夢で見た景色は、目覚めると、すぐに輪郭を失っていく。','知らない土地の夢は、どこか懐かしい匂いがした。','夢と現実の境目は、思っているより薄いのかもしれない。','目覚めたあとも、夢の中の誰かの声が、しばらく耳に残っていた。'],
+ calm:['何も起こらない一日にも、確かな手ざわりがある。','繰り返しの毎日の中で、人生の大部分は静かに過ぎていく。','振り返れば、こういう時間こそが、いちばん長かった。','特別ではない日々が、人の輪郭をつくっていく。','時間は、急ぐ人にも急がない人にも、同じように流れる。','ささやかな習慣の中に、その人らしさが宿る。']
+};
+const PR_THEMES=[['loss',/亡くな|葬|別れ|お墓|最期|この世を去/],['illness',/熱|病|入院|けが|怪我|医者|手術|看病/],['love',/恋|告白|デート|と結婚した|結婚を|恋人|プロポーズ|好きな人|好きです/],['money',/家計|借金|貧し|給料が|失業|職を失|仕事を失|暮らしが苦し/],['work',/仕事|職場|会社|上司|同僚|働|店を/],['school',/学校|先生|授業|試験|宿題|通知表|クラス|入学|卒業|教室/],['friend',/友だち|友人|親友|仲間|幼なじみ|同級生/],['move',/引っ越|旅|移り住|故郷|移住|上京/],['family',/母|父|祖母|祖父|姉|兄|弟|妹|家族|おばあちゃん|おじいちゃん/],['nature',/川で|川べり|海|山|雨の|雨が|虹|空に|空が|星|森|花が|花を|風が|雪|鳥が/]];
+function prHash(a,b){ let h=2166136261>>>0; const s=a+':'+b; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return h; }
+function prTheme(e,age){ const t=(e.text||'')+(e.feel||'')+(e.result||''); if(age<=2) return 'baby'; if(e.kind==='dream') return 'dream'; for(const [k,re] of PR_THEMES) if(re.test(t)) return k; const d=e.d||0; return d>=2?'joy':d<=-2?'sorrow':'calm'; }
+// その年の文脈：既出の文と、考察を添える出来事
+let PR_SEEN=new Set();
+function prReset(){ PR_SEEN=new Set(); }
+function proseYear(P,y){ const ctx={ seen:PR_SEEN, target:null, refl:'' }; if(!P||!y||!y.events) return ctx;
+  const h=prHash(P.seed,y.age); if(y.age>2&&h%4===0) return ctx; // 毎年ではなく、ところどころ
+  let best=null, bw=-1; y.events.forEach(e=>{ if(['birth','death','birthsit','fecho','meet'].includes(e.kind)) return; const w=Math.abs(e.d||0)+(e.big?3:0)+((e.feel||e.inner)?.5:0); if(w>bw){ bw=w; best=e; } });
+  if(!best) return ctx; const th=prTheme(best,y.age); const pool=PR_REFL[th]||PR_REFL.calm;
+  ctx.target=best; ctx.refl=pool[(prHash(P.seed,th)+y.age*5)%pool.length]; return ctx; }
+// ---- 段落にまとめる：短い出来事を、つなぎの言葉で一つの流れにする ----
+const PR_JOIN_SAME=['その頃、','同じ頃、','また、','そうして、','やがて、','かと思うと、','ほかにも、'], PR_JOIN_DOWN=['けれど、','ところが、','その一方で、'], PR_JOIN_UP=['それでも、','そのあと、','やがて、'];
+function prMergeable(e){ return !e.big&&!e.result&&!e.fr&&!['birth','death','birthsit','dream','meet','fecho','choice'].includes(e.kind); }
+let _prLastJ='';
+function prJoin(prev,e,k){ const t=String(e.text||''); if(/^(そして|でも|だが|けれど|しかし|それでも|その|また|やがて|ところが)/.test(t)) return t;
+  const h=prHash(t,k); const pd=prev.d||0, d=e.d||0; const pool=(pd>=1&&d<=-1)?PR_JOIN_DOWN:(pd<=-1&&d>=1)?PR_JOIN_UP:PR_JOIN_SAME; let j=pool[h%pool.length]; if(j===_prLastJ) j=pool[(h+1)%pool.length]; _prLastJ=j; return j+t; }
+function prOneSentence(e){ let s=String(e.text||''); if(e.feel) s+=String(e.feel); if(e.inner) s+=`「${e.inner}」`; return s; }
+// evs: その見出しのまとまりの出来事。evOne: ふつうの1件の表示。px: proseYear の文脈
+function proseGroupHTML(evs,px,evOne){ let o='', buf=[];
+  const flush=()=>{ if(!buf.length) return; if(buf.length===1){ o+=evOne(buf[0]); buf=[]; return; }
+    let s=prOneSentence(buf[0]); for(let i=1;i<buf.length;i++) s+=prJoin(buf[i-1],{ text:prOneSentence(buf[i]), d:buf[i].d },i);
+    const fresh=buf.some(e=>e.fresh), hasT=px&&px.target&&buf.some(e=>e.text===px.target.text)&&px.refl;
+    o+=`<div class="ev para ${fresh?'ev-new':''}"><p class="t">${prHTML(s,px)}</p>${hasT?`<p class="pr-ess">${esc(px.refl)}</p>`:''}</div>`; buf=[]; };
+  for(const e of evs){ if(prMergeable(e)){ buf.push(e); if(buf.length>=4) flush(); } else { flush(); o+=evOne(e); } }
+  flush(); return o; }
 //---------------------------------------------------------------------
 //
 // QR Code Generator for JavaScript
@@ -14547,7 +14690,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-album',`思い出のアルバム<span class="hm-n">${photos.length}枚</span>`, photos.length?`<div class="hm-photos">${photos.slice(-3).map(ph=>photoHTML(P,L,ph,true)).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。</p>', photos.length?`<button class="linkish" type="button" id="hmAlbum">アルバムをひらく</button>`:'')}
     ${homeTile('hm-belief','心に生まれた観念', bel.length?`<ul class="hm-list">${bel.map(b=>`<li><span class="hm-a">${b.age}歳</span>「${esc(b.core||b.text||'')}」</li>`).join('')}</ul>`:'<p class="tiny muted">まだ、心に残る思い込みは生まれていません。</p>', arc.length?`<button class="linkish" type="button" id="hmKmap">本棚の人生とくらべる（観念の地図）</button>`:'')}
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
-    ${homeTile('hm-friends',`Group Soul /紹介でつながった人たち<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, `<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
+    ${homeTile('hm-friends',`Group Soul /紹介でつながった人たち<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, (typeof gsTreeHTML==='function'?gsTreeHTML(fr):'')+`<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
     ${homeTile('hm-shelf',`わたしの本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は「思い出のLIFE BOOK」になって、ここに並びます。</p>')}
     ${typeof borrowTileHTML==='function'?homeTile('hm-borrow',`友だちからLIFE BOOKを借りる<span class="hm-n">${store.get(KEY_LOAN,[]).length}冊</span>`,borrowTileHTML()):''}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
@@ -14722,7 +14865,7 @@ function reincarnate(){
 }
 
 // --- 描画 ---
-function render(){ RUBY_PL=null; const ak=viewing?('v'+viewing.seed+'|'+(viewing.loan||'')):(st?(st.stage||'')+'|'+page:'intro'); if(ak!==ART_KEY||ART_NEW){ ART_SALT=1+Math.floor(Math.random()*90000); ART_KEY=ak; ART_NEW=false; } render1(); try{ const pl=RUBY_PL||(cur&&!viewing&&st?[cur.P,cur.L]:null); if(pl&&typeof rubyApply==='function') rubyApply(document.getElementById('app'),pl[0],pl[1]); }catch(e){ console.warn(e); } try{ if(cur&&!viewing&&st&&st.stage!=='funeral'&&st.stage!=='report'&&typeof meetOverlay==='function') meetOverlay(cur.P,cur.L,clock()); }catch(e){ console.warn(e); } }
+function render(){ RUBY_PL=null; if(typeof prReset==='function') prReset(); const ak=viewing?('v'+viewing.seed+'|'+(viewing.loan||'')):(st?(st.stage||'')+'|'+page:'intro'); if(ak!==ART_KEY||ART_NEW){ ART_SALT=1+Math.floor(Math.random()*90000); ART_KEY=ak; ART_NEW=false; } render1(); try{ const pl=RUBY_PL||(cur&&!viewing&&st?[cur.P,cur.L]:null); if(pl&&typeof rubyApply==='function') rubyApply(document.getElementById('app'),pl[0],pl[1]); }catch(e){ console.warn(e); } try{ if(cur&&!viewing&&st&&st.stage!=='funeral'&&st.stage!=='report'&&typeof meetOverlay==='function') meetOverlay(cur.P,cur.L,clock()); }catch(e){ console.warn(e); } }
 setInterval(()=>{ try{ if(cur&&!viewing&&st&&st.stage!=='funeral'&&st.stage!=='report'&&typeof meetOverlay==='function'){ meetOverlay(cur.P,cur.L,clock()); navSync(); } }catch(e){} },45000);
 let RUBY_PL=null, VIEW_CACHE=null;
 function render1(){
@@ -14800,11 +14943,12 @@ function profileFacts(P,age){
 }
 
 function seasonLabel(i,cid){ const cl=climateOf(cid); return cl==='n'?SEASON_NAME[i]:cl==='s'?['秋','冬','春','夏'][i]:['1〜3月ごろ','4〜6月ごろ','7〜9月ごろ','10〜12月ごろ'][i]; }
-function evHTML(e){
-  return `<div class="ev ${e.fresh?'ev-new':''} ${e.big?'big':''} ${e.kind==='death'?'death':''} k-${e.kind}"><p class="t">${esc(e.text)}</p>${e.feel?`<p class="f">${esc(e.feel)}</p>`:''}${e.kind==='dream'?(e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:'')+(e.result?`<p class="rs">${esc(e.result)}</p>`:''):(e.result?`<p class="rs">${esc(e.result)}</p>`:'')+(e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:'')}${e.fr?`<p class="fr-tag">紹介でつながった人：${esc(e.fr)}さんの人生の Channel</p>`:''}</div>`;
+function evHTML(e,px){ const T=s=>px&&typeof prHTML==='function'?prHTML(s,px):esc(s); let lead='', txt=e.text; if(px&&e.kind==='birth'&&typeof prBirthLead==='function'){ const bl=prBirthLead(e.text); if(bl){ lead=`<p class="pr-date">${esc(bl.lead)}</p>`; txt=bl.rest; } }
+  const refl=px&&px.target&&px.target.text===e.text&&px.refl?`<p class="pr-ess">${esc(px.refl)}</p>`:'';
+  return `<div class="ev ${e.fresh?'ev-new':''} ${e.big?'big':''} ${e.kind==='death'?'death':''} k-${e.kind}">${lead}<p class="t">${T(txt)}</p>${e.feel?`<p class="f">${T(e.feel)}</p>`:''}${e.kind==='dream'?(e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:'')+(e.result?`<p class="rs">${T(e.result)}</p>`:''):(e.result?`<p class="rs">${T(e.result)}</p>`:'')+(e.inner?`<p class="inner">「${esc(e.inner)}」</p>`:'')}${refl}${e.fr?`<p class="fr-tag">紹介でつながった人：${esc(e.fr)}さんの人生の Channel</p>`:''}</div>`;
 }
 function yearHTML(y, isNew){
-  return `<div class="year ${isNew?'fade':''}"><div class="yage">${y.age===0?'0':y.age}<small>${ageSpan(cur&&cur.P?cur.P:{year:y.year-y.age,month:1},y.age)}</small></div><div>${isNew?'<div class="new-badge">あたらしい出来事</div>':''}${cur&&cur.P?yearArt(cur.P,cur.L,y):''}${(()=>{ let last=null, o=''; const cid=cur&&cur.P?cur.P.countryId:'jp'; for(const e of y.events){ if(e._mo!=null && e.kind!=='death' && e.kind!=='birth' && e.kind!=='birthsit' && e._mo!==last){ o+=`<div class="season-h">${e._mo}月</div>`; last=e._mo; } else if(e._mo==null && e.season!=null && e.kind!=='death' && e.kind!=='birth' && e.season!==last){ o+=`<div class="season-h">${seasonLabel(e.season,cid)}</div>`; last=e.season; } o+=evHTML(e); } return o; })()}${y.mood&&!y.events.some(e=>e.kind==='death')?`<p class="mood">${esc(y.mood)}</p>`:''}${y.egs?egsTagHTML(y.egs):''}</div></div>`;
+  return `<div class="year ${isNew?'fade':''}"><div class="yage">${y.age===0?'0':y.age}<small>${ageSpan(cur&&cur.P?cur.P:{year:y.year-y.age,month:1},y.age)}</small></div><div>${isNew?'<div class="new-badge">あたらしい出来事</div>':''}${cur&&cur.P?yearArt(cur.P,cur.L,y):''}${(()=>{ let last=null, o=''; const cid=cur&&cur.P?cur.P.countryId:'jp'; const PX=cur&&cur.P?cur.P:(typeof viewing!=='undefined'&&viewing&&viewing._P)||null; const px=typeof proseYear==='function'&&PX?proseYear(PX,(cur&&cur.P===PX&&cur.L&&cur.L.years.find(a=>a.age===y.age))||y):null; let grp=[]; const fl=()=>{ if(!grp.length) return; o+=(px&&typeof proseGroupHTML==='function')?proseGroupHTML(grp,px,e=>evHTML(e,px)):grp.map(e=>evHTML(e,px)).join(''); grp=[]; }; for(const e of y.events){ if(e._mo!=null && e.kind!=='death' && e.kind!=='birth' && e.kind!=='birthsit' && e._mo!==last){ fl(); o+=`<div class="season-h">${typeof prMonth==='function'?prMonth(e._mo):e._mo+'月'}</div>`; last=e._mo; } else if(e._mo==null && e.season!=null && e.kind!=='death' && e.kind!=='birth' && e.season!==last){ fl(); o+=`<div class="season-h">${seasonLabel(e.season,cid)}</div>`; last=e.season; } grp.push(e); } fl(); return o; })()}${y.mood&&!y.events.some(e=>e.kind==='death')?`<p class="mood">${esc(y.mood)}</p>`:''}${y.egs?egsTagHTML(y.egs):''}</div></div>`;
 }
 
 
