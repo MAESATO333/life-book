@@ -11873,14 +11873,25 @@ function growthSignHTML(P,L,c){ const now=snapNow(P,L,c); let s=d2Get(KEY_SNAP,n
   if(now.bel>base.bel) ch.push(['bel',`心に新しい観念が ${now.bel-base.bel}こ 生まれた`]);
   if(now.ev>base.ev) ch.push(['ev',`出来事が ${now.ev-base.ev}こ 起きた`]);
   if(!ch.length) return `<p>前に見た日（${days}日前）から、まだ大きな変化はありません。</p>`;
-  return `<p class="gs-lead">前に見た日（${days}日前）から</p><ul class="gs-list">${ch.map(([kd,x])=>`<li><span class="gs-tx">${esc(x)}</span>${gsCheerHTML(P.seed+'|'+base.t+'|'+kd)}</li>`).join('')}</ul>`; }
+  return `<p class="gs-lead">前に見た日（${days}日前）から</p><ul class="gs-list">${ch.map(([kd,x])=>`<li><span class="gs-tx">${esc(x)}</span>${gsCheerHTML(P.seed+'|'+kd)}</li>`).join('')}</ul>`; }
 // 成長のしるしに、Higher Self から小さな応援を贈る（ひとつのしるしに1回。押すと、かわいい印が残る）
 const KEY_GSCHEER='hitotsu.gsCheer';
 const GS_CHEERS=[['いいね！','💗'],['やった！','🎉'],['がんばったね','🌸']];
-function gsCheerHTML(id){ const m=d2Get(KEY_GSCHEER,{}); const v=m[id];
+// 押した応援は、同じ種類のしるし（背・出会った人・出来事など）に7日間残る。数字が変わっても、日が変わっても消えない
+const GS_KEEP=7*864e5;
+const GS_KIND_RE={ age:/年をとって/, h:/背が/, ppl:/出会った人/, bel:/観念/, ev:/出来事/ };
+function gsCheerGet(id){ const m=d2Get(KEY_GSCHEER,{}); const v=m[id]; const now=Date.now();
+  if(v&&typeof v==='object'&&now-v.t<GS_KEEP) return v.v;
+  // 前の版で押したもの（キーの形がちがう）も、7日以内なら引きつぐ
+  const kd=String(id).split('|').pop(), re=GS_KIND_RE[kd]; if(!re) return null;
+  for(const k in m){ const x=m[k]; if(typeof x!=='number') continue; const d=k.match(/^(\d{4})-(\d{2})-(\d{2})\|(.*)$/);
+    if(d&&re.test(d[4])&&now-new Date(+d[1],+d[2]-1,+d[3]).getTime()<GS_KEEP) return x;
+    if(!d&&k.endsWith('|'+kd)) return x; }
+  return null; }
+function gsCheerHTML(id){ const v=gsCheerGet(id);
   if(v!=null&&GS_CHEERS[v]){ const c=GS_CHEERS[v]; return `<span class="gs-got" aria-label="Higher Self から ${esc(c[0])}"><small>Higher Self</small><b aria-hidden="true">${c[1]}</b>${esc(c[0])}</span>`; }
   return `<span class="gs-cheer" data-gsid="${esc(id)}"><small class="gs-hs">Higher Self より</small>${GS_CHEERS.map((c,i)=>`<button type="button" class="gs-cb" data-gscheer="${i}" aria-label="Higher Self から「${esc(c[0])}」を贈る"><span aria-hidden="true">${c[1]}</span>${esc(c[0])}</button>`).join('')}</span>`; }
-document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-gscheer]'); if(!b) return; try{ const w=b.closest('[data-gsid]'); if(!w) return; const id=w.dataset.gsid; const m=d2Get(KEY_GSCHEER,{}); if(m[id]==null){ m[id]=+b.dataset.gscheer; const ks=Object.keys(m); if(ks.length>300) delete m[ks[0]]; d2Set(KEY_GSCHEER,m); }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-gscheer]'); if(!b) return; try{ const w=b.closest('[data-gsid]'); if(!w) return; const id=w.dataset.gsid; const m=d2Get(KEY_GSCHEER,{}); m[id]={ v:+b.dataset.gscheer, t:Date.now() }; const ks=Object.keys(m); if(ks.length>300) delete m[ks[0]]; d2Set(KEY_GSCHEER,m);
   const t=document.createElement('span'); t.innerHTML=gsCheerHTML(id); const n=t.firstElementChild; n.classList.add('gs-pop'); w.replaceWith(n); }catch(_){} });
 // ---- ホームにまとめて置く ----
 function dailyPlusHTML(P,L,age,c){ if(c.dead) return '';
