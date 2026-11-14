@@ -16485,7 +16485,10 @@ function mpColors(bid){ const b=PB_ALL[bid]; if(!b) return []; const out=[{ id:b
   for(const v of Object.values(PB_ALL)){ if(!v.id.startsWith(bid+'_')||!v.name.startsWith(b.name)) continue; let l=v.name.slice(b.name.length).replace(/^（/,'').replace(/）$/,''); if(!l||MP_NOTCOL.test(l)) continue; if(MP_POINTED.has(bid)&&!/ポイント/.test(l)) continue; if(out.some(x=>x.l===l)) continue; out.push({ id:v.id, l, c:v.c, c2:v.c2 }); }
   for(const [id,l] of (MP_FOLD[bid]||[])){ const v=PB_ALL[id]; if(v&&!out.some(x=>x.l===l)) out.push({ id, l, c:v.c, c2:v.c2 }); }
   return out.slice(0,7); }
-function mpBreeds(kind){ const a={ dog:PB_DOG, cat:PB_CAT, bird:PB_BIRD, rabbit:PB_RABBIT, fish:PB_FISH }[kind]||[]; return a.filter(x=>!MP_HIDE.has(x[0])).map(x=>({ id:x[0], name:x[1] })).sort((p,q)=>(/雑種|の猫$|^白猫$|^黒猫$/.test(p.name)?1:0)-(/雑種|の猫$|^白猫$|^黒猫$/.test(q.name)?1:0)); }
+// Channel の国・時代で、ふつうに見かける種類か（例：アラブの国に柴犬は、ふつうはいない）
+function mpPlace(){ try{ if(typeof cur==='undefined'||!cur||viewing||typeof st==='undefined'||!st) return null; const P=cur.P, c=clock(); return { style:typeof archStyle==='function'?archStyle(P):(P.countryId==='jp'?'jp':'eu'), year:(P.year||1990)+Math.floor(c.age||0), country:(typeof COUNTRIES!=='undefined'&&(COUNTRIES.find(x=>x.id===P.countryId)||{}).name)||'' }; }catch(e){ return null; } }
+function mpLocal(id,pl){ pl=pl===undefined?mpPlace():pl; if(!pl) return true; const b=PB_ALL[id]; if(!b) return true; if(b.yr&&pl.year<b.yr) return false; const h=b.home?b.home.split(' '):[]; return !h.length||h.includes(pl.style); }
+function mpBreeds(kind){ const a={ dog:PB_DOG, cat:PB_CAT, bird:PB_BIRD, rabbit:PB_RABBIT, fish:PB_FISH }[kind]||[]; const pl=mpPlace(); return a.filter(x=>!MP_HIDE.has(x[0])).map(x=>({ id:x[0], name:x[1], loc:mpLocal(x[0],pl) })).sort((p,q)=>(/雑種|の猫$|^白猫$|^黒猫$/.test(p.name)?1:0)-(/雑種|の猫$|^白猫$|^黒猫$/.test(q.name)?1:0)); }
 function mpHuman(p){ const a=mpAge(p); if(p.kind!=='dog'&&p.kind!=='cat') return null; const big=p.kind==='dog'&&((PB_ALL[p.breed]||{}).k||1)>=1.25; return Math.round(a<1?a*(big?12:15):a<2?(big?12:15)+(a-1)*(big?10:9):(big?22:24)+(a-2)*(big?7:4)); }
 function mpBreedName(p){ const v=PB_ALL[p.breed]||{}; if(p.base&&PB_ALL[p.base]) return PB_ALL[p.base].name+(p.col?'（'+p.col+'）':''); return v.name||''; }
 function mpAge(p){ return Math.max(0,(Date.now()-p.at)/MP_MPY); }
@@ -16517,42 +16520,42 @@ function mpTileHTML(){ const p=mpGet();
   return `<div class="mp-card" data-mp="open" role="button" tabindex="0">${mpArt(p,st[1])}<div class="mp-info"><b>${esc(p.name)}</b><small>${esc(b.name||'')}</small>
     <span class="mp-day">${gone?`🌈 虹の橋をわたりました（${p.life}歳）`:`うちに来て <b>${mpDays(p)}</b> 日目`}</span>${gone?'':`<span class="mp-age">${a}歳・${st[0]}${mpHuman(p)!=null?`（人なら約${mpHuman(p)}歳）`:''}</span>`}<span class="mp-love">💗 愛情 ${p.love||0}</span></div></div>
     <button type="button" class="linkish" data-mp="open">${esc(p.name)}のページをひらく</button>`; }
-function mpAnniv(p){ const d=mpDays(p); const m={7:'うちに来て1週間！',30:'うちに来て30日！',100:'うちに来て100日の記念日！',365:'うちに来て1年！'}[d]; if(m) return `🎉 ${m} ${p.name}と、これからもいっしょに。`; const a=Math.floor(mpAge(p)); if(a>=1&&p.lastBd!==a&&!mpGone(p)){ p.lastBd=a; p.anMsg={ d:dayKey(), t:`🎂 ${p.name}が${a}歳になりました！ おめでとう。` }; mpSet(p); } return p.anMsg&&p.anMsg.d===dayKey()?p.anMsg.t:''; }
+function mpAnniv(p){ const d=mpDays(p); const m={7:'うちに来て1週間！',30:'うちに来て30日！',100:'うちに来て100日の記念日！',365:'うちに来て1年！',500:'うちに来て500日！',1000:'うちに来て1000日！'}[d]; if(m&&p.lastAnD!==d&&!mpGone(p)){ p.lastAnD=d; mpLog(p,m.replace(/！$/,'。'),'anniv'); mpSet(p); } if(m) return `🎉 ${m} ${p.name}と、これからもいっしょに。`; const a=Math.floor(mpAge(p)); if(a>=1&&p.lastBd!==a&&!mpGone(p)){ p.lastBd=a; p.anMsg={ d:dayKey(), t:`🎂 ${p.name}が${a}歳になりました！ おめでとう。` }; mpLog(p,`${a}歳の誕生日。`,'bd'); mpSet(p); } return p.anMsg&&p.anMsg.d===dayKey()?p.anMsg.t:''; }
 function mpOpen(view){ let d=document.getElementById('mpDlg'); if(!d){ d=document.createElement('div'); d.id='mpDlg'; d.className='mp-ov'; document.body.appendChild(d); }
   d.hidden=false; d.innerHTML=`<div class="mp-box" role="dialog" aria-modal="true" aria-label="うちのペット">${view==='new'||!mpGet()?mpNewHTML():mpPageHTML()}</div>`; d.onclick=e=>{ if(e.target===d) mpClose(); }; }
 function mpClose(){ const d=document.getElementById('mpDlg'); if(d) d.hidden=true; try{ render(); }catch(_){} }
 let _mpPick={ kind:'dog', breed:null, col:null };
 function mpColHTML(){ const cs=mpColors(_mpPick.breed); if(!cs.some(x=>x.id===_mpPick.col)) _mpPick.col=cs[0]&&cs[0].id;
   return `<p class="tiny muted">3. 毛の色を選んでください（${cs.length}色）</p><div class="mp-cols">${cs.map(x=>`<button type="button" class="mp-col${x.id===_mpPick.col?' on':''}" data-mpc="${esc(x.id)}"><i style="background:linear-gradient(135deg,${x.c} 55%,${x.c2} 55%)"></i>${esc(x.l)}</button>`).join('')}</div><div class="mp-prev">${petPortraitSVG(_mpPick.col,'')}</div>`; }
-function mpNewHTML(){ const k=_mpPick.kind, list=mpBreeds(k); if(!_mpPick.breed||!list.some(x=>x.id===_mpPick.breed)) _mpPick.breed=list[0]&&list[0].id;
+function mpNewHTML(){ const k=_mpPick.kind, list=mpBreeds(k), loc=list.filter(x=>x.loc), far=list.filter(x=>!x.loc), pl=mpPlace(); if(!_mpPick.breed||!list.some(x=>x.id===_mpPick.breed)) _mpPick.breed=(loc[0]||list[0]||{}).id;
   const nm=(PET_SPECIES.find(s=>s.id===k)||{names:['ポチ']}).names;
   return `<h3 class="mp-h">🐾 ペットをお迎えする</h3><p class="tiny muted">1. どの動物にしますか？</p><div class="mp-kinds">${MP_KIND.map(x=>`<button type="button" class="mp-k${x[0]===k?' on':''}" data-mpk="${x[0]}">${x[2]} ${x[1]}</button>`).join('')}</div>
-  <p class="tiny muted">2. 種類を選んでください（本当にいる種類です）</p><select id="mpBreed" class="mp-sel">${list.map(x=>`<option value="${x.id}"${x.id===_mpPick.breed?' selected':''}>${esc(x.name)}</option>`).join('')}</select>
+  <p class="tiny muted">2. 種類を選んでください（本当にいる種類です）${pl&&far.length?`<br>Channel の国${pl.country?'（'+esc(pl.country)+'）':''}で、ふつうに見かける種類を先に出しています。`:''}</p><select id="mpBreed" class="mp-sel">${(o=>pl&&far.length?`<optgroup label="Channel の国でよく見かける種類">${loc.map(o).join('')}</optgroup><optgroup label="ほかの国の種類（Channel の人生の記録には、種類は書かれません）">${far.map(o).join('')}</optgroup>`:list.map(o).join(''))(x=>`<option value="${x.id}"${x.id===_mpPick.breed?' selected':''}>${esc(x.name)}</option>`)}</select>
   <div id="mpColBox">${mpColHTML()}</div>
   <p class="tiny muted">4. 名前をつけてください</p><input id="mpName" class="mp-in" maxlength="12" placeholder="${esc(nm[0])}" value="">
   <div class="mp-row"><button type="button" class="mp-btn" data-mp="adopt">家族に迎える</button><button type="button" class="linkish" data-mp="close">やめる</button></div>`; }
-function mpPageHTML(){ const p=mpGet(); const gone=mpGone(p), st=mpStage(p), b={ name:mpBreedName(p) }, a=Math.min(mpAge(p),p.life), done=mpToday(p);
+function mpPageHTML(){ const p=mpGet(); if(mpStageLog(p)) mpSet(p); if(p.per==null){ mpPer(p); mpSet(p); } const per=mpPer(p); const gone=mpGone(p), st=mpStage(p), b={ name:mpBreedName(p) }, a=Math.min(mpAge(p),p.life), done=mpToday(p);
   const days=[]; const t=new Date(); for(let i=13;i>=0;i--){ const x=new Date(t); x.setDate(t.getDate()-i); days.push(x); } const S=new Set(Object.keys(p.acts||{}));
   const W='日月火水木金土'; const ph=(p.photos||[]).slice().reverse();
-  return `<div class="mp-top">${mpArt(p,st[1])}<div><h3 class="mp-h">${esc(p.name)}</h3><p class="mp-sub">${esc(b.name||'')}</p>
+  return `<div class="mp-top">${mpArt(p,st[1])}<div><h3 class="mp-h">${esc(p.name)}</h3><p class="mp-sub">${esc(b.name||'')}</p><span class="mp-per" title="${esc(per.d)}">性格：${esc(per.n)}</span>
     <p class="mp-big">${gone?`🌈 ${esc(p.name)}は、${p.life}歳で虹の橋をわたりました。`:`うちに来て <b>${mpDays(p)}</b> 日目`}</p>
     ${gone?'':`<p class="mp-sub">${Math.floor(a)}歳${Math.floor((a%1)*12)}か月・${st[0]}${mpHuman(p)!=null?`（人の年齢なら約${mpHuman(p)}歳）`:''}</p>`}<p class="mp-sub">💗 愛情 ${p.love||0}　📷 写真 ${(p.photos||[]).length}枚</p></div></div>
   ${gone?`<div class="mp-rb"><p>🌈 ${esc(p.name)}は、${p.life}歳まで、たくさんの愛情に包まれて生きました。</p><p>いまは虹の橋のたもとで、元気に走りまわっています。いつかまた会える日まで、ゆっくり待っていてくれるそうです。</p><p>💗 もらった愛情 ${p.love||0}　📷 思い出の写真 ${(p.photos||[]).length}枚　🏠 いっしょにいた日 ${mpTogether(p)}日</p><p class="tiny">思い出のアルバムは、ずっとここに残ります。</p></div>`:`${(w=>w.all.length?`<p class="tiny muted">あなた（Higher Self）が、だれにお願いしますか？${w.all.some(x=>x.k==='ch')?'':'（Channel は、まだ小さくて動けません。3歳になったら、お世話できます）'}</p><div class="mp-who">${w.all.map(x=>`<button type="button" class="mp-w${x.k===w.k?' on':''}" data-mpw="${esc(x.k)}">${esc(x.call==='Channel'?x.n+'（Channel）':x.call+'の'+x.n)}</button>`).join('')}</div>`:'')(mpWho())}<div class="mp-acts">${Object.keys(MP_ACT).map(k=>`<button type="button" class="mp-a${done.includes(k)?' done':''}" data-mpa="${k}">${MP_ACT[k][1]} ${k==='play'&&p.kind==='dog'?'さんぽに行ってあげて':MP_ACT[k][0]}${done.includes(k)?' ✓':''}</button>`).join('')}<button type="button" class="mp-a mp-cam" data-mp="photo">📷 写真をとる</button></div>
-  ${(an=>an?`<p class="mp-anniv">${esc(an)}</p>`:'')(mpAnniv(p))}<p class="mp-msg" id="mpMsg" role="status">${esc(p.msg||'きょうも、見守ってあげてね。')}</p>`}
+  ${mpFoodHTML(p)}${(an=>an?`<p class="mp-anniv">${esc(an)}</p>`:'')(mpAnniv(p))}${mpAnnivHTML(p)}<p class="mp-msg" id="mpMsg" role="status">${esc(p.msg||'きょうも、見守ってあげてね。')}</p><p class="tiny muted">${esc(p.name)}は、${esc(per.d)}。</p>${mpChatHTML(p)}`}
   <p class="tiny muted">見守った日</p><div class="stp-row">${days.map(x=>{ const on=S.has(dayKey(x)); return `<span class="stp ${on?'on':''} ${dayKey(x)===dayKey()?'today':''}"><small>${W[x.getDay()]}</small>${on?'<i aria-hidden="true"></i>':x.getDate()}</span>`; }).join('')}</div>
-  <h4 class="mp-h4">📷 ${esc(p.name)}のアルバム</h4>${ph.length?`<div class="mp-album">${ph.map(x=>`<figure class="mp-ph">${mpArt(p,x.k)}<figcaption>${esc(x.c)}</figcaption></figure>`).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。「写真をとる」を押すと、いまの姿がアルバムに残ります。</p>'}
+  ${mpDiaryHTML(p)}<h4 class="mp-h4">📷 ${esc(p.name)}のアルバム</h4>${ph.length?`<div class="mp-album">${ph.map(x=>`<figure class="mp-ph">${mpArt(p,x.k)}<figcaption>${esc(x.c)}</figcaption></figure>`).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。「写真をとる」を押すと、いまの姿がアルバムに残ります。</p>'}
   <div class="mp-row">${gone?`<button type="button" class="mp-btn" data-mp="again">新しい家族を迎える</button>`:''}<button type="button" class="linkish" data-mp="close">もどる</button></div>
   <p class="mp-src">寿命の目安：犬の平均は約14.6歳、猫は約15.8歳（日本ペットフード協会 2023年）。この中では、約1か月で1歳、年をとります。</p>`; }
 function mpAdopt(){ const k=_mpPick.kind, br=_mpPick.col||(document.getElementById('mpBreed')||{}).value||_mpPick.breed; const inp=document.getElementById('mpName'); let nm=(inp&&inp.value||'').trim().slice(0,12)||(inp&&inp.placeholder)||'ポチ';
   const kk=(PB_ALL[br]||{}).k||1; const L=k==='dog'?(kk>=1.25?[10,13]:kk<=.8?[13,17]:[12,15]):(MP_LIFE[k]||[10,14]); const life=L[0]+Math.floor(Math.random()*(L[1]-L[0]+1));
   let chS=null, chA=null; try{ if(typeof st!=='undefined'&&st&&cur&&!viewing){ const c=clock(); if(!c.dead){ chS=st.seed; chA=c.ageF||c.age; } } }catch(e){}
-  const cl=mpColors(_mpPick.breed).find(x=>x.id===br); mpSet({ kind:k, breed:br, base:_mpPick.breed, col:cl?cl.l:'', name:nm, at:Date.now(), life, chS, chA, love:0, acts:{}, photos:[], msg:`${nm}が、家族になりました！ これから、よろしくね。` }); try{ if(typeof load==='function'&&typeof st!=='undefined'&&st) load(); }catch(_){} mpOpen(); }
-function mpAct(k){ const p=mpGet(); if(!p||mpGone(p)) return; const d=dayKey(); p.acts=p.acts||{}; const a=p.acts[d]||[]; if(a.includes(k)){ p.msg=`きょうは、もう${MP_ACT[k][0].replace(/て$/,'た')}よ。また明日ね。`; }
+  const cl=mpColors(_mpPick.breed).find(x=>x.id===br); mpSet({ kind:k, breed:br, base:_mpPick.breed, col:cl?cl.l:'', name:nm, at:Date.now(), life, chS, chA, love:0, acts:{}, photos:[], per:Math.floor(Math.random()*MP_PER.length), diary:[{ t:Date.now(), x:`${nm}が、うちに来た。`, k:'in' }], msg:`${nm}が、家族になりました！ これから、よろしくね。` }); try{ if(typeof load==='function'&&typeof st!=='undefined'&&st) load(); }catch(_){} mpOpen(); }
+function mpAct(k){ const p=mpGet(); if(!p||mpGone(p)) return; const d=dayKey(); if(k==='food'&&!(p.acts&&(p.acts[d]||[]).includes('food'))){ _mpFoodOpen=!_mpFoodOpen; _mpGiftMode=false; mpOpen(); return; } p.acts=p.acts||{}; const a=p.acts[d]||[]; if(a.includes(k)){ p.msg=`きょうは、もう${MP_ACT[k][0].replace(/て$/,'た')}よ。また明日ね。`; }
   else { a.push(k); p.acts[d]=a; p.love=(p.love||0)+1; const L=k==='play'&&p.kind==='dog'?MP_WALK:MP_ACT[k][2]; const w=mpWho(); p.msg=L[Math.floor(Math.random()*L.length)].replace(/\{p\}/g,p.name).replace(/\{w\}/g,mpWhoName(w))+' 💗+1'; }
   const ks=Object.keys(p.acts).sort(); if(ks.length>400) ks.slice(0,ks.length-400).forEach(x=>delete p.acts[x]); mpSet(p); mpOpen(); }
 function mpPhoto(){ const p=mpGet(); if(!p||mpGone(p)) return; const st=mpStage(p), a=mpAge(p), t=new Date();
   p.photos=p.photos||[]; p.photos.push({ t:Date.now(), k:st[1], c:`${t.getFullYear()}年${t.getMonth()+1}月${t.getDate()}日・うちに来て${mpDays(p)}日目・${Math.floor(a)}歳（${st[0]}）` }); if(p.photos.length>60) p.photos=p.photos.slice(-60);
-  p.msg=`パシャ！ ${p.name}の写真を、アルバムに残しました。`; mpSet(p); mpOpen(); }
+  p.msg=`パシャ！ ${p.name}の写真を、アルバムに残しました。`; mpLog(p,`写真をとった（${st[0]}のころ）。`,'photo'); mpSet(p); mpOpen(); }
 function mpAgain(){ const p=mpGet(); if(p){ try{ const a=JSON.parse(localStorage.getItem(MP_PAST)||'[]'); a.push(p); localStorage.setItem(MP_PAST,JSON.stringify(a.slice(-10))); }catch(e){} } try{ localStorage.removeItem(MP_KEY); }catch(e){} mpOpen('new'); }
 document.addEventListener('click',e=>{ const t=e.target.closest&&e.target.closest('[data-mp],[data-mpa],[data-mpk],[data-mpc],[data-mpw]'); if(!t) return;
   if(t.dataset.mpc){ _mpPick.col=t.dataset.mpc; const bx=document.getElementById('mpColBox'); if(bx) bx.innerHTML=mpColHTML(); return; }
@@ -16584,15 +16587,141 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 
 // Channel の Life Record にも、うちのペットのことを書く（迎えた時の Channel の年から。表示だけ）
 function mpLifeApply(P,L){ const p=mpGet(); if(!p||!L||L._mp||p.chS==null||typeof st==='undefined'||!st||P.seed!==st.seed||p.chS!==st.seed) return; L._mp=1;
-  // ペットは約1か月で1歳、Channel は約2.5日で1歳。ペットが元気なあいだ、Channel の物語の中でも、ずっと家族でいる。
-  const a0=Math.floor(p.chA), b=PB_ALL[p.breed]||{}; const H=k=>pbHash(String(p.at)+'|'+k);
+  // Channel の人生には、ほんの少しだけ書く（人生の出来事や結果は、何も変えない）。
+  // その国でふつうに見かけない種類なら、種類の名前は書かず「犬」「猫」とだけ書く（例：アラブの国で柴犬、とは書かない）。
+  const a0=Math.floor(p.chA); const H=k=>pbHash(String(p.at)+'|'+k);
   const realEnd=p.at+p.life*MP_MPY; const chAgeAt=t=>p.chA+(t-p.at)/(typeof msPerYear==='function'?msPerYear(P):2.5*864e5);
-  const end=Math.min(Math.floor(chAgeAt(realEnd)),P.deathAge);
-  const add=(age,ev)=>{ const y=L.years.find(y=>y.age===age); if(y) y.events.splice(H('pos'+age+ev.text.length)%(y.events.length+1),0,Object.assign({ feel:'', inner:null, d:2, season:H('s'+age)%4 },ev)); };
-  add(a0,{ kind:'pet', big:true, d:7, text:`Higher Self が見守る${b.name||''}の${p.name}が、家族になった。`, feel:`${p.name}が来てから、家の中が少しにぎやかになった。` });
+  const end=Math.min(Math.floor(chAgeAt(Math.min(realEnd,Date.now()+400*MP_DAY))),P.deathAge);
+  const sp={ dog:'犬', cat:'猫', bird:'小鳥', rabbit:'うさぎ', fish:'金魚' }[p.kind]||'ペット';
+  const loc=mpLocal(p.base||p.breed,{ style:typeof archStyle==='function'?archStyle(P):'eu', year:(P.year||1990)+a0 }); const kind=loc?(mpBreedName(p).replace(/（.*$/,'')||sp):sp;
+  const used=new Set(); const add=(age,ev)=>{ if(age<a0||age>=P.deathAge||used.has(age)) return; const y=L.years.find(y=>y.age===age); if(!y) return; used.add(age); y.events.splice(H('pos'+age+ev.text.length)%(y.events.length+1),0,Object.assign({ feel:'', inner:null, d:2, season:H('s'+age)%4 },ev)); };
+  add(a0,{ kind:'pet', big:true, d:6, text:`${kind}の${p.name}が、家族になった。`, feel:`${p.name}が来てから、家の中が少しにぎやかになった。` });
+  // 本当にあった、いくつかの出来事（記念日のプレゼント・誕生日・写真）だけを、ときどき
+  const pick=(p.diary||[]).filter(x=>['gift','bd','letter'].includes(x.k)&&x.t<=Date.now());
+  for(const x of pick){ const age=Math.floor(chAgeAt(x.t)); if(H('d'+x.t)%2) continue; const t=x.k==='gift'?`記念日に、${p.name}へ、ごちそうをあげた。`:x.k==='bd'?`${p.name}の誕生日を、家族でお祝いした。`:`記念日に、${p.name}へ、そっと声をかけた。`; add(age,{ kind:'pet', text:t }); }
+  // それ以外は、4年に1回くらい、ふつうの日のひとこと
   const pool=(PET_DAY[p.kind]||[]).concat(PET_DAY.any); const f=x=>(x||'').replace(/\{p\}/g,p.name).replace(/\{名\}/g,P.givenKana||P.given||'');
-  for(let age=a0+1;age<end;age++){ if(H('k'+age)%3===0) continue; const e=pool[H('e'+age)%pool.length]; add(age,{ kind:'pet', text:f(e[0]), feel:f(e[1]), d:e[2], inner:e[3]?f(e[3]):null }); }
-  if(end<P.deathAge&&realEnd<=Date.now()) add(end,{ kind:'pet', big:true, d:-11, text:`${p.name}が、虹の橋をわたった。`, feel:`${p.name}と過ごした日々は、家族みんなの宝物になった。` }); }
+  for(let age=a0+2;age<end;age++){ if(H('k'+age)%4) continue; const e=pool[H('e'+age)%pool.length]; add(age,{ kind:'pet', text:f(e[0]), feel:f(e[1]), d:e[2], inner:e[3]?f(e[3]):null }); }
+  const endAge=Math.floor(chAgeAt(realEnd)); if(endAge<P.deathAge&&realEnd<=Date.now()){ used.delete(endAge); add(endAge,{ kind:'pet', big:true, d:-8, text:`${p.name}が、虹の橋をわたった。`, feel:`${p.name}と過ごした日々は、家族みんなの宝物になった。` }); } }
+// ===== うちのペット（その2）：性格・ごはん選び・おしゃべり・成長の記録・記念日のプレゼント =====
+// おしゃべりの返事は、ことば（キーワード）・性格・動物・時間帯・気分から、用意した返事を組み合わせて作る（無料・通信なし）。
+// ---- 性格（家に来たときに決まる） ----
+const MP_PER=[
+  { k:'friendly', n:'人懐っこい', d:'だれにでも、しっぽをふって近づいていく' },
+  { k:'shy', n:'こわがりで、あまえんぼう', d:'物音にびっくりするけれど、そばにいると安心する' },
+  { k:'cool', n:'気まぐれ', d:'呼んでも来ないのに、さみしい日に限ってそばに来る' },
+  { k:'calm', n:'おっとり', d:'日だまりで、一日じゅう眠っている' },
+  { k:'naughty', n:'やんちゃ', d:'目をはなすと、いつも何かをひっくり返している' },
+  { k:'foodie', n:'くいしんぼう', d:'ごはんの音がすると、どこにいても飛んでくる' },
+];
+function mpPer(p){ if(p.per==null){ p.per=pbHash(String(p.at)+'|per')%MP_PER.length; } return MP_PER[p.per]; }
+// ---- ごはん（その動物に、ふつうにあげるもの。人の食べ物で、からだに悪いものは入れない） ----
+const MP_FOOD={
+  dog:[['ドライフード','カリカリ'],['ウェットフード',''],['ゆでたささみ','おやつ'],['ゆでたかぼちゃ','少しだけ'],['ふかしたさつまいも','少しだけ'],['ヤギミルク','犬用'],['犬用ジャーキー','おやつ'],['犬用ボーロ','おやつ'],['りんご','皮と種をとって少し'],['キャベツ','ゆでて少し'],['ブロッコリー','ゆでて少し'],['犬用ガム','かむおやつ']],
+  cat:[['ドライフード','カリカリ'],['ウェットフード',''],['猫用ペーストおやつ','おやつ'],['ゆでたささみ','おやつ'],['かつお節','猫用を少し'],['猫用ミルク',''],['ゆでた白身魚','少しだけ'],['猫草','おなかの調子に'],['フリーズドライのおやつ','おやつ'],['猫用のまぐろ缶','']],
+  bird:[['シード（ミックス）',''],['ペレット',''],['粟穂','ごちそう'],['小松菜','よく洗って'],['にんじん','細かくして'],['りんご','少しだけ'],['ボレー粉','カルシウム']],
+  rabbit:[['チモシー（牧草）','いちばん大事'],['ペレット',''],['小松菜',''],['にんじん','少しだけ'],['りんご','少しだけ'],['乾燥パパイヤ','おやつ'],['ちんげん菜','']],
+  fish:[['金魚のエサ（浮くタイプ）',''],['金魚のエサ（沈むタイプ）',''],['冷凍赤虫','ごちそう'],['乾燥ミジンコ','おやつ']],
+};
+const MP_FOODR=['{p}は、{f}を夢中で食べた。','{p}は、{f}のにおいをかいで、目をかがやかせた。','{p}は、{f}をぺろりと食べて、おかわりの顔をした。','{p}は、{f}を少しずつ、大事そうに食べた。'];
+const MP_FOODR_NO=['{p}は、{f}をちょっとだけ食べて、ぷいっと横を向いた。きょうの気分ではないらしい。','{p}は、{f}をくわえて、どこかへ持っていった。あとで食べるらしい。'];
+// ---- 動物ごとの声・しぐさ ----
+const MP_VOICE={ dog:{ s:['ワン！','ワンワン！','クゥ〜ン','ワフッ'], a:['しっぽをぶんぶんふりながら','おなかを見せて','首をかしげて','鼻をフンフンさせて'], e:['ワン','だワン'] },
+  cat:{ s:['ニャー','ニャッ','ゴロゴロ…','ニャ〜ン'], a:['しっぽをぴんと立てて','目を細めて','前足で顔をあらいながら','ゴロンと寝ころんで'], e:['ニャ','だニャ'] },
+  bird:{ s:['ピッ！','ピピッ','チュンチュン','ピュイ〜'], a:['首をくりっとかしげて','羽をふくらませて','止まり木を行ったり来たりして','頭を上下にふって'], e:['ピッ','だピッ'] },
+  rabbit:{ s:['（鼻をひくひく）','ブゥ','（足ダンッ）','（耳をぴくっ）'], a:['鼻をひくひくさせて','耳をぴんと立てて','ぴょんと跳ねて','前足で顔をこすって'], e:['ぴょん','だぴょん'] },
+  fish:{ s:['（ぷくぷく）','（ぱくぱく）','（ひらひら）','（くるっ）'], a:['口をぱくぱくさせて','ひれをひらひらさせて','水面まで上がってきて','水草のかげから'], e:['ぷく','だぷく'] } };
+// ---- 話題（キーワード → 返事）。{p}=ペット {w}=呼び方 {e}=語尾 ----
+const MP_TOPIC=[
+  [/おはよ|朝/, ['おはよう{e}！ 朝は、いちばんおなかがすく時間{e}。つまり、ごはんの時間{e}。','おはよう{e}…まだ夢の中で、ごはんを食べてたところ{e}。']],
+  [/こんばんは|おやすみ|夜|ねむ|眠|寝/, ['おやすみ{e}。夢の中でも、いっしょに遊ぼう{e}。','もう寝る{e}？ ぼくは昼にたくさん寝たから、元気いっぱい{e}…あ、やっぱり眠い{e}。','寝るのは得意{e}。一日に何回でも寝られる{e}。']],
+  [/こんにちは|やあ|ハロー|hello|hi/i, ['こんにちは{e}！ 待ってた{e}！ ずっと待ってた{e}！','やあ{e}。いいところに来た{e}。ちょうど退屈してた{e}。']],
+  [/ごはん|ご飯|おやつ|食べ|お腹|おなか|腹|エサ|えさ/, ['ごはんの話？ 聞いてる{e}。耳がぴーんとなった{e}。','ごはんは、何回食べてもうれしい{e}。さっき食べたのは、ないしょ{e}。','おやつの話をするなら、まず、おやつを見せてほしい{e}。']],
+  [/散歩|さんぽ|お出かけ|外/, ['さんぽ！？ いま「さんぽ」って言った{e}！？ 準備はできてる{e}！','外は楽しい{e}。でも、帰ってきて、おうちでゴロゴロするのも好き{e}。']],
+  [/遊|あそ|ボール|おもちゃ/, ['遊ぶ{e}！ ボール、どこに隠したか忘れた{e}。','遊んでくれるなら、なんでもする{e}。おすわりも、たぶんできる{e}。']],
+  [/好き|すき|大好き|愛|かわい|可愛/, ['ぼくも大好き{e}！ たぶん、ごはんの次くらいに…うそ{e}、いちばん{e}。','知ってる{e}。だって、ずっと見てたから{e}。','てれる{e}…。もう一回言って{e}。']],
+  [/悲し|かなし|つら|辛|疲|つかれ|しんど|泣|落ち込|さみし|寂/, ['だいじょうぶ{e}。ぼくがそばにいる{e}。何も言わなくていい{e}。','つかれた日は、いっしょにゴロゴロする日{e}。それがいちばん{e}。','よしよし{e}。きょうは、ぼくがなでてあげる番{e}。']],
+  [/嬉し|うれし|楽し|たのし|やった|最高|いいこと/, ['いいこと？ じゃあ、ぼくもうれしい{e}！ しっぽ…じゃなくて、心がゆれてる{e}。','よかった{e}！ お祝いに、おやつ…が出たら、もっとよかった{e}。']],
+  [/雨|あめ/, ['雨の日は、窓の外を見るのが仕事{e}。たいへんな仕事{e}。','雨の音、きらいじゃない{e}。眠くなる{e}。']],
+  [/晴|天気|暑|あつ|寒|さむ|雪/, ['いい天気の日は、日だまりの取り合い{e}。ぼくの勝ち{e}。','暑い日は、床がひんやりしてる所を知ってる{e}。ないしょ{e}。','寒い日は、くっついて寝るといい{e}。ぼく、あったかい{e}。']],
+  [/仕事|学校|勉強|宿題|会社/, ['おしごと、えらい{e}。ぼくのおしごとは、おうちの見はり。ほとんど寝てるけど{e}。','がんばってえらい{e}。帰ってきたら、ぼくがいちばんに出迎える{e}。']],
+  [/お風呂|ふろ|シャンプー|洗/, ['お風呂…？ いま、聞こえなかったことにする{e}。','シャンプーのあとは、ふわふわになる{e}。でも、その前がこわい{e}。']],
+  [/病院|獣医|注射|薬/, ['病院の話は、なしにしよう{e}。…でも、元気でいるためなら、がまんする{e}。']],
+  [/名前|だれ|誰/, ['ぼくは{p}{e}！ いい名前でしょ{e}。つけてくれて、ありがとう{e}。']],
+  [/誕生日|記念日|おめでと/, ['おめでとうって言われると、うれしくて、くるくる回っちゃう{e}！','記念日は、ごちそうの日{e}。…だよね{e}？']],
+  [/元気|げんき|調子/, ['元気{e}！ さっきまで寝てたから、元気が満タン{e}。','元気だよ{e}。おなかがすいてる以外は{e}。']],
+  [/ありがと|感謝/, ['どういたしまして{e}。お礼は、おやつでいい{e}。','こちらこそ{e}。おうちに来られて、よかった{e}。']],
+  [/ごめん|すまん/, ['いいよ{e}！ もう忘れた{e}。ぼく、忘れるのが得意{e}。']],
+  [/猫|ねこ|ネコ/, ['ねこ…？ ちょっと気になる存在{e}。','ねこの話をすると、なぜか、背中がむずむずする{e}。']],
+  [/犬|いぬ|イヌ/, ['いぬ…？ においをかいで、あいさつしたい{e}。']],
+  [/Channel|チャネル|あの子|赤ちゃん/i, ['Channel のこと、ちゃんと見守ってる{e}。ぼくも家族だから{e}。','あの子、きょうも、いい顔してた{e}。']],
+  [/宇宙|星|月/, ['夜空の、まるくて光るもの…あれ、たぶん大きなボール{e}。','星を見てると、なんだか遠くの友だちを思い出す{e}。会ったことないけど{e}。']],
+  [/[?？]$/, ['うーん…むずかしい質問{e}。ちょっと寝て考える{e}。','その答えは…ごはんのあとで発表する{e}。','わかった{e}！ …やっぱり、わからない{e}。']],
+];
+const MP_FALLBACK=['なるほど{e}。よくわからないけど、うなずいておく{e}。','うん、うん{e}。…ところで、おやつの時間はまだ{e}？','その話、もっと聞きたい{e}。ひざの上で聞いてもいい{e}？','ふむふむ{e}。ぼくも、そう思ってた{e}。たぶん{e}。','いい話{e}。感動して、あくびが出た{e}。','そうなんだ{e}！ じゃあ、記念に、なでてほしい{e}。'];
+// 性格ごとの、ひとこと（返事の前後に足す）
+const MP_PER_PRE={ friendly:['わーい！','うれしい！'], shy:['（ちょっとだけ顔を出して）','（そっと近づいて）'], cool:['（チラッと見て）','（あくびをして）'], calm:['（ねむそうに）','（のんびり）'], naughty:['（スリッパをくわえたまま）','（なにかをかじりながら）'], foodie:['（口をもぐもぐさせながら）','（おやつのにおいをかぎながら）'] };
+const MP_PER_POST={ friendly:['また話そう{e}！','ずっといっしょ{e}！'], shy:['…また、話しかけてね{e}。','ちょっとだけ、近くにいてもいい{e}？'], cool:['…べつに、うれしくないけど{e}。','まあ、悪くない{e}。'], calm:['ふぁ〜…。','ゆっくりでいい{e}。'], naughty:['（そして、走ってにげた）','あ、今のは見なかったことにして{e}。'], foodie:['ところで、ごはんは{e}？','おなかすいた{e}。']};
+function mpPick(a,seed){ return a[(seed>>>0)%a.length]; }
+function mpReply(p,text){ const v=MP_VOICE[p.kind]||MP_VOICE.dog, per=mpPer(p), h=pbHash(text+'|'+Date.now()); const E=v.e[0]; const e=(s,last)=>{ const n=(s.match(/\{e\}/g)||[]).length; let i=0; return s.replace(/\{e\}/g,()=>(++i===n&&last)?E:'').replace(/\{p\}/g,p.name); };
+  let body=null; for(const [re,arr] of MP_TOPIC){ if(re.test(text)){ body=mpPick(arr,h>>5); break; } }
+  const hr=new Date().getHours(); if(!body&&hr<5) body='こんな夜ふけに、どうした{e}？ ぼくは、起きてる…つもり{e}。';
+  if(!body) body=mpPick(MP_FALLBACK,h>>7);
+  const pre=mpPick(MP_PER_PRE[per.k],h>>9), post=mpPick(MP_PER_POST[per.k],h>>11), snd=mpPick(v.s,h>>13);
+  let r=`${snd} ${pre}${e(body,1)} ${e(post,0)}`; if(p.kind==='fish') r=`${snd} ${mpPick(v.a,h>>2)}、${e(body,1)}`;
+  // 一人称：女の子らしい名前でも「ぼく」は変なので、性格で少し変える
+  if(per.k==='cool') r=r.replace(/ぼく/g,'わたし'); if(per.k==='calm') r=r.replace(/ぼく/g,'ぼくちん');
+  return r.length>100?r.slice(0,99)+'…':r; }
+// ---- 成長の記録（日記） ----
+function mpLog(p,text,kind){ p.diary=p.diary||[]; p.diary.push({ t:Date.now(), x:text, k:kind||'' }); if(p.diary.length>200) p.diary=p.diary.slice(-200); }
+function mpStageLog(p){ const st=mpStage(p)[0]; if(p.lastStage!==st){ if(p.lastStage) mpLog(p,`${p.name}が「${st}」になった。`,'grow'); p.lastStage=st; return true; } return false; }
+function mpDiaryHTML(p){ const d=(p.diary||[]).slice().reverse().slice(0,40); if(!d.length) return '';
+  const f=t=>{ const x=new Date(t); return `${x.getFullYear()}年${x.getMonth()+1}月${x.getDate()}日`; };
+  return `<h4 class="mp-h4">🐾 ${esc(p.name)}の成長の記録</h4><ul class="mp-diary">${d.map(x=>`<li><small>${f(x.t)}</small>${esc(x.x)}</li>`).join('')}</ul>`; }
+// ---- おしゃべり（1日1回・100文字まで） ----
+function mpChatLeft(p){ const n=((p.chat||{})[dayKey()]||[]).length; return Math.max(0,1-n); }
+function mpChatHTML(p){ if(mpGone(p)) return ''; const today=(p.chat||{})[dayKey()]||[]; const left=mpChatLeft(p);
+  return `<h4 class="mp-h4">💬 ${esc(p.name)}とおしゃべり <small>1日1回まで</small></h4>
+  <div class="mp-chat">${today.map(c=>`<p class="mp-me">${esc(c.q)}</p><p class="mp-pet"><b>${esc(p.name)}</b>${esc(c.a)}</p>`).join('')}</div>
+  ${left?`<div class="mp-in-row"><textarea id="mpChatIn" class="mp-in" maxlength="100" rows="2" placeholder="${esc(p.name)}に話しかけてみよう（100文字まで）"></textarea><button type="button" class="mp-btn" data-mp="chat">話す</button></div>`:`<p class="tiny muted">きょうのおしゃべりは、おしまい。また明日、話そうね。</p>`}`; }
+function mpChat(){ const p=mpGet(); if(!p||mpGone(p)) return; const el=document.getElementById('mpChatIn'); const q=(el&&el.value||'').trim().slice(0,100); if(!q||!mpChatLeft(p)) return;
+  p.chat=p.chat||{}; const d=dayKey(); const a=mpReply(p,q); (p.chat[d]=p.chat[d]||[]).push({ q, a });
+  const ks=Object.keys(p.chat).sort(); if(ks.length>60) ks.slice(0,ks.length-60).forEach(x=>delete p.chat[x]);
+  if(p.chat[d].length===1) mpLog(p,`Higher Self と、はじめておしゃべりした日。「${q.slice(0,20)}${q.length>20?'…':''}」`,'chat');
+  mpSet(p); mpOpen(); setTimeout(()=>{ const c=document.querySelector('.mp-chat'); if(c) c.lastElementChild&&c.lastElementChild.scrollIntoView({ block:'nearest' }); },50); }
+// ---- ごはん選び ----
+let _mpFoodOpen=false, _mpGiftMode=false;
+function mpFoodHTML(p){ if(!_mpFoodOpen&&!_mpGiftMode) return ''; const L=MP_FOOD[p.kind]||MP_FOOD.dog;
+  return `<div class="mp-food"><p class="tiny muted">${_mpGiftMode?'記念日のプレゼントに、どれをあげますか？':'どのごはんにしますか？'}</p>${L.map((f,i)=>`<button type="button" class="mp-f" data-mpf="${i}">${esc(f[0])}${f[1]?`<small>${esc(f[1])}</small>`:''}</button>`).join('')}</div>`; }
+function mpFeed(i){ const p=mpGet(); if(!p||mpGone(p)) return; const f=(MP_FOOD[p.kind]||MP_FOOD.dog)[i]; if(!f) return; const w=mpWho(); const who=mpWhoName(w);
+  const h=pbHash(f[0]+Date.now()); const no=mpPer(p).k==='cool'&&h%4===0; let t=mpPick(no?MP_FOODR_NO:MP_FOODR,h>>3).replace(/\{p\}/g,p.name).replace(/\{f\}/g,f[0]);
+  if(_mpGiftMode){ p.gifts=p.gifts||{}; p.gifts[dayKey()]=1; p.love=(p.love||0)+2; p.msg=`🎁 記念日のプレゼントに、${f[0]}をあげた。${t} 💗+2`; mpLog(p,`記念日のプレゼントに、${f[0]}をもらった。`,'gift'); }
+  else { const d=dayKey(); p.acts=p.acts||{}; const a=p.acts[d]||[]; if(a.includes('food')){ p.msg='きょうのごはんは、もうあげたよ。また明日ね。'; } else { a.push('food'); p.acts[d]=a; p.love=(p.love||0)+1; p.msg=`${who}が、${f[0]}をあげた。${t} 💗+1`; p.fav=p.fav||{}; p.fav[f[0]]=(p.fav[f[0]]||0)+1; } }
+  _mpFoodOpen=false; _mpGiftMode=false; mpSet(p); mpOpen(); }
+// ---- 記念日：メッセージとプレゼント ----
+function mpIsAnniv(p){ const d=mpDays(p); if([7,30,100,365,500,1000].includes(d)) return true; return !!(p.anMsg&&p.anMsg.d===dayKey()); }
+function mpAnnivHTML(p){ if(mpGone(p)||!mpIsAnniv(p)) return ''; const sent=(p.letters||{})[dayKey()], gift=(p.gifts||{})[dayKey()];
+  return `<div class="mp-anv"><p class="tiny"><b>きょうは記念日！</b> ${esc(p.name)}に、メッセージやプレゼントを送れます。</p>
+  ${sent?`<p class="mp-me">${esc(sent.q)}</p><p class="mp-pet"><b>${esc(p.name)}</b>${esc(sent.a)}</p>`:`<div class="mp-in-row"><textarea id="mpLetterIn" class="mp-in" maxlength="100" rows="2" placeholder="記念日のメッセージ（100文字まで）"></textarea><button type="button" class="mp-btn" data-mp="letter">送る</button></div>`}
+  ${gift?'<p class="tiny">🎁 プレゼントは、もうあげました。</p>':`<button type="button" class="mp-a" data-mp="gift">🎁 ごはんをプレゼント</button>`}</div>`; }
+function mpLetter(){ const p=mpGet(); if(!p) return; const el=document.getElementById('mpLetterIn'); const q=(el&&el.value||'').trim().slice(0,100); if(!q) return;
+  const a=mpReply(p,q+' 記念日 おめでとう'); p.letters=p.letters||{}; p.letters[dayKey()]={ q, a }; p.love=(p.love||0)+2; mpLog(p,`記念日に、Higher Self からメッセージが届いた。「${q.slice(0,24)}${q.length>24?'…':''}」`,'letter'); mpSet(p); mpOpen(); }
+document.addEventListener('click',e=>{ const t=e.target.closest&&e.target.closest('[data-mpf]'); if(t){ mpFeed(+t.dataset.mpf); return; }
+  const u=e.target.closest&&e.target.closest('[data-mp="chat"],[data-mp="letter"],[data-mp="gift"]'); if(!u) return; const v=u.dataset.mp;
+  if(v==='chat') mpChat(); else if(v==='letter') mpLetter(); else if(v==='gift'){ _mpGiftMode=true; _mpFoodOpen=false; mpOpen(); } },true);
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey&&e.target&&e.target.id==='mpChatIn'){ e.preventDefault(); mpChat(); } });
+document.head.insertAdjacentHTML('beforeend',`<style>
+.mp-food{ display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 10px; padding:10px; border-radius:14px; background:#FFF6E8; } .mp-food .tiny{ width:100%; margin:0 0 2px; }
+.mp-f{ font:inherit; font-size:13px; padding:6px 11px; border-radius:12px; border:1.5px solid #F2C98A; background:#fff; color:#3A2E38; cursor:pointer; display:inline-flex; flex-direction:column; align-items:flex-start; } .mp-f small{ font-size:10.5px; color:#8A7B85; }
+.mp-chat{ display:flex; flex-direction:column; gap:6px; margin:4px 0 8px; }
+.mp-me,.mp-pet{ margin:0; padding:8px 12px; border-radius:16px; font-size:14px; line-height:1.6; max-width:85%; }
+.mp-me{ align-self:flex-end; background:#E8F1FF; border-bottom-right-radius:4px; } .mp-pet{ align-self:flex-start; background:#FFE9F0; border-bottom-left-radius:4px; } .mp-pet b{ display:block; font-size:11.5px; color:#C2476B; }
+.mp-in-row{ display:flex; gap:8px; align-items:flex-end; } .mp-in-row .mp-in{ flex:1; resize:none; }
+.mp-h4 small{ font-size:12px; color:#8A7B85; font-weight:400; margin-left:6px; }
+.mp-diary{ list-style:none; margin:0; padding:0; max-height:220px; overflow-y:auto; } .mp-diary li{ font-size:13.5px; line-height:1.6; padding:6px 0; border-bottom:1px dashed #F1D3DC; } .mp-diary small{ display:block; font-size:11px; color:#8A7B85; }
+.mp-anv{ margin:10px 0; padding:10px 12px; border-radius:14px; background:#FFF3D6; display:flex; flex-direction:column; gap:6px; } .mp-anv .mp-a{ align-self:flex-start; }
+.mp-per{ display:inline-block; margin:2px 0; padding:2px 10px; border-radius:999px; background:#F3F0FF; color:#6A4BB8; font-size:12.5px; font-weight:700; }
+</style>`);
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
