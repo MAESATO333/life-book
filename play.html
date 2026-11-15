@@ -9440,7 +9440,7 @@ function blockSceneSVG(P,o,label){ const w=ilWorld(P); const r=ilRng(P.seed*13+o
     (o.kids||[]).slice(0,2).forEach(ka=>{ const ks=ilStage(ka); if(ks==='baby') row.push({ f:(x,y)=>bkBaby(S,x-.3,y+.2,{ skin:w.skin, shirt:'#FFFFFF' }) }); else if(['toddler','child','teen'].includes(ks)){ const ko={ stage:ks, skin:w.skin, hair:w.hair, shirt:ilPick(r,IL_SHIRT), gender:r()<.5?'女性':'男性', mood:65 }; row.push({ f:(x,y)=>bkPerson(S,x,y,ko) }); } }); }
   const items=st==='baby'?[{ f:row[0]().f }]:row; const n=items.length, stp=1.65;
   items.forEach((it,i)=>{ const t=(i-(n-1)/2)*stp; it.f(.1+t,.7-t); });
-  if(o.petB&&typeof PB_ALL!=='undefined'&&PB_ALL[o.petB]){ S.begin(1.2+2.2+1.2,typeof pbAnim==='function'?pbAnim(o.petPose,PB_ALL[o.petB]):''); pbDraw(S,1.2,2.2,PB_ALL[o.petB],o.petPose); S.end(); } else if(o.pet) bkPet(S,1.2,2.2,o.pet);
+  if(o.petB&&typeof PB_ALL!=='undefined'&&PB_ALL[o.petB]){ const sp=o.petSpot||[1.2,2.2]; S.begin(sp[0]+sp[1]+1.2,typeof pbAnim==='function'?pbAnim(o.petPose,PB_ALL[o.petB]):''); pbDraw(S,sp[0],sp[1],PB_ALL[o.petB],o.petPose); S.end(); } else if(o.pet) bkPet(S,1.2,2.2,o.pet);
   let fx='';
   if(mood<35&&!inside){ fx='<g fill="#7F93AD" opacity=".75">'; for(let i=0;i<24;i++) fx+=`<rect class="bk-fall" style="animation-delay:${-(i*.13).toFixed(2)}s" x="${(r()*360).toFixed(0)}" y="${(r()*150).toFixed(0)}" width="2.4" height="7"/>`; fx+='</g>'; }
   else if(!inside&&season===3&&(biome==='cold'||biome==='temp')){ fx='<g fill="#FFFFFF">'; for(let i=0;i<26;i++) fx+=`<rect class="bk-snow" style="animation-delay:${-(i*.41).toFixed(2)}s" x="${(r()*360).toFixed(0)}" y="${(r()*190).toFixed(0)}" width="3" height="3"/>`; fx+='</g>'; }
@@ -9813,7 +9813,7 @@ function pbProp(S,Q,hx,fy,k,b,hz,z0){ z0=z0||0; const X=_pbX||{}; let pr=X.pr;
     case 'greens': B(.06,.1,0,.3,.24,.05,'#5FAF6A'); B(.14,.16,.05,.2,.16,.04,'#7CC46A'); break;
     case 'hay': B(-.04,.1,0,.46,.3,.12,'#C8D46A'); B(.06,.14,.12,.26,.2,.06,'#D9E08A'); break;
     case 'seed': B(.1,.2,0,.3,.22,.12,'#E8C27A'); B(.14,.24,.12,.22,.14,.02,'#B5753A'); break;
-    case 'leash': B(-.2,.34,0,.7,.05,.04,'#E04A5A'); B(.44,.3,0,.12,.12,.06,'#E04A5A'); break;
+    case 'leash': break; // 矢印に見えるので、描かない
     case 'bell': B(.2,.3,0,.14,.14,.14,'#F2C230'); break;
     case 'mirror': B(.5,.1,0,.04,.3,.42,'#CFE3F0'); B(.48,.08,-.02,.08,.34,.04,'#C98A4A'); break;
     case 'swing': B(-.5,0,.9,.04,.04,.5,'#C98A4A'); B(.4,0,.9,.04,.04,.5,'#C98A4A'); B(-.5,0,1.38,.94,.06,.04,'#E8913A'); break;
@@ -15797,8 +15797,8 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
       <div class="hm-go"><button class="hm-btn" type="button" id="hmRead">${esc(go)}</button>${newYears?`<span class="hm-new">あたらしい出来事 ${newYears}年分</span>`:''}</div>
     </div>
   </section>
-  <div class="hm-pair">${homeTile('hm-friends',`Group Soul /紹介でつながった人たち<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, (typeof gsTreeHTML==='function'?gsTreeHTML(fr):'')+(typeof gsPetTreeHTML==='function'?gsPetTreeHTML(fr):'')+`<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<details class="hm-frl"><summary>友だちの一覧（${fr.length}人）</summary><ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul></details>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
-  ${typeof mpTileHTML==='function'?homeTile('hm-mypet','うちのペット',mpTileHTML()):''}</div>
+  <div class="hm-pair">${homeTile('hm-friends',`Group Soul /紹介でつながった人たち<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, (typeof gsTreeHTML==='function'?gsTreeHTML(fr):'')+`<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<details class="hm-frl"><summary>友だちの一覧（${fr.length}人）</summary><ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul></details>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
+  ${typeof mpTileHTML==='function'?homeTile('hm-mypet','うちのペット',mpTileHTML()+(typeof gsPetTreeHTML==='function'?gsPetTreeHTML(fr):'')):''}</div>
   <div class="hm-today">
     <section class="hm-tile hm-scene"><h3>今日の小さな場面<span class="hm-n">${dayKey().replace(/^\d+-0?(\d+)-0?(\d+)$/,'$1月$2日')}・${tod[1]}</span></h3>${scn?`<p class="hm-ono"><b>${esc(scn.w)}</b></p><p>${esc(scn.t)}</p>`:''}${near.length?`<ul class="hm-near">${near.map(n=>`<li><b>${esc(n.who)}</b>は、${esc(n.t)}</li>`).join('')}</ul>`:''}<p class="tiny muted">毎日、ちがう場面が届きます。</p></section>
     <section class="hm-tile hm-stamp"><h3>見守りスタンプ</h3>${stampHTML()}</section>
@@ -17342,7 +17342,10 @@ function ppOld(p,x){ const A=PP_ACTS[p.kind]||PP_ACTS.dog; return x.pose||A[ppH(
     p.photos=p.photos||[]; p.photos.push({ t:Date.now(), k:st[1], pose, c:`${t.getFullYear()}年${t.getMonth()+1}月${t.getDate()}日・うちに来て${mpDays(p)}日目・${Math.floor(a)}歳（${st[0]}）・${ppTxt(p.kind,pose)}` }); if(p.photos.length>60) p.photos=p.photos.slice(-60);
     p.msg=`パシャ！ ${p.name}の写真を、アルバムに残しました。（${ppTxt(p.kind,pose)}）`; mpLog(p,`写真をとった（${st[0]}のころ）。`,'photo'); mpSet(p); mpOpen(); }; }
 // Channel の部屋の絵にいるペットも、いまの姿勢で
-{ const SS=sceneState; sceneState=function(P,L,age){ const o=SS(P,L,age); try{ const p=mpGet(); if(o&&o.petB&&p&&o.petB===p.breed) o.petPose=ppAct(p.kind,ppNow(p)); }catch(e){} return o; }; }
+{ const SS=sceneState; sceneState=function(P,L,age){ const o=SS(P,L,age); try{ const p=mpGet(); if(o&&o.petB&&p&&o.petB===p.breed) o.petPose=ppAct(p.kind,ppNow(p)); if(o&&o.petB&&p&&o.petB===p.breed) o.petSpot=ppSpot(p,o.petPose); }catch(e){} return o; }; }
+// ペットは、部屋のあちこちを移動する（3分ごとに場所が変わる。寝ているときは、あまり動かない）
+const PP_SPOTS=[[1.2,2.2],[4.0,-1.8],[3.4,-0.8],[2.2,-2.6],[-0.8,-3.2],[-3.2,-2.4],[-3.0,-0.6],[-2.6,2.2],[0.4,2.6],[1.0,-3.8],[-1.8,-1.6],[2.6,0.4]];
+function ppSpot(p,pose){ const b=pose&&pose.b||pose; const step=(b==='sleep'||b==='lie')?15:3; const slot=Math.floor(Date.now()/60000/step); return PP_SPOTS[ppH((p.name||'')+'|spot|'+step+'|'+slot)%PP_SPOTS.length]; }
 document.head.insertAdjacentHTML('beforeend',`<style>
 .mp-now{ margin:2px 0 4px; display:inline-block; padding:3px 10px; border-radius:999px; background:#FFF0F4; color:#C2557A; font-size:13px; font-weight:700; }
 .pb-a{ transform-box:fill-box; transform-origin:50% 100%; }
@@ -17442,7 +17445,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .gs-forest{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; }
 .gs-tree.gs-mini{ margin:0; padding:4px 3px 3px; } .gs-tree.gs-mini figcaption{ font-size:11px; font-weight:700; color:#6A4A58; }
 .gs-forest-n{ margin:6px 2px 0; }
-.hm-pair{ display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:14px; align-items:start; margin:0 0 14px; } .hm-pair > .hm-tile{ margin:0; min-width:0; } .hm-pair .hm-friends{ padding:10px 12px; } @media (max-width:560px){ .hm-pair{ grid-template-columns:1fr; } } .hm-friends .hm-tile-h,.hm-friends h3{ font-size:14px; }
+.hm-pair{ display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:14px; align-items:stretch; margin:0 0 14px; } .hm-pair > .hm-tile{ margin:0; min-width:0; display:flex; flex-direction:column; } .hm-pair > .hm-tile > .hm-foot{ margin-top:auto; } .hm-pair .hm-mypet .gs-pet-w{ margin-top:12px; flex:1; display:flex; flex-direction:column; } .hm-pair .hm-mypet .gs-pet-w > div{ flex:1; } .hm-pair .hm-mypet .gs-tree svg{ max-height:170px; } .hm-pair .hm-friends > .gs-tree,.hm-pair .hm-friends > .gs-forest-w{ flex:1; display:flex; flex-direction:column; justify-content:center; } .hm-pair .hm-friends > .gs-tree .gs-zb{ flex:1; display:flex; align-items:center; justify-content:center; } .hm-pair .hm-friends > .gs-tree svg{ max-height:300px; height:100%; } .hm-pair .hm-friends{ padding:10px 12px; } @media (max-width:560px){ .hm-pair{ grid-template-columns:1fr; } } .hm-friends .hm-tile-h,.hm-friends h3{ font-size:14px; }
 .hm-friends .gs-tree svg{ max-height:140px; } .hm-friends .gs-tree > p,.hm-friends .gs-tree .tiny{ font-size:10px; margin:2px 0; } .hm-friends .gs-tree{ margin-bottom:8px; } .hm-friends .gs-tree figcaption{ font-size:10.5px; }
 .hm-friends .gs-forest{ grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:4px; } .hm-friends .gs-mini svg{ max-height:80px; } .hm-friends .gs-tree.gs-mini figcaption{ font-size:9.5px; white-space:nowrap; margin-top:2px; } .hm-friends .mt-appeal span{ font-size:11px; } .hm-friends .gs-tree figcaption{ font-size:9.5px; line-height:1.4; }
 .hm-friends .gs-pet-w{ margin:6px 0 8px; } .hm-friends .gs-forest-h{ font-size:12px; margin:2px 2px 6px; }
