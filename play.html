@@ -12477,7 +12477,8 @@ function eaCollected(){ let s=[]; try{ s=JSON.parse(localStorage.getItem(KEY_EA)
   const set=new Set(s); try{ if(cur&&cur.P) set.add(cur.P.countryId); }catch(e){}
   try{ for(const a of store.get(KEY_ARC,[])){ const c=COUNTRIES.find(x=>x.name===a.nation); if(c) set.add(c.id); } }catch(e){}
   const out=[...set].filter(id=>EA_LM[id]); if(out.length!==s.length){ try{ localStorage.setItem(KEY_EA,JSON.stringify(out)); }catch(e){} } return out; }
-function eaName(id){ try{ return (COUNTRIES.find(c=>c.id===id)||{}).name||id; }catch(e){ return id; } }
+const EA_NAME_EX={ mo:'マカオ', hk:'香港', tw:'台湾', pr:'プエルトリコ', gl:'グリーンランド' };
+function eaName(id){ try{ return (COUNTRIES.find(c=>c.id===id)||{}).name||EA_NAME_EX[id]||id; }catch(e){ return EA_NAME_EX[id]||id; } }
 // ホームの小さな欄
 function eaTileHTML(P){ const got=eaCollected(); const id=P&&P.countryId; const L=EA_LM[id]; const tod=(typeof localTod==='function'&&localTod(P))||'day';
   return `<div class="ea-tile">${L?`<figure class="ea-card ea-big ea-click" data-ea="${id}" tabindex="0" role="button" aria-label="${esc(L[0])}を大きく見る"><div class="ea-art">${eaCardSVG(id,{tod})}</div><figcaption><b>${esc(L[0])}</b>（${esc(eaName(id))}）<span>${esc(L[3]||'')}</span></figcaption></figure>`:''}
@@ -16594,7 +16595,7 @@ function skFillKeep(el,html){ if(!el) return; if(el.innerHTML===html) return; co
 const MP_KEY='hitotsu.mypet', MP_PAST='hitotsu.mypetPast', MP_DAY=864e5, MP_MPY=30*864e5; // ペットは約1か月で1歳（Channel より、ゆっくり）
 const MP_KIND=[['dog','犬','🐶'],['cat','猫','🐱'],['bird','インコ・小鳥','🐦'],['rabbit','うさぎ','🐰'],['fish','金魚','🐟']];
 const MP_LIFE={ dog:[12,15], cat:[13,19], bird:[7,12], rabbit:[7,11], fish:[6,12] };
-function mpGet(){ try{ return JSON.parse(localStorage.getItem(MP_KEY)||'null'); }catch(e){ return null; } }
+function mpGet(){ try{ return JSON.parse(localStorage.getItem(MP_KEY)||'null'); }catch(e){ return null; } } // MP_KEY が読みこまれる前（最初の表示）は、null になる。あとで描き直す
 function mpSet(p){ try{ localStorage.setItem(MP_KEY,JSON.stringify(p)); }catch(e){} }
 // 毛色：その種類で実際に認められている色だけ（いちばん多い色＋ほかの色。最大7色）。黒柴・白いトイ・プードル・黒いラブは、色の一つにまとめる。
 const MP_BASECOL={ shiba:'赤',akita:'赤',kai:'黒虎',kishu:'白',shikoku:'胡麻',hokkaido:'白',jspitz:'白',jindo:'黄',shihtzu:'クリーム＆ホワイト',peke:'フォーン',chow:'レッド',pariah:'黄褐色',basenji:'レッド＆ホワイト',africanis:'茶',samoyed:'ホワイト',husky:'グレー＆ホワイト',xolo:'グレー',chihuahua:'フォーン',chihuahual:'フォーン＆ホワイト',aussie:'ブルーマール',phaske:'茶',toypoodle:'レッド',stdpoodle:'ブラック',minidachs:'レッド',pom:'オレンジ',yorkie:'ブルー＆タン',maltese:'ホワイト',schnauzer:'ソルト＆ペッパー',frenchie:'フォーン',pug:'フォーン',beagle:'トライカラー',lab:'イエロー',golden:'ゴールド',gsd:'ブラック＆タン',corgi:'レッド＆ホワイト',sheltie:'セーブル＆ホワイト',collie:'セーブル＆ホワイト',bordercollie:'ブラック＆ホワイト',jrt:'ホワイト＆タン',cavalier:'ブレンハイム',boston:'ブラック＆ホワイト',bulldog:'ホワイト＆フォーン',boxer:'フォーン',dobe:'ブラック＆タン',rottie:'ブラック＆タン',dane:'ブルー',bernese:'トライカラー',dalmatian:'ブラック・スポット',bichon:'ホワイト',papillon:'ホワイト＆レッド',iggy:'グレー',greyhound:'グレー',minpin:'ブラック＆タン',westie:'ホワイト',scottie:'ブラック',cocker:'バフ',pit:'ブラウン',staffie:'ブラウン',weim:'シルバーグレー',shibainu2:'赤',havanese:'クリーム＆ホワイト',lhasa:'ゴールド',tibmastiff:'ブラック＆タン',mx5:'茶',mx6:'茶',
@@ -17679,6 +17680,9 @@ function sideSceneSVG(P,o,label,setting,h){ const w=ilWorld(P); const r=ilRng(h|
   else if(k==='skyscraper'){ [[-5,-5,1.6,1.6,7.5,'#7FA2C9'],[-3,-4.8,1.4,1.4,9,'#9FB4C7'],[-1.2,-5,1.6,1.6,6,'#5E7FA6'],[1,-4.6,1.4,1.4,8,'#8EC3E6'],[3,-5,1.6,1.8,5,'#A9B8C9']].forEach(([x,y,w,d,h,c])=>{ S.begin(x+y+1); B2(x,y,0,w,d,h,c); for(let f=0;f<h-.5;f+=.8) B2(x,y+d,f+.3,w,.02,.3,bkShade(c,1.25)); S.end(); }); }
   else if(k==='towermansion'){ const c=ilPick(r,['#E8E2D6','#D7DEE6','#EFE6D2']); S.begin(-6); B2(-3,-5,0,2.6,2.4,9,c); for(let f=0;f<11;f++) B2(-3.1,-2.6,.4+f*.8,2.8,.4,.12,'#FFFFFF'); B2(-3.1,-5.1,9,2.8,2.6,.3,bkShade(c,.85)); S.end(); scHouse(S,ctx,1.2,-4.8); }
   if(ctx.year>=1955) scCar(S,1.6,-1.5,ctx); scLamp(S,-4.4,-.4); }; }
+
+// v152: ページを開いた直後の一回目の表示は、ペットなどの仕組みが読みこまれる前に出ることがある。全部読みこんだあとで、もう一度かき直す
+try{ if(typeof render==='function'&&typeof page!=='undefined'&&page==='home'){ const y=window.scrollY; render(); window.scrollTo(0,y); } }catch(e){}
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
