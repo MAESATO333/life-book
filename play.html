@@ -15996,7 +15996,7 @@ setInterval(()=>{ try{ if(cur&&!viewing&&st&&st.stage!=='funeral'&&st.stage!=='r
 let RUBY_PL=null, VIEW_CACHE=null;
 function render1(){
   const app=$('#app'); if(typeof navSync==='function') navSync();
-  if(!viewing&&st&&page==='home'&&cur){ app.innerHTML=homeHTML(); bindHome(); $('#mastmeta').textContent=''; renderDev(); return; }
+  if(!viewing&&st&&page==='home'&&cur){ try{ app.innerHTML=homeHTML(); bindHome(); }catch(e){ try{ console.error(e); localStorage.setItem('lb.lastErr',String(e&&e.stack||e).slice(0,600)); }catch(_){} app.innerHTML=`<section class="hm-tile" style="margin:20px 0"><h3>Life Home を、もう一度読みこんでいます</h3><p>表示のとちゅうで、うまくいかない所がありました。下のボタンで、もう一度ひらいてください。</p><p><button type="button" class="btn" onclick="location.reload()">もう一度ひらく</button> <button type="button" class="btn" onclick="goLife()">Life Record を見る</button></p><p class="tiny muted">${esc(String(e&&e.message||e)).slice(0,200)}</p></section>`; } $('#mastmeta').textContent=''; renderDev(); return; }
   if(viewing){ const vk=JSON.stringify([viewing.seed,viewing.country,viewing.force,viewing.choice,viewing.bs,viewing.loan]); let P,L; if(VIEW_CACHE&&VIEW_CACHE.k===vk){ P=VIEW_CACHE.P; L=VIEW_CACHE.L; } else { P=makeBirth(viewing.seed,{country:viewing.country||null,force:viewing.force||null}); L=simulate(P,viewing.choice||undefined); VIEW_CACHE={ k:vk, P, L }; } if(typeof birthSitApply==='function') birthSitApply(P,L,viewing.bs||null); if(typeof momentsApply==='function') momentsApply(P,L); if(typeof petExtraApply==='function') petExtraApply(P,L); if(typeof fort2Apply==='function') fort2Apply(P,L); if(typeof petBreedApply==='function') petBreedApply(P,L); if(typeof siblingsApply==='function') siblingsApply(P,L); if(typeof dreamApply==='function') dreamApply(P,L); if(viewing.loan==null&&typeof friendMeet==='function') friendMeet(P,L); RUBY_PL=[P,L]; app.innerHTML=reportHTML(P,L,true)+loanReportHTML(P,L); bindReport(P,L); bindLoanReport(P,L); $('#mastmeta').textContent='過去の人生'; renderDev(); return; }
   if(!st){ app.innerHTML=introHTML(); bindIntro(); $('#mastmeta').textContent=''; renderDev(); return; }
   if(!viewing&&page==='top'){ app.innerHTML=introHTML(); bindIntro(); introLock(); $('#mastmeta').textContent=''; renderDev(); return; }
@@ -16565,7 +16565,7 @@ function navFromHash(){ try{ const m=(location.hash||'').match(/^#(gateway|birth
   if((k==='home'||k==='record')&&typeof st!=='undefined'&&st){ if(k==='home') goHome(); else goLife(); return; }
   if(typeof goTop==='function') goTop(); }catch(_){} }
 window.addEventListener('hashchange',navFromHash);
-function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); render(); navFromHash(); if(typeof friendFromHash==='function') friendFromHash(); if(typeof loanFromHash==='function') loanFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
+function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); try{ render(); }catch(e){ try{ console.error(e); localStorage.setItem('lb.lastErr',String(e&&e.stack||e).slice(0,600)); }catch(_){} } navFromHash(); if(typeof friendFromHash==='function') friendFromHash(); if(typeof loanFromHash==='function') loanFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
 start();
 setInterval(()=>{ if(st && st.stage==='life' && !viewing && !inspAnim && document.visibilityState==='visible' && !document.activeElement.matches('textarea')){ window._skAuto=true; try{ render(); }finally{ window._skAuto=false; } } }, 30000);
 
@@ -17933,6 +17933,8 @@ var _ssOut=false, _bkOut=false;
     S.box(x+.75,y+.25,.75,.6,.6,.6,o.skin,p=>bkFace(x+.75,y+.25,.75,.6,75)(p)); S.box(x+.73,y+.23,1.35,.64,.64,.1,o.hair||'#3A2A22'); S.end(); }; }
 { const BS=blockSceneSVG; blockSceneSVG=function(P,o,label){ let prev=_bkOut; try{ const setting=o.setting||(typeof scPick==='function'?scPick(P,o):'home'); _bkOut=!(typeof SC_INTERIOR!=='undefined'&&SC_INTERIOR.has(setting)); }catch(e){}
     try{ return BS(P,o,label); } finally{ _bkOut=prev; } }; }
+// v161: Life Home の一部でエラーが出ても、ページ全体が白くならないように、各カードを守る
+['chnIdHTML','dailyThreeHTML','pwaNoteHTML','nbMeaningHTML','localTimeHTML','dailyTopHTML','gsTreeHTML','mpTileHTML','gsPetTreeHTML','dailyPlusHTML','borrowTileHTML','growthHTML','birthMapHTML','stampHTML','frReplyHTML','photoHTML','homeMoodSVG','blockSceneSVG','spineHTML'].forEach(n=>{ try{ const f=window[n]; if(typeof f!=='function'||f._safe) return; const g=function(){ try{ return f.apply(this,arguments); }catch(e){ try{ console.error(n,e); localStorage.setItem('lb.lastErr',n+': '+String(e&&e.stack||e).slice(0,500)); }catch(_){} return ''; } }; g._safe=1; window[n]=g; }catch(e){} });
 try{ if(typeof render==='function'&&typeof page!=='undefined'&&page==='home'){ const y=window.scrollY; render(); window.scrollTo(0,y); } }catch(e){}
 </script>
 <script>
