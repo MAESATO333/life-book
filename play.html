@@ -667,7 +667,7 @@ a.nav-b{ text-decoration:none; }
 <div class="wrap">
   <header class="masthead">
     <a class="name lb-logo" href="#" aria-label="LIFE BOOK"><span class="lb-isle" id="lbIsle" aria-hidden="true"></span><span class="lb-word" aria-hidden="true"><span class="lb-t" style="--c:#E8667E">L</span><span class="lb-t" style="--c:#F2B630">I</span><span class="lb-t" style="--c:#6DB84A">F</span><span class="lb-t" style="--c:#5BA7DD">E</span><span class="lb-gap"></span><span class="lb-t" style="--c:#9B7FD9">B</span><span class="lb-t" style="--c:#EE7A92">O</span><span class="lb-t" style="--c:#F2B630">O</span><span class="lb-t" style="--c:#5DAE44">K</span></span></a>
-    <div class="mast-r"><nav class="mastnav" id="mastnav" aria-label="ページ"></nav><div class="meta" id="mastmeta"></div><button class="fr-top fr-open" type="button">友だちに紹介</button></div>
+    <div class="mast-r"><nav class="mastnav" id="mastnav" aria-label="ページ"></nav><div class="meta" id="mastmeta"></div><button class="fr-top fr-open" type="button">友だちに紹介</button><button class="fr-top fof-top" type="button" data-foftop="1"><span aria-hidden="true">👥</span>友だちの友だち<b class="fof-top-n" hidden></b></button></div>
   </header>
   <main id="app"></main>
 </div>
@@ -15785,6 +15785,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
   const kana=P.fullKana&&P.fullKana!==P.full?`<div class="kana">${esc(P.fullKana)}</div>`:'';
   const hint=hintNow();
   return `<div class="home fade">
+  ${typeof chnIdHTML==='function'?chnIdHTML(P):''}
   <section class="hm-hint" aria-label="人生のヒント"><span class="hm-hint-ic" aria-hidden="true"></span><div><small>人生のヒント</small><p>${esc(hint)}</p></div></section>${typeof dailyThreeHTML==='function'?dailyThreeHTML(P):''}${typeof pwaNoteHTML==='function'?pwaNoteHTML('top'):''}
   <section class="hm-hero">
     <div class="hm-art">${art}${todOverlay()}${c.dead?'':`<div class="hm-bubble" role="note"><small>今日の${esc(P.given)}</small>${esc(hk)}</div>`}</div>
@@ -15796,6 +15797,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
       <div class="hm-go"><button class="hm-btn" type="button" id="hmRead">${esc(go)}</button>${newYears?`<span class="hm-new">あたらしい出来事 ${newYears}年分</span>`:''}</div>
     </div>
   </section>
+  ${homeTile('hm-friends hm-wide',`Group Soul /紹介でつながった人たち<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, (typeof gsTreeHTML==='function'?gsTreeHTML(fr):'')+(typeof gsPetTreeHTML==='function'?gsPetTreeHTML(fr):'')+`<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
   <div class="hm-today">
     <section class="hm-tile hm-scene"><h3>今日の小さな場面<span class="hm-n">${dayKey().replace(/^\d+-0?(\d+)-0?(\d+)$/,'$1月$2日')}・${tod[1]}</span></h3>${scn?`<p class="hm-ono"><b>${esc(scn.w)}</b></p><p>${esc(scn.t)}</p>`:''}${near.length?`<ul class="hm-near">${near.map(n=>`<li><b>${esc(n.who)}</b>は、${esc(n.t)}</li>`).join('')}</ul>`:''}<p class="tiny muted">毎日、ちがう場面が届きます。</p></section>
     <section class="hm-tile hm-stamp"><h3>見守りスタンプ</h3>${stampHTML()}</section>
@@ -15809,7 +15811,6 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${homeTile('hm-album',`思い出のアルバム<span class="hm-n">${photos.length}枚</span>`, photos.length?`<div class="hm-photos">${photos.slice(-3).map(ph=>photoHTML(P,L,ph,true)).join('')}</div>`:'<p class="tiny muted">まだ写真はありません。</p>', photos.length?`<button class="linkish" type="button" id="hmAlbum">アルバムをひらく</button>`:'')}
     ${homeTile('hm-belief','心に生まれた観念', bel.length?`<ul class="hm-list">${bel.map(b=>`<li><span class="hm-a">${b.age}歳</span>「${esc(b.core||b.text||'')}」</li>`).join('')}</ul>`:'<p class="tiny muted">まだ、心に残る思い込みは生まれていません。</p>', arc.length?`<button class="linkish" type="button" id="hmKmap">本棚の人生とくらべる（観念の地図）</button>`:'')}
     ${homeTile('hm-insp','インスピレーション', `<div class="hm-dots" aria-label="一生で贈れる${L.inspMax}回のうち、${insp}回贈りました">${Array.from({length:L.inspMax},(_,i)=>`<i class="${i<insp?(i<heard?'on':'used'):''}"></i>`).join('')}</div><p class="tiny">一生で贈れるのは${L.inspMax}回。これまでに${insp}回贈り、${heard}回が心に届きました。</p>`)}
-    ${homeTile('hm-friends',`Group Soul /紹介でつながった人たち<span class="hm-n">${fr.length}人</span>${typeof fbFofCount==='function'&&fbFofCount()?`<span class="mt-badge" aria-label="つながりたいと届いている数 ${fbFofCount()}件">${fbFofCount()}</span>`:''}`, (typeof gsTreeHTML==='function'?gsTreeHTML(fr):'')+`<div class="mt-appeal"><b>紹介した人との出会いは、お互いに通知されます！</b><span>ふたりの Channel が人生のどこかで出会うと、あなたにも友だちにも「出会った！」とお知らせが届きます。</span></div>`+(typeof frReplyHTML==='function'?frReplyHTML():'')+(!fr.length&&store.get('hitotsu.frSent',0)?`<p class="tiny">紹介を送りました。相手が LIFE BOOK を始めて、「つながったことを知らせる」リンクを送ってくれると、ここに名前が出ます。</p>`:'')+(fr.length?`<ul class="hm-list">${fr.map(f=>{ const m=meets.find(x=>x.fr===(f.by||'友だち')); return `<li><b>${esc(f.by||'友だち')}さん</b>　${m&&m.age<=age?`${m.age}歳のときに、${esc(m.name)}と出会いました。`:'まだ出会っていません。いつ、どんな形で出会うのかは、お楽しみに。'}</li>`; }).join('')}</ul>`:''), `<button class="fr-big small fr-open" type="button"><i class="ic ic-heart" aria-hidden="true"></i>友だちに紹介する</button>`)}
     ${homeTile('hm-shelf'+(arc.length?'':' hm-empty'),`私の本棚<span class="hm-n">${arc.length}冊</span>`, arc.length?`<div class="shelf hm-shelf-row">${arc.slice(0,8).map((a,i)=>spineHTML(a,i)).join('')}</div>`:'<p class="tiny muted">生き終えた人生は「思い出のLIFE BOOK」になって、ここに並びます。</p>')}
     ${typeof borrowTileHTML==='function'?homeTile('hm-borrow',`友だちからLIFE BOOKを借りる<span class="hm-n">${store.get(KEY_LOAN,[]).length}冊</span>`,borrowTileHTML()):''}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
@@ -17360,6 +17361,80 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 @keyframes pbZ{ 0%{ opacity:0; transform:translate(0,0) } 20%{ opacity:.9 } 100%{ opacity:0; transform:translate(4px,-8px) } }
 @keyframes pbMk{ 0%,100%{ transform:translateY(0); opacity:.95 } 50%{ transform:translateY(-2px); opacity:.7 } }
 </style>`);
+// ===== 友だちの木が、増えると森になる。木を押すと、アップで全員の名前が見える。友だちのペットのつながりの木も =====
+const GS_PER=8; // 1本の木に、8人まで
+const _gsTree1=gsTreeHTML;
+function gsSVG(fr,full){ const s0=gsShort; if(full) gsShort=(s)=>String(s||''); let h=''; try{ h=_gsTree1(fr); }finally{ gsShort=s0; } const m=h.match(/<svg[\s\S]*<\/svg>/); return m?m[0]:''; }
+function gsChunks(a,n){ const out=[]; for(let i=0;i<a.length;i+=n) out.push(a.slice(i,i+n)); return out; }
+let _gsFr=[];
+gsTreeHTML=function(fr){ fr=fr||[]; _gsFr=fr; const ch=gsChunks(fr,GS_PER);
+  if(ch.length<=1) return `<figure class="gs-tree gs-one"><button type="button" class="gs-zb" data-gsz="0" aria-label="友だちの木を、大きく見る">${gsSVG(fr)}<span class="gs-zoom" aria-hidden="true">🔍 押すと大きく見られます</span></button><figcaption>あなたの Channel を幹に、紹介でつながった人が枝の先に。点線の先は、その人とつながっている人です。</figcaption></figure>`;
+  return `<div class="gs-forest-w"><p class="gs-forest-h">🌳 友だちの森　木${ch.length}本・${fr.length}人</p><div class="gs-forest">${ch.map((c,i)=>`<figure class="gs-tree gs-mini"><button type="button" class="gs-zb" data-gsz="${i}" aria-label="${i+1}本目の木（${c.length}人）を、大きく見る">${gsSVG(c)}</button><figcaption>${i+1}本目の木・${c.length}人</figcaption></figure>`).join('')}</div><p class="tiny muted gs-forest-n">友だちが${GS_PER}人ふえるごとに、木が1本ふえて、森になっていきます。木を押すと、アップで全員の名前が見られます。</p></div>`; };
+// ---- ペットのつながりの木 ----
+function gsFrPets(fr){ const fof=(typeof store!=='undefined'&&store.get('hitotsu.fof',{}))||{}; return (fr||[]).map(f=>{ const e=fof[f.id]; return e&&e.pet&&typeof PB_ALL!=='undefined'&&PB_ALL[e.pet.p]?Object.assign({ owner:f.by||'友だち', oid:f.id },e.pet):null; }).filter(Boolean); }
+function gsPetArt(id,kind,seed,x,y,w){ let pose=''; try{ const A=PP_ACTS[kind]||PP_ACTS.dog; const c=A.filter(a=>a.b!=='sleep'); pose=c[gsHash(seed+'|'+Math.floor(Date.now()/(15*60e3)))%c.length]; }catch(e){}
+  const s=petPortraitSVG(id,'',pose); return s.replace(/<svg class="pet-art" viewBox="0 0 200 150"[^>]*>/,`<svg x="${(x-w/2).toFixed(1)}" y="${(y-w*.75/2).toFixed(1)}" width="${w}" height="${(w*.75).toFixed(1)}" viewBox="0 0 200 150">`); }
+function gsPetSVG(list,full){ const n=list.length, W=360, H=n>4?280:230, cx=W/2, base=H-40, top=base-56; let br='', art='', lab='';
+  const me=typeof mpGet==='function'?mpGet():null; const lb=(x,y,t,sub)=>{ const tt=full?t:gsShort(t,7); const w=Math.max(34,tt.length*9+12); return `<g><rect x="${(x-w/2).toFixed(1)}" y="${(y-8).toFixed(1)}" width="${w}" height="${sub?26:15}" rx="7.5" fill="#fff" stroke="#F4C6D4"/><text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#6A4A58">${esc(tt)}</text>${sub?`<text x="${x.toFixed(1)}" y="${(y+14).toFixed(1)}" text-anchor="middle" font-size="7.5" fill="#8A7A84">${esc(full?sub:gsShort(sub,9))}</text>`:''}</g>`; };
+  let back=`<rect x="${cx-70}" y="${base}" width="140" height="10" rx="2" fill="#A6DC8E"/><rect x="${cx-62}" y="${base+8}" width="124" height="7" rx="2" fill="#B08463"/>`;
+  br+=`<path d="M${cx-9} ${base} L${cx-6} ${top} L${cx+6} ${top} L${cx+9} ${base} Z" fill="#9A6B47"/>`;
+  list.forEach((p,i)=>{ const a=n===1?-Math.PI/2:(-Math.PI+0.36)+(Math.PI-0.72)*(i/(n-1)); const R=n>4?(i%2?78:130):108;
+    const ex=Math.max(40,Math.min(W-40,cx+Math.cos(a)*R*1.25)), ey=top-14+Math.sin(a)*R*(n>4?.85:.72); const mx=cx+Math.cos(a)*R*.45, my=top-6+Math.sin(a)*R*.18;
+    br+=`<path d="M${cx} ${top+4} Q${mx.toFixed(1)} ${my.toFixed(1)} ${ex.toFixed(1)} ${(ey+14).toFixed(1)}" stroke="#9A6B47" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+    art+=gsPetArt(p.p,p.k,p.oid+p.b,ex,ey,full?64:56); lab+=lb(ex,ey+26,(p.g?'🌈 ':'')+p.b,`${p.owner}さんの${({dog:'犬',cat:'猫',rabbit:'うさぎ',bird:'小鳥',fish:'金魚'})[p.k]||'ペット'}`); });
+  if(me&&PB_ALL[me.breed]){ art+=gsPetArt(me.breed,me.kind,'me'+me.name,cx,base-22,68); lab+=lb(cx,base+22,(mpGone(me)?'🌈 ':'')+me.name,'うちのペット'); }
+  else lab+=lb(cx,base+20,'あなたのペット','まだいません');
+  if(!n) lab+=`<text x="${cx}" y="${top-40}" text-anchor="middle" font-size="10.5" fill="#8A7A84">友だちがペットを迎えると、ここに枝がのびます</text>`;
+  return `<svg viewBox="0 ${n>4?-20:0} ${W} ${H+(n>4?20:0)+12}" role="img" aria-label="ペットのつながりの木。${n}匹">${back}${br}${art}${lab}</svg>`; }
+const GS_PPER=6;
+function gsPetTreeHTML(fr){ const list=gsFrPets(fr); const me=typeof mpGet==='function'?mpGet():null; if(!list.length&&!me) return ''; const ch=gsChunks(list,GS_PPER); if(!ch.length) ch.push([]);
+  return `<div class="gs-pet-w"><p class="gs-forest-h">🐾 ペットのつながりの木${list.length?`　${list.length}匹`:''}${ch.length>1?`・木${ch.length}本`:''}</p><div class="${ch.length>1?'gs-forest':''}">${ch.map((c,i)=>`<figure class="gs-tree gs-pet ${ch.length>1?'gs-mini':'gs-one'}"><button type="button" class="gs-zb" data-gspz="${i}" aria-label="ペットの木を、大きく見る">${gsPetSVG(c)}${ch.length>1?'':'<span class="gs-zoom" aria-hidden="true">🔍 押すと大きく見られます</span>'}</button>${ch.length>1?`<figcaption>${i+1}本目の木・${c.length}匹</figcaption>`:'<figcaption>うちのペットを幹に、友だちのペットが枝の先に。</figcaption>'}</figure>`).join('')}</div></div>`; }
+// ---- アップで見る ----
+function gsZoomOpen(html){ let d=document.getElementById('gsZoom'); if(!d){ d=document.createElement('div'); d.id='gsZoom'; d.className='gsz'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); document.body.appendChild(d); }
+  d.innerHTML=`<div class="gsz-in"><button type="button" class="gsz-x" aria-label="閉じる">×</button>${html}</div>`; d.hidden=false; document.body.classList.add('gsz-open'); try{ d.querySelector('.gsz-x').focus(); }catch(e){} }
+function gsZoomClose(){ const d=document.getElementById('gsZoom'); if(d){ d.hidden=true; d.innerHTML=''; } document.body.classList.remove('gsz-open'); }
+document.addEventListener('click',e=>{ const t=e.target; if(t.closest&&t.closest('.gsz-x')||(t.id==='gsZoom')){ gsZoomClose(); return; }
+  const z=t.closest&&t.closest('[data-gsz]'); if(z){ const i=+z.dataset.gsz; const c=gsChunks(_gsFr,GS_PER)[i]||_gsFr; const fof=store.get('hitotsu.fof',{}); const many=_gsFr.length>GS_PER;
+    gsZoomOpen(`<h3 class="gsz-h">🌳 ${many?`${i+1}本目の木（${c.length}人）`:`友だちの木（${c.length}人）`}</h3><div class="gsz-art">${gsSVG(c,true)}</div><ul class="gsz-l">${c.map(f=>{ const e=fof[f.id]||{}; const sub=(e.fr||[]).map(x=>x.b).filter(Boolean); return `<li><b>${esc(f.by||'友だち')}さん</b>${sub.length?`<small>つながっている人：${sub.map(x=>esc(x)+'さん').join('、')}</small>`:''}${e.pet?`<small>🐾 ${esc(e.pet.b)}（${esc((PB_ALL[e.pet.p]||{}).name||'')}）</small>`:''}</li>`; }).join('')||'<li>まだ、つながった人はいません。</li>'}</ul>`); return; }
+  const pz=t.closest&&t.closest('[data-gspz]'); if(pz){ const i=+pz.dataset.gspz; const list=gsFrPets(_gsFr); const c=gsChunks(list,GS_PPER)[i]||[];
+    gsZoomOpen(`<h3 class="gsz-h">🐾 ペットのつながりの木（${c.length}匹）</h3><div class="gsz-art">${gsPetSVG(c,true)}</div><ul class="gsz-l">${c.map(p=>`<li><b>${p.g?'🌈 ':''}${esc(p.b)}</b><small>${esc(p.owner)}さんの家・${esc((PB_ALL[p.p]||{}).name||'')}・${p.a}歳</small></li>`).join('')||'<li>友だちがペットを迎えると、ここに出ます。</li>'}</ul>`); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const d=document.getElementById('gsZoom'); if(d&&!d.hidden) gsZoomClose(); } });
+document.head.insertAdjacentHTML('beforeend',`<style>
+.gs-zb{ display:block; width:100%; padding:0; border:0; background:none; cursor:zoom-in; position:relative; font:inherit; }
+.gs-zb:focus-visible{ outline:3px solid #E86A88; outline-offset:2px; border-radius:14px; }
+.gs-zoom{ position:absolute; right:8px; top:6px; font-size:11px; font-weight:700; color:#C2476B; background:#fff; border-radius:999px; padding:2px 9px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.gs-forest-h{ margin:4px 2px 8px; font-weight:800; color:#3F7F3A; font-size:15px; }
+.gs-forest{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; }
+.gs-tree.gs-mini{ margin:0; padding:4px 3px 3px; } .gs-tree.gs-mini figcaption{ font-size:11px; font-weight:700; color:#6A4A58; }
+.gs-forest-n{ margin:6px 2px 0; }
+.gs-pet-w{ margin:10px 0 12px; } .gs-tree.gs-pet{ background:linear-gradient(180deg,#FFF7E6 0%,#FFF0F4 100%); }
+.gsz{ position:fixed; inset:0; z-index:9000; background:rgba(40,30,40,.55); display:flex; align-items:center; justify-content:center; padding:16px; }
+.gsz[hidden]{ display:none; } body.gsz-open{ overflow:hidden; }
+.gsz-in{ position:relative; background:#FFFDFE; border-radius:22px; width:min(760px,100%); max-height:92vh; overflow:auto; padding:14px 16px 18px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+.gsz-x{ position:absolute; right:10px; top:8px; width:36px; height:36px; border-radius:50%; border:2px solid #F4C6D4; background:#fff; color:#C2476B; font-size:20px; cursor:pointer; }
+.gsz-h{ margin:4px 44px 8px 4px; color:#C2476B; font-size:18px; }
+.gsz-art{ border-radius:16px; background:linear-gradient(180deg,#E7F4FF 0%,#FFF3F6 100%); padding:6px; } .gsz-art svg{ display:block; width:100%; height:auto; }
+.gsz-l{ list-style:none; margin:12px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:8px; }
+.gsz-l li{ background:#FFF0F4; border-radius:12px; padding:8px 12px; } .gsz-l b{ display:block; font-size:15px; color:#6A4A58; } .gsz-l small{ display:block; font-size:12px; color:#8A7A84; margin-top:2px; line-height:1.5; }
+</style>`);
+// ---- 上のメニューの「友だちの友だち」ボタン：押すと、紹介の窓の「友だちの友だち」の場所へ ----
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-foftop]'); if(!b) return; e.preventDefault();
+  try{ openFriend(''); }catch(_){} setTimeout(()=>{ const t=document.querySelector('#frDlg .fof'); if(t) try{ t.scrollIntoView({ block:'start', behavior:'smooth' }); t.classList.remove('fof-flash'); void t.offsetWidth; t.classList.add('fof-flash'); }catch(_){} },250); });
+function fofTopBadge(){ try{ const n=(typeof fbFofCount==='function'?fbFofCount():0)||(typeof fbCandidates==='function'?fbCandidates().length:0); document.querySelectorAll('.fof-top-n').forEach(x=>{ x.hidden=!n; x.textContent=n?String(n):''; }); }catch(e){} }
+setInterval(fofTopBadge,5000); setTimeout(fofTopBadge,1500);
+document.head.insertAdjacentHTML('beforeend',`<style>
+.fof-top{ margin-left:6px; } .fof-top::before{ display:none!important; }
+.fof-top-n{ min-width:18px; height:18px; padding:0 5px; border-radius:999px; background:#fff; color:#E04A7A; font-size:11px; display:inline-flex; align-items:center; justify-content:center; }
+.fof-top-n[hidden]{ display:none; }
+</style>`);
+// ---- Channel 番号：その Channel だけの8桁。Safari などから入り直しても、同じ番号ならいつもの Channel ----
+function chnIdNum(P){ let h=2166136261; const s='chn|'+String(P.seed)+'|'+(P.full||''); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return 10000000+((h>>>0)%90000000); }
+function chnIdHTML(P){ if(!P||P.seed==null) return ''; const n=String(chnIdNum(P)); return `<div class="hm-cid" role="note"><span class="hm-cid-l">Channel 番号</span><b class="hm-cid-n">${n.slice(0,4)} ${n.slice(4)}</b><small>この番号が同じなら、いつものあなたの Channel です</small></div>`; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+.hm-cid{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; margin:0 0 12px; padding:9px 14px; border-radius:16px; background:#FFF0F4; border:2px solid #F7C3D2; }
+.hm-cid-l{ font-size:12.5px; font-weight:700; color:#C2476B; } .hm-cid-n{ font-size:22px; font-weight:800; letter-spacing:.08em; color:#6A4A58; font-variant-numeric:tabular-nums; }
+.hm-cid small{ flex-basis:100%; font-size:11.5px; color:#8A7A84; }
+</style>`);
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
@@ -17390,7 +17465,10 @@ async function fbMakeIv(){ try{ const k=fbKey(), want=store.get(KEY_FBIV+'.k',''
   const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(k+'|lifebook-iv')); const iv=[...new Uint8Array(b)].slice(0,12).map(x=>x.toString(16).padStart(2,'0')).join('');
   store.set(KEY_FBIV,iv); store.set(KEY_FBIV+'.k',k.slice(0,6)); return iv; }catch(e){ return ''; } }
 function fbFriends(){ return store.get(KEY_FRIEND,[]).filter(f=>f&&f.id); }
-function fbFrList(except){ return fbFriends().filter(f=>f.id!==except).slice(0,20).map(f=>({ i:String(f.id), b:String(f.by||'').slice(0,20) })); }
+function fbFrList(except){ const out=fbFriends().filter(f=>f.id!==except).slice(0,19).map(f=>({ i:String(f.id), b:String(f.by||'').slice(0,20) }));
+  // うちのペットも、友だちに知らせる（ペットのつながりの木に出る）。i が「~pet」の行は、人ではない
+  try{ const p=typeof mpGet==='function'&&mpGet(); if(p&&p.breed&&p.name) out.push({ i:'~pet', b:String(p.name).slice(0,20), p:String(p.breed).slice(0,40), k:String(p.kind||''), a:Math.floor(Math.min(mpAge(p),p.life||99)), g:mpGone(p)?1:0 }); }catch(e){}
+  return out; }
 // つながり具合：FB_ST = 'off'（まだ）/'try'（つなぎ中）/'ok'/'ng'。FB_ERR = うまくいかなかった理由。失敗したら、時間をおいて自動でやり直す
 let FB_ST='off', FB_ERR='', _fbTry=0, _fbBusyStart=false, _fbHooks=false;
 async function fbStart(){
@@ -17432,7 +17510,7 @@ async function fbPush(){ if(!FB) return; if(_fbBusy){ _fbAgain=true; return; } _
 // ひとりの相手の受け箱に書く。書けたら true
 async function fbPushOne(f,h){ h=h||myHero(); if(!FB||!h||!f||!f.id) return false; const me=myId(), by=store.get(KEY_ME,'')||'';
   // t には「つながった日」（出会いの日の起点）を入れる。ルールを変えずに相手へ届けるため、g ではなく t を使う。
-  const g=f.a0||f.got||Date.now(), fr=fbFrList(f.id), sig=fbHeroSig(h,by)+'#'+fr.map(x=>x.i+':'+x.b).join(',')+'#g'+g, done=store.get(KEY_FBPUSH,{});
+  const g=f.a0||f.got||Date.now(), fr=fbFrList(f.id), sig=fbHeroSig(h,by)+'#'+fr.map(x=>x.i+':'+x.b+(x.p?':'+x.p+':'+x.a+':'+x.g:'')).join(',')+'#g'+g, done=store.get(KEY_FBPUSH,{});
   if(done[f.id]===sig) return true;
   const data={ from:me, by:String(by).slice(0,20), s:h.s, c:h.c||null, f:h.f||null, ch:h.ch||null, t:g, fr };
   if(f.iv) data.iv=String(f.iv);
@@ -17452,7 +17530,8 @@ function fbListen(){ const { collection, onSnapshot }=FB.D;
     snap.docChanges().forEach(ch=>{ if(ch.type==='removed') return; const d=ch.doc.data();
       if(typeof d.s!=='number'||!d.from) return;
       const o={ id:String(d.from), by:d.by||'', s:d.s, c:d.c||null, f:d.f||null, ch:d.ch||null, t:d.t||Date.now(), g:(typeof d.t==='number'?d.t:undefined) };
-      if(Array.isArray(d.fr)){ fof[o.id]={ by:o.by, fr:d.fr.filter(x=>x&&x.i).slice(0,20).map(x=>({ i:String(x.i), b:String(x.b||'').slice(0,20) })) }; fofCh=true; }
+      if(Array.isArray(d.fr)){ const pt=d.fr.find(x=>x&&x.i==='~pet'); fof[o.id]={ by:o.by, fr:d.fr.filter(x=>x&&x.i&&String(x.i)[0]!=='~').slice(0,20).map(x=>({ i:String(x.i), b:String(x.b||'').slice(0,20) })) };
+        if(pt&&pt.p) fof[o.id].pet={ b:String(pt.b||'').slice(0,20), p:String(pt.p).slice(0,40), k:String(pt.k||''), a:+pt.a||0, g:pt.g?1:0 }; fofCh=true; }
       const old=store.get(KEY_FRIEND,[]).find(x=>x.id===o.id);
       if(old&&old.s===o.s&&(old.c||null)===o.c&&(old.by||'')===o.by&&(o.g==null||old.g===o.g)) return; // 変わりなし
       const r=receiveFriend(o); if(r==='self') return; changed=true;
