@@ -18260,11 +18260,16 @@ function hmiBuild(){
   wrap.innerHTML='<p class="hmi-title">いろんな国の人生が、空に浮かんでいます</p><div class="hmi-view"><div class="hmi-track"></div></div>';
   const track=wrap.querySelector('.hmi-track');
   const mix=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
-  const idx=[], fr=[]; HMI_L.forEach((x,i)=>(x.f?fr:idx).push(i)); mix(idx); mix(fr);
-  let next=0, nf=0, nn=0;
-  const pick=()=>{ let k; if(next%9===5){ next++; return -2; } if(typeof hmipMake==='function'&&next%4===3){ next++; return -1; } if(fr.length&&next%3===1){ k=fr[nf%fr.length]; nf++; if(nf%fr.length===0) mix(fr); } else { k=idx[nn%idx.length]; nn++; } next++; return k; };
+  // v157: 342人ぜんいんを1周ずつ、かたよりなく流す（同じ国が続かないように並べ、1周したら並べなおす。リロードしても続きから）
+  const deal=()=>{ const by={}; mix(HMI_L.map((x,i)=>i)).forEach(i=>{ (by[HMI_L[i].c]=by[HMI_L[i].c]||[]).push(i); }); const out=[]; let last=null;
+    while(out.length<HMI_L.length){ const ks=Object.keys(by).filter(c=>by[c].length); const ok=ks.filter(c=>c!==last); const pool=ok.length?ok:ks; let tot=0; pool.forEach(c=>tot+=by[c].length); let r=Math.random()*tot, c=pool[0]; for(const q of pool){ r-=by[q].length; if(r<0){ c=q; break; } } out.push(by[c].pop()); last=c; } return out; };
+  let deck=null, dp=0; try{ const sv=JSON.parse(localStorage.getItem('hmiDeck')||'null'); if(sv&&sv.n===HMI_L.length&&Array.isArray(sv.d)&&sv.d.length===HMI_L.length){ deck=sv.d; dp=sv.p|0; } }catch(e){}
+  if(!deck){ deck=deal(); dp=0; }
+  const save=()=>{ try{ localStorage.setItem('hmiDeck',JSON.stringify({n:HMI_L.length,d:deck,p:dp})); }catch(e){} };
+  let next=0;
+  const pick=()=>{ let k; if(next%24===13){ next++; return -2; } if(typeof hmipMake==='function'&&next%4===3){ next++; return -1; } if(dp>=deck.length){ deck=deal(); dp=0; } k=deck[dp++]; save(); next++; return k; };
   const fill=fig=>{ const k=pick(), img=fig.querySelector('img'), pv=fig.querySelector('.hmi-pet');
-    if(k===-2){ try{ const o=hmiAlien(Math.random); pv.innerHTML=o.svg; pv.hidden=false; img.hidden=true; img.removeAttribute('src'); fig.querySelector('b').textContent='宇宙人 3人'; fig.querySelector('span').textContent=o.star; fig.classList.add('hmi-is-pet'); return; }catch(e){} }
+    if(k===-2){ try{ const o=hmiAlien(Math.random); pv.innerHTML=o.svg; pv.hidden=false; img.hidden=true; img.removeAttribute('src'); fig.querySelector('b').textContent=o.kind==='under'?'地底人 3人':'宇宙人 3人'; fig.querySelector('span').textContent=o.star; fig.classList.add('hmi-is-pet'); return; }catch(e){} }
     if(k<0){ try{ const o=hmipMake(Math.random,false); pv.innerHTML=hmipSVG(o); pv.hidden=false; img.hidden=true; img.removeAttribute('src'); fig.querySelector('b').textContent=o.group?HMIP_GNAME[o.kind]+' '+o.cnt+'匹':o.name+' '+o.age+'歳'; fig.querySelector('span').textContent=o.n+(o.t?'・'+o.t:''); fig.classList.add('hmi-is-pet'); return; }catch(e){} }
     if(pv){ pv.hidden=true; pv.innerHTML=''; } img.hidden=false; fig.classList.remove('hmi-is-pet'); const kk=k<0?0:k, x=HMI_L[kk];
     img.src='lives/'+('00'+kk).slice(-3)+'.webp'; img.alt=x.n+'で暮らす'+x.g+'、'+x.a+'歳';
@@ -18316,29 +18321,41 @@ setTimeout(hmiPlace,0);
 `; document.head.appendChild(s); })();
 
 // v154: 宇宙人だけの島（3人）。星の名前は、このゲームの中だけの名前
-const HMI_STARS=['キラリ星','ポルン星','ミルル星','ふわり星','ルミナ星','ピッコ星','ソラネ星','ほしまる星'];
-function hmiAlien(rnd){ const S=bkScene(); const pick=a=>a[Math.floor(rnd()*a.length)];
-  const top=pick(['#B79CF2','#9ED7E8','#F2B5D4','#A8E6B8']);
-  S.box(-.9,-.6,-2.0,1.8,1.2,.5,'#6E5A9E'); S.box(-1.35,-1.0,-1.5,2.7,2.0,.55,'#8A74C0'); S.box(-1.7,-1.3,-.95,3.4,2.6,.6,'#A08BD6'); S.box(-1.7,-1.3,-.35,3.4,2.6,.35,top);
-  // 未来の街：光る塔・ドーム・チューブ・アンテナ
-  const glow=pick(['#7CF2E8','#FFE27A','#F7A8E0']);
-  S.begin(-4); S.box(-1.65,-1.25,0,.55,.55,1.9,'#DCE4F2'); for(let f=0;f<5;f++) S.box(-1.65,-.71,.2+f*.34,.55,.02,.12,'#9FE6F7'); S.box(-1.75,-1.35,1.9,.75,.75,.14,'#B9C6DD'); S.box(-1.5,-1.1,2.04,.25,.25,.45,glow); S.box(-1.42,-1.02,2.49,.09,.09,.35,'#9AA3B8'); S.end();
-  S.begin(-2.6); S.box(-.85,-1.28,0,1.1,.85,.45,'#E8ECF7'); S.box(-.75,-1.18,.45,.9,.65,.18,'#C9F2FA'); S.box(-.62,-1.05,.63,.64,.4,.14,'#B2EAF5'); S.box(-.48,-.95,.77,.36,.22,.1,'#9FE6F7'); for(let k=0;k<3;k++) S.box(-.75+k*.3,-.44,.12,.18,.02,.2,glow); S.end();
-  S.begin(-1.2); S.box(.45,-1.28,0,.38,.38,1.35,'#B79CF2'); S.box(.38,-1.35,1.35,.52,.52,.1,'#9C8CF2'); S.box(.53,-1.2,1.45,.22,.22,.5,'#E8ECF7'); S.box(.6,-1.13,1.95,.08,.08,.3,glow); S.end();
-  S.begin(-.4); S.box(.95,-1.25,0,.7,.55,.75,'#F2F4FA'); S.box(.95,-.71,.25,.7,.02,.25,'#9FE6F7'); S.box(1.05,-1.15,.75,.5,.35,.12,'#F7A8E0'); S.end();
-  S.begin(-2); S.box(-1.1,-.95,.95,1.55,.18,.18,'#C9F2FA'); S.end();
-  S.begin(1); S.box(1.45,.75,0,.18,.18,.55,'#7CE0F2'); S.box(1.25,.95,0,.14,.14,.35,'#F7A8E0'); S.box(-1.6,1.0,0,.16,.16,.42,'#7CE0F2'); S.end();
-  // 空を飛ぶUFO（ゆらゆら、左右に）
-  const u=S.p(1.3,-.9,2.5); const ux=u[0].toFixed(1), uy=u[1].toFixed(1);
-  S.deco(999,`<g class="hmi-ufo" style="animation-duration:${(5+Math.floor(rnd()*4))}s"><g transform="translate(${ux} ${uy})"><polygon class="hmi-beam" points="-5,4 5,4 12,30 -12,30" fill="#FFF6B0" opacity=".35"/><ellipse cx="0" cy="2" rx="13" ry="4.2" fill="#C9D2DD"/><ellipse cx="0" cy="1" rx="13" ry="3" fill="#E8ECF7"/><path d="M-6,0 A6,6 0 0 1 6,0 Z" fill="#9FE6F7"/>${[-9,-3,3,9].map((x,i)=>`<circle class="hmi-ufo-l" style="animation-delay:${i*.2}s" cx="${x}" cy="3" r="1.3" fill="${['#FFE27A','#F7A8E0','#7CF2E8','#FFE27A'][i]}"/>`).join('')}</g></g>`);
-  if(!document.getElementById('hmiUfoCss')) document.head.insertAdjacentHTML('beforeend',`<style id="hmiUfoCss">@keyframes hmiUfo{ 0%,100%{ transform:translate(-14px,0) } 25%{ transform:translate(0,-4px) } 50%{ transform:translate(14px,0) } 75%{ transform:translate(0,3px) } } .hmi-ufo{ animation:hmiUfo 6s ease-in-out infinite; } @keyframes hmiBeam{ 0%,100%{ opacity:.12 } 50%{ opacity:.45 } } .hmi-beam{ animation:hmiBeam 2.4s ease-in-out infinite; } @keyframes hmiUfoL{ 0%,100%{ opacity:1 } 50%{ opacity:.3 } } .hmi-ufo-l{ animation:hmiUfoL 1s steps(2) infinite; }</style>`);
-  const cols=['#7DDB7A','#9C8CF2','#6FC8F2','#F29BD0','#F2D36B']; const xs=[[-1.35,.65],[-.25,.4],[.85,.25]];
-  xs.forEach(([x,y],i)=>{ const c=cols[(Math.floor(rnd()*5)+i)%5]; S.begin(x+y+4);
+// v157: 宇宙人の島は3種類（プレアデス星団・シリウス・地底人）。ときどきだけ流れてくる
+let _hmiAk=Math.floor(Math.random()*3);
+function hmiAlien(rnd){ const kind=['pleiades','sirius','under'][(_hmiAk++)%3]; const S=bkScene(); const pick=a=>a[Math.floor(rnd()*a.length)];
+  const T={ pleiades:{ top:'#E9E6FB', s1:'#9C8CF2', s2:'#B7AAF5', s3:'#CFC6FA', cols:['#BFE4FF','#E8ECFF','#C9D8FF'], ant:'#FFE27A', label:'プレアデス星団', ufo:'#E8ECF7' },
+    sirius:{ top:'#BFEAF2', s1:'#3E7FA8', s2:'#5BA6D8', s3:'#7CC8F2', cols:['#6FC8F2','#7DDBC8','#9FB4F2'], ant:'#9FE6F7', label:'シリウス', ufo:'#CFE6F7' },
+    under:{ top:'#8C7A6A', s1:'#4E4038', s2:'#6A5848', s3:'#7E6A58', cols:['#C9C2B8','#B9A88E','#A8B3A0'], ant:'#F2A65A', label:'地底の世界', ufo:null } }[kind];
+  S.box(-.9,-.6,-2.0,1.8,1.2,.5,T.s1); S.box(-1.35,-1.0,-1.5,2.7,2.0,.55,T.s2); S.box(-1.7,-1.3,-.95,3.4,2.6,.6,T.s3); S.box(-1.7,-1.3,-.35,3.4,2.6,.35,T.top);
+  if(kind==='pleiades'){ // 光のクリスタルの塔が7本（7つの星にちなんで）
+    [[-1.6,-1.25,1.9],[-1.15,-1.25,1.3],[-.7,-1.25,2.2],[-.25,-1.25,1.5],[.25,-1.25,2.5],[.75,-1.25,1.6],[1.25,-1.25,1.1]].forEach(([x,y,h],i)=>{ S.begin(x+y-1); S.box(x,y,0,.32,.32,h,i%2?'#DCE4FF':'#C9D8FF'); S.box(x+.06,y+.06,h,.2,.2,.3,'#FFFFFF'); S.box(x+.11,y+.11,h+.3,.1,.1,.18,'#FFE27A'); S.end(); });
+    S.begin(-.5); S.box(-1.2,-.85,0,2.6,.25,.12,'#FFFFFF'); S.end();
+    const st=S.p(-.3,-1.2,3.6); S.deco(998,`<g class="hmi-sky">${[[0,0],[7,-3],[13,1],[5,5],[-6,3],[19,-2],[10,8]].map(([x,y],i)=>`<path class="hmi-tw" style="animation-delay:${i*.3}s" d="M${(st[0]+x).toFixed(1)},${(st[1]+y-2.4).toFixed(1)} l.8,1.6 1.6,.8 -1.6,.8 -.8,1.6 -.8,-1.6 -1.6,-.8 1.6,-.8z" fill="#FFF6C8"/>`).join('')}</g>`); }
+  if(kind==='sirius'){ // 青いピラミッドと、水の広場、白い塔
+    S.begin(-3); for(let k=0;k<5;k++) S.box(-1.65+k*.13,-1.28+k*.13,k*.32,1.3-k*.26,1.3-k*.26,.32,k%2?'#5BA6D8':'#7CC8F2'); S.box(-1.06,-.69,1.6,.12,.12,.25,'#FFFFFF'); S.end();
+    S.begin(-1.2); S.box(.3,-1.28,0,.45,.45,2.1,'#F2F8FC'); S.box(.22,-1.36,2.1,.6,.6,.12,'#9FE6F7'); S.box(.42,-1.16,2.22,.2,.2,.45,'#FFFFFF'); S.end();
+    S.begin(-.6); S.box(.95,-1.2,0,.75,.8,.12,'#4FA3C8'); S.box(1.02,-1.13,.12,.6,.65,.02,'#9FE6F7'); S.box(1.25,-.9,.14,.12,.12,.4,'#BFEFFF'); S.end();
+    const st=S.p(-1.3,-1.3,3.5); S.deco(998,`<g class="hmi-sky"><path class="hmi-tw" d="M${st[0].toFixed(1)},${(st[1]-6).toFixed(1)} l1.6,4.4 4.4,1.6 -4.4,1.6 -1.6,4.4 -1.6,-4.4 -4.4,-1.6 4.4,-1.6z" fill="#FFFFFF"/><circle cx="${st[0].toFixed(1)}" cy="${st[1].toFixed(1)}" r="5" fill="#BFE4FF" opacity=".5"/></g>`); }
+  if(kind==='under'){ // 洞くつのアーチ・光るきのこ・オレンジの結晶・ランタン
+    S.begin(-3.5); S.box(-1.7,-1.3,0,.5,.6,1.5,'#5E5048'); S.box(.2,-1.3,0,.5,.6,1.5,'#5E5048'); S.box(-1.7,-1.3,1.5,2.4,.6,.5,'#6A5A50'); S.box(-1.2,-1.28,0,1.4,.02,1.5,'#2B2320'); S.end();
+    S.begin(-1); S.box(.95,-1.25,0,.25,.25,.9,'#F2A65A'); S.box(1.25,-1.15,0,.2,.2,.6,'#F7C46A'); S.box(1.45,-1.25,0,.18,.18,.45,'#F2A65A'); S.end();
+    [[-1.5,.9],[1.3,.8],[1.45,-.2],[-.6,1.05]].forEach(([x,y],i)=>{ S.begin(x+y+2); S.box(x+.08,y+.08,0,.1,.1,.3,'#E8DCC8'); S.box(x-.05,y-.05,.3,.36,.36,.14,i%2?'#7CF2E8':'#B79CF2'); S.end(); });
+    S.begin(-.2); S.box(-.6,-.8,0,.06,.06,1.1,'#3A3A3A'); S.box(-.68,-.88,1.1,.22,.22,.22,'#FFE27A'); S.box(.75,-.6,0,.06,.06,1.1,'#3A3A3A'); S.box(.67,-.68,1.1,.22,.22,.22,'#FFE27A'); S.end(); }
+  // 宇宙人3人
+  const xs=[[-1.35,.65],[-.25,.4],[.85,.25]];
+  xs.forEach(([x,y],i)=>{ const c=T.cols[i%3]; const big=kind==='under'; S.begin(x+y+4);
     S.box(x,y,0,.14,.14,.3,bkShade(c,.85)); S.box(x+.26,y,0,.14,.14,.3,bkShade(c,.85));
-    S.box(x-.02,y-.02,.3,.44,.36,.4,c);
-    S.box(x-.1,y-.08,.7,.6,.5,.48,c,p=>{ const e1=p(x+.08,y+.42,1.0), e2=p(x+.34,y+.42,1.0); return `<rect x="${e1[0].toFixed(1)}" y="${e1[1].toFixed(1)}" width="3.6" height="4.4" rx="1.2" fill="#1E1A2E"/><rect x="${e2[0].toFixed(1)}" y="${e2[1].toFixed(1)}" width="3.6" height="4.4" rx="1.2" fill="#1E1A2E"/><rect x="${(e1[0]+.8).toFixed(1)}" y="${(e1[1]+.6).toFixed(1)}" width="1.2" height="1.2" fill="#FFFFFF"/><rect x="${(e2[0]+.8).toFixed(1)}" y="${(e2[1]+.6).toFixed(1)}" width="1.2" height="1.2" fill="#FFFFFF"/>`; });
-    S.box(x+.04,y+.1,1.18,.05,.05,.25,'#555'); S.box(x+.36,y+.1,1.18,.05,.05,.25,'#555'); S.box(x,y+.06,1.42,.12,.12,.12,'#FFE27A'); S.box(x+.32,y+.06,1.42,.12,.12,.12,'#FFE27A'); S.end(); });
-  const c0=S.p(0,0,0), sc=1.8; const svg=`<svg class="hmi-psvg" viewBox="0 0 320 220" role="img" aria-label="宇宙人が3人いる島"><g transform="translate(160 142) scale(${sc}) translate(${(-c0[0]).toFixed(1)} ${(-c0[1]).toFixed(1)})">${S.render()}</g></svg>`;
-  return { svg, star:'どこかの星・'+pick(HMI_STARS) }; }
+    S.box(x-.02,y-.02,.3,.44,.36,.4,kind==='pleiades'?'#FFFFFF':c);
+    S.box(x-.1,y-.08,.7,.6,.5,.48,c,p=>{ const e1=p(x+.08,y+.42,1.0), e2=p(x+.34,y+.42,1.0); const w=big?4.6:3.6, h=big?5.4:4.4; return `<rect x="${e1[0].toFixed(1)}" y="${e1[1].toFixed(1)}" width="${w}" height="${h}" rx="1.2" fill="#1E1A2E"/><rect x="${e2[0].toFixed(1)}" y="${e2[1].toFixed(1)}" width="${w}" height="${h}" rx="1.2" fill="#1E1A2E"/><rect x="${(e1[0]+.8).toFixed(1)}" y="${(e1[1]+.6).toFixed(1)}" width="1.2" height="1.2" fill="#FFFFFF"/><rect x="${(e2[0]+.8).toFixed(1)}" y="${(e2[1]+.6).toFixed(1)}" width="1.2" height="1.2" fill="#FFFFFF"/>`; });
+    if(kind==='under'){ S.box(x-.12,y-.1,1.18,.64,.54,.08,'#8C6A4A'); S.box(x+.18,y+.1,1.26,.1,.1,.1,'#FFE27A'); }
+    else { S.box(x+.04,y+.1,1.18,.05,.05,.25,'#555'); S.box(x+.36,y+.1,1.18,.05,.05,.25,'#555'); S.box(x,y+.06,1.42,.12,.12,.12,T.ant); S.box(x+.32,y+.06,1.42,.12,.12,.12,T.ant); }
+    S.end(); });
+  // UFO（地底人は、なし）
+  if(T.ufo){ const u=S.p(1.3,-.9,2.5); const ux=u[0].toFixed(1), uy=u[1].toFixed(1);
+    S.deco(999,`<g class="hmi-ufo" style="animation-duration:${(5+Math.floor(rnd()*4))}s"><g transform="translate(${ux} ${uy})"><polygon class="hmi-beam" points="-5,4 5,4 12,30 -12,30" fill="#FFF6B0" opacity=".35"/><ellipse cx="0" cy="2" rx="13" ry="4.2" fill="#C9D2DD"/><ellipse cx="0" cy="1" rx="13" ry="3" fill="${T.ufo}"/><path d="M-6,0 A6,6 0 0 1 6,0 Z" fill="#9FE6F7"/>${[-9,-3,3,9].map((x,i)=>`<circle class="hmi-ufo-l" style="animation-delay:${i*.2}s" cx="${x}" cy="3" r="1.3" fill="${['#FFE27A','#F7A8E0','#7CF2E8','#FFE27A'][i]}"/>`).join('')}</g></g>`); }
+  if(!document.getElementById('hmiUfoCss')) document.head.insertAdjacentHTML('beforeend',`<style id="hmiUfoCss">@keyframes hmiUfo{ 0%,100%{ transform:translate(-14px,0) } 25%{ transform:translate(0,-4px) } 50%{ transform:translate(14px,0) } 75%{ transform:translate(0,3px) } } .hmi-ufo{ animation:hmiUfo 6s ease-in-out infinite; } @keyframes hmiBeam{ 0%,100%{ opacity:.12 } 50%{ opacity:.45 } } .hmi-beam{ animation:hmiBeam 2.4s ease-in-out infinite; } @keyframes hmiUfoL{ 0%,100%{ opacity:1 } 50%{ opacity:.3 } } .hmi-ufo-l{ animation:hmiUfoL 1s steps(2) infinite; } @keyframes hmiTw{ 0%,100%{ opacity:1 } 50%{ opacity:.35 } } .hmi-tw{ animation:hmiTw 1.8s ease-in-out infinite; }</style>`);
+  const c0=S.p(0,0,0), sc=1.8; const svg=`<svg class="hmi-psvg" viewBox="0 0 320 220" role="img" aria-label="${T.label}の宇宙人が3人いる島"><g transform="translate(160 142) scale(${sc}) translate(${(-c0[0]).toFixed(1)} ${(-c0[1]).toFixed(1)})">${S.render()}</g></svg>`;
+  return { svg, star:T.label, kind }; }
 </script>
 </body></html>
