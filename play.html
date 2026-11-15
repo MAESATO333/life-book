@@ -9440,7 +9440,7 @@ function blockSceneSVG(P,o,label){ const w=ilWorld(P); const r=ilRng(P.seed*13+o
     (o.kids||[]).slice(0,2).forEach(ka=>{ const ks=ilStage(ka); if(ks==='baby') row.push({ f:(x,y)=>bkBaby(S,x-.3,y+.2,{ skin:w.skin, shirt:'#FFFFFF' }) }); else if(['toddler','child','teen'].includes(ks)){ const ko={ stage:ks, skin:w.skin, hair:w.hair, shirt:ilPick(r,IL_SHIRT), gender:r()<.5?'女性':'男性', mood:65 }; row.push({ f:(x,y)=>bkPerson(S,x,y,ko) }); } }); }
   const items=st==='baby'?[{ f:row[0]().f }]:row; const n=items.length, stp=1.65;
   items.forEach((it,i)=>{ const t=(i-(n-1)/2)*stp; it.f(.1+t,.7-t); });
-  if(o.petB&&typeof PB_ALL!=='undefined'&&PB_ALL[o.petB]){ S.begin(1.2+2.2+1.2,o.petPose?'pb-a pb-'+o.petPose:''); pbDraw(S,1.2,2.2,PB_ALL[o.petB],o.petPose); S.end(); } else if(o.pet) bkPet(S,1.2,2.2,o.pet);
+  if(o.petB&&typeof PB_ALL!=='undefined'&&PB_ALL[o.petB]){ S.begin(1.2+2.2+1.2,typeof pbAnim==='function'?pbAnim(o.petPose,PB_ALL[o.petB]):''); pbDraw(S,1.2,2.2,PB_ALL[o.petB],o.petPose); S.end(); } else if(o.pet) bkPet(S,1.2,2.2,o.pet);
   let fx='';
   if(mood<35&&!inside){ fx='<g fill="#7F93AD" opacity=".75">'; for(let i=0;i<24;i++) fx+=`<rect class="bk-fall" style="animation-delay:${-(i*.13).toFixed(2)}s" x="${(r()*360).toFixed(0)}" y="${(r()*150).toFixed(0)}" width="2.4" height="7"/>`; fx+='</g>'; }
   else if(!inside&&season===3&&(biome==='cold'||biome==='temp')){ fx='<g fill="#FFFFFF">'; for(let i=0;i<26;i++) fx+=`<rect class="bk-snow" style="animation-delay:${-(i*.41).toFixed(2)}s" x="${(r()*360).toFixed(0)}" y="${(r()*190).toFixed(0)}" width="3" height="3"/>`; fx+='</g>'; }
@@ -9711,11 +9711,11 @@ function pbMark(L,age){ try{ const s=pbSeen(); let ch=false; for(const p of (L.p
 
 // ---- ブロック絵 ----
 // いまの姿勢（pbDraw の5つ目で決める。なし＝立っている、これまでと同じ）
-let _pbPose='';
+let _pbPose='', _pbX=null;
 function pbQuad(S,x,y,b){ const k=b.k, f=b.fluff*.05*k; const pats=(b.pat||'').split(' '); const Q=_pbPose; const lie=Q==='lie'||Q==='sleep', sit=Q==='sit'||Q==='groom';
   const has=t=>pats.includes(t); const c=has('hairless')?b.c:b.c, c2=b.c2;
   const legH0={S:.14,N:.3,L:.46}[b.leg]*k, legH=lie?.05*k:sit?legH0*.35:legH0, bl=1.1*k, bd=.5*k, bh=.42*k;
-  if(Q==='sleep') S.box(x-.25*k,y-.2*k,-.02,bl+.5*k,bd+.4*k,.05,'#F2B8C6');
+  pbUnder(S,x-.25*k,y-.2*k,bl+.5*k,bd+.4*k);
   const legC=has('tan')||has('point')||has('tri')?c2:(has('van')?b.c:c);
   const hs=.52*k+f, hx=x+bl-.28*k+(Q==='eat'?.12*k:Q==='sleep'?.06*k:0), hy=y-.01*k, hz=legH+bh*.55+(sit?(legH0-legH)+bh*.7:Q==='eat'?-(legH0*.45+bh*.5):Q==='look'?.14*k:Q==='sleep'?-bh*.45:0);
   const tailC=has('van')||has('point')?c2:(has('tri')?c:c);
@@ -9781,17 +9781,52 @@ function pbQuad(S,x,y,b){ const k=b.k, f=b.fluff*.05*k; const pats=(b.pat||'').s
   if(b.ear==='L') S.box(hx+hs,hy+hs*.3,hz-.05,.08*k,.28*k,.62*k,bkShade(earC,.9));
   pbProp(S,Q,hx,hy+hs,k,b,hz);
 }
-// 姿勢に合わせた小物（ボール・ごはんの皿・おもちゃのねずみ・毛づくろいの前足）
-function pbProp(S,Q,hx,fy,k,b,hz){ if(Q==='eat'){ S.box(hx+.02*k,fy+.06*k,0,.42*k,.36*k,.12*k,'#E86A88'); S.box(hx+.07*k,fy+.11*k,.12*k,.32*k,.26*k,.03*k,b.kind==='rabbit'?'#7CC46A':'#C98A4A'); }
-  if(Q==='play'){ if(b.kind==='cat'){ S.box(hx+.1*k,fy+.3*k,0,.26*k,.14*k,.12*k,'#B9B4B0'); S.box(hx-.06*k,fy+.35*k,.04*k,.16*k,.03*k,.03*k,'#E89AA6'); } else { S.box(hx+.08*k,fy+.3*k,0,.22*k,.22*k,.22*k,'#F0506A',p=>{ const a=p(hx+.08*k,fy+.52*k,.08*k), c=p(hx+.3*k,fy+.52*k,.08*k); return `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${c[0].toFixed(1)}" y2="${c[1].toFixed(1)}" stroke="#FFF" stroke-width="1.2"/>`; }); } }
-  if(Q==='groom') S.box(hx+.18*k,fy-.04,hz-.12*k,.16*k,.14*k,.34*k,b.c); }
+// 姿勢に合わせた小物（ボール・ほね・毛糸玉・ねこじゃらし・お皿・にんじん・鈴…）と、頭の上の「！」「？」「♪」「♡」
+function pbUnder(S,x,y,w,d){ const X=_pbX||{}; const c={ cushion:'#F2B8C6', blanket:'#A8C8F0', sunbeam:'#FFF1A8' }[X.pr]||(_pbPose==='sleep'?'#F2B8C6':''); if(!c) return;
+  S.box(x,y,-.02,w,d,.05,c,X.pr==='blanket'?p=>{ let s=''; for(let i=1;i<4;i++){ const a=p(x+w*i/4,y,.03), b2=p(x+w*i/4,y+d,.03); s+=`<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b2[0].toFixed(1)}" y2="${b2[1].toFixed(1)}" stroke="#FFFFFF" stroke-width="1.2" opacity=".8"/>`; } return s; }:null); }
+function pbProp(S,Q,hx,fy,k,b,hz,z0){ z0=z0||0; const X=_pbX||{}; let pr=X.pr;
+  if(!pr) pr=Q==='eat'?(b.kind==='rabbit'?'carrot':b.kind==='bird'?'':'bowl'):Q==='play'?(b.kind==='cat'?'mouse':b.kind==='dog'?'ball':''):'';
+  const B=(dx,dy,dz,w,d,h,c,ex)=>S.box(hx+dx*k,fy+dy*k,z0+dz*k,w*k,d*k,h*k,c,ex);
+  const line=(a,c)=>p=>{ const A=p(hx+a[0]*k,fy+a[1]*k,z0+a[2]*k), C=p(hx+a[3]*k,fy+a[4]*k,z0+a[5]*k); return `<line x1="${A[0].toFixed(1)}" y1="${A[1].toFixed(1)}" x2="${C[0].toFixed(1)}" y2="${C[1].toFixed(1)}" stroke="${c}" stroke-width="1.2"/>`; };
+  switch(pr){
+    case 'bowl': B(.02,.06,0,.42,.36,.12,'#E86A88'); B(.07,.11,.12,.32,.26,.03,b.kind==='rabbit'?'#7CC46A':'#C98A4A'); break;
+    case 'water': B(.02,.06,0,.42,.36,.12,'#7FB8E8'); B(.07,.11,.12,.32,.26,.02,'#D6F0FB'); break;
+    case 'ball': B(.08,.3,0,.22,.22,.22,'#F0506A',line([.08,.52,.08,.3,.52,.08],'#FFFFFF')); break;
+    case 'ball2': B(.08,.3,0,.22,.22,.22,'#4A90D9',line([.08,.52,.08,.3,.52,.08],'#FFE27A')); break;
+    case 'bone': B(.02,.28,0,.42,.1,.08,'#F7F2E6'); B(-.04,.24,0,.1,.18,.1,'#F7F2E6'); B(.4,.24,0,.1,.18,.1,'#F7F2E6'); break;
+    case 'stick': B(-.12,.32,0,.62,.07,.07,'#8A5A36'); B(.2,.39,0,.16,.05,.05,'#8A5A36'); break;
+    case 'frisbee': B(0,.26,0,.42,.42,.04,'#4FA3E0'); B(.12,.38,.04,.18,.18,.01,'#8FD0F5'); break;
+    case 'rope': B(0,.3,0,.42,.1,.1,'#E8D5B0'); B(-.06,.28,0,.1,.14,.14,'#E04A5A'); B(.4,.28,0,.1,.14,.14,'#4A90D9'); break;
+    case 'duck': B(.06,.3,0,.24,.22,.2,'#FFD84D'); B(.12,.36,.2,.14,.14,.14,'#FFD84D'); B(.16,.5,.24,.06,.08,.05,'#F28A3A'); break;
+    case 'slipper': B(0,.3,0,.44,.2,.08,'#F7A8C0'); B(.24,.3,.08,.18,.2,.05,'#F28AAA'); break;
+    case 'sock': B(0,.3,0,.36,.13,.1,'#FFFFFF'); B(.1,.3,0,.07,.14,.11,'#E04A5A'); B(.24,.3,0,.07,.14,.11,'#E04A5A'); break;
+    case 'mouse': B(.1,.3,0,.26,.14,.12,'#B9B4B0'); B(-.06,.35,.04,.16,.03,.03,'#E89AA6'); break;
+    case 'yarn': B(.08,.3,0,.24,.24,.22,'#F28AAA',line([.08,.42,.11,.32,.42,.11],'#FFFFFF')); B(-.2,.4,0,.28,.03,.02,'#F28AAA'); break;
+    case 'feather': B(.14,.42,0,.04,.04,.62,'#C98A4A'); B(.1,.38,.6,.12,.12,.16,'#B9A6FF'); break;
+    case 'fish': B(.04,.3,0,.32,.13,.13,'#F28A3A'); B(-.06,.3,.02,.1,.13,.1,'#F7B76A'); break;
+    case 'bag': B(.1,.35,0,.5,.4,.46,'#C9A57A'); B(.1,.35,.46,.5,.4,.02,'#B38F62'); break;
+    case 'leaf': B(.04,.3,0,.2,.2,.03,'#E8913A'); B(.3,.42,0,.18,.18,.03,'#D9B23A'); B(-.12,.46,0,.16,.16,.03,'#C9653A'); break;
+    case 'flower': B(.16,.42,0,.04,.04,.26,'#5FAF6A'); B(.11,.37,.26,.14,.14,.12,'#FF8FAA'); B(.36,.3,0,.04,.04,.2,'#5FAF6A'); B(.32,.26,.2,.12,.12,.1,'#FFD84D'); break;
+    case 'butterfly': B(.3,.5,(hz-z0)/k+.35,.12,.04,.14,'#FFB3D1'); B(.3,.56,(hz-z0)/k+.35,.12,.04,.14,'#B9A6FF'); break;
+    case 'treat': B(.1,.3,0,.12,.12,.08,'#C98A4A'); B(.26,.36,0,.1,.1,.08,'#E8C27A'); break;
+    case 'carrot': B(.12,.04,0,.36,.1,.08,'#F28A3A'); B(.04,.04,0,.1,.1,.12,'#5FAF6A'); break;
+    case 'greens': B(.06,.1,0,.3,.24,.05,'#5FAF6A'); B(.14,.16,.05,.2,.16,.04,'#7CC46A'); break;
+    case 'hay': B(-.04,.1,0,.46,.3,.12,'#C8D46A'); B(.06,.14,.12,.26,.2,.06,'#D9E08A'); break;
+    case 'seed': B(.1,.2,0,.3,.22,.12,'#E8C27A'); B(.14,.24,.12,.22,.14,.02,'#B5753A'); break;
+    case 'leash': B(-.2,.34,0,.7,.05,.04,'#E04A5A'); B(.44,.3,0,.12,.12,.06,'#E04A5A'); break;
+    case 'bell': B(.2,.3,0,.14,.14,.14,'#F2C230'); break;
+    case 'mirror': B(.5,.1,0,.04,.3,.42,'#CFE3F0'); B(.48,.08,-.02,.08,.34,.04,'#C98A4A'); break;
+    case 'swing': B(-.5,0,.9,.04,.04,.5,'#C98A4A'); B(.4,0,.9,.04,.04,.5,'#C98A4A'); B(-.5,0,1.38,.94,.06,.04,'#E8913A'); break;
+    case 'dot': B(.3,.5,0,.1,.1,.01,'#FF3355'); break; }
+  if(Q==='groom') S.box(hx+.18*k,fy-.04,hz-.12*k,.16*k,.14*k,.34*k,b.c);
+  if(X.mk) S.box(hx+.3*k,fy-.2*k,hz+.7*k,.001,.001,.001,'#FFFFFF',p=>{ const a=p(hx+.55*k,fy,hz+(b.kind==='bird'?.75:1.05)*k); return `<text class="pb-mk" x="${a[0].toFixed(1)}" y="${a[1].toFixed(1)}" font-size="9" font-weight="700" fill="${X.mk==='♡'?'#F0506A':X.mk==='♪'?'#E86A88':X.mk==='?'?'#6A8FD0':'#F2A030'}">${X.mk}</text>`; }); }
 function pbBird(S,x,y,b){ S.box(x+.32,y+.2,0,.14,.14,.72,'#9B7553'); S.box(x-.05,y+.22,.72,.95,.12,.08,'#9B7553');
   S.box(x-.25,y+.12,.86,.32,.16,.07,b.c3);
   S.box(x+.1,y,.8,.48,.42,.46,b.c,p=>{ let s=''; if(/セキセイ|キンカ/.test(b.name)) for(let i=0;i<3;i++){ const a=p(x+.16+i*.12,y+.42,1.16); s+=`<rect x="${a[0].toFixed(1)}" y="${a[1].toFixed(1)}" width="4" height="1.2" fill="${b.c3}"/>`; } return s; });
   S.box(x+.12,y+.41,.86,.32,.03,.3,b.c3);
   const Q=_pbPose; const hx=x+.42, hy=y+.03, hz=1.18+(Q==='sing'?.06:Q==='sleep'?-.08:Q==='eat'?-.1:0), hs=.36;
   if(Q==='flap'){ S.box(x+.15,y-.12,1.0,.36,.14,.3,b.c3); S.box(x+.15,y+.4,1.0,.36,.14,.3,b.c3); }
-  if(Q==='eat') S.box(x+.6,y+.24,.8,.28,.2,.12,'#E8C27A');
+  if(Q==='eat'&&!(_pbX&&_pbX.pr)) S.box(x+.6,y+.24,.8,.28,.2,.12,'#E8C27A');
   S.box(hx,hy,hz,hs,hs,hs,b.c2,p=>{ const q=(a,h)=>p(hx+a*hs,hy+hs,hz+h*hs); const e=q(.62,.62); let s=Q==='sleep'?`<rect x="${(e[0]-1.5).toFixed(1)}" y="${(e[1]-.2).toFixed(1)}" width="3" height="1" rx=".5" fill="#2B2230"/>`+(z=>`<text class="pb-z pb-z0" x="${z[0].toFixed(1)}" y="${z[1].toFixed(1)}" font-size="6" font-weight="700" fill="#8A94C8">z</text>`)(q(1.3,1.4)):`<rect x="${(e[0]-1.3).toFixed(1)}" y="${(e[1]-1.5).toFixed(1)}" width="2.6" height="3" rx=".7" fill="#2B2230"/>`;
     if(Q==='sing'){ const m=q(1.4,1.1); s+=`<text class="pb-note" x="${m[0].toFixed(1)}" y="${m[1].toFixed(1)}" font-size="8" fill="#E86A88">♪</text>`; }
     if(b.cheek==='ring'){ s=`<rect x="${(e[0]-2.4).toFixed(1)}" y="${(e[1]-2.6).toFixed(1)}" width="4.8" height="5.2" rx="1.6" fill="#FFFFFF"/>`+s; }
@@ -9801,9 +9836,10 @@ function pbBird(S,x,y,b){ S.box(x+.32,y+.2,0,.14,.14,.72,'#9B7553'); S.box(x-.05
   if(b.cheek==='ring'&&b.c2!=='#2A2523') S.box(hx-.02,hy-.02,hz-.04,hs+.04,hs+.04,.06,'#F28A9A');
   const beak=/文鳥|ジュウシ|キンカ/.test(b.name)?'#F0506A':b.name==='九官鳥'?'#F7A33A':/ホンセイ/.test(b.name)?'#D9363E':'#F4E3C3';
   S.box(hx+hs*.55,hy+hs,hz+hs*.15,hs*.3,.1,hs*.28,beak);
-  if(b.crest){ S.box(hx+hs*.3,hy+hs*.4,hz+hs,.08,.08,.3,b.c2); S.box(hx+hs*.25,hy+hs*.4,hz+hs+.25,.08,.08,.12,b.c2); } }
+  if(b.crest){ S.box(hx+hs*.3,hy+hs*.4,hz+hs,.08,.08,.3,b.c2); S.box(hx+hs*.25,hy+hs*.4,hz+hs+.25,.08,.08,.12,b.c2); }
+  pbProp(S,Q,hx+.1,hy+hs-.2,.8,b,hz,.8); }
 function pbRabbit(S,x,y,b){ const k=b.k, f=b.fluff*.05*k; const Q=_pbPose;
-  if(Q==='sleep') S.box(x-.3*k,y-.2*k,-.02,1.4*k,1*k,.05,'#F2B8C6');
+  pbUnder(S,x-.3*k,y-.2*k,1.4*k,1*k);
   S.box(x-.12*k,y+.22*k,.18*k,.16*k,.16*k,.16*k,'#FFFFFF');
   S.box(x+.05*k,y+.03*k,0,.18*k,.15*k,.12*k,b.c); S.box(x+.05*k,y+.42*k,0,.18*k,.15*k,.12*k,b.c);
   const dutch=b.pat==='dutch';
@@ -9821,7 +9857,7 @@ function pbRabbit(S,x,y,b){ const k=b.k, f=b.fluff*.05*k; const Q=_pbPose;
   if(b.ear==='U'&&Q==='sleep'){ const ec=dutch?b.c2:b.c; S.box(hx-.3*k,hy+hs*.3,hz+hs-.08*k,.46*k,.1*k,.08*k,ec); S.box(hx-.3*k,hy+hs*.6,hz+hs-.08*k,.46*k,.1*k,.08*k,ec); }
   else if(b.ear==='U'){ const ec=dutch?b.c2:b.c; S.box(hx+.07*k,hy+hs*.35,hz+hs,.11*k,.08*k,.5*k,ec,p=>{ const a=p(hx+.12*k,hy+hs*.35+.08*k,hz+hs+.1*k); return `<rect x="${(a[0]-.8).toFixed(1)}" y="${(a[1]-8*k).toFixed(1)}" width="1.6" height="${(6*k).toFixed(1)}" fill="#F2B8C2"/>`; }); S.box(hx+hs-.18*k,hy+hs*.35,hz+hs,.11*k,.08*k,.5*k,ec); }
   if(b.ear==='L') S.box(hx+hs,hy+hs*.3,hz-.12*k,.07*k,.24*k,.5*k,bkShade(b.c2==='#FFFFFF'?b.c:b.c2,.9));
-  if(Q==='eat'){ S.box(hx+.12*k,hy+hs+.04*k,0,.36*k,.1*k,.08*k,'#F28A3A'); S.box(hx+.04*k,hy+hs+.04*k,0,.1*k,.1*k,.12*k,'#5FAF6A'); } }
+  pbProp(S,Q,hx,hy+hs,k,b,hz); }
 function pbFishSVG(b,cx,cy,s){ s=s||1; const c=b.c, c2=b.c2; const bw={S:11,R:9,C:9}[b.shape]*s, bh={S:5.5,R:7.5,C:7}[b.shape]*s; let g='';
   const tx=cx-bw*.9;
   if(b.tail==='S') g+=`<polygon points="${tx},${cy} ${tx-7*s},${cy-5*s} ${tx-6*s},${cy} ${tx-7*s},${cy+5*s}" fill="${c}"/>`;
@@ -9839,20 +9875,28 @@ function pbFishSVG(b,cx,cy,s){ s=s||1; const c=b.c, c2=b.c2; const bw={S:11,R:9,
   else if(b.eye==='U') g+=`<circle cx="${ex}" cy="${ey-2*s}" r="${2*s}" fill="#FDE9D6"/><circle cx="${ex}" cy="${ey-2.6*s}" r="${1.1*s}" fill="#2B2230"/>`;
   else g+=`<circle cx="${ex}" cy="${ey}" r="${1.3*s}" fill="#2B2230"/>`;
   return g; }
-function pbFish(S,x,y,b){ S.box(x-.5,y,0,2.1,.8,.12,'#D9C9A8');
+function pbFish(S,x,y,b){ const PO=_pbPose, X0=_pbX||{}; S.box(x-.5,y,0,2.1,.8,.12,'#D9C9A8');
   S.box(x-.5,y,.12,2.1,.8,.9,'#BFE3F2',p=>{ const m=p(x+.55,y+.8,.5), a=p(x-.3,y+.8,.14), c=p(x+1.4,y+.8,.14);
     let s=`<path d="M${a[0].toFixed(1)} ${a[1].toFixed(1)} q-1 -6 1 -11 M${(a[0]+3).toFixed(1)} ${(a[1]+1).toFixed(1)} q2 -5 0 -9 M${c[0].toFixed(1)} ${c[1].toFixed(1)} q-2 -6 1 -10" stroke="#5FAF6A" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
-    if(_pbPose==='swim2') s+=[0,1,2].map(i=>`<circle class="pb-bub" cx="${(m[0]-6+i*2).toFixed(1)}" cy="${(m[1]-4-i*5).toFixed(1)}" r="${1.8+i*.5}" fill="none" stroke="#3E8FBF" stroke-width=".9"/>`).join('');
-    const fx=_pbPose==='rest'?-6:_pbPose==='swim2'?5:0;
-    return s+`<circle cx="${(m[0]+9).toFixed(1)}" cy="${(m[1]-6).toFixed(1)}" r="1" fill="#FFFFFF"/><circle cx="${(m[0]+10).toFixed(1)}" cy="${(m[1]-9).toFixed(1)}" r=".7" fill="#FFFFFF"/>`+`<g class="pb-fish">${pbFishSVG(b,m[0]+1+fx,m[1]-1+(_pbPose==='rest'?3:0),.6)}</g>`; });
+    const X=X0, pr=X.pr||'';
+    if(pr==='pebble'||pr==='down') s+=[[-.2,.14],[.3,.14],[.8,.14],[1.1,.14]].map(([a,h],i)=>{ const q=p(x+a,y+.8,h); return `<rect x="${(q[0]-2).toFixed(1)}" y="${(q[1]-3).toFixed(1)}" width="4" height="2.6" rx="1.2" fill="${['#A8A49C','#C9C2B4','#8F8A82','#B8B0A0'][i]}"/>`; }).join('');
+    if(pr==='shell'){ const q=p(x+.9,y+.8,.16); s+=`<path d="M${(q[0]-4).toFixed(1)} ${q[1].toFixed(1)} Q${q[0].toFixed(1)} ${(q[1]-7).toFixed(1)} ${(q[0]+4).toFixed(1)} ${q[1].toFixed(1)}Z" fill="#F7B8C8"/>`; }
+    if(pr==='plant'){ const q=p(x+.2,y+.8,.14); s+=`<path d="M${q[0].toFixed(1)} ${q[1].toFixed(1)} q-3 -8 1 -16 M${(q[0]+4).toFixed(1)} ${q[1].toFixed(1)} q3 -7 -1 -14" stroke="#3F9A55" stroke-width="1.8" fill="none" stroke-linecap="round"/>`; }
+    if(pr==='food'){ const q=p(x+.6,y+.8,.98); s+=[0,1,2,3].map(i=>`<rect x="${(q[0]-4+i*3).toFixed(1)}" y="${(q[1]+(i%2)).toFixed(1)}" width="1.6" height="1.2" fill="#B5753A"/>`).join(''); }
+    if(pr==='sunbeam'){ const q=p(x+.6,y+.8,.98); s+=`<polygon points="${(q[0]-6).toFixed(1)},${q[1].toFixed(1)} ${(q[0]+2).toFixed(1)},${q[1].toFixed(1)} ${(q[0]+8).toFixed(1)},${(q[1]+18).toFixed(1)} ${(q[0]-10).toFixed(1)},${(q[1]+18).toFixed(1)}" fill="#FFF6C0" opacity=".55"/>`; }
+    if(X.mk){ s+=`<text class="pb-mk" x="${(m[0]+16).toFixed(1)}" y="${(m[1]-2).toFixed(1)}" font-size="7" font-weight="700" fill="#E86A88">${X.mk}</text>`; }
+    if(PO==='swim2'||pr==='bubbles') s+=[0,1,2].map(i=>`<circle class="pb-bub" cx="${(m[0]-6+i*2).toFixed(1)}" cy="${(m[1]-4-i*5).toFixed(1)}" r="${1.8+i*.5}" fill="none" stroke="#3E8FBF" stroke-width=".9"/>`).join('');
+    const fx=(PO==='rest'?-6:PO==='swim2'?5:0)+(pr==='left'?-8:pr==='right'?8:0), fyo=(PO==='rest'?3:0)+(pr==='up'||pr==='food'?-2.5:pr==='down'?5:0);
+    return s+`<circle cx="${(m[0]+9).toFixed(1)}" cy="${(m[1]-6).toFixed(1)}" r="1" fill="#FFFFFF"/><circle cx="${(m[0]+10).toFixed(1)}" cy="${(m[1]-9).toFixed(1)}" r=".7" fill="#FFFFFF"/>`+`<g class="pb-fish">${pbFishSVG(b,m[0]+1+fx,m[1]-1+fyo,.6)}</g>`; });
   S.box(x-.5,y,1.02,2.1,.8,.03,'#DDF1F8'); }
-function pbDraw(S,x,y,b,pose){ _pbPose=pose||''; try{ pbDraw0(S,x,y,b); } finally { _pbPose=''; } }
+function pbDraw(S,x,y,b,pose){ const X=pose&&typeof pose==='object'?pose:(pose?{ b:pose }:null); _pbPose=X?X.b:''; _pbX=X; try{ pbDraw0(S,x,y,b); } finally { _pbPose=''; _pbX=null; } }
+function pbAnim(pose,b){ if(!pose) return ''; const an=typeof pose==='object'?(pose.an||pose.b):pose; return b&&b.kind==='fish'?'pb-a pbf-'+an:'pb-a pb-'+an; }
 function pbDraw0(S,x,y,b){ if(b.kind==='dog'||b.kind==='cat') pbQuad(S,x,y,b); else if(b.kind==='bird') pbBird(S,x,y,b); else if(b.kind==='rabbit') pbRabbit(S,x,y,b); else if(b.kind==='fish') pbFish(S,x,y,b); }
 // ペットひとりの肖像（ペットの章・図鑑に使う）
 function petPortraitSVG(id,label,pose){ const b=PB_ALL[id]; if(!b) return ''; const S=bkScene(); const h=pbHash(id);
   const mats=['#F3D9C8','#D9E8C8','#CFE0F2','#EBD9F2','#F7E7B4']; const mat=mats[h%mats.length];
   S.box(-1.3,-.9,-.3,2.6,1.8,.3,mat); S.box(-1.3,-.9,-.4,2.6,1.8,.1,bkShade(mat,.85));
-  S.begin(5,pose?'pb-a pb-'+pose:''); pbDraw(S,b.kind==='fish'?-.2:-.5,-.3,b,pose); S.end();
+  S.begin(5,pbAnim(pose,b)); pbDraw(S,b.kind==='fish'?-.2:-.5,-.3,b,pose); S.end();
   const bgs=['#FFF4EC','#F1F8EC','#EEF5FC','#F7F0FB','#FFF9E6'];
   const kk=b.k||1; const sc=b.kind==='dog'||b.kind==='cat'?Math.min(4.6,3.3/Math.max(.75,kk)):b.kind==='fish'?3.4:3.4; const c0=S.p(0,0,b.kind==='bird'?.75:.35);
   return `<svg class="pet-art" viewBox="0 0 200 150" role="img" aria-label="${esc(label||b.name)}のブロック絵"><rect width="200" height="150" rx="14" fill="${bgs[h%bgs.length]}"/><g transform="translate(100 82) scale(${sc.toFixed(2)}) translate(${(-c0[0]).toFixed(1)} ${(-c0[1]).toFixed(1)})">${S.render()}</g></svg>`; }
@@ -16940,29 +16984,321 @@ document.head.insertAdjacentHTML('beforeend',`<style>.mp-sick{ margin:8px 0 4px;
     const mpy=typeof msPerYear==='function'?msPerYear(P):2.5*864e5; const from=Math.floor(p.chA); let end=Infinity; if(mpGone(p)){ end=Math.floor(p.chA+(p.life*MP_MPY)/mpy); try{ end=Math.min(end,Math.floor(clock().age)); }catch(e){} }
     if(age>=from&&age<end){ o.petB=p.breed; o.pet=p.kind; } }catch(e){} return o; }; }
 // ===== ペットの姿勢・動き：見るたび、写真をとるたびに、ちがう姿（立つ・おすわり・ごろん・ねんね・ごはん・遊ぶ・見上げる・歩く…） =====
-const PP_POSES={ dog:['stand','sit','lie','sleep','eat','play','look','walk'], cat:['stand','sit','lie','sleep','eat','play','look','groom'],
-  rabbit:['stand','lie','sleep','eat','look'], bird:['perch','sing','sleep','eat','flap'], fish:['swim','swim2','rest'] };
-const PP_TXT={ stand:'きょろきょろ、まわりを見ています', sit:'おすわりしています', lie:'ごろんと寝そべっています', sleep:'すやすや眠っています', eat:'ごはんを食べています',
-  play:{ dog:'ボールで遊んでいます', cat:'おもちゃのねずみで遊んでいます' }, look:'こっちを見上げています', walk:'とことこ歩いています', groom:'毛づくろいしています',
-  perch:'とまり木で、ひと休み', sing:'きれいな声で歌っています', flap:'ぱたぱた、はばたいています', swim:'すいすい泳いでいます', swim2:'あわをぷくぷく出して泳いでいます', rest:'水草のそばで、じっとしています' };
-function ppTxt(kind,pose){ const t=PP_TXT[pose]; return typeof t==='object'?(t[kind]||t.dog):(t||''); }
+// 「姿勢|小物|頭の上のしるし|動き方|いま何してる」。犬・猫は80、うさぎ・小鳥は50、金魚は30
+const PP_RAW={
+dog:`stand|||idle|きょろきょろ、まわりを見ています
+stand|||sniff|くんくん、においをかいでいます
+stand||♪|wag|しっぽをふって、ごきげんです
+stand||!|tilt|物音に、耳をぴんと立てています
+stand|||shake|ぶるぶるっと、体をふるわせています
+stand|||stretch|大きなあくびをしています
+stand|leaf||sniff|落ち葉のにおいをかいでいます
+stand|flower||sniff|お花のにおいをかいでいます
+stand|butterfly|!|tilt|ちょうちょを見つけました
+stand|water||nod|お水をぺろぺろ飲んでいます
+stand|sunbeam||idle|ひなたで、ぽかぽかしています
+stand||?|tilt|首をかしげています
+sit|||idle|おすわりしています
+sit|treat|♡|tilt|おやつを待って、おすわりしています
+sit|||tilt|じっと、こっちを見つめています
+sit||♪|wag|おすわりして、しっぽをぱたぱた
+sit|leash|!|hop|おさんぽを待っています
+sit|||nod|うとうと、いねむりしそうです
+sit|||shake|後ろ足で、耳のうしろをかいています
+sit|sunbeam||breath|ひなたぼっこしています
+sit|ball||tilt|ボールを見つめて、待っています
+sit||♡|idle|「おて」の練習をしています
+lie|||breath|ごろんと寝そべっています
+lie|bone||nod|ほねのおもちゃを、かじかじ
+lie||♡|roll|おなかを見せて、ごろごろ
+lie|cushion||breath|クッションの上で、のんびり
+lie|sunbeam||stretch|ひなたで、のびーっとしています
+lie|||tilt|あごをのせて、こっちを見ています
+lie|rope||nod|ロープのおもちゃを、かんでいます
+lie|slipper||nod|スリッパを、こっそりかじっています
+lie|blanket||breath|毛布にくるまっています
+lie||?|idle|ふせをして、様子を見ています
+sleep|||breath|すやすや眠っています
+sleep|cushion||breath|クッションで、ぐっすり
+sleep|blanket||breath|毛布の中で、すやすや
+sleep|||twitch|夢を見て、足をぴくぴく
+sleep|sunbeam||breath|ひなたで、お昼寝中
+sleep|duck||breath|おもちゃをかかえて、ねんね
+sleep||♪|breath|寝言を言っています
+sleep|||roll|おなかを出して、大の字で寝ています
+eat|bowl||nod|ごはんを食べています
+eat|bowl|♡|nod|ごはんを、おいしそうに食べています
+eat|water||nod|お水を飲んでいます
+eat|treat|!|hop|おやつをもらって大喜び
+eat|bone||nod|ほねのおやつを、かじっています
+eat|bowl||sniff|お皿をぺろぺろなめています
+eat|carrot||nod|にんじんを、ぽりぽり
+eat|bowl|?|tilt|ごはんのにおいを、たしかめています
+play|ball||hop|ボールで遊んでいます
+play|ball2||bounce|青いボールを追いかけています
+play|frisbee|!|bounce|フリスビーに夢中です
+play|rope||shake|ロープで、引っぱりっこ
+play|duck|♪|hop|ピーピー鳴るおもちゃで遊んでいます
+play|stick||wag|木の枝を見つけて、うれしそう
+play|sock||shake|くつしたを、ぶんぶんふりまわしています
+play|||spin|自分のしっぽを追いかけて、くるくる
+play|butterfly||bounce|ちょうちょを追いかけています
+play|leaf||hop|落ち葉にじゃれています
+play||!|bounce|「あそぼう！」とさそっています
+play|ball|♡|hop|ボールをくわえて、持ってきました
+look|||tilt|こっちを見上げています
+look||♡|wag|なでて、とおねだりしています
+look|treat|!|hop|おやつの袋を、じっと見ています
+look|butterfly||tilt|空を飛ぶちょうちょを見ています
+look||?|tilt|「なあに？」と首をかしげています
+look|||peek|窓から、外をのぞいています
+look||♪|idle|家族の帰りを待っています
+look|leash|!|hop|リードを見て、そわそわ
+walk|||walk|とことこ歩いています
+walk|leash|♪|walk|おさんぽ中です
+walk|||sniff|においをかぎながら、歩いています
+walk|ball||walk|ボールをくわえて、歩いています
+walk|stick||walk|枝をくわえて、得意げに歩いています
+walk||!|bounce|うれしくて、走りまわっています
+walk|leaf||walk|落ち葉の上を、さくさく歩いています
+walk|flower||walk|お花の道を、おさんぽ
+walk|||dig|前足で、地面をほりほり
+walk|duck||walk|おもちゃを運んでいます
+walk||♡|walk|うしろを、ついてきます
+walk|sunbeam||stretch|のびーっと、伸びをしています`,
+cat:`stand|||idle|きょろきょろ、まわりを見ています
+stand|||sniff|くんくん、においをかいでいます
+stand||♪|wag|しっぽをぴんと立てて、ごきげんです
+stand||!|tilt|物音に、耳をぴくっと動かしました
+stand|||stretch|背中をまるくして、のびをしています
+stand|||shake|ぶるぶるっと、体をふるわせています
+stand|flower||sniff|お花のにおいをかいでいます
+stand|butterfly|!|tilt|ちょうちょを、じっと見ています
+stand|water||nod|水のみ場で、ぺろぺろ
+stand|sunbeam||idle|ひなたで、ぽかぽかしています
+sit|||idle|おすわりしています
+sit||!|tilt|窓の外の鳥を見ています
+sit|||idle|しっぽを足にくるりと巻いて、すましています
+sit|sunbeam||breath|ひなたぼっこしています
+sit|||nod|うとうと、いねむりしそうです
+sit|||tilt|じっと、こっちを見つめています
+sit|||idle|前足をそろえて、お上品にすわっています
+sit|treat|♡|tilt|おやつを待っています
+sit|ball2||tilt|鈴のボールを見つめています
+sit|cushion||breath|クッションの上で、すましています
+lie|||breath|ごろんと寝そべっています
+lie||♡|roll|おなかを見せて、ごろごろ
+lie|cushion||breath|クッションの上で、のんびり
+lie|blanket|♡|nod|毛布の上で、ふみふみしています
+lie|||breath|香箱すわりで、くつろいでいます
+lie|sunbeam||stretch|ひなたで、のびーっとしています
+lie|||idle|しっぽを、ゆらゆらさせています
+lie|yarn||nod|毛糸玉を、前足でころころ
+lie|feather||tilt|ねこじゃらしを見つめています
+lie|||breath|床にぺたんと、寝そべっています
+sleep|||breath|すやすや眠っています
+sleep|cushion||breath|まるくなって、ぐっすり
+sleep|blanket||breath|毛布の中で、すやすや
+sleep|sunbeam||breath|ひなたで、お昼寝中
+sleep|||breath|前足で顔をかくして、寝ています
+sleep|||roll|おなかを出して、へそ天で寝ています
+sleep||♪|breath|寝言で、むにゃむにゃ
+sleep|||twitch|夢を見て、ひげをぴくぴく
+eat|bowl||nod|ごはんを食べています
+eat|bowl|♡|nod|カリカリを、おいしそうに食べています
+eat|water||nod|お水を飲んでいます
+eat|treat|!|hop|おやつをもらって大喜び
+eat|fish||nod|お魚のおやつを、はむはむ
+eat|bowl||sniff|お皿をぺろぺろなめています
+eat|bowl|?|tilt|ごはんのにおいを、たしかめています
+eat|treat||nod|おやつを、ちゅるっとなめています
+play|mouse||hop|おもちゃのねずみで遊んでいます
+play|yarn||bounce|毛糸玉にじゃれています
+play|feather|!|bounce|ねこじゃらしに夢中です
+play|ball||hop|ボールをころころ
+play|||spin|自分のしっぽを追いかけています
+play|butterfly||bounce|ちょうちょを追いかけています
+play|leaf||hop|落ち葉にじゃれています
+play|bag||shake|紙ぶくろに、頭をつっこんでいます
+play|fish||shake|お魚のおもちゃを、けりけり
+play|rope||bounce|ひもで遊んでいます
+play|dot|!|bounce|光の点を追いかけています
+play|ball2|♪|hop|鈴のついたボールで遊んでいます
+look|||tilt|こっちを見上げています
+look||♡|wag|なでて、とおねだりしています
+look||?|tilt|「なあに？」と首をかしげています
+look|||peek|窓から、外をのぞいています
+look||!|peek|高いところを見上げています
+look|butterfly||tilt|ちょうちょを目で追っています
+look||♪|idle|家族の帰りを待っています
+look|treat|!|hop|おやつの音に、気づきました
+groom|||nod|毛づくろいしています
+groom|||nod|前足をぺろぺろなめています
+groom|||tilt|前足で、顔を洗っています
+groom|||nod|しっぽの毛づくろい中です
+groom|sunbeam||nod|ひなたで、毛づくろい
+groom|cushion||nod|クッションの上で、毛づくろい
+groom|||idle|毛づくろいのあと、ぼーっとしています
+groom|||shake|耳のうしろを、かいています
+walk|||walk|とことこ歩いています
+walk||♪|walk|しっぽを立てて、おうちをパトロール
+walk|||sneak|そーっと、しのび足で歩いています
+walk||!|bounce|ジャンプして、高いところへ
+walk||♡|walk|足もとに、すりすりしています
+stand|||dig|爪とぎをしています`,
+rabbit:`stand|||idle|きょろきょろ、まわりを見ています
+stand|||sniff|鼻をひくひくさせています
+stand||!|tilt|耳をぴんと立てています
+stand|||bounce|ぴょんぴょん跳ねています
+stand||♪|bounce|うれしくて、ジャンプしています
+stand|||walk|お部屋をパトロールしています
+stand|||nod|前足で、顔を洗っています
+stand|flower||sniff|お花のにおいをかいでいます
+stand|sunbeam||idle|ひなたで、ぽかぽかしています
+stand|||shake|ぶるぶるっと、体をふるわせています
+stand||!|dig|後ろ足で、トンと足ぶみしました
+stand|leaf||sniff|落ち葉をかぎまわっています
+lie|||breath|ごろんと寝そべっています
+lie|||stretch|足をのばして、くつろいでいます
+lie|||breath|まるまって、香箱すわり
+lie|cushion||breath|クッションで、のんびり
+lie|sunbeam||stretch|ひなたで、のびーっとしています
+lie|||nod|うとうとしています
+lie|||nod|毛づくろいしています
+lie|blanket||roll|毛布の上で、ごろん
+lie|||idle|しっぽを、ぴくぴく
+lie||♡|roll|ほっぺを床に、すりすり
+sleep|||breath|すやすや眠っています
+sleep|cushion||breath|クッションで、ぐっすり
+sleep|sunbeam||breath|ひなたで、お昼寝中
+sleep|||breath|耳をたおして、ぐっすり
+sleep|blanket||breath|毛布の中で、すやすや
+sleep|||twitch|夢を見て、鼻をぴくぴく
+sleep|||roll|横になって、ごろんと寝ています
+sleep||♪|breath|寝言で、ぷうぷう
+eat|carrot||nod|にんじんを、ぽりぽり
+eat|hay||nod|牧草を、もぐもぐ
+eat|greens||nod|葉っぱを食べています
+eat|water||nod|お水を飲んでいます
+eat|bowl||nod|ペレットを、かりかり
+eat|treat|♡|nod|りんごのおやつを、かじっています
+eat|treat|!|hop|おやつをもらって大喜び
+eat|flower||nod|お花を、かじかじ
+eat|bowl|?|tilt|お皿のにおいを、たしかめています
+eat|hay||shake|牧草の山に、もぐっています
+look|||tilt|こっちを見上げています
+look||♡|wag|なでて、とおねだりしています
+look||?|tilt|「なあに？」と首をかしげています
+look|||peek|後ろ足で立って、のぞいています
+look|butterfly||tilt|ちょうちょを見ています
+look||!|shake|物音に、びっくり
+look||♪|idle|家族の帰りを待っています
+look|treat|!|hop|おやつの袋を、じっと見ています
+look||♡|sniff|鼻をつんつん、あいさつ
+look|ball||nod|ボールを、鼻でつんつん`,
+bird:`perch|||idle|とまり木で、ひと休み
+perch||?|tilt|首をかしげています
+perch|||nod|羽づくろいしています
+perch|||breath|片足で立って、くつろいでいます
+perch|||idle|きょろきょろしています
+perch|mirror|♪|tilt|鏡の自分と、おしゃべり
+perch|bell||nod|鈴をつついています
+perch|swing||roll|ブランコで、ゆらゆら
+perch|||breath|羽をふくらませて、まんまる
+perch|sunbeam||idle|ひなたぼっこしています
+perch|||tilt|こっちを、じっと見ています
+perch|||shake|くちばしを、とまり木でこすっています
+sing|||tilt|きれいな声で歌っています
+sing||♪|tilt|おしゃべりのまねをしています
+sing||♪|idle|口笛のまねをしています
+sing||♡|tilt|「おはよう」と言っています
+sing|||idle|楽しそうに、さえずっています
+sing||♪|roll|頭をふりふり、ダンスしています
+sing|bell||tilt|鈴を鳴らして、歌っています
+sing|mirror||tilt|鏡に向かって、歌っています
+sleep|||breath|すやすや眠っています
+sleep|||breath|羽に顔をうずめて、眠っています
+sleep|||breath|片足で立って、眠っています
+sleep|||nod|ふくらんで、うとうと
+sleep|sunbeam||breath|ひなたで、お昼寝中
+sleep||♪|breath|夢を見ています
+sleep|swing||roll|ブランコで、いねむり
+sleep||♪|breath|小さな寝言を言っています
+eat|seed||nod|シードを、ついばんでいます
+eat|water||nod|お水を飲んでいます
+eat|greens||nod|青菜を、つついています
+eat|hay||nod|おやつのあわ穂を、ついばんでいます
+eat|seed||dig|からを、ぱりぱりむいています
+eat|treat|!|hop|おやつに大喜び
+eat|treat||nod|りんごを、かじっています
+eat|seed|?|tilt|ごはんを、えらんでいます
+eat|water||shake|水浴びして、ぱしゃぱしゃ
+eat|seed||nod|ボレー粉を食べています
+flap|||hop|はばたいています
+flap|||bounce|部屋を、ひと回り飛んでいます
+flap||♪|hop|うれしくて、羽をぱたぱた
+flap|||stretch|羽をのばして、ストレッチ
+flap|swing|!|bounce|ブランコに、飛び乗りました
+flap||♡|hop|肩に乗りたそうにしています
+flap|butterfly||bounce|ちょうちょを追いかけています
+flap|||shake|水浴びのあと、ぶるぶる
+flap|||dig|頭を上下に、ふりふり
+flap|bell||bounce|鈴に、飛びついています
+flap||!|shake|びっくりして、ぱたぱた
+flap|||stretch|羽を広げて、ポーズ`,
+fish:`swim|||swim|すいすい泳いでいます
+swim2|||swim|あわを、ぷくぷく出しています
+rest|plant||slow|水草のそばで、じっとしています
+swim|up||nod|水面で、口をぱくぱく
+rest|down||nod|底の小石を、つついています
+swim|||dart|くるりとターンしました
+swim|||float|ゆらゆら、ただよっています
+swim|up|!|nod|えさを待っています
+swim|food||nod|えさを食べています
+swim|||slow|ひれを、ひらひらさせています
+rest|shell||slow|貝がらの近くで、休んでいます
+swim|plant||swim|水草の間を、くぐっています
+swim|||dart|すばやく泳いでいます
+swim|||slow|ゆっくり泳いでいます
+swim|right|?|float|こっちを見ています
+swim2|bubbles||bounce|あわを、追いかけています
+swim|sunbeam||float|水面のひかりの下で、ゆらゆら
+rest|down||slow|底で、ひと休み
+swim|||nod|口を、ぱくぱく動かしています
+swim|plant||nod|水草を、つついています
+swim|right|♡|swim|ガラスの近くまで、来ました
+swim|||spin|くるくる回っています
+swim|||wag|しっぽをふって、泳いでいます
+rest|pebble||slow|小石の上で、じっとしています
+rest|||slow|しずかに、休んでいます
+swim|up|?|tilt|えさの時間を、待っています
+swim||♪|bounce|うれしそうに、泳いでいます
+swim|up||swim|水面の近くを、泳いでいます
+swim2|bubbles||swim|あわの中を、くぐっています
+swim|shell||nod|貝がらを、つついています`};
+const PP_ACTS={}; for(const k in PP_RAW) PP_ACTS[k]=PP_RAW[k].split('\n').map((l,i)=>{ const [b,pr,mk,an,t]=l.split('|'); return { id:k[0]+i, b, pr, mk, an, t }; });
+const PP_POSES={}; for(const k in PP_ACTS) PP_POSES[k]=[...new Set(PP_ACTS[k].map(a=>a.b))];
+function ppAct(kind,id){ const A=PP_ACTS[kind]||PP_ACTS.dog; if(!id) return A[0]; if(typeof id==='object') return id; return A.find(a=>a.id===id)||A.find(a=>a.b===id)||A[0]; }
+function ppTxt(kind,id){ return ppAct(kind,id).t; }
 function ppH(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
-// いまの姿勢：夜はよく眠り、朝と夕方はごはん。ほかは15分ごとに、いろいろ変わる。お世話のすぐあとは、そのお世話に合わせる
-const PP_ACT={ pet:{ dog:'sit', cat:'lie', rabbit:'lie', bird:'sing', fish:'swim2' }, food:{ dog:'eat', cat:'eat', rabbit:'eat', bird:'eat', fish:'swim2' }, play:{ dog:'walk', cat:'play', rabbit:'look', bird:'flap', fish:'swim' } };
-function ppNow(p){ const L=PP_POSES[p.kind]||PP_POSES.dog; if(mpGone(p)) return p.kind==='fish'?'rest':L.includes('sit')?'sit':L[0];
-  if(p.la&&Date.now()-p.la.t<8*60e3){ const m=PP_ACT[p.la.k]; if(m&&m[p.kind]) return m[p.kind]; }
-  try{ if(typeof mpIsSick==='function'&&mpIsSick(p)&&p.heal!==dayKey()) return p.kind==='fish'?'rest':L.includes('lie')?'lie':'sleep'; }catch(e){}
-  const d=new Date(), hr=d.getHours(), slot=Math.floor(Date.now()/(15*60e3)), r=ppH(p.name+'|'+p.at+'|'+slot)%100;
-  if((hr>=23||hr<6)&&r<75) return L.includes('sleep')?'sleep':L[L.length-1];
-  if((hr===7||hr===18)&&r<45&&L.includes('eat')) return 'eat';
-  if(hr>=13&&hr<15&&r<35&&L.includes('sleep')) return 'sleep';
-  const day=L.filter(x=>x!=='sleep'); return day[ppH(p.name+'|'+slot+'|d')%day.length]; }
-// 写真の姿勢：前の写真と同じにならないように、いろいろ
-function ppPhoto(p){ const L=PP_POSES[p.kind]||PP_POSES.dog; const last=(p.photos||[]).slice(-1)[0]; const now=ppNow(p);
-  const c=L.filter(x=>x!==(last&&last.pose)); return Math.random()<.35&&c.includes(now)?now:c[Math.floor(Math.random()*c.length)]; }
+// いまの姿勢：夜もときどき起きて動く（Channel の夜は Higher Self の朝や昼のことも）。朝と夕方はごはんが多め。15分ごとに変わる。お世話のすぐあとは、そのお世話に合わせる
+const PP_ACTB={ pet:['look','sit','lie','perch','sing'], food:['eat'], play:['play','walk','flap','swim','swim2'] };
+function ppPick(p,bases,salt,avoid){ const A=PP_ACTS[p.kind]||PP_ACTS.dog; let c=A.filter(a=>bases.includes(a.b)&&a.id!==avoid); if(!c.length) c=A.filter(a=>a.b!=='sleep'); return c[ppH(p.name+'|'+salt)%c.length].id; }
+function ppNow(p){ const A=PP_ACTS[p.kind]||PP_ACTS.dog, bases=PP_POSES[p.kind]||PP_POSES.dog; const slot=Math.floor(Date.now()/(15*60e3));
+  if(mpGone(p)) return (A.find(a=>a.b==='sit'&&!a.pr&&!a.mk)||A.find(a=>a.b==='rest')||A[0]).id;
+  if(p.la&&Date.now()-p.la.t<8*60e3){ const m=PP_ACTB[p.la.k]; if(m) return ppPick(p,m,'la'+p.la.t); }
+  try{ if(typeof mpIsSick==='function'&&mpIsSick(p)&&p.heal!==dayKey()) return ppPick(p,p.kind==='fish'?['rest']:['lie','sleep','perch'],'sick'+slot); }catch(e){}
+  const hr=new Date().getHours(), r=ppH(p.name+'|'+p.at+'|'+slot)%100;
+  if((hr>=23||hr<6)&&r<35&&bases.includes('sleep')) return ppPick(p,['sleep'],'n'+slot);
+  if((hr===7||hr===18)&&r<45&&bases.includes('eat')) return ppPick(p,['eat'],'m'+slot);
+  if(hr>=13&&hr<15&&r<20&&bases.includes('sleep')) return ppPick(p,['sleep'],'h'+slot);
+  return ppPick(p,bases.filter(x=>x!=='sleep'),'d'+slot); }
+// 写真の姿勢：前の写真と同じにならないように、80（50・30）通りの中から
+function ppPhoto(p){ const A=PP_ACTS[p.kind]||PP_ACTS.dog; const last=(p.photos||[]).slice(-1)[0]; const now=ppNow(p);
+  if(Math.random()<.3&&(!last||last.pose!==now)) return now; const c=A.filter(a=>a.id!==(last&&last.pose)); return c[Math.floor(Math.random()*c.length)].id; }
 // 絵に姿勢をつける（mpArt に3つ目の引数。写真は、とったときの姿勢。前の写真は、とった時刻から決める）
-mpArt=function(p,k,pose){ const s=petPortraitSVG(p.breed,p.name+'（'+(PB_ALL[p.breed]||{}).name+'）',pose||ppNow(p)); return s.replace(/scale\(([\d.]+)\)/,(m,x)=>`scale(${(+x*(k||1)).toFixed(2)})`); };
-function ppOld(p,x){ const L=PP_POSES[p.kind]||PP_POSES.dog; return x.pose||L[ppH(String(x.t))%L.length]; }
+mpArt=function(p,k,pose){ const s=petPortraitSVG(p.breed,p.name+'（'+(PB_ALL[p.breed]||{}).name+'）',ppAct(p.kind,pose||ppNow(p))); return s.replace(/scale\(([\d.]+)\)/,(m,x)=>`scale(${(+x*(k||1)).toFixed(2)})`); };
+function ppOld(p,x){ const A=PP_ACTS[p.kind]||PP_ACTS.dog; return x.pose||A[ppH(String(x.t))%A.length].id; }
 { const PH=mpPageHTML; mpPageHTML=function(){ let h=PH(); const p=mpGet(); if(!p) return h;
     // アルバムの写真は、それぞれの姿勢で
     const ph=(p.photos||[]).slice().reverse(); let i=0; h=h.replace(/<figure class="mp-ph">[\s\S]*?<figcaption>/g,m=>{ const x=ph[i++]; return x?`<figure class="mp-ph">${mpArt(p,x.k,ppOld(p,x))}<figcaption>`:m; });
@@ -16972,32 +17308,57 @@ function ppOld(p,x){ const L=PP_POSES[p.kind]||PP_POSES.dog; return x.pose||L[pp
   const A=mpAct; mpAct=function(k){ const p=mpGet(); if(p&&!mpGone(p)&&k!=='food'){ p.la={ k, t:Date.now() }; mpSet(p); } A(k); };
   const F=mpFeed; mpFeed=function(i){ const p=mpGet(); if(p&&!mpGone(p)){ p.la={ k:'food', t:Date.now() }; mpSet(p); } F(i); };
   mpPhoto=function(){ const p=mpGet(); if(!p||mpGone(p)) return; const st=mpStage(p), a=mpAge(p), t=new Date(); const pose=ppPhoto(p);
-    p.photos=p.photos||[]; p.photos.push({ t:Date.now(), k:st[1], pose, c:`${t.getFullYear()}年${t.getMonth()+1}月${t.getDate()}日・うちに来て${mpDays(p)}日目・${Math.floor(a)}歳（${st[0]}）・${ppTxt(p.kind,pose).replace(/ています$/,'ているところ').replace(/います$/,'いるところ')}` }); if(p.photos.length>60) p.photos=p.photos.slice(-60);
-    p.msg=`パシャ！ ${ppTxt(p.kind,pose).replace(/ています$/,'ている').replace(/います$/,'いる')}${p.name}の写真を、アルバムに残しました。`; mpLog(p,`写真をとった（${st[0]}のころ）。`,'photo'); mpSet(p); mpOpen(); }; }
+    p.photos=p.photos||[]; p.photos.push({ t:Date.now(), k:st[1], pose, c:`${t.getFullYear()}年${t.getMonth()+1}月${t.getDate()}日・うちに来て${mpDays(p)}日目・${Math.floor(a)}歳（${st[0]}）・${ppTxt(p.kind,pose)}` }); if(p.photos.length>60) p.photos=p.photos.slice(-60);
+    p.msg=`パシャ！ ${p.name}の写真を、アルバムに残しました。（${ppTxt(p.kind,pose)}）`; mpLog(p,`写真をとった（${st[0]}のころ）。`,'photo'); mpSet(p); mpOpen(); }; }
 // Channel の部屋の絵にいるペットも、いまの姿勢で
-{ const SS=sceneState; sceneState=function(P,L,age){ const o=SS(P,L,age); try{ const p=mpGet(); if(o&&o.petB&&p&&o.petB===p.breed) o.petPose=ppNow(p); }catch(e){} return o; }; }
+{ const SS=sceneState; sceneState=function(P,L,age){ const o=SS(P,L,age); try{ const p=mpGet(); if(o&&o.petB&&p&&o.petB===p.breed) o.petPose=ppAct(p.kind,ppNow(p)); }catch(e){} return o; }; }
 document.head.insertAdjacentHTML('beforeend',`<style>
 .mp-now{ margin:2px 0 4px; display:inline-block; padding:3px 10px; border-radius:999px; background:#FFF0F4; color:#C2557A; font-size:13px; font-weight:700; }
 .pb-a{ transform-box:fill-box; transform-origin:50% 100%; }
-.pb-stand,.pb-sit,.pb-perch,.pb-groom{ animation:pbIdle 3.8s ease-in-out infinite; }
-.pb-sleep,.pb-lie{ animation:pbBreath 3.6s ease-in-out infinite; }
-.pb-eat{ animation:pbNod 1.1s ease-in-out infinite; }
-.pb-play{ animation:pbHop 1.3s ease-in-out infinite; }
+.pb-idle,.pb-stand,.pb-sit,.pb-perch,.pb-groom{ animation:pbIdle 3.8s ease-in-out infinite; }
+.pb-breath,.pb-sleep,.pb-lie{ animation:pbBreath 3.6s ease-in-out infinite; }
+.pb-nod,.pb-eat{ animation:pbNod 1.1s ease-in-out infinite; }
+.pb-hop,.pb-play,.pb-flap{ animation:pbHop 1.3s ease-in-out infinite; }
+.pb-bounce{ animation:pbBounce 1s ease-in-out infinite; }
 .pb-walk{ animation:pbWalk 1.6s ease-in-out infinite; }
-.pb-look,.pb-sing{ animation:pbTilt 3.2s ease-in-out infinite; }
-.pb-flap{ animation:pbHop .7s ease-in-out infinite; }
+.pb-sneak{ animation:pbWalk 3.2s ease-in-out infinite; }
+.pb-tilt,.pb-look,.pb-sing{ animation:pbTilt 3.2s ease-in-out infinite; }
+.pb-sniff{ animation:pbSniff 1.2s ease-in-out infinite; }
+.pb-shake{ animation:pbShake 2.2s ease-in-out infinite; }
+.pb-stretch{ animation:pbStretch 3.4s ease-in-out infinite; }
+.pb-roll{ animation:pbRoll 2.6s ease-in-out infinite; }
+.pb-spin{ animation:pbSpin 1.4s ease-in-out infinite; }
+.pb-dig{ animation:pbDig .5s ease-in-out infinite; }
+.pb-peek{ animation:pbPeek 3s ease-in-out infinite; }
+.pb-wag{ animation:pbWag .8s ease-in-out infinite; }
+.pb-twitch{ animation:pbTwitch 2.8s ease-in-out infinite; }
 .pb-fish{ transform-box:fill-box; transform-origin:center; animation:pbSwim 3.4s ease-in-out infinite; }
-.pb-rest .pb-fish{ animation-duration:6s; }
+.pbf-dart .pb-fish{ animation:pbDart 1.6s ease-in-out infinite; } .pbf-slow .pb-fish{ animation-duration:7s; } .pbf-float .pb-fish{ animation:pbFloat 4.5s ease-in-out infinite; }
+.pbf-nod .pb-fish{ animation:pbNod 1s ease-in-out infinite; } .pbf-spin .pb-fish{ animation:pbSpin 1.6s ease-in-out infinite; } .pbf-wag .pb-fish{ animation:pbWag .9s ease-in-out infinite; }
+.pbf-bounce .pb-fish{ animation:pbBounce 1.4s ease-in-out infinite; } .pbf-tilt .pb-fish{ animation:pbTilt 3s ease-in-out infinite; }
 .pb-z{ animation:pbZ 3s ease-out infinite; opacity:0; } .pb-z1{ animation-delay:1s; } .pb-z2{ animation-delay:2s; }
-.pb-note{ animation:pbZ 2.4s ease-out infinite; } .pb-bub{ animation:pbZ 2.6s linear infinite; }
+.pb-note,.pb-bub{ animation:pbZ 2.4s ease-out infinite; } .pb-mk{ animation:pbMk 2.6s ease-in-out infinite; }
 @keyframes pbIdle{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-.8px) } }
 @keyframes pbBreath{ 0%,100%{ transform:scale(1,1) } 50%{ transform:scale(1.015,1.045) } }
 @keyframes pbNod{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(1.2px) } }
 @keyframes pbHop{ 0%,55%,100%{ transform:translateY(0) } 75%{ transform:translateY(-4px) } }
+@keyframes pbBounce{ 0%,100%{ transform:translate(0,0) } 30%{ transform:translate(1px,-7px) } 60%{ transform:translate(2px,0) } 80%{ transform:translate(1px,-2px) } }
 @keyframes pbWalk{ 0%,100%{ transform:translate(0,0) } 25%{ transform:translate(1.5px,-.8px) } 50%{ transform:translate(3px,0) } 75%{ transform:translate(1.5px,-.8px) } }
 @keyframes pbTilt{ 0%,100%{ transform:rotate(0) } 30%{ transform:rotate(-3deg) } 60%{ transform:rotate(2deg) } }
+@keyframes pbSniff{ 0%,100%{ transform:translateX(0) } 20%{ transform:translateX(1.2px) } 40%{ transform:translateX(0) } 60%{ transform:translateX(1.2px) } }
+@keyframes pbShake{ 0%,60%,100%{ transform:translateX(0) } 65%{ transform:translateX(-1.4px) } 70%{ transform:translateX(1.4px) } 75%{ transform:translateX(-1.4px) } 80%{ transform:translateX(1.4px) } 85%{ transform:translateX(0) } }
+@keyframes pbStretch{ 0%,100%{ transform:scale(1,1) } 50%{ transform:scale(1.06,.96) } }
+@keyframes pbRoll{ 0%,100%{ transform:rotate(0) } 25%{ transform:rotate(-6deg) } 75%{ transform:rotate(6deg) } }
+@keyframes pbSpin{ 0%,100%{ transform:rotate(0) scaleX(1) } 25%{ transform:rotate(-8deg) } 50%{ transform:scaleX(-1) } 75%{ transform:rotate(8deg) scaleX(-1) } }
+@keyframes pbDig{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(1px) rotate(-1.5deg) } }
+@keyframes pbPeek{ 0%,100%{ transform:translateY(0) } 40%,60%{ transform:translateY(-2.5px) } }
+@keyframes pbWag{ 0%,100%{ transform:rotate(-1.5deg) } 50%{ transform:rotate(1.5deg) } }
+@keyframes pbTwitch{ 0%,70%,100%{ transform:scale(1,1) } 75%{ transform:scale(1.02,.97) } 80%{ transform:scale(1,1.02) } 85%{ transform:scale(1.02,.98) } }
 @keyframes pbSwim{ 0%,100%{ transform:translateX(-2px) } 50%{ transform:translateX(3px) } }
+@keyframes pbDart{ 0%,100%{ transform:translateX(-6px) } 40%{ transform:translateX(6px) } 50%{ transform:translateX(6px) scaleX(-1) } 90%{ transform:translateX(-6px) scaleX(-1) } }
+@keyframes pbFloat{ 0%,100%{ transform:translate(0,0) } 50%{ transform:translate(1px,-2.5px) } }
 @keyframes pbZ{ 0%{ opacity:0; transform:translate(0,0) } 20%{ opacity:.9 } 100%{ opacity:0; transform:translate(4px,-8px) } }
+@keyframes pbMk{ 0%,100%{ transform:translateY(0); opacity:.95 } 50%{ transform:translateY(-2px); opacity:.7 } }
 </style>`);
 </script>
 <script>
