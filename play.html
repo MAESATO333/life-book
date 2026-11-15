@@ -17335,11 +17335,11 @@ function ppNow(p){ const A=PP_ACTS[p.kind]||PP_ACTS.dog, bases=PP_POSES[p.kind]|
 function ppPhoto(p){ const A=PP_ACTS[p.kind]||PP_ACTS.dog; const last=(p.photos||[]).slice(-1)[0]; const now=ppNow(p);
   if(Math.random()<.3&&(!last||last.pose!==now)) return now; const c=A.filter(a=>a.id!==(last&&last.pose)); return c[Math.floor(Math.random()*c.length)].id; }
 // 絵に姿勢をつける（mpArt に3つ目の引数。写真は、とったときの姿勢。前の写真は、とった時刻から決める）
-mpArt=function(p,k,pose){ const s=petPortraitSVG(p.breed,p.name+'（'+(PB_ALL[p.breed]||{}).name+'）',ppAct(p.kind,pose||ppNow(p))); return s.replace(/scale\(([\d.]+)\)/,(m,x)=>`scale(${(+x*(k||1)).toFixed(2)})`); };
+mpArt=function(p,k,pose,t){ const sp=Object.assign({},ppAct(p.kind,pose||ppNow(p)),{ g:mpGrowK(p,t) }); const ox=p.kind==='fish'?-.2:-.5; const svg=ppScale(petPortraitSVG(p.breed,p.name+'（'+(PB_ALL[p.breed]||{}).name+'）',sp),sp.g,ox+.6,-.3+.45); return t||pose?svg:ppRoam(svg,sp,p.name,9,4.5,p.kind); };
 function ppOld(p,x){ const A=PP_ACTS[p.kind]||PP_ACTS.dog; return x.pose||A[ppH(String(x.t))%A.length].id; }
 { const PH=mpPageHTML; mpPageHTML=function(){ let h=PH(); const p=mpGet(); if(!p) return h;
     // アルバムの写真は、それぞれの姿勢で
-    const ph=(p.photos||[]).slice().reverse(); let i=0; h=h.replace(/<figure class="mp-ph">[\s\S]*?<figcaption>/g,m=>{ const x=ph[i++]; return x?`<figure class="mp-ph">${mpArt(p,x.k,ppOld(p,x))}<figcaption>`:m; });
+    const ph=(p.photos||[]).slice().reverse(); let i=0; h=h.replace(/<figure class="mp-ph">[\s\S]*?<figcaption>/g,m=>{ const x=ph[i++]; return x?`<figure class="mp-ph">${mpArt(p,x.k,ppOld(p,x),x.t)}<figcaption>`:m; });
     // いま、なにしてる？
     if(!mpGone(p)) h=h.replace('<p class="mp-big">',`<p class="mp-now">🐾 いま：${esc(ppTxt(p.kind,ppNow(p)))}</p><p class="mp-big">`);
     return h; };
@@ -17349,7 +17349,7 @@ function ppOld(p,x){ const A=PP_ACTS[p.kind]||PP_ACTS.dog; return x.pose||A[ppH(
     p.photos=p.photos||[]; p.photos.push({ t:Date.now(), k:st[1], pose, c:`${t.getFullYear()}年${t.getMonth()+1}月${t.getDate()}日・うちに来て${mpDays(p)}日目・${Math.floor(a)}歳（${st[0]}）・${ppTxt(p.kind,pose)}` }); if(p.photos.length>60) p.photos=p.photos.slice(-60);
     p.msg=`パシャ！ ${p.name}の写真を、アルバムに残しました。（${ppTxt(p.kind,pose)}）`; mpLog(p,`写真をとった（${st[0]}のころ）。`,'photo'); mpSet(p); mpOpen(); }; }
 // Channel の部屋の絵にいるペットも、いまの姿勢で
-{ const SS=sceneState; sceneState=function(P,L,age){ const o=SS(P,L,age); try{ const p=mpGet(); if(o&&o.petB&&p&&o.petB===p.breed) o.petPose=ppAct(p.kind,ppNow(p)); if(o&&o.petB&&p&&o.petB===p.breed) o.petSpot=ppSpot(p,o.petPose); }catch(e){} return o; }; }
+{ const SS=sceneState; sceneState=function(P,L,age){ const o=SS(P,L,age); try{ const p=mpGet(); if(o&&o.petB&&p&&o.petB===p.breed) o.petPose=Object.assign({},ppAct(p.kind,ppNow(p)),{ g:mpGrowK(p) }); if(o&&o.petB&&p&&o.petB===p.breed) o.petSpot=ppSpot(p,o.petPose); }catch(e){} return o; }; }
 // ペットは、部屋のあちこちを移動する（3分ごとに場所が変わる。寝ているときは、あまり動かない）
 const PP_SPOTS=[[1.2,2.2],[4.0,-1.8],[3.4,-0.8],[2.2,-2.6],[-0.8,-3.2],[-3.2,-2.4],[-3.0,-0.6],[-2.6,2.2],[0.4,2.6],[1.0,-3.8],[-1.8,-1.6],[2.6,0.4]];
 function ppSpot(p,pose){ const b=pose&&pose.b||pose; const step=(b==='sleep'||b==='lie')?15:3; const slot=Math.floor(Date.now()/60000/step); return PP_SPOTS[ppH((p.name||'')+'|spot|'+step+'|'+slot)%PP_SPOTS.length]; }
@@ -17405,6 +17405,28 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 @keyframes pbFloat{ 0%,100%{ transform:translate(0,0) } 50%{ transform:translate(1px,-2.5px) } }
 @keyframes pbZ{ 0%{ opacity:0; transform:translate(0,0) } 20%{ opacity:.9 } 100%{ opacity:0; transform:translate(4px,-8px) } }
 @keyframes pbMk{ 0%,100%{ transform:translateY(0); opacity:.95 } 50%{ transform:translateY(-2px); opacity:.7 } }
+</style>`);
+
+// v155: ペットは、小さいときから、だんだん大きくなる（迎えた日からの年齢で、少しずつ）
+function mpGrowK(p,t){ if(!p||!p.at) return 1; const a=Math.max(0,((t||Date.now())-p.at)/MP_MPY); const k=p.kind;
+  const [k0,full]=k==='dog'||k==='cat'?[.45,2]:k==='fish'?[.5,2]:[.5,.8]; const f=Math.min(1,a/full); return +(k0+(1-k0)*Math.pow(f,.8)).toFixed(3); }
+function ppGrp(svg){ const i=svg.indexOf('<g class="pb-a'); if(i<0) return null; let d=0; const re=/<g\b|<\/g>/g; re.lastIndex=i; let m; while((m=re.exec(svg))){ if(m[0]==='</g>'){ d--; if(d===0) return [i,m.index+4]; } else d++; } return null; }
+// 体ごと小さくする（目や模様もいっしょに）。足もとを中心に縮める
+function ppScale(svg,g,x,y){ if(!g||g>=.999) return svg; const r=ppGrp(svg); if(!r) return svg; const ax=180+(x-y)*BK_A, ay=78+(x+y)*BK_A/2; return svg.slice(0,r[0])+`<g transform="translate(${ax.toFixed(1)} ${ay.toFixed(1)}) scale(${g}) translate(${(-ax).toFixed(1)} ${(-ay).toFixed(1)})">`+svg.slice(r[0],r[1])+'</g>'+svg.slice(r[1]); }
+
+// v155: 見ているあいだ、ペットが島（部屋）のまわりを走って回る。速さは、速い・ゆっくり・ダッシュして止まる、など変わる
+function ppRoam(svg,sp,name,rx,ry,kind){ try{ if(!svg||kind==='fish'||kind==='bird') return svg; const b=sp&&sp.b||''; if(b==='sleep'||b==='lie') return svg;
+  const slot=Math.floor(Date.now()/(5*60000)); const hh=ppH((name||'')+'|roam|'+slot); if(hh%100>=85) return svg;
+  const rr=ppGrp(svg); if(!rr) return svg; const i=rr[0], j=rr[1];
+  const mode=['pbRoamA','pbRoamB','pbRoamC'][hh%3]; const dur=[3.2,4.5,6,8,11][(hh>>3)%5]; const dir=(hh>>6)%2?'reverse':'normal';
+  return svg.slice(0,i)+`<g class="pb-roam" style="--rx:${rx}px;--ry:${ry}px;animation:${mode} ${dur}s ease-in-out infinite ${dir}">`+svg.slice(i,j)+'</g>'+svg.slice(j); }catch(e){ return svg; } }
+{ const BS0=blockSceneSVG; blockSceneSVG=function(P,o,label){ const s=BS0(P,o,label); try{ const p=mpGet(); if(o&&o.petPose&&p&&o.petB===p.breed){ const sp=o.petSpot||[1.2,2.2]; return ppRoam(ppScale(s,o.petPose.g,sp[0]+.6,sp[1]+.45),o.petPose,p.name+'|sc',20,10,p.kind); } }catch(e){} return s; }; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+.pb-roam{ transform-box:fill-box; transform-origin:center; will-change:transform; }
+@keyframes pbRoamA{ 0%{ transform:translate(0,0) scaleX(1) } 24%{ transform:translate(var(--rx),var(--ry)) scaleX(1) } 25%{ transform:translate(var(--rx),var(--ry)) scaleX(-1) } 49%{ transform:translate(0,calc(var(--ry)*2)) scaleX(-1) } 74%{ transform:translate(calc(var(--rx)*-1),var(--ry)) scaleX(-1) } 75%{ transform:translate(calc(var(--rx)*-1),var(--ry)) scaleX(1) } 100%{ transform:translate(0,0) scaleX(1) } }
+@keyframes pbRoamB{ 0%{ transform:translate(0,0) scaleX(1) } 9%{ transform:translate(var(--rx),var(--ry)) scaleX(1) } 30%{ transform:translate(var(--rx),var(--ry)) scaleX(1) } 31%{ transform:translate(var(--rx),var(--ry)) scaleX(-1) } 40%{ transform:translate(0,calc(var(--ry)*2)) scaleX(-1) } 55%{ transform:translate(0,calc(var(--ry)*2)) scaleX(-1) } 64%{ transform:translate(calc(var(--rx)*-1),var(--ry)) scaleX(-1) } 80%{ transform:translate(calc(var(--rx)*-1),var(--ry)) scaleX(-1) } 81%{ transform:translate(calc(var(--rx)*-1),var(--ry)) scaleX(1) } 92%,100%{ transform:translate(0,0) scaleX(1) } }
+@keyframes pbRoamC{ 0%{ transform:translate(0,0) scaleX(1) } 12%{ transform:translate(calc(var(--rx)*.5),calc(var(--ry)*-.5)) scaleX(1) } 30%{ transform:translate(var(--rx),var(--ry)) scaleX(1) } 31%{ transform:translate(var(--rx),var(--ry)) scaleX(-1) } 45%{ transform:translate(calc(var(--rx)*.2),calc(var(--ry)*2.2)) scaleX(-1) } 62%{ transform:translate(calc(var(--rx)*-1.1),calc(var(--ry)*1.2)) scaleX(-1) } 63%{ transform:translate(calc(var(--rx)*-1.1),calc(var(--ry)*1.2)) scaleX(1) } 82%{ transform:translate(calc(var(--rx)*-.4),calc(var(--ry)*-.3)) scaleX(1) } 100%{ transform:translate(0,0) scaleX(1) } }
+@media (prefers-reduced-motion:reduce){ .pb-roam{ animation-duration:20s !important; } }
 </style>`);
 // ===== 友だちの木が、増えると森になる。木を押すと、アップで全員の名前が見える。友だちのペットのつながりの木も =====
 const GS_PER=30; // 1本の木に、30人まで
@@ -17784,6 +17806,11 @@ function ssClockDetail(){}
   if(kind==='classroom'){ ssPencils(S,-13,3.6,D-1.6); S.box(-11,3.6,D-1.8,2,.9,1.2,ssPop(h,2)); }
   if(kind==='library'){ ssLampDesk(S,-8,3.8,2.4); S.box(4,3.8,2.8,2.4,.3,1.6,'#FFFFFF'); }
   if(kind==='washitsu'){ ssCup(S,-5,1.6,4.2,'#6E8F6A',true); ssCup(S,-1,1.6,4.2,'#6E8F6A',false); } }; }
+
+// v155: 横から見た絵のペットも、年齢で大きさが変わる
+{ const SP=ssPet; ssPet=function(S,x,z,id,pose){ const g=pose&&typeof pose==='object'&&pose.g; if(!g||g>=.999) return SP(S,x,z,id,pose);
+  const T=(X,Y,Z)=>[x+(X-x)*g, Y*g, z+(Z-z)*g]; const S2=Object.create(S); S2.box=function(X,Y,Z,w,h,d,c,o){ const q=T(X,Y,Z); let o2=o; if(o&&o.ex){ const ex=o.ex; o2=Object.assign({},o,{ ex:pp=>ex((a,b2,c2)=>{ const r=T(a,b2,c2); return pp(r[0],r[1],r[2]); }) }); } return S.box(q[0],q[1],q[2],w*g,h*g,d*g,c,o2); };
+  return SP(S2,x,z,id,pose); }; }
 
 // v152: ページを開いた直後の一回目の表示は、ペットなどの仕組みが読みこまれる前に出ることがある。全部読みこんだあとで、もう一度かき直す
 try{ if(typeof render==='function'&&typeof page!=='undefined'&&page==='home'){ const y=window.scrollY; render(); window.scrollTo(0,y); } }catch(e){}
