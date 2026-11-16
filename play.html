@@ -18340,6 +18340,143 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style id="vhCss">
 .vh-smoke{ animation:vhSm 1.6s ease-out infinite; } @keyframes vhSm{ 0%{ opacity:.9; transform:translateY(0) } 100%{ opacity:0; transform:translateY(-8px) } }
 @media (prefers-reduced-motion:reduce){ .vh{ animation-duration:40s!important; } }
 </style>`); }catch(e){}
+// v170: お花。部屋に飾る・生ける・花束を作る・ほかの Channel に贈る（俳句といっしょに）
+// 花の名前｜形｜実際にある色（最大6色）。順番は変えない（番号で保存するため。足すときは最後に）
+const FL_RAW='バラ|R|rwpyoP\nミニバラ|R|rwpyoP\nカーネーション|R|rwpyoP\nスプレーカーネーション|R|rwpyom\nチューリップ|T|rwpyov\n八重咲きチューリップ|T|rwpyoP\nユリ|L|wpyoP\nカサブランカ|L|w\nテッポウユリ|L|w\nスカシユリ|L|oyrpw\nガーベラ|D|rwpyoP\nヒマワリ|D|yon\nミニヒマワリ|D|yo\nコスモス|D|wpPm\nチョコレートコスモス|D|k\nキバナコスモス|D|yo\nマーガレット|D|wyp\nデイジー|D|wpP\nフランスギク|D|w\nノースポール|D|w\nシャスタデージー|D|w\nアネモネ|P|rwpvb\nラナンキュラス|R|rwpyoP\n芍薬（シャクヤク）|R|wpPd\nボタン|R|wpPrd\n椿（ツバキ）|R|rwpP\n山茶花（サザンカ）|R|wpr\n梅|K|wpr\n桜|K|wp\n桃の花|K|pwP\n菜の花|F|y\n桔梗（キキョウ）|K|vwp\n撫子（ナデシコ）|K|pwPr\nカスミソウ|F|wp\nアジサイ|C|bpvwa\nガクアジサイ|C|bpw\nアナベル|C|wg\nラベンダー|S|lvw\nデルフィニウム|S|bawlp\nラークスパー|S|bpwl\nグラジオラス|S|rwpyov\nキンギョソウ|S|rwpyo\nストック|S|wpvcl\nスイートピー|P|wpPvlr\nルピナス|S|vpwyb\nジギタリス|S|pwv\nベロニカ|S|bwp\nサルビア|S|rbvwp\nリアトリス|S|vw\nトルコキキョウ|R|wpvgl\nダリア|R|rwpyoPm\nポンポンダリア|R|rwpyo\nキク|R|wyprog\nスプレーマム|R|wyporg\nピンポンマム|R|wygp\nミヤコワスレ|D|vwp\nアスター|D|vpwP\nクリスマスローズ|P|wpdgk\nシクラメン|O|rwpPm\nパンジー|K|vyowbr\nビオラ|K|vywbo\nプリムラ|K|rpywvo\nゼラニウム|C|rpws\nペチュニア|L|pvwrm\nベゴニア|K|rpwo\nインパチェンス|K|pwros\nマリーゴールド|R|yo\nジニア（百日草）|D|rpyowm\nケイトウ|S|ryoP\n千日紅（センニチコウ）|C|mwpr\nハイビスカス|P|ryopw\nブーゲンビリア|F|mpwo\nプルメリア|K|wyp\nランタナ|C|yopw\nハナミズキ|K|wp\nモクレン|T|wv\nコブシ|T|w\n藤（フジ）|S|lw\n朝顔（アサガオ）|L|bvpw\n昼顔（ヒルガオ）|L|p\n夕顔（ユウガオ）|L|w\n睡蓮（スイレン）|P|wpyP\n蓮（ハス）|P|pw\n菖蒲（ショウブ）|O|vwb\n花菖蒲（ハナショウブ）|O|vwbl\nアヤメ|O|v\nカキツバタ|O|bw\nジャーマンアイリス|O|vywbo\nアイリス|O|bvyw\n水仙（スイセン）|L|wy\nラッパスイセン|L|y\nヒヤシンス|C|bpwvy\nムスカリ|C|bw\nクロッカス|T|vyw\nスノードロップ|B|w\nスズラン|B|wp\nブルーベル|B|bw\nフリージア|L|ywprv\nアマリリス|L|rwpo\nカラー|L|wypo\nアンスリウム|L|rpwg\n胡蝶蘭（コチョウラン）|O|wpy\nシンビジウム|O|wpyg\nデンファレ|O|mw\nカトレア|O|mwl\nオンシジウム|O|y\nバンダ|O|vb\nデンドロビウム|O|wpm\nパフィオペディラム|O|gn\nエビネ|O|wpy\nシャクナゲ|C|pwr\nツツジ|K|pwrm\nサツキ|K|pwr\nハマナス|K|pw\nノイバラ|K|w\nクレマチス|K|vwpl\nテッセン|K|w\nトケイソウ|K|vb\nジャスミン|K|wy\nクチナシ|R|w\nキンモクセイ|F|o\nギンモクセイ|F|w\n沈丁花（ジンチョウゲ）|C|pw\nミモザ|F|y\nレンギョウ|K|y\n雪柳（ユキヤナギ）|F|w\nコデマリ|C|w\nオオデマリ|C|wg\nライラック|C|lwvp\nブッドレア|S|vpw\nエリカ|S|pw\nヒース|S|pwv\nフジバカマ|F|pw\n萩（ハギ）|F|pw\n女郎花（オミナエシ）|F|y\n彼岸花（ヒガンバナ）|L|rwy\nリコリス|L|pwyr\nネリネ|L|pwr\n秋明菊（シュウメイギク）|D|pw\nリンドウ|L|bvw\nホトトギス|K|v\nツワブキ|D|y\n寒菊（カンギク）|D|y\n福寿草（フクジュソウ）|P|y\nセツブンソウ|K|w\nカタクリ|L|p\nニリンソウ|K|w\nイチリンソウ|K|w\nスミレ|K|vw\nタンポポ|D|yw\nレンゲソウ|C|p\nシロツメクサ|C|w\nムラサキツメクサ|C|m\nナズナ|F|w\nオオイヌノフグリ|K|a\nハルジオン|D|wp\nヒメジョオン|D|w\nツユクサ|K|b\nホタルブクロ|B|wp\nドクダミ|K|w\nネジバナ|S|p\nワスレナグサ|K|abw\nネモフィラ|K|aw\nポピー|P|royw\nヒナゲシ|P|rpw\nケシ|P|rw\nカリフォルニアポピー|P|oy\n矢車菊（ヤグルマギク）|D|bpwv\nニゲラ|K|abw\nブルースター|K|a\nクレオメ|S|pw\nノコギリソウ|F|wyp\nアキレア|F|wypr\nエキナセア|D|pwyo\nルドベキア|D|yo\nヘリオプシス|D|y\nガイラルディア|D|ryo\nガザニア|D|yorw\nオステオスペルマム|D|wpvy\nアークトチス|D|osw\nディモルフォセカ|D|ow\nカレンデュラ|D|oy\nヘリクリサム|D|ywpro\nスターチス|F|vpywl\nゴデチア|P|pw\nクラスペディア|C|y\nブルニア|C|g\nピンクッション|C|roy\nプロテア|C|pw\nキングプロテア|C|p\nリューカデンドロン|T|rgy\nバンクシア|S|oy\nワックスフラワー|K|wp\nエリンジウム|C|b\nアリウム|C|vw\nアガパンサス|C|bw\nエキノプス|C|b\nブルーレースフラワー|F|bw\nレースフラワー|F|w\nオルレア|F|w\nホワイトレースフラワー|F|w\nスカビオサ|D|vpwk\nペンタス|C|rpw\nルリマツリ|C|aw\nセージ|S|bvp\nタイム|F|pw\nローズマリー|F|l\nカモミール|D|w\nボリジ|K|b\nナスタチウム|P|roy\nバーベナ|C|rpvw\nヘリオトロープ|C|v\nアゲラタム|F|bpw\nロベリア|K|bwv\nサフィニア|L|pvrw\nニチニチソウ|K|pwr\nマツバボタン|K|pyorw\nポーチュラカ|K|pyorw\nゼフィランサス|L|pw\nハナニラ|K|wa\nオキザリス|K|pyw\nカンパニュラ|B|vpw\nフクシア|B|pmr\nツリガネソウ|B|bv\nギボウシ|L|lw\nヘメロカリス|L|oyr\nカンナ|L|ryo\nジンジャー|L|wy\nヘリコニア|S|ry\nストレリチア（極楽鳥花）|O|o\nグロリオサ|L|ry\nアルストロメリア|L|pwyor\nクロコスミア|S|or\nワトソニア|S|pwo\nイキシア|K|pwy\nスパラキシス|K|ory\nラケナリア|B|yr\nアネモネ・ブランダ|D|bw\nハナカンザシ|D|w\nローダンセ|D|pw\nブラキカム|D|lw\nエーデルワイス|K|w\nコマクサ|B|p\nチングルマ|K|w\nハクサンイチゲ|K|w\nミズバショウ|L|w\nカキラン|O|o\nサギソウ|O|w\nウツギ|K|w\nハコネウツギ|K|pw\nアベリア|B|wp\nムクゲ|P|wpv\nフヨウ|P|pw\n酔芙蓉（スイフヨウ）|P|wp\nタチアオイ|P|prwy\nゼニアオイ|P|m\nノウゼンカズラ|L|o\nサルスベリ|F|pwm\nキョウチクトウ|K|pw\nハマユウ|L|w\nナツツバキ|P|w\nヤマボウシ|K|w\nホオノキ|P|c\nタイサンボク|P|w\nミカンの花|K|w\nリンゴの花|K|wp\n梨の花|K|w\nハナカイドウ|K|p\nボケ|K|rpw\nユスラウメ|K|wp\nアーモンドの花|K|pw\nオリーブの花|F|c\nコーヒーの花|K|w\n綿の花|P|cp\nソバの花|F|w\nジャガイモの花|K|wv\nナスの花|K|v\nイチゴの花|K|w\nエンドウの花|P|wp\nレンゲツツジ|K|o\nミツバツツジ|K|m\nアザレア|K|pwr\nガーデンシクラメン|O|rpw\nクリスマスカクタス|L|rpwo\nポインセチア|K|rwp\nシャコバサボテン|L|prw\nカランコエ|C|ryopw\n月下美人|L|w\nサボテンの花|L|pyr\nアロエの花|S|o\nセダムの花|F|yp\nハオルチアの花|S|w\nブルーデージー|D|a\nスイートアリッサム|F|wp\nキャンディタフト|C|wp\nムシトリナデシコ|C|p\nシレネ|K|pw\nルナリア|K|vw\nアグロステンマ|K|p\nヤグルマソウ|C|w\nベルガモット|F|rpv\nアスチルベ|S|pwr\nアカンサス|S|w\nヒペリカム|K|y\nブラックベリーの花|K|w\nエルダーフラワー|F|w\nシャクヤク・サラベルナール|R|p\nバラ・アイスバーグ|R|w\nバラ・ピース|R|y\nバラ・ブルームーン|R|l\nイングリッシュローズ|R|pyws\nスプレーバラ|R|pwyr\nガーデンローズ|R|pPrw\nハマギク|D|w\nノジギク|D|w\nイソギク|F|y\nヨメナ|D|l\nノコンギク|D|l\nシオン（紫苑）|D|l\nユウゼンギク|D|vpw\nハナトラノオ|S|pw\nミソハギ|S|m\nキキョウソウ|K|v\nヤマユリ|L|w\nオニユリ|L|o\nヒメユリ|L|r\nササユリ|L|p\nクルマユリ|L|o\nウバユリ|L|w\nエゾスカシユリ|L|o\nクロユリ|B|k\nユキワリソウ|K|pwv\nサクラソウ|K|pw\nオダマキ|B|bvpwy\nヤマブキ|K|y\nシャガ|O|w\nイカリソウ|K|pwy\nシラン|O|mw\nエンゴサク|S|b\nヒメヒオウギ|K|r\nツルニチニチソウ|K|bw\nヒルザキツキミソウ|P|p\nマツヨイグサ|P|y\n月見草（ツキミソウ）|P|w';
+const FL_PAL={ r:['#E8394A','赤'], w:['#FBFAF5','白'], p:['#F7A1BE','ピンク'], P:['#E8508E','濃いピンク'], y:['#F7D23E','黄'], o:['#F59A3A','オレンジ'], v:['#8E5BC7','紫'], l:['#C3A6E8','薄紫'], b:['#4F7FE0','青'], a:['#8EC8F2','水色'], c:['#F5E6B8','クリーム'], g:['#A8D27A','緑'], d:['#9E1F3A','濃い赤'], s:['#F7A08A','サーモン'], m:['#B83A8E','赤紫'], k:['#4A2340','黒紫'], n:['#A86A3E','茶'] };
+const FL=FL_RAW.split('\n').map((l,i)=>{ const [n,s,c]=l.split('|'); return { i, n, s, c:c.split('') }; });
+const FL_VES={ vase:'花びん', one:'一輪ざし', ike:'生け花', wrap:'花束' };
+const KEY_FLROOM='fl.room', KEY_FLGOT='fl.got', KEY_FLPICK='fl.pick';
+function flC(k){ return (FL_PAL[k]||FL_PAL.p)[0]; }
+function flSh(c,k){ try{ return bkShade(c,k); }catch(e){ return c; } }
+// ひとつの花（x,y は花の中心。r は大きさ）
+function flHead(sh,col,x,y,r,seed){ const c=col, c2=flSh(col,.82), ol=col==='#FBFAF5'||col==='#F5E6B8'?' stroke="#D8CFC0" stroke-width=".5"':''; const F=v=>(+v).toFixed(1); let s='';
+  if(sh==='R'){ s=`<circle cx="${F(x)}" cy="${F(y)}" r="${F(r)}" fill="${c}"${ol}/><circle cx="${F(x)}" cy="${F(y)}" r="${F(r*.62)}" fill="${c2}"/><circle cx="${F(x-r*.1)}" cy="${F(y-r*.1)}" r="${F(r*.32)}" fill="${c}"/><path d="M${F(x-r*.5)} ${F(y)} Q${F(x)} ${F(y+r*.6)} ${F(x+r*.5)} ${F(y)}" stroke="${c2}" stroke-width="${F(r*.12)}" fill="none"/>`; }
+  else if(sh==='D'){ for(let i=0;i<10;i++){ const a=i/10*Math.PI*2; s+=`<ellipse cx="${F(x+Math.cos(a)*r*.62)}" cy="${F(y+Math.sin(a)*r*.62)}" rx="${F(r*.42)}" ry="${F(r*.2)}" transform="rotate(${F(a*180/Math.PI)} ${F(x+Math.cos(a)*r*.62)} ${F(y+Math.sin(a)*r*.62)})" fill="${c}"${ol}/>`; } s+=`<circle cx="${F(x)}" cy="${F(y)}" r="${F(r*.34)}" fill="${col==='#F7D23E'||col==='#F59A3A'?'#7A4A22':'#F2B526'}"/>`; }
+  else if(sh==='T'){ s=`<path d="M${F(x-r*.7)} ${F(y-r*.5)} Q${F(x-r*.75)} ${F(y+r*.8)} ${F(x)} ${F(y+r*.8)} Q${F(x+r*.75)} ${F(y+r*.8)} ${F(x+r*.7)} ${F(y-r*.5)} L${F(x+r*.35)} ${F(y-r*.1)} L${F(x)} ${F(y-r*.7)} L${F(x-r*.35)} ${F(y-r*.1)} Z" fill="${c}"${ol}/><path d="M${F(x)} ${F(y-r*.6)} L${F(x)} ${F(y+r*.7)}" stroke="${c2}" stroke-width="${F(r*.1)}"/>`; }
+  else if(sh==='L'){ let pts=[]; for(let i=0;i<12;i++){ const a=i/12*Math.PI*2-Math.PI/2, rr=i%2?r*.35:r; pts.push(F(x+Math.cos(a)*rr)+','+F(y+Math.sin(a)*rr)); } s=`<polygon points="${pts.join(' ')}" fill="${c}"${ol}/><circle cx="${F(x)}" cy="${F(y)}" r="${F(r*.22)}" fill="${c2}"/>`+[0,1,2].map(i=>`<circle cx="${F(x+(i-1)*r*.2)}" cy="${F(y-r*.35)}" r="${F(r*.08)}" fill="#A8622E"/>`).join(''); }
+  else if(sh==='S'){ for(let i=0;i<6;i++){ const rr=r*(.5-i*.05); s+=`<circle cx="${F(x+(i%2?rr*.4:-rr*.4))}" cy="${F(y+r*1.1-i*r*.42)}" r="${F(rr)}" fill="${i%2?c:c2}"${ol}/>`; } }
+  else if(sh==='C'){ [[0,0],[-.45,-.25],[.45,-.25],[-.3,.35],[.3,.35],[0,-.5],[-.55,.15],[.55,.15]].forEach(([a,b],i)=>{ s+=`<circle cx="${F(x+a*r)}" cy="${F(y+b*r)}" r="${F(r*.36)}" fill="${i%3?c:c2}"${ol}/>`; }); }
+  else if(sh==='B'){ s=`<path d="M${F(x-r)} ${F(y-r*.6)} Q${F(x)} ${F(y-r*1.2)} ${F(x+r)} ${F(y-r*.4)}" stroke="#6FA85A" stroke-width="${F(r*.12)}" fill="none"/>`; [[-.6,-.55],[0,-.75],[.6,-.45]].forEach(([a,b])=>{ s+=`<path d="M${F(x+a*r-r*.28)} ${F(y+b*r+r*.55)} Q${F(x+a*r)} ${F(y+b*r-r*.1)} ${F(x+a*r+r*.28)} ${F(y+b*r+r*.55)} Z" fill="${c}"${ol}/>`; }); }
+  else if(sh==='O'){ [[-.55,-.2],[.55,-.2],[0,-.6],[-.4,.4],[.4,.4]].forEach(([a,b])=>{ s+=`<ellipse cx="${F(x+a*r)}" cy="${F(y+b*r)}" rx="${F(r*.38)}" ry="${F(r*.3)}" fill="${c}"${ol}/>`; }); s+=`<ellipse cx="${F(x)}" cy="${F(y+r*.25)}" rx="${F(r*.25)}" ry="${F(r*.3)}" fill="${c2}"/><circle cx="${F(x)}" cy="${F(y)}" r="${F(r*.12)}" fill="#F7D23E"/>`; }
+  else if(sh==='P'){ [0,1,2,3].forEach(i=>{ const a=i/4*Math.PI*2+.4; s+=`<circle cx="${F(x+Math.cos(a)*r*.45)}" cy="${F(y+Math.sin(a)*r*.45)}" r="${F(r*.55)}" fill="${i%2?c:c2}"${ol}/>`; }); s+=`<circle cx="${F(x)}" cy="${F(y)}" r="${F(r*.22)}" fill="#3A2A30"/>`; }
+  else if(sh==='F'){ for(let i=0;i<14;i++){ const a=(i*2.4)%(Math.PI*2), rr=r*(.2+((i*37)%10)/12); s+=`<circle cx="${F(x+Math.cos(a)*rr)}" cy="${F(y+Math.sin(a)*rr*.8)}" r="${F(r*.18)}" fill="${c}"${ol}/>`; } }
+  else { for(let i=0;i<5;i++){ const a=i/5*Math.PI*2-Math.PI/2; s+=`<circle cx="${F(x+Math.cos(a)*r*.45)}" cy="${F(y+Math.sin(a)*r*.45)}" r="${F(r*.4)}" fill="${c}"${ol}/>`; } s+=`<circle cx="${F(x)}" cy="${F(y)}" r="${F(r*.2)}" fill="#F2C94C"/>`; }
+  return s; }
+// 花束・花びん・一輪ざし・生け花の絵（120×120）
+function flArt(items,ves,label){ items=(items||[]).filter(x=>FL[x.f]).slice(0,6); if(!items.length) return ''; ves=FL_VES[ves]?ves:(items.length===1?'one':'vase'); const F=v=>(+v).toFixed(1);
+  const stems=[]; const n=ves==='one'?1:Math.min(13,Math.max(5,items.length*3-1)); for(let i=0;i<n;i++) stems.push(items[i%items.length]);
+  let back='', st='', heads='', front='';
+  const base= ves==='ike'?[60,96]:ves==='wrap'?[60,100]:[60,88];
+  const spread= ves==='one'?0:ves==='ike'?46:ves==='wrap'?34:30;
+  stems.forEach((it,i)=>{ const f=FL[it.f], col=flC(it.c||f.c[0]); const t=n===1?0:(i/(n-1)-.5); const lay=i%3; const hx=base[0]+t*spread*2*(ves==='ike'?.9:1)+(lay===1?4:lay===2?-3:0), hy=(ves==='one'?30:ves==='ike'?36+Math.abs(t)*30-(i%2)*12:30+Math.abs(t)*22+lay*9);
+    const r=ves==='one'?14:f.s==='S'?8:f.s==='F'?9:f.s==='C'?10:9.5;
+    st+=`<path d="M${F(base[0]+t*8)} ${F(base[1])} Q${F((hx+base[0])/2)} ${F((hy+base[1])/2+6)} ${F(hx)} ${F(hy)}" stroke="#5E9E4E" stroke-width="1.8" fill="none"/>`;
+    if(i%3===0) st+=`<ellipse cx="${F((hx*2+base[0])/3+4)}" cy="${F((hy*2+base[1])/3+8)}" rx="5" ry="2.2" fill="#7BBF5E" transform="rotate(-30 ${F((hx*2+base[0])/3+4)} ${F((hy*2+base[1])/3+8)})"/>`;
+    heads+=flHead(f.s,col,hx,hy,r,i); });
+  if(ves==='vase') front=`<path d="M44 70 Q38 92 46 112 L74 112 Q82 92 76 70 Z" fill="#9FD3F0" opacity=".9" stroke="#7FB8DA"/><rect x="44" y="66" width="32" height="6" rx="3" fill="#B8E2F7"/><path d="M50 78 Q47 92 51 104" stroke="#FFFFFF" stroke-width="2" opacity=".7" fill="none"/>`;
+  if(ves==='one') front=`<path d="M54 72 Q50 84 50 98 Q50 112 60 112 Q70 112 70 98 Q70 84 66 72 Z" fill="#E8B4C8" stroke="#D493AD"/><rect x="54" y="68" width="12" height="5" rx="2" fill="#F2C9D8"/>`;
+  if(ves==='ike') front=`<ellipse cx="60" cy="102" rx="40" ry="8" fill="#5A6A7A"/><ellipse cx="60" cy="99" rx="38" ry="6" fill="#8EC3E6"/><rect x="48" y="94" width="24" height="5" rx="1.5" fill="#3A3A3A"/><path d="M20 102 Q60 118 100 102 L96 110 Q60 122 24 110 Z" fill="#46525E"/>`;
+  if(ves==='wrap') front=`<path d="M24 52 L60 112 L96 52 Q60 70 24 52 Z" fill="#FBE3EC" stroke="#F2B8CC"/><path d="M34 60 L60 112 L86 60 Q60 74 34 60 Z" fill="#F7C9DA"/><path d="M52 92 Q60 86 68 92 Q60 98 52 92 Z M60 92 L52 104 M60 92 L68 104" fill="#E8508E" stroke="#E8508E" stroke-width="1.6"/>`;
+  return `<svg class="fl-art" viewBox="0 0 120 120" role="img" aria-label="${esc(label||items.map(x=>FL[x.f].n).join('・'))}">${back}${st}${heads}${front}</svg>`; }
+function flCode(items,ves){ return items.slice(0,6).map(x=>x.f+'.'+x.c).join(',')+'|'+(ves||''); }
+function flDecode(s){ const [a,v]=String(s||'').split('|'); const items=(a||'').split(',').map(x=>{ const [f,c]=x.split('.'); return { f:+f, c:c||'' }; }).filter(x=>FL[x.f]&&FL[x.f].c.includes(x.c)); return { items:items.slice(0,6), ves:FL_VES[v]?v:'vase' }; }
+function flNames(items){ return items.map(x=>`${FL[x.f].n}（${(FL_PAL[x.c]||[])[1]||''}）`).join('・'); }
+// --- 俳句：かなの音を数える（小さい ゃゅょ などは数えない）。漢字があるときは null ---
+function flMora(s){ s=String(s||'').replace(/[\s　]/g,''); if(!s) return 0; if(/[^ぁ-ゖァ-ヺー・、。！？!?〜～]/.test(s)) return null; return s.replace(/[ゃゅょぁぃぅぇぉゎャュョァィゥェォヮ・、。！？!?〜～]/g,'').length; }
+const FL_H5=['いつまでも','ありがとう','おめでとう','はなひらく','ほほえんで','だいすきよ','またあおう','はるのかぜ','なつのそら','あきのよる','ふゆのあさ','きみのため','きょうのひに','あたたかい','かがやいて'];
+const FL_H7=['あなたとともに','こころをこめて','はなたばおくる','えがおがさいた','しあわせねがう','ひかりのなかで','いつもみまもる','かぜにのせたよ','うまれたことに','であえたきせき','ゆめがかなうよ','あしたもいっしょ'];
+const FL_OCC=['なんでもない日','記念日','お誕生日','おめでとう','ありがとう','おつかれさま','元気になってね'];
+const FL_OCC_H={ 'お誕生日':[['おめでとう','うまれたことに','ありがとう']], 'ありがとう':[['いつまでも','あなたとともに','ありがとう']], 'おめでとう':[['おめでとう','えがおがさいた','はるのかぜ']], '記念日':[['きょうのひに','であえたきせき','ありがとう']], '元気になってね':[['ほほえんで','しあわせねがう','はるのかぜ']] };
+function flHaikuIdea(occ,k){ const fix=FL_OCC_H[occ]; if(fix&&!k) return fix[0].slice(); const r=()=>Math.floor(Math.random()*999); return [FL_H5[r()%FL_H5.length],FL_H7[r()%FL_H7.length],FL_H5[r()%FL_H5.length]]; }
+// --- 状態 ---
+let _flPick=null; function flPick(){ if(!_flPick){ _flPick=store.get(KEY_FLPICK,null)||{ items:[], ves:'vase' }; } return _flPick; } function flSavePick(){ store.set(KEY_FLPICK,_flPick); }
+let _flTab='pick', _flQ='', _flShape='', _flMsg='', _flH=null, _flOcc='なんでもない日', _flTo='';
+const FL_SHN={ '':'すべて', R:'まるい花', D:'菊・デイジー', T:'チューリップ形', L:'ユリ・ラッパ形', S:'穂の花', C:'小花のかたまり', B:'すず形', O:'ラン・アヤメ', P:'ポピー形', F:'ふわふわ小花', K:'星形・小花' };
+// 部屋に飾っているお花の絵（Life Home のカード）
+function flTileHTML(){ const rm=store.get(KEY_FLROOM,null), got=store.get(KEY_FLGOT,[]); const un=got.filter(g=>!g.seen).length;
+  return `<section class="hm-tile fl-tile"><h3>💐 お花${un?`<span class="fl-new">${un}</span>`:''}</h3><div class="fl-tile-in">${rm&&rm.items&&rm.items.length?`<div class="fl-tile-art">${flArt(rm.items,rm.ves)}</div><p class="tiny">部屋に飾っています：${esc(flNames(rm.items))}（${FL_VES[rm.ves]||''}）</p>`:'<p class="tiny muted">好きなお花をえらんで、部屋に飾ったり、花束にして友だちに贈ったりできます。</p>'}
+    <div class="fl-tile-b"><button type="button" class="mp-btn" data-fl-open="pick">💐 お花をえらぶ</button><button type="button" class="mp-btn fl-b2" data-fl-open="got">💌 届いたお花${got.length?`（${got.length}）`:''}</button></div></div></section>`; }
+function flPlace(){ try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home'||app.querySelector('.fl-tile')) return; const t=app.querySelector('.hm-mypet'); if(!t) return; const box=document.createElement('div'); box.innerHTML=flTileHTML(); t.after(box.firstElementChild); }catch(e){} }
+(function(){ if(typeof render1!=='function') return; const _r=render1; render1=function(){ const r=_r.apply(this,arguments); flPlace(); return r; }; })();
+setTimeout(flPlace,0);
+function flRefreshTile(){ const t=document.querySelector('.fl-tile'); if(t){ const box=document.createElement('div'); box.innerHTML=flTileHTML(); t.replaceWith(box.firstElementChild); } }
+// --- ダイアログ ---
+function flOpen(tab){ if(tab) _flTab=tab; let d=document.getElementById('flDlg'); if(!d){ d=document.createElement('div'); d.id='flDlg'; d.className='pa-ov fl-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','お花'); document.body.appendChild(d);
+    d.addEventListener('click',flClick); d.addEventListener('input',flInput); d.addEventListener('change',flInput); }
+  d.innerHTML=`<div class="pa-in fl-in"><button type="button" class="pa-x" data-fl-x="1" aria-label="閉じる">×</button><h3 class="fl-h">💐 お花</h3>
+   <div class="fl-tabs" role="tablist">${[['pick','えらぶ・飾る'],['send','贈る'],['got','届いたお花']].map(([k,t])=>`<button type="button" role="tab" aria-selected="${_flTab===k}" class="fl-tab${_flTab===k?' on':''}" data-fl-tab="${k}">${t}</button>`).join('')}</div>
+   <div class="fl-body">${_flTab==='send'?flSendHTML():_flTab==='got'?flGotHTML():flPickHTML()}</div>
+   ${_flMsg?`<p class="fl-msg" role="status">${esc(_flMsg)}</p>`:''}<button type="button" class="pa-x pa-back" data-fl-x="1">← もどる</button></div>`;
+  d.hidden=false; document.body.classList.add('gsz-open'); }
+function flClose(){ const d=document.getElementById('flDlg'); if(d){ d.hidden=true; d.innerHTML=''; } document.body.classList.remove('gsz-open'); _flMsg=''; flRefreshTile(); }
+function flSelHTML(){ const pk=flPick(); const its=pk.items;
+  return `<div class="fl-sel"><div class="fl-sel-art">${its.length?flArt(its,pk.ves):'<p class="tiny muted">下のリストから、お花と色をえらんでね（6種類まで）</p>'}</div><div class="fl-sel-r">
+    <p class="fl-sel-h">えらんだお花（${its.length}/6）</p><ul class="fl-sel-l">${its.map((x,i)=>`<li><span class="fl-dot" style="background:${flC(x.c)}"></span>${esc(FL[x.f].n)}（${esc(FL_PAL[x.c][1])}）<button type="button" class="fl-rm" data-fl-rm="${i}" aria-label="${esc(FL[x.f].n)}をはずす">×</button></li>`).join('')}</ul>
+    <div class="fl-ves">${Object.entries(FL_VES).map(([k,t])=>`<button type="button" class="fl-vb${pk.ves===k?' on':''}" data-fl-ves="${k}">${t}</button>`).join('')}</div>
+    ${its.length?`<div class="fl-act"><button type="button" class="mp-btn" data-fl-room="1">🏠 部屋に飾る</button><button type="button" class="mp-btn fl-b2" data-fl-tab="send">🎁 友だちに贈る</button></div>`:''}</div></div>`; }
+function flPickHTML(){ const q=_flQ.trim(); const list=FL.filter(f=>(!_flShape||f.s===_flShape)&&(!q||f.n.includes(q))); const pk=flPick();
+  return `${flSelHTML()}<div class="fl-find"><input type="search" class="fl-q" id="flQ" placeholder="お花の名前でさがす" value="${esc(_flQ)}" aria-label="お花の名前でさがす"><select id="flShape" aria-label="花の形">${Object.entries(FL_SHN).map(([k,t])=>`<option value="${k}"${_flShape===k?' selected':''}>${t}</option>`).join('')}</select></div>
+   <ul class="fl-list">${list.map(f=>`<li><b>${esc(f.n)}</b><span class="fl-cs">${f.c.map(c=>{ const on=pk.items.some(x=>x.f===f.i&&x.c===c); return `<button type="button" class="fl-c${on?' on':''}" data-fl-add="${f.i}.${c}" title="${esc(FL_PAL[c][1])}" aria-label="${esc(f.n)}・${esc(FL_PAL[c][1])}"><svg viewBox="0 0 30 30" width="30" height="30">${flHead(f.s,flC(c),15,15,11)}</svg></button>`; }).join('')}</span></li>`).join('')||'<li class="tiny muted">見つかりませんでした</li>'}</ul>`; }
+function flFriends(){ try{ return (typeof fbFriends==='function'?fbFriends():store.get(KEY_FRIEND,[])).filter(f=>f&&f.id); }catch(e){ return []; } }
+function flSendHTML(){ const pk=flPick(); if(!pk.items.length) return `<p>まず「えらぶ・飾る」で、お花をえらんでね。</p><button type="button" class="mp-btn" data-fl-tab="pick">💐 お花をえらぶ</button>`;
+  const fr=flFriends(); if(!_flH) _flH=flHaikuIdea(_flOcc); const m=_flH.map(flMora); const want=[5,7,5];
+  return `<div class="fl-send"><div class="fl-sel-art">${flArt(pk.items,pk.ves)}</div><div class="fl-sel-r"><p class="tiny">${esc(flNames(pk.items))}・${pk.items.length===1&&pk.ves==='one'?'一輪':FL_VES[pk.ves]}</p>
+   <label class="fl-lb">だれに贈る？<select id="flTo">${fr.length?fr.map(f=>`<option value="${esc(f.id)}"${_flTo===f.id?' selected':''}>${esc(f.by||'友だち')}さん</option>`).join(''):'<option value="">（友だちがまだいません）</option>'}</select></label>
+   <label class="fl-lb">どんな日？<select id="flOcc">${FL_OCC.map(o=>`<option${o===_flOcc?' selected':''}>${o}</option>`).join('')}</select></label>
+   <p class="fl-lb">メッセージは、5・7・5の俳句で</p>
+   <div class="fl-hk">${[0,1,2].map(i=>`<div class="fl-hl"><input type="text" id="flH${i}" maxlength="16" value="${esc(_flH[i]||'')}" aria-label="${['はじめの5音','まんなかの7音','おわりの5音'][i]}"><span class="fl-mc ${m[i]===want[i]?'ok':''}">${m[i]==null?'読みで'+want[i]+'音':m[i]+'/'+want[i]+'音'}</span></div>`).join('')}</div>
+   <button type="button" class="linkish" data-fl-idea="1">✨ ほかの俳句の例</button>
+   <p class="tiny muted">ひらがなで書くと、音の数を数えます。漢字は、読みで5・7・5になっていればOKです。</p>
+   <button type="button" class="mp-btn" data-fl-send="1" ${fr.length?'':'disabled'}>💐 俳句と花を贈る</button></div></div>`; }
+function flGotHTML(){ const got=store.get(KEY_FLGOT,[]); if(got.some(g=>!g.seen)){ got.forEach(g=>g.seen=1); store.set(KEY_FLGOT,got); }
+  if(!got.length) return '<p class="tiny muted">まだ届いたお花はありません。友だちから花束や一輪のお花が届くと、ここに残ります。</p>';
+  return `<ul class="fl-got">${got.slice().reverse().map((g,i)=>{ const b=flDecode(g.b); const j=got.length-1-i; return `<li><div class="fl-got-art">${flArt(b.items,b.ves)}</div><div><p class="fl-got-by"><b>${esc(g.by)}さん</b>から・${esc(g.o||'')}・${esc(new Date(g.t).getMonth()+1+'月'+new Date(g.t).getDate()+'日')}</p><p class="fl-haiku">${(g.h||'').split('／').map(esc).join('<br>')}</p><p class="tiny muted">${esc(flNames(b.items))}</p><button type="button" class="mp-btn" data-fl-roomgot="${j}">🏠 部屋に飾る</button></div></li>`; }).join('')}</ul>`; }
+function flClick(e){ const t=e.target; const d=document.getElementById('flDlg');
+  if(t===d||t.closest('[data-fl-x]')){ flClose(); return; }
+  const tb=t.closest('[data-fl-tab]'); if(tb){ _flTab=tb.dataset.flTab; _flMsg=''; flOpen(); return; }
+  const ad=t.closest('[data-fl-add]'); if(ad){ const [f,c]=ad.dataset.flAdd.split('.'); const pk=flPick(); const k=pk.items.findIndex(x=>x.f===+f&&x.c===c); if(k>=0) pk.items.splice(k,1); else { const k2=pk.items.findIndex(x=>x.f===+f); if(k2>=0) pk.items[k2].c=c; else if(pk.items.length<6) pk.items.push({ f:+f, c }); else { _flMsg='花束は6種類までです。'; } } if(pk.items.length>1&&pk.ves==='one') pk.ves='vase'; flSavePick(); const sc=d.querySelector('.fl-list'), y=sc?sc.scrollTop:0, iy=d.querySelector('.fl-in').scrollTop; flOpen(); const sc2=d.querySelector('.fl-list'); if(sc2) sc2.scrollTop=y; d.querySelector('.fl-in').scrollTop=iy; return; }
+  const rm=t.closest('[data-fl-rm]'); if(rm){ flPick().items.splice(+rm.dataset.flRm,1); flSavePick(); flOpen(); return; }
+  const vs=t.closest('[data-fl-ves]'); if(vs){ flPick().ves=vs.dataset.flVes; flSavePick(); flOpen(); return; }
+  if(t.closest('[data-fl-room]')){ const pk=flPick(); store.set(KEY_FLROOM,{ items:pk.items.slice(), ves:pk.ves, t:Date.now() }); _flMsg=`部屋に${FL_VES[pk.ves]}を飾りました🌷 Life Home の部屋の絵に出ます。`; flOpen(); return; }
+  const rg=t.closest('[data-fl-roomgot]'); if(rg){ const g=store.get(KEY_FLGOT,[])[+rg.dataset.flRoomgot]; if(g){ const b=flDecode(g.b); store.set(KEY_FLROOM,{ items:b.items, ves:b.ves, t:Date.now(), by:g.by }); _flMsg=`${g.by}さんのお花を、部屋に飾りました🌷`; flOpen(); } return; }
+  if(t.closest('[data-fl-idea]')){ _flH=flHaikuIdea(_flOcc,1); flOpen(); return; }
+  if(t.closest('[data-fl-send]')){ flReadForm(); if(typeof flSend==='function') flSend(_flTo,flPick(),_flOcc,_flH); else { _flMsg='いまは贈れません。サイトの LIFE BOOK から贈ってね。'; flOpen(); } return; } }
+function flReadForm(){ const g=id=>document.getElementById(id); if(g('flTo')) _flTo=g('flTo').value; if(g('flOcc')) _flOcc=g('flOcc').value; if(g('flH0')) _flH=[0,1,2].map(i=>g('flH'+i).value.trim().slice(0,16)); }
+function flInput(e){ const t=e.target; if(t.id==='flQ'){ _flQ=t.value; const d=document.getElementById('flDlg'); const body=d.querySelector('.fl-list'); if(body){ const tmp=document.createElement('div'); tmp.innerHTML=flPickHTML(); body.replaceWith(tmp.querySelector('.fl-list')); } return; }
+  if(t.id==='flShape'){ _flShape=t.value; flOpen(); return; }
+  if(t.id==='flOcc'&&e.type==='change'){ flReadForm(); _flH=flHaikuIdea(_flOcc); flOpen(); return; }
+  if(/^flH\d$/.test(t.id)){ flReadForm(); const i=+t.id[3], m=flMora(t.value), want=[5,7,5][i]; const sp=t.parentNode.querySelector('.fl-mc'); if(sp){ sp.textContent=m==null?'読みで'+want+'音':m+'/'+want+'音'; sp.classList.toggle('ok',m===want); } return; }
+  if(t.id==='flTo') _flTo=t.value; }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-fl-open]'); if(b){ e.preventDefault(); _flMsg=''; flOpen(b.dataset.flOpen); } });
+document.addEventListener('keydown',e=>{ const d=document.getElementById('flDlg'); if(d&&!d.hidden&&e.key==='Escape') flClose(); });
+// --- 部屋の絵に、飾ったお花を出す（いまの Channel の部屋だけ） ---
+var _flOn=false;
+{ const BS=blockSceneSVG; blockSceneSVG=function(P,o,label){ const pv=_flOn; try{ _flOn=!!(typeof cur!=='undefined'&&cur&&cur.P&&P&&P.seed===cur.P.seed&&!viewing); }catch(e){ _flOn=false; } try{ return BS(P,o,label); } finally{ _flOn=pv; } }; }
+function flRoomSVG(w,x,y){ const rm=store.get(KEY_FLROOM,null); if(!rm||!rm.items||!rm.items.length) return ''; const a=flArt(rm.items,rm.ves); if(!a) return ''; return a.replace('<svg class="fl-art"',`<svg class="fl-art fl-room" x="${(x-w/2).toFixed(1)}" y="${(y-w*.93).toFixed(1)}" width="${w}" height="${w}"`); }
+{ const SI=ssInterior; ssInterior=function(S,ctx,kind,tod,r){ const out=SI.apply(this,arguments); try{ if(_flOn&&['living','kitchen','bedroom','study','washitsu','kids','nursery','music','atelier'].includes(kind)){ const q=S.p(10.5,0,.8); const s=flRoomSVG(58,q[0],q[1]); if(s) S.raw(-(.8)*100+9,s); } }catch(e){} return out; }; }
+{ const SC=scInterior; scInterior=function(S,ctx,kind){ const out=SC.apply(this,arguments); try{ if(_flOn&&kind==='room'){ const q=S.p(3.6,-2.2,0); const s=flRoomSVG(30,q[0],q[1]); if(s) S.deco(3.6-2.2+.5,s); } }catch(e){} return out; }; }
+try{ document.head.insertAdjacentHTML('beforeend',`<style>
+.fl-tile .fl-tile-in{ display:flex; flex-direction:column; gap:6px; } .fl-tile-art{ width:120px; margin:0 auto; } .fl-tile-art svg,.fl-sel-art svg,.fl-got-art svg{ width:100%; height:auto; display:block; }
+.fl-tile-b{ display:flex; gap:8px; flex-wrap:wrap; } .fl-b2{ background:#FFE3EC!important; color:#C2476B!important; } .fl-new{ display:inline-block; margin-left:6px; min-width:20px; padding:0 6px; border-radius:999px; background:#E8508E; color:#fff; font-size:12px; text-align:center; }
+.fl-ov{ z-index:9400; } .fl-in{ width:min(820px,100%); max-height:94vh; } .fl-h{ margin:2px 44px 8px 2px; color:#C2476B; font-size:19px; }
+.fl-tabs{ display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; } .fl-tab{ border:0; border-radius:999px; padding:9px 16px; background:#FFF0F4; color:#C2476B; font-weight:700; font-size:15px; cursor:pointer; } .fl-tab.on{ background:#FF8FAB; color:#fff; }
+.fl-sel,.fl-send{ display:grid; grid-template-columns:minmax(120px,190px) 1fr; gap:12px; align-items:start; background:#FFF8FA; border-radius:14px; padding:10px; }
+.fl-sel-h{ margin:0 0 4px; font-weight:700; color:#6A4A58; } .fl-sel-l{ list-style:none; margin:0 0 8px; padding:0; display:flex; flex-wrap:wrap; gap:6px; } .fl-sel-l li{ background:#fff; border-radius:999px; padding:3px 6px 3px 10px; font-size:13px; display:flex; align-items:center; gap:4px; border:1px solid #F4C6D4; }
+.fl-dot{ width:12px; height:12px; border-radius:50%; display:inline-block; border:1px solid #ddd; } .fl-rm{ border:0; background:#FFE3EC; color:#C2476B; border-radius:50%; width:24px; height:24px; cursor:pointer; }
+.fl-ves{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; } .fl-vb{ border:1px solid #F4C6D4; background:#fff; border-radius:999px; padding:6px 12px; cursor:pointer; color:#6A4A58; font-size:14px; } .fl-vb.on{ background:#FF8FAB; color:#fff; border-color:#FF8FAB; }
+.fl-act{ display:flex; gap:8px; flex-wrap:wrap; }
+.fl-find{ display:flex; gap:8px; margin:12px 0 8px; } .fl-q{ flex:1; min-width:0; font-size:16px; padding:9px 12px; border-radius:12px; border:1px solid #F4C6D4; } .fl-find select,.fl-lb select{ font-size:16px; padding:8px; border-radius:12px; border:1px solid #F4C6D4; background:#fff; }
+.fl-list{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:6px; max-height:46vh; overflow:auto; }
+.fl-list li{ background:#FFF6F9; border-radius:12px; padding:6px 10px; } .fl-list b{ display:block; font-size:14px; color:#6A4A58; } .fl-cs{ display:flex; gap:4px; flex-wrap:wrap; margin-top:2px; }
+.fl-c{ border:2px solid transparent; background:#fff; border-radius:10px; padding:2px; cursor:pointer; line-height:0; } .fl-c.on{ border-color:#E8508E; background:#FFE3EC; } .fl-c:focus-visible,.fl-tab:focus-visible,.fl-vb:focus-visible{ outline:3px solid #8EC3E6; }
+.fl-lb{ display:block; margin:8px 0 4px; font-weight:700; color:#6A4A58; } .fl-lb select{ display:block; margin-top:4px; width:100%; }
+.fl-hk{ display:flex; flex-direction:column; gap:6px; } .fl-hl{ display:flex; gap:8px; align-items:center; } .fl-hl input{ flex:1; min-width:0; font-size:18px; padding:8px 12px; border-radius:12px; border:1px solid #F4C6D4; font-family:inherit; } .fl-mc{ font-size:12px; color:#8A7A84; white-space:nowrap; } .fl-mc.ok{ color:#2E9E6A; font-weight:700; }
+.fl-msg{ margin:10px 0 0; padding:10px 12px; border-radius:12px; background:#EAF7EE; color:#2E7D4F; }
+.fl-got{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; } .fl-got li{ display:grid; grid-template-columns:120px 1fr; gap:12px; background:#FFF8FA; border-radius:14px; padding:10px; }
+.fl-haiku{ font-size:18px; line-height:1.8; color:#4A3A44; margin:6px 0; font-family:"Hiragino Mincho ProN","Yu Mincho",serif; } .fl-got-by{ margin:0; color:#8A7A84; font-size:13px; }
+@media (max-width:560px){ .fl-sel,.fl-send{ grid-template-columns:1fr; } .fl-sel-art{ width:150px; margin:0 auto; } .fl-got li{ grid-template-columns:90px 1fr; } }
+</style>`); }catch(e){}
 // v162: ペットのアルバムの写真を押すと、大きく見える
 function paZoomOpen(fig){ let d=document.getElementById('paZoom'); if(!d){ d=document.createElement('div'); d.id='paZoom'; d.className='pa-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','写真を大きく見る'); document.body.appendChild(d);
     d.addEventListener('click',e=>{ if(e.target===d||e.target.closest('.pa-x')) paZoomClose(); }); }
@@ -18364,6 +18501,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v166: Life Home の上のほうに「✨ LIFE BOOKのニュース」。新しい機能・更新のお知らせ。
 // ゲームに入っているお知らせ（LBN_BUILTIN）＋ 管理者が Firebase の os/news に書いたお知らせ（{ n:[{ i, d:ミリ秒, t:題, b:説明 }] }）。新しい順に3つ、のこりは「これまでのお知らせ」。
 const LBN_BUILTIN=[
+  { i:'v170-flower', d:Date.UTC(2026,10,16,7), t:'お花を、部屋に飾ったり、友だちに贈ったりできるようになりました💐', b:'Life Home の「💐 お花」から、好きなお花と色をえらんで、花びん・一輪ざし・生け花・花束にできます。部屋に飾ると、部屋の絵に出ます。友だちには、5・7・5の俳句をそえて贈れます。' },
   { i:'v169-veh', d:Date.UTC(2026,10,16,5), t:'街や空の乗り物が、動くようになりました🚗✈️', b:'車・バイク・自転車・電車・新幹線・飛行機・気球・船・ロケット・人工衛星・UFOが、街や空を走ったり飛んだりします。その時代や国に合った乗り物が出てきます。' },
   { i:'v162-gift', d:Date.UTC(2026,10,16,3), t:'友だちのペットに「可愛い！」とごはんを贈れるようになりました🎁', b:'うちのペットの「ペットのつながりの木」の下にある「🎁 友だちのペットに贈る」から、友だちのペットに「💗 可愛い！」と「🎁 ごはん」を、1日1回ずつ贈れます。届いたプレゼントは、ペットのページの「💌 届いたプレゼント」に出て、ペットの愛情もふえます。' },
   { i:'v162-photo', d:Date.UTC(2026,10,16,2), t:'ペットのアルバムの写真を、大きく見られるようになりました📷', b:'アルバムの写真を押すと、大きく見えます。「まえ／つぎ」で、めくれます。いちばん下の「← もどる」で、もとの画面にもどれます。' },
@@ -18998,5 +19136,29 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .pg-got{ list-style:none; margin:0 0 12px; padding:0; display:grid; gap:6px; } .pg-got li{ background:#FFF6F9; border-radius:10px; padding:8px 12px; display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; } .pg-got span{ font-size:12px; color:#8A7A84; }
 .pg-toast{ position:fixed; left:50%; bottom:24px; transform:translate(-50%,40px); opacity:0; z-index:120; background:#C2476B; color:#fff; padding:12px 18px; border-radius:14px; font-weight:700; box-shadow:0 6px 24px rgba(0,0,0,.2); transition:.3s; max-width:calc(100% - 32px); text-align:center; pointer-events:none; z-index:300; } .pg-toast.on{ opacity:1; transform:translate(-50%,0); }
 </style>`); }catch(e){}
+// v170: お花を贈る・受け取る（Firebase：ids/{相手}/flower/{自分_日付_1〜3}）
+function flOn(){ return typeof fbOnline==='function'&&fbOnline()&&typeof FB!=='undefined'&&FB&&FB.D; }
+function flDay(){ const d=new Date(); return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); }
+async function flSend(to,pk,occ,h){ const fr=flFriends().find(f=>f.id===to)||flFriends()[0]; if(!fr){ _flMsg='贈る友だちが、まだいません。'; flOpen(); return; }
+  if(!pk.items.length){ _flMsg='お花をえらんでね。'; flOpen(); return; }
+  if(!h||h.some(x=>!x)){ _flMsg='俳句を3行とも書いてね。'; flOpen(); return; }
+  if(!flOn()){ _flMsg='いまはサーバーにつながっていません。少しあとで、もう一度押してください。'; flOpen(); return; }
+  const sent=store.get('fl.sent',{}), key=fr.id+'|'+flDay(), n=(sent[key]||0)+1; if(n>3){ _flMsg=`${fr.by||'友だち'}さんには、きょうはもう3回贈りました。また明日ね。`; flOpen(); return; }
+  const me=myId(), by=String(store.get(KEY_ME,'')||'').slice(0,20), id=me+'_'+flDay()+'_'+n; const b=flCode(pk.items,pk.items.length===1&&pk.ves==='one'?'one':pk.ves).slice(0,80);
+  const btn=document.querySelector('[data-fl-send]'); if(btn){ btn.disabled=true; btn.textContent='おくっています…'; }
+  try{ await FB.D.setDoc(FB.D.doc(FB.db,'ids',String(fr.id),'flower',id),{ from:me, by, b, o:String(occ||'').slice(0,20), h:h.map(x=>String(x).slice(0,16)).join('／').slice(0,60), t:Date.now() });
+    const keep={}; Object.keys(sent).filter(x=>x.endsWith(flDay())).forEach(x=>keep[x]=sent[x]); keep[key]=n; store.set('fl.sent',keep);
+    _flMsg=`${fr.by||'友だち'}さんに、お花と俳句を贈りました💐`; _flH=null; }
+  catch(err){ _flMsg=String(err&&err.code||'').includes('permission')?'まだ贈れません（サーバーの準備中です）。':'うまく送れませんでした。少しあとで、もう一度ためしてね。'; }
+  flOpen(); }
+let _flL=false;
+function flListen(){ if(_flL||!flOn()) return; _flL=true; const { collection, onSnapshot, deleteDoc }=FB.D;
+  onSnapshot(collection(FB.db,'ids',myId(),'flower'),snap=>{ const got=[]; snap.forEach(d=>{ const x=d.data()||{}; if(typeof x.b!=='string') return; got.push({ id:d.id, by:String(x.by||'友だち').slice(0,20), b:String(x.b).slice(0,80), o:String(x.o||'').slice(0,20), h:String(x.h||'').slice(0,60), t:+x.t||Date.now() }); });
+    if(!got.length) return; const seen=store.get('fl.seenIds',[]); const nu=got.filter(g=>!seen.includes(g.id));
+    if(nu.length){ store.set('fl.seenIds',seen.concat(nu.map(g=>g.id)).slice(-300)); const L=store.get(KEY_FLGOT,[]).concat(nu).slice(-60); store.set(KEY_FLGOT,L);
+      try{ if(typeof pgToast==='function') pgToast(nu.length>1?`お花が${nu.length}つ届きました💐`:`${nu[0].by}さんから、お花と俳句が届きました💐`); }catch(_){}
+      try{ const dl=document.getElementById('flDlg'); if(dl&&!dl.hidden) flOpen(); else flRefreshTile(); }catch(_){} }
+    got.forEach(g=>{ try{ deleteDoc(FB.D.doc(FB.db,'ids',myId(),'flower',g.id)); }catch(_){} }); },()=>{ _flL=false; }); }
+setInterval(flListen,4000); setTimeout(flListen,1500);
 </script>
 </body></html>
