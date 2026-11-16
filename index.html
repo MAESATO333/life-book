@@ -323,6 +323,15 @@ footer .wrap{padding-block:20px 28px; display:flex; flex-wrap:wrap; gap:8px 18px
   html{scroll-behavior:auto}
   .btn,.toc li a,.hero-meet{transition:none}
 }
+/* 街ブラ：いろんな街の帯（Gateway） */
+.cities{position:relative; z-index:1; margin:4px 0 14px; padding-block:12px 14px; overflow:hidden; background:linear-gradient(180deg,rgba(255,233,168,.9),rgba(255,246,218,.9)); border-radius:24px}
+.cities .worlds-sub{color:#B07A1E}
+#cities{display:flex; width:max-content; will-change:transform}
+#cities .isle img{width:100%; height:auto; aspect-ratio:320/220; display:block; animation:float 5s ease-in-out infinite}
+#cities .isle:nth-child(3n+1) img{animation-delay:-1.6s} #cities .isle:nth-child(3n+2) img{animation-delay:-3.1s}
+#cities .isle figcaption{max-width:96%; margin-top:-22px; box-shadow:0 3px 0 #F2DDA0}
+#cities .isle figcaption b,#cities .isle figcaption span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; display:block}
+#cities .isle figcaption b{font-size:12px}
 </style>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5af5f16575224c8c9596106067decbde"}'></script><!-- End Cloudflare Web Analytics -->
 </head>
@@ -376,6 +385,35 @@ footer .wrap{padding-block:20px 28px; display:flex; flex-wrap:wrap; gap:8px 18px
       <p class="worlds-sub">開くたびに、ちがう人生が流れてきます</p>
       <div class="lives-view"><div class="drift" id="lives"></div></div>
     </div>
+    <div class="cities" aria-label="いろんな街">
+      <p class="worlds-title">🟡いろんな街が、空に浮かんでいます</p>
+      <p class="worlds-sub">ゲームの中の「🟡街ブラ」で、世界の街をブラブラできます</p>
+      <div class="lives-view"><div id="cities"></div></div>
+    </div>
+<script>
+/* 街ブラ：いろんな街の帯。絵は cities/〇〇.webp（52枚）。人生の帯と同じしくみで、外に出た島から次の街に入れかえる */
+(function(){
+var C=[{"k":"tokyo-1","n":"東京","a":"日本","p":"東京・西新宿"},{"k":"miyako-1","n":"宮古島","a":"日本","p":"宮古島・久貝"},{"k":"ny-1","n":"ニューヨーク","a":"アメリカ","p":"ニューヨーク・5番街"},{"k":"london-1","n":"ロンドン","a":"イギリス","p":"ロンドン・ウェストミンスター"},{"k":"singapore-1","n":"シンガポール","a":"シンガポール","p":"シンガポール・マリーナベイ"},{"k":"sapporo-1","n":"札幌","a":"日本","p":"札幌・大通公園"},{"k":"tanegashima-1","n":"種子島","a":"日本","p":"種子島・茎永"},{"k":"osaka-1","n":"大阪","a":"日本","p":"大阪城公園"},{"k":"kyoto-1","n":"京都","a":"日本","p":"京都・金閣寺"},{"k":"okinawa-1","n":"那覇","a":"日本","p":"那覇・首里"},{"k":"hokkaido-1","n":"富良野","a":"日本","p":"富良野・中富良野"},{"k":"hiroshima-1","n":"広島","a":"日本","p":"宮島・厳島神社"},{"k":"kanagawa-1","n":"横浜","a":"日本","p":"横浜・みなとみらい"},{"k":"fukuoka-1","n":"福岡","a":"日本","p":"福岡・百道浜"},{"k":"aichi-1","n":"名古屋","a":"日本","p":"名古屋城"},{"k":"paris-1","n":"パリ","a":"フランス","p":"パリ・シャン・ド・マルス"},{"k":"rome-1","n":"ローマ","a":"イタリア","p":"ローマ・コロッセオ"},{"k":"venice-1","n":"ベネチア","a":"イタリア","p":"ベネチア・大運河"},{"k":"barcelona-1","n":"バルセロナ","a":"スペイン","p":"バルセロナ・サグラダ・ファミリア"},{"k":"amsterdam-2","n":"アムステルダム","a":"オランダ","p":"キンデルダイク"},{"k":"santorini-1","n":"サントリーニ","a":"ギリシャ","p":"サントリーニ・イア"},{"k":"moscow-1","n":"モスクワ","a":"ロシア","p":"モスクワ・赤の広場"},{"k":"zermatt-1","n":"ツェルマット","a":"スイス","p":"マッターホルン"},{"k":"prague-1","n":"プラハ","a":"チェコ","p":"プラハ・カレル橋"},{"k":"tromso-1","n":"トロムソ","a":"ノルウェー","p":"トロムソ"},{"k":"dubai-1","n":"ドバイ","a":"アラブ首長国連邦","p":"ドバイ・ダウンタウン"},{"k":"cairo-1","n":"カイロ","a":"エジプト","p":"ギザのピラミッド"},{"k":"istanbul-1","n":"イスタンブール","a":"トルコ","p":"イスタンブール・スルタンアフメト"},{"k":"cappadocia-1","n":"カッパドキア","a":"トルコ","p":"カッパドキア・ギョレメ"},{"k":"agra-1","n":"アグラ","a":"インド","p":"アグラ・タージマハル"},{"k":"bangkok-1","n":"バンコク","a":"タイ","p":"バンコク・ワットアルン"},{"k":"beijing-1","n":"北京","a":"中国","p":"北京・天安門"},{"k":"shanghai-1","n":"上海","a":"中国","p":"上海・外灘"},{"k":"hongkong-1","n":"香港","a":"香港","p":"香港・尖沙咀"},{"k":"seoul-1","n":"ソウル","a":"韓国","p":"ソウル・景福宮"},{"k":"bali-2","n":"バリ島","a":"インドネシア","p":"バリ島・タナロット寺院"},{"k":"siemreap-1","n":"シェムリアップ","a":"カンボジア","p":"アンコール・ワット"},{"k":"sydney-1","n":"シドニー","a":"オーストラリア","p":"シドニー・オペラハウス"},{"k":"uluru-1","n":"ウルル","a":"オーストラリア","p":"ウルル"},{"k":"queenstown-1","n":"クイーンズタウン","a":"ニュージーランド","p":"クイーンズタウン・ワカティプ湖"},{"k":"honolulu-1","n":"ホノルル","a":"アメリカ","p":"ホノルル・ワイキキ"},{"k":"sanfrancisco-1","n":"サンフランシスコ","a":"アメリカ","p":"サンフランシスコ・ゴールデンゲート"},{"k":"lasvegas-1","n":"ラスベガス","a":"アメリカ","p":"ラスベガス・ストリップ"},{"k":"rio-1","n":"リオデジャネイロ","a":"ブラジル","p":"リオ・コルコバードの丘"},{"k":"cusco-1","n":"クスコ","a":"ペルー","p":"マチュピチュ"},{"k":"easterisland-1","n":"イースター島","a":"チリ","p":"イースター島・アフ・トンガリキ"},{"k":"orlando-1","n":"ケープカナベラル","a":"アメリカ","p":"ケネディ宇宙センター"},{"k":"mexicocity-2","n":"メキシコシティ","a":"メキシコ","p":"テオティワカン"},{"k":"capetown-1","n":"ケープタウン","a":"南アフリカ","p":"ケープタウン・ウォーターフロント"},{"k":"marrakech-2","n":"マラケシュ","a":"モロッコ","p":"メルズーガ"},{"k":"washington-1","n":"ワシントンD.C.","a":"アメリカ","p":"ワシントン・キャピトル"},{"k":"london-3","n":"ロンドン","a":"イギリス","p":"ロンドン・タワーヒル"}];
+var track=document.getElementById('cities'); if(!track) return;
+for(var i=C.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=C[i]; C[i]=C[j]; C[j]=t; }
+var nx=0;
+function fill(fig){ var x=C[nx%C.length]; nx++; var img=fig.querySelector('img'); img.src='cities/'+x.k+'.webp'; img.alt=x.p+'の街の島'; fig.querySelector('b').textContent=x.n; fig.querySelector('span').textContent=x.a; }
+function make(){ var f=document.createElement('figure'); f.className='isle'; f.innerHTML='<img decoding="async" width="320" height="220" alt=""><figcaption><b></b><span></span></figcaption>'; fill(f); return f; }
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var need=Math.ceil((window.innerWidth||1200)/150)+3;
+for(var n=0;n<need;n++) track.appendChild(make());
+var x=0, last=0, speed=reduce?16:28;
+function step(t){
+  if(!last) last=t; var dt=Math.min(.1,(t-last)/1000); last=t;
+  x-=speed*dt;
+  var first=track.firstElementChild;
+  if(first){ var w=first.getBoundingClientRect().width; if(-x>=w){ x+=w; track.appendChild(first); fill(first); } }
+  track.style.transform='translateX('+x.toFixed(2)+'px)';
+  requestAnimationFrame(step);
+}
+requestAnimationFrame(step);
+})();
+</script>
     <div class="wrap">
       <div class="world-now" aria-label="このページを開いてから、世界で">
         <p class="wn-title">このページを開いてから、世界で</p>
