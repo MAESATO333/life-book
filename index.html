@@ -414,6 +414,71 @@ function step(t){
 requestAnimationFrame(step);
 })();
 </script>
+    <div class="parade" aria-label="街を走る乗り物">
+      <p class="worlds-title">街の中を、いろんな乗り物が走っています</p>
+      <p class="worlds-sub">バスも車も、電車も船も、飛行機もヘリコプターも</p>
+      <div class="pd-frame"><div id="parade" class="pd-view"></div></div>
+    </div>
+<style>
+/* 乗り物が走る街（横はばいっぱい）。絵はゲームと同じ部品から作った parade/parade.json */
+.parade{position:relative; z-index:1; width:100vw; margin:4px 0 14px calc(50% - 50vw); padding:12px 0 0}
+.parade .worlds-sub{color:#3E68B0}
+.pd-frame{overflow:hidden; background:#CFE8F7}
+.pd-view{aspect-ratio:720/220}
+.pd-view.n{aspect-ratio:360/220}
+.pd-view svg{display:block; width:100%; height:100%}
+.pd-view .vh-prop{animation:vhPr .25s linear infinite; transform-box:fill-box; transform-origin:center}
+.pd-view .vh-rotor,.pd-view .rv-rotor{animation:vhRo .3s linear infinite; transform-box:fill-box; transform-origin:center}
+.pd-view .vh-blink,.pd-view .rv-blink{animation:vhBl 1s steps(2) infinite}
+.pd-view .vh-hover,.pd-view .vh-bob{animation:vhHov 2.6s ease-in-out infinite}
+.pd-view .rv-prop{animation:vhPr .25s linear infinite; transform-box:fill-box; transform-origin:center}
+@keyframes vhPr { 
+  50% { transform: scaleY(0.15); }
+}
+@keyframes vhRo { 
+  50% { transform: scaleX(0.2); }
+}
+@keyframes vhBl { 
+  50% { opacity: 0.25; }
+}
+@keyframes vhHov { 
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes vhFl { 
+  50% { opacity: 0.6; }
+}
+@media (prefers-reduced-motion: reduce){.pd-view *{animation:none !important}}
+</style>
+<script>
+/* 乗り物は、かならず画面の外から入ってきて、反対側の外に出るまで走る。いろんな種類が次々に来る */
+(function(){
+var box=document.getElementById('parade'); if(!box||!window.fetch) return;
+var NS='http://www.w3.org/2000/svg', D=null, S=null, lanes=[], X0=0, W=360, wideNow=null, last=0, raf=0;
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches; var SLOW=reduce?.5:1;
+function rnd(a,b){ return a+Math.random()*(b-a); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function build(){ var wide=(window.innerWidth||1000)>=600; if(wide===wideNow) return; wideNow=wide; var bg=wide?D.bgW:D.bgN; var vb=bg.vb.split(' ').map(Number); X0=vb[0]; W=vb[2];
+  box.className='pd-view'+(wide?'':' n'); box.innerHTML='<svg xmlns="'+NS+'" viewBox="'+bg.vb+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="街の中を、乗り物が走る絵"><g>'+bg.inner+'</g></svg>'; S=box.firstChild;
+  // 道・線路・海・空のレーン（y は地面の高さ。dir 1 は右へ、-1 は左へ）
+  var L=[ {lane:'sky',y:[26,64],dir:0,sp:[16,22],gap:[60,220]}, {lane:'sky',y:[40,80],dir:0,sp:[14,20],gap:[120,320]},
+    {lane:'rail',y:[118,118],dir:-1,sp:[34,42],gap:[200,500]},
+    {lane:'sea',y:[127,129],dir:-1,sp:[7,10],gap:[60,200]}, {lane:'sea',y:[148,149],dir:1,sp:[9,12],gap:[40,160]},
+    {lane:'road',y:[184.5,184.5],dir:1,sp:[22,30],gap:[20,90]}, {lane:'lane2',y:[193.6,193.6],dir:-1,sp:[14,20],gap:[20,90]} ];
+  lanes=L.map(function(o){ var g=document.createElementNS(NS,'g'); S.appendChild(g);
+    if(o.lane==='rail'){ var v='<rect x="'+X0+'" y="118" width="'+W+'" height="4" fill="#9AA3AE"/>'; for(var px=X0+14;px<X0+W;px+=46) v+='<rect x="'+px+'" y="122" width="5" height="48" fill="#B4BCC6" opacity=".85"/>'; g.innerHTML=v; var tg=document.createElementNS(NS,'g'); S.appendChild(tg); g=tg; } return {o:o,g:g,list:D.spr.filter(function(s){ return s.lane===o.lane; }),cars:[],wait:rnd(0,2)}; }); }
+function spawn(l){ var s=pick(l.list); if(!s) return; var dir=l.o.dir||(Math.random()<.5?1:-1); var y=rnd(l.o.y[0],l.o.y[1]); var sp=rnd(l.o.sp[0],l.o.sp[1])*SLOW;
+  var e=document.createElementNS(NS,'g'); e.innerHTML=dir<0?'<g transform="translate('+s.w+' 0) scale(-1 1)">'+s.g+'</g>':s.g;
+  var x=dir>0?X0-s.w-6:X0+W+6; l.g.appendChild(e); var c={e:e,x:x,y:y,w:s.w,dir:dir,sp:sp}; l.cars.push(c); place(c);
+  l.wait=(s.w+rnd(l.o.gap[0],l.o.gap[1]))/sp; }
+function place(c){ c.e.setAttribute('transform','translate('+c.x.toFixed(1)+' '+c.y.toFixed(1)+')'); }
+function tick(t){ raf=requestAnimationFrame(tick); var dt=last?Math.min(.1,(t-last)/1000):0; last=t; if(!S) return;
+  lanes.forEach(function(l){ l.wait-=dt; if(l.wait<=0) spawn(l);
+    for(var i=l.cars.length-1;i>=0;i--){ var c=l.cars[i]; c.x+=c.dir*c.sp*dt; place(c); if((c.dir>0&&c.x>X0+W+8)||(c.dir<0&&c.x+c.w<X0-8)){ c.e.remove(); l.cars.splice(i,1); } } }); }
+fetch('parade/parade.json').then(function(r){ return r.ok?r.json():null; }).then(function(d){ if(!d) return; D=d; build(); raf=requestAnimationFrame(tick); window.addEventListener('resize',build); }).catch(function(){});
+document.addEventListener('visibilitychange',function(){ last=0; });
+})();
+</script>
     <div class="wrap">
       <div class="world-now" aria-label="このページを開いてから、世界で">
         <p class="wn-title">このページを開いてから、世界で</p>
