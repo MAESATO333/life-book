@@ -18457,14 +18457,17 @@ function vhViaduct(y,tod){ const X0=typeof _ssX0!=='undefined'?_ssX0:0, W=typeof
     // 高架を走る電車・新幹線
     if(['town','bigcity','park','station','harbor','market','skyscraper'].includes(land)||h%2===0){ let rp=vhPool(VH_RAIL,y,st); const sk=rp.filter(v=>v.t==='shink'); if(sk.length&&h%3!==2) rp=sk; if(rp.length&&(h>>>8)%3!==1){ const v=rp[(h>>>9)%rp.length]; S.raw(-1e6+2.5,`<g class="vh-via">${vhViaduct(118,tod)}${vhMove(v,118,1.5,h>>>5,'vh-rail')}</g>`); } }
     // 空：飛行機・ヘリ・気球
-    const sp=vhPool(VH_SKY,y,st); if(sp.length&&(h>>>11)%3!==0){ const v=sp[(h>>>12)%sp.length]; S.raw(-1e6+1.5,vhMove(v,30+(h>>>13)%40,.55,h>>>7,'vh-sky')); }
+    const sp=vhPool(VH_SKY,y,st); if(!(MANY&&RV)&&sp.length&&(h>>>11)%3!==0){ const v=sp[(h>>>12)%sp.length]; S.raw(-1e6+1.5,vhMove(v,30+(h>>>13)%40,.55,h>>>7,'vh-sky')); }
+    // v175d：海辺の道では、気球・飛行船だけ、ときどき（いつも同じジェットにならないように）
+    if(MANY&&RV){ const bl=sp.filter(v=>['balloon','airship'].includes(v.t)); if(bl.length&&(h>>>11)%2===0){ const v=bl[(h>>>12)%bl.length]; S.raw(-1e6+1.5,vhMove(v,26+(h>>>13)%30,.55,h>>>7,'vh-sky')); } }
     // 港：船
     if(land==='harbor'){ const shp=vhPool(['ship'],y,st); if(shp.length){ const v=shp[(h>>>18)%shp.length], q=S.p(0,0,16); S.raw(-1e6+4.7,vhMove(v,q[1],.6,h>>>2,'vh-sea')); const v2=shp[(h>>>21)%shp.length], q2=S.p(0,0,24); S.raw(-1e6+4.65,vhMove(v2,q2[1],.42,h>>>6,'vh-sea')); } }
     // v175: 横はばいっぱいの絵では、空と海の乗り物も、いろいろな種類を
     if(MANY&&RV&&window.lbVehicles){ const L=window.lbVehicles.list(), civ=v=>!['stealth','twinf','singlef','dd','cv','sub'].includes(v.type);
       const pl=L.filter(v=>v.cat==='plane'&&civ(v)), he=L.filter(v=>v.cat==='heli'), bt=L.filter(v=>(v.cat==='yacht'||v.cat==='boat'||v.cat==='ship')&&civ(v));
       const h1=ssH('sky1|'+h), h2=ssH('sky2|'+h), h3=ssH('sea1|'+h);
-      if(pl.length) S.raw(-1e6+1.52,vhMoveRV(pl[h1%pl.length],52+(h1>>>5)%22,4.2*S.U/120,h1,'vh-sky'));
+      if(pl.length){ const a=h1%pl.length; S.raw(-1e6+1.52,vhMoveRV(pl[a],52+(h1>>>5)%22,4.2*S.U/120,h1,'vh-sky'));
+        if(pl.length>1&&(h1>>>9)%3!==0){ const hb=ssH('sky3|'+h), b2=(a+1+hb%(pl.length-1))%pl.length; S.raw(-1e6+1.515,vhMoveRV(pl[b2],40+(hb>>>5)%14,3.4*S.U/120,hb,'vh-sky')); } }
       if(he.length) S.raw(-1e6+1.53,vhMoveRV(he[h2%he.length],78+(h2>>>5)%18,4.8*S.U/120,h2,'vh-sky'));
       if(land==='harbor'&&bt.length){ const q=S.p(0,0,10); S.raw(-1e6+4.72,vhMoveRV(bt[h3%bt.length],q[1]+2,4.6*S.U/120,h3,'vh-sea')); } }
     vhSpace(S,y,st,h,tod);
@@ -19036,6 +19039,9 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v166: Life Home の上のほうに「✨ LIFE BOOKのニュース」。新しい機能・更新のお知らせ。
 // ゲームに入っているお知らせ（LBN_BUILTIN）＋ 管理者が Firebase の os/news に書いたお知らせ（{ n:[{ i, d:ミリ秒, t:題, b:説明 }] }）。新しい順に3つ、のこりは「これまでのお知らせ」。
 const LBN_BUILTIN=[
+  { i:'gw-parade', d:Date.UTC(2026,10,16,14,17), t:'Gateway に、乗り物が走る街ができました🚌✈️', b:'Gateway の「いろんな街が、空に浮かんでいます」の下で、バスや車、電車、船、飛行機、ヘリコプターなど、いろんな乗り物が次々に走っています。' },
+  { i:'v175-street', d:Date.UTC(2026,10,16,14,50), t:'Life Home に「🌊 海辺の道」ができました', b:'人生の島と浮かぶ街の下に、海辺の道があります。バス・車・バイク・自転車・救急車・タクシー・トラック、高架の電車や新幹線、海の船やヨット、空の飛行機やヘリコプターが、いろいろな組み合わせで次々に走っていきます。' },
+  { i:'v175-park', d:Date.UTC(2026,10,16,14,49), t:'公園のペットたちが、道の上を走るようになりました🐾', b:'公園の道を広くして、ペットたちが道の上を走るようにしました。左を向いて、右から左へ。足を動かして走る子、とても速い子、ひと休みする子もいます。' },
   { i:'v174-park', d:Date.UTC(2026,10,16,13,32), t:'知り合いのペットたちが、公園を走るようになりました🐾', b:'Life Home のニュースの上で、ペットたちが公園の中を走ったり、ジャンプしたり、ひと休みしたりしながら通りすぎていきます。ペットを押すと大きくなって、Higher Self の名前や、さいきんのおしゃべりが見られます。その下では、ペットたちのおしゃべりが電光掲示板のように流れます。' },
   { i:'v174-street', d:Date.UTC(2026,10,16,13,31), t:'街の絵が、横はばいっぱいに広がりました🏙', b:'広い画面では、街の絵が横はばいっぱいになり、たくさんの車やバイクが走ります。うしろのビルや港の景色も、乗り物と同じくらいリアルに描きなおしました。' },
   { i:'v174-pastchat', d:Date.UTC(2026,10,16,13,30), t:'ペットたちの、これまでのおしゃべりを読めるようになりました📖', b:'「📖 これまでのおしゃべりを読む」から、過去のおしゃべりをまとめて読めます。ペットが本当にごはんやプレゼントをもらった日は、そのことも話してくれます。' },
@@ -19178,7 +19184,7 @@ function prRunHTML(){ const L=prPets(); _prL=L; if(!L.length) return ''; const a
   // 画面の幅で、1本の道に走れる数を決める（ペットどうしが重ならないように、間を110px以上あける）
   const W=Math.max(320,Math.min(1400,(document.getElementById('app')||document.body).clientWidth||window.innerWidth||400)), per=Math.max(2,Math.floor((W+160)/115));
   const lanes=[[],[],[]]; all.forEach(p=>{ const fast=gsHash(p.s+'|sp')%5===0; const ln=fast?2:(lanes[0].length<=lanes[1].length?0:1); if(lanes[ln].length<per) lanes[ln].push(p); else if(lanes[1-Math.min(ln,1)].length<per) lanes[1-Math.min(ln,1)].push(p); });
-  const base=Math.max(16,per*2.6); let h='';
+  const base=Math.max(24,per*5.2); let h=''; /* v175d：間を倍にして、見えるペットを半分くらいに */
   lanes.forEach((A,ln)=>A.forEach((p,k)=>{ h+=prOne(p,ln,k,A.length,base); }));
   return `<div class="pr-run" aria-label="知り合いのペットたち">${prParkSVG()}${h}</div>`; }
 // 電光掲示板：さいきんのおしゃべりを、つなげて流す（1周ごとに、新しいおしゃべりに入れかえる）
@@ -19194,12 +19200,16 @@ function prFit(root){ root.querySelectorAll('.pr-hop').forEach(h=>{ const S=[...
   S.forEach(s=>s.setAttribute('viewBox',`${vx.toFixed(1)} ${vy.toFixed(1)} ${W.toFixed(1)} ${H.toFixed(1)}`)); }); }
 function prSetW(){ document.querySelectorAll('.pr-run').forEach(r=>r.style.setProperty('--prW',(r.clientWidth||360)+'px')); }
 window.addEventListener('resize',prSetW);
+// v175d：Life Home は30秒ごとに描きなおされる。そのたびに動きが最初にもどって「止まった」ように見えないよう、
+// 同じ絵はそのまま使い、動きの時間を、最初に出した時からの続きに合わせる
+function lbAnimSync(root,t0){ const el=(performance.now()-t0)/1000; root.querySelectorAll('[style*="animation-delay"]').forEach(e=>{ try{ if(e.dataset.d0==null){ const m=/animation-delay:\s*(-?[\d.]+)s/.exec(e.getAttribute('style')||''); if(!m) return; e.dataset.d0=m[1]; } e.style.animationDelay=(+e.dataset.d0-el).toFixed(2)+'s'; }catch(_){} }); }
+var _prC=null;
 function prPlace(){ try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home'||app.querySelector('.pr-w')) return;
-  const run=prRunHTML(); if(!run) return; const html=`<section class="pr-w">${run}${prBoardHTML()}</section>`;
-  const box=document.createElement('div'); box.innerHTML=html; const el=box.firstElementChild;
+  const run=prRunHTML(); if(!run) return; let el, fresh=false;
+  if(_prC&&_prC.key===run){ el=_prC.el; } else { const box=document.createElement('div'); box.innerHTML=`<section class="pr-w">${run}${prBoardHTML()}</section>`; el=box.firstElementChild; _prC={ key:run, el, t0:performance.now() }; fresh=true; }
   const lbn=app.querySelector('.lbn'), cid=app.querySelector('.hm-cid'), osm=app.querySelector('.osm'), home=app.querySelector('.home');
   if(lbn) lbn.before(el); else if(cid) cid.after(el); else if(osm) osm.before(el); else if(home) home.prepend(el); else return;
-  prFit(el); const bd=el.querySelector('.pr-bd'); if(bd) prBoardFit(bd); prSetW();
+  if(fresh){ prFit(el); const bd=el.querySelector('.pr-bd'); if(bd) prBoardFit(bd); } lbAnimSync(el,_prC.t0); prSetW();
 }catch(e){ try{ console.warn('[petrun]',e); }catch(_){} } }
 // 走っているペットを押すと：大きな絵・Higher Self の名前・Higher Self のじまん・さいきんのおしゃべり
 function prOpen(p){ let art=''; try{ art=petPortraitSVG(p.id,'',prPose(p)).replace(/<svg class="pet-art"/,'<svg class="pr-big"'); }catch(e){}
@@ -19278,20 +19288,62 @@ function lbStreetSVG(P,age,o0){ if(typeof sideSceneSVG!=='function'||!P) return 
   const ss=ssLandFor; ssLandFor=()=>'harbor'; let s=''; window._lbStreetNow=true; try{ s=sideSceneSVG(P,o,'','town',ssH('lbst|'+P.seed+'|'+age+'|'+o.tod+'|'+_lbStSalt)); }catch(e){ s=''; } finally{ ssLandFor=ss; window._lbStreetNow=false; }
   return s; }
 function lbStreetCardHTML(){ try{ if(typeof cur==='undefined'||!cur||!cur.P) return ''; const c=clock(); if(c.dead) return ''; const s=lbStreetSVG(cur.P,c.age); if(!s) return '';
-  return `<section class="lbst"><h3 class="lbst-h">🌊 海辺の道 <span>物語の中の、いまの時代の乗り物が走っています</span></h3><div class="lbst-art">${s}</div></section>`; }catch(e){ return ''; } }
+  return `<section class="lbst"><h3 class="lbst-h">🌊 海辺の道 <span>バスも車も、電車も船も、飛行機もヘリコプターも</span></h3><div class="lbst-art">${s}</div></section>`; }catch(e){ return ''; } }
 function lbStreetAnchor(app){ const home=app.querySelector('.home'); let a=app.querySelector('.mbx-strip')||app.querySelector('.hmi-slot')||app.querySelector('.hmi'); if(!a||!home) return null; while(a.parentNode&&a.parentNode!==home) a=a.parentNode; return a.parentNode===home?a:null; }
-function lbStreetFix(){ try{ const app=document.getElementById('app'); const el=app&&app.querySelector('.lbst'); if(!el) return; const anc=lbStreetAnchor(app); if(anc&&anc.nextElementSibling!==el&&anc.parentNode) anc.after(el); }catch(e){} }
+function lbStreetFix(){ try{ const app=document.getElementById('app'); const el=app&&app.querySelector('.lbst'); if(!el) return; const anc=lbStreetAnchor(app); if(anc&&anc.nextElementSibling!==el&&anc.parentNode){ anc.after(el); } }catch(e){} }
+var _lbStC=null;
 setInterval(lbStreetFix,1200);
 function lbStreetPlace(){ try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home') return; if(app.querySelector('.lbst')){ lbStreetFix(); return; }
-  const h=lbStreetCardHTML(); if(!h) return; const box=document.createElement('div'); box.innerHTML=h; const el=box.firstElementChild;
+  // v175d：同じ時間帯・同じ年の間は、同じ絵をそのまま使い、動きを続きから（30秒ごとの描きなおしで止まって見えないように）
+  let key=''; try{ key=cur.P.seed+'|'+clock().age+'|'+lbStTod(); }catch(_){}
+  let el; if(_lbStC&&_lbStC.key===key){ el=_lbStC.el; } else { const h=lbStreetCardHTML(); if(!h) return; const box=document.createElement('div'); box.innerHTML=h; el=box.firstElementChild; _lbStC={ key, el, t0:performance.now() }; }
   // 上から3番目：人生の島 → 浮かぶ街の帯 → 海辺の道
   const anc=lbStreetAnchor(app), lbn=app.querySelector('.lbn'), home=app.querySelector('.home');
-  if(anc) anc.after(el); else if(lbn) lbn.before(el); else if(home) home.prepend(el); }catch(e){ try{ console.warn('[lbstreet]',e); }catch(_){} } }
+  if(anc) anc.after(el); else if(lbn) lbn.before(el); else if(home) home.prepend(el); try{ lbPdBuild(el.querySelector('.lbst-art svg')); }catch(_){} }catch(e){ try{ console.warn('[lbstreet]',e); }catch(_){} } }
 (function(){ if(typeof render1!=='function') return; const _r=render1; render1=function(){ const r=_r.apply(this,arguments); lbStreetPlace(); return r; }; })();
 setTimeout(lbStreetPlace,0);
+
+// v175e：海辺の道を、Gateway の「乗り物が走る街」と同じしくみに。レーン（空2・高架・海2・道2）ごとに、
+// いろいろな種類を1台ずつ選んで、かならず画面の外から入れて、反対の外に出たら消す（JS で動かすので止まらない・描きなおしでも続きから）
+var _lbPd=null, _lbPdRaf=0, _lbPdLast=0;
+function lbPdSpecs(){ if(_lbPd) return _lbPd; const U=6.2, F=v=>(+v).toFixed(2), out=[];
+  try{ const L=window.lbVehicles?window.lbVehicles.list():[];
+    L.forEach((v,i)=>{ for(let c=0;c<2;c++){ const col=(i*3+c*5+Math.floor(Math.random()*10))%10, seed=1000+i*7+c+Math.floor(Math.random()*9999);
+      let lane,k,dy,ppl=1; if(v.cat==='car'||v.cat==='tri'){ lane='road'; k=10.5*U/120; dy=-120*k; } else if(v.cat==='moto'||v.cat==='bike'){ lane='lane2'; k=11*U/120; dy=-120*k; }
+      else if(v.cat==='plane'||v.cat==='heli'){ lane='sky'; k=v.cat==='heli'?.26:.3; dy=-66*k; ppl=0; } else { lane='sea'; k=v.cat==='ship'?.36:.26; dy=-100*k; }
+      out.push({ lane, name:v.name, w:240*k, mk:()=>`<g transform="translate(0 ${F(dy)}) scale(${F(k)})">${window.lbVehicles.g(v.cat,v.type,col,{ people:ppl, seed })}</g>` }); } }); }catch(e){}
+  try{ const want={ bus:'road', truck:'road', jeepney:'road', car:'road', train:'rail', shink:'rail', balloon:'sky', airship:'sky', biplane:'sky' }, VSC={ bus:.36*U, truck:.36*U, jeepney:.36*U, car:.36*U, train:1.5, shink:1.5, balloon:.55, airship:.55, biplane:.55 }, seen={};
+    VH.forEach(v=>{ if(!want[v.t]) return; if(v.t==='car'&&!/救急|パトカー|タクシー|キャブ/.test(v.n)) return; const key=v.t+v.n; seen[key]=(seen[key]||0)+1; if(seen[key]>2) return;
+      const sp={ lane:want[v.t], name:v.n, w:0, old:1, mk:()=>{ const g=`<g transform="scale(${F(VSC[v.t])})">${VH_DRAW[v.t](v.c,v.o||{})}</g>`; const ns='http://www.w3.org/2000/svg', t=document.createElementNS(ns,'svg'); t.setAttribute('width','2000'); t.setAttribute('height','2000'); t.style.cssText='position:absolute;left:-9999px;top:0'; t.innerHTML=`<g>${g}</g>`; document.body.appendChild(t); let bb={ x:0, width:60 }; try{ bb=t.firstChild.getBBox(); }catch(_){} t.remove(); sp.w=bb.width; return `<g transform="translate(${F(-bb.x)} 0)">${g}</g>`; } }; out.push(sp); }); }catch(e){}
+  _lbPd=out; return out; }
+function lbPdBuild(svg){ if(!svg||svg._pd) return; const NS='http://www.w3.org/2000/svg'; const vb=(svg.getAttribute('viewBox')||'0 0 360 220').split(' ').map(Number), X0=vb[0], W=vb[2];
+  svg.querySelectorAll('.vh,.vh-via,.ss-car,.ss-car2,.ss-moto,.rb-ferry,.vh-rocket').forEach(e=>e.remove());
+  const host=svg.querySelector(':scope > g')||svg; const night=/night/.test(lbStTod());
+  const LN=[ { lane:'sky', y:[26,64], dir:0, sp:[16,22], gap:[60,220] }, { lane:'sky', y:[40,80], dir:0, sp:[14,20], gap:[120,320] }, { lane:'rail', y:[118,118], dir:-1, sp:[34,42], gap:[200,500] },
+    { lane:'sea', y:[127,129], dir:-1, sp:[7,10], gap:[60,200] }, { lane:'sea', y:[148,149], dir:1, sp:[9,12], gap:[40,160] },
+    { lane:'road', y:[184.5,184.5], dir:1, sp:[22,30], gap:[20,90] }, { lane:'lane2', y:[193.6,193.6], dir:-1, sp:[14,20], gap:[20,90] } ];
+  const all=lbPdSpecs(); const rnd=(a,b)=>a+Math.random()*(b-a);
+  // 道の手前（いちばん上の重なり）に入れる。海・空は背景のすぐ上
+  const lanes=LN.map(o=>{ let g=document.createElementNS(NS,'g'); g.setAttribute('class','lbpd-'+o.lane); host.appendChild(g);
+    if(o.lane==='rail'){ let v=`<rect x="${X0}" y="118" width="${W}" height="4" fill="${night?'#4A5478':'#9AA3AE'}"/>`; for(let px=X0+14;px<X0+W;px+=46) v+=`<rect x="${px}" y="122" width="5" height="48" fill="${night?'#3E4768':'#B4BCC6'}" opacity=".85"/>`; g.innerHTML=v; const tg=document.createElementNS(NS,'g'); host.appendChild(tg); g=tg; }
+    return { o, g, list:all.filter(s=>s.lane===o.lane), cars:[], wait:rnd(0,2), lastN:'' }; });
+  // 海は道より奥、空は街より奥に見えるよう、順番をととのえる（空→高架→海→道）
+  svg._pd={ X0, W, lanes, rnd };
+  // はじめから画面の中にも何台か（外から来たところ、として途中の位置に置く）
+  lanes.forEach(l=>{ let x=0; for(let n=0;n<3;n++){ lbPdSpawn(svg._pd,l); const c=l.cars[l.cars.length-1]; if(!c) break; x+=rnd(.25,.45)*W; c.x=c.dir>0?X0+W-x:X0+x-c.w; if(c.x<X0-c.w||c.x>X0+W) { c.e.remove(); l.cars.pop(); } else lbPdPlace(c); } l.wait=rnd(0,3); });
+  if(!_lbPdRaf) _lbPdRaf=requestAnimationFrame(lbPdTick); }
+function lbPdSpawn(P,l){ const L=l.list; if(!L.length) return; let s=null; for(let k=0;k<6;k++){ s=L[Math.floor(Math.random()*L.length)]; if(s.name!==l.lastN) break; } l.lastN=s.name;
+  let g=''; try{ g=s.mk(); }catch(e){ return; } if(!g) return; const dir=l.o.dir||(Math.random()<.5?1:-1), y=P.rnd(l.o.y[0],l.o.y[1]), sp=P.rnd(l.o.sp[0],l.o.sp[1]);
+  const e=document.createElementNS('http://www.w3.org/2000/svg','g'); e.innerHTML=dir<0?`<g transform="translate(${s.w.toFixed(1)} 0) scale(-1 1)">${typeof vhTxtFix==='function'?vhTxtFix(g):g}</g>`:g;
+  const c={ e, x:dir>0?P.X0-s.w-6:P.X0+P.W+6, y, w:s.w, dir, sp }; l.g.appendChild(e); l.cars.push(c); lbPdPlace(c); l.wait=(s.w+P.rnd(l.o.gap[0],l.o.gap[1]))/sp; }
+function lbPdPlace(c){ c.e.setAttribute('transform',`translate(${c.x.toFixed(1)} ${c.y.toFixed(1)})`); }
+function lbPdTick(t){ _lbPdRaf=requestAnimationFrame(lbPdTick); const dt=_lbPdLast?Math.min(.1,(t-_lbPdLast)/1000):0; _lbPdLast=t; if(document.hidden) return;
+  document.querySelectorAll('.lbst-art svg').forEach(svg=>{ const P=svg._pd; if(!P) return; P.lanes.forEach(l=>{ l.wait-=dt; if(l.wait<=0) lbPdSpawn(P,l);
+    for(let i=l.cars.length-1;i>=0;i--){ const c=l.cars[i]; c.x+=c.dir*c.sp*dt; lbPdPlace(c); if((c.dir>0&&c.x>P.X0+P.W+8)||(c.dir<0&&c.x+c.w<P.X0-8)){ c.e.remove(); l.cars.splice(i,1); } } }); }); }
+document.addEventListener('visibilitychange',()=>{ _lbPdLast=0; });
 // Gateway など、ほかのページに埋めこむとき：play.html?view=street（絵だけを横いっぱいに出す）
 function lbStreetView(){ try{ const P=makeBirth(20260516,{country:'jp'}); const y=new Date().getFullYear(); const age=Math.max(20,Math.min(60,y-P.year)); P.year=y-age;
-  document.body.className='lbst-only'; document.body.innerHTML=`<div class="lbst-art">${lbStreetSVG(P,age)}</div>`; }catch(e){ try{ console.warn('[lbstreet view]',e); }catch(_){} } }
+  document.body.className='lbst-only'; document.body.innerHTML=`<div class="lbst-art">${lbStreetSVG(P,age)}</div>`; try{ lbPdBuild(document.querySelector('.lbst-art svg')); }catch(_){} }catch(e){ try{ console.warn('[lbstreet view]',e); }catch(_){} } }
 if(/[?&]view=street\b/.test(location.search)){ const go=()=>setTimeout(lbStreetView,50); if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go(); }
 try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .lbst{ margin:0 0 14px; } .lbst-h{ margin:0 0 6px; font-size:15px; color:#C2476B; font-weight:800; } .lbst-h span{ font-size:11.5px; font-weight:600; color:#9A8A92; margin-left:6px; }
