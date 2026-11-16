@@ -17466,7 +17466,7 @@ document.addEventListener('click',e=>{ const t=e.target; if(t.closest&&t.closest
   const z=t.closest&&t.closest('[data-gsz]'); if(z){ const i=+z.dataset.gsz; const c=gsChunks(_gsFr,GS_PER)[i]||_gsFr; const fof=store.get('hitotsu.fof',{}); const many=_gsFr.length>GS_PER;
     gsZoomOpen(`<h3 class="gsz-h">🌳 ${many?`${i+1}本目の木（${c.length}人）`:`友だちの木（${c.length}人）`}</h3><div class="gsz-art">${gsSVG(c,true)}</div><ul class="gsz-l">${c.map(f=>{ const e=fof[f.id]||{}; const sub=(e.fr||[]).map(x=>x.b).filter(Boolean); return `<li><b>${esc(f.by||'友だち')}さん</b>${sub.length?`<small>つながっている人：${sub.map(x=>esc(x)+'さん').join('、')}</small>`:''}${e.pet?`<small>🐾 ${esc(e.pet.b)}（${esc((PB_ALL[e.pet.p]||{}).name||'')}）</small>`:''}</li>`; }).join('')||'<li>まだ、つながった人はいません。</li>'}</ul>`); return; }
   const pz=t.closest&&t.closest('[data-gspz]'); if(pz){ const i=+pz.dataset.gspz; const list=gsFrPets(_gsFr); const c=gsChunks(list,GS_PPER)[i]||[];
-    gsZoomOpen(`<h3 class="gsz-h">🐾 ペットのつながりの木（${c.length}匹）</h3><div class="gsz-art">${gsPetSVG(c,true)}</div><ul class="gsz-l">${c.map(p=>`<li><b>${p.g?'🌈 ':''}${esc(p.b)}</b><small>${esc(p.owner)}さんの家・${esc((PB_ALL[p.p]||{}).name||'')}・${p.a}歳</small></li>`).join('')||'<li>友だちがペットを迎えると、ここに出ます。</li>'}</ul>`); } });
+    gsZoomOpen(`<h3 class="gsz-h">🐾 ペットのつながりの木（${c.length}匹）</h3><div class="gsz-art">${gsPetSVG(c,true)}</div><ul class="gsz-l">${c.map(p=>`<li><b>${p.g?'🌈 ':''}${esc(p.b)}</b><small>${esc(p.owner)}さんの家・${esc((PB_ALL[p.p]||{}).name||'')}・${p.a}歳</small>${typeof pgBtns==='function'?pgBtns(p):''}</li>`).join('')||'<li>友だちがペットを迎えると、ここに出ます。</li>'}</ul>`); } });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const d=document.getElementById('gsZoom'); if(d&&!d.hidden) gsZoomClose(); } });
 document.head.insertAdjacentHTML('beforeend',`<style>
 .gs-zb{ display:block; width:100%; padding:0; border:0; background:none; cursor:zoom-in; position:relative; font:inherit; }
@@ -17936,6 +17936,25 @@ var _ssOut=false, _bkOut=false;
 // v161: Life Home の一部でエラーが出ても、ページ全体が白くならないように、各カードを守る
 ['chnIdHTML','dailyThreeHTML','pwaNoteHTML','nbMeaningHTML','localTimeHTML','dailyTopHTML','gsTreeHTML','mpTileHTML','gsPetTreeHTML','dailyPlusHTML','borrowTileHTML','growthHTML','birthMapHTML','stampHTML','frReplyHTML','photoHTML','homeMoodSVG','blockSceneSVG','spineHTML'].forEach(n=>{ try{ const f=window[n]; if(typeof f!=='function'||f._safe) return; const g=function(){ try{ return f.apply(this,arguments); }catch(e){ try{ console.error(n,e); localStorage.setItem('lb.lastErr',n+': '+String(e&&e.stack||e).slice(0,500)); }catch(_){} return ''; } }; g._safe=1; window[n]=g; }catch(e){} });
 try{ if(typeof render==='function'&&typeof page!=='undefined'&&page==='home'){ const y=window.scrollY; render(); window.scrollTo(0,y); } }catch(e){}
+// v162: ペットのアルバムの写真を押すと、大きく見える
+function paZoomOpen(fig){ let d=document.getElementById('paZoom'); if(!d){ d=document.createElement('div'); d.id='paZoom'; d.className='pa-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','写真を大きく見る'); document.body.appendChild(d);
+    d.addEventListener('click',e=>{ if(e.target===d||e.target.closest('.pa-x')) paZoomClose(); }); }
+  const art=fig.querySelector('svg'), cap=fig.querySelector('figcaption'); if(!art) return;
+  const all=[...document.querySelectorAll('.mp-album .mp-ph')], i=all.indexOf(fig);
+  d.innerHTML=`<div class="pa-in"><button type="button" class="pa-x" aria-label="閉じる">×</button><div class="pa-art">${art.outerHTML}</div>${cap?`<p class="pa-cap">${cap.innerHTML}</p>`:''}${all.length>1?`<div class="pa-nav"><button type="button" class="pa-b" data-pa="${i-1}" ${i<=0?'disabled':''}>← まえ</button><span>${i+1} / ${all.length}</span><button type="button" class="pa-b" data-pa="${i+1}" ${i>=all.length-1?'disabled':''}>つぎ →</button></div>`:''}</div>`;
+  d.querySelectorAll('[data-pa]').forEach(b=>b.onclick=()=>{ const f=all[+b.dataset.pa]; if(f) paZoomOpen(f); });
+  d.hidden=false; try{ d.querySelector('.pa-x').focus(); }catch(e){} }
+function paZoomClose(){ const d=document.getElementById('paZoom'); if(d){ d.hidden=true; d.innerHTML=''; } }
+document.addEventListener('click',e=>{ const f=e.target.closest&&e.target.closest('.mp-album .mp-ph'); if(f) paZoomOpen(f); });
+document.addEventListener('keydown',e=>{ const d=document.getElementById('paZoom'); if(!d||d.hidden) return; if(e.key==='Escape') paZoomClose(); if(e.key==='ArrowLeft'||e.key==='ArrowRight'){ const b=d.querySelector(`.pa-b:${e.key==='ArrowLeft'?'first-of-type':'last-of-type'}`); if(b&&!b.disabled) b.click(); } });
+try{ document.head.insertAdjacentHTML('beforeend',`<style>
+.mp-album .mp-ph{ cursor:zoom-in; transition:transform .15s; } .mp-album .mp-ph:hover{ transform:translateY(-2px); }
+.pa-ov{ position:fixed; inset:0; z-index:200; background:rgba(40,25,35,.6); display:flex; align-items:center; justify-content:center; padding:16px; } .pa-ov[hidden]{ display:none; }
+.pa-in{ position:relative; background:#fff; border-radius:14px; padding:14px; width:min(760px,100%); max-height:100%; overflow:auto; box-shadow:0 10px 40px rgba(0,0,0,.3); }
+.pa-art svg{ width:100%; height:auto; display:block; border-radius:10px; } .pa-cap{ margin:10px 4px 0; font-size:15px; line-height:1.7; color:#4A3A44; }
+.pa-x{ position:absolute; top:8px; right:8px; width:40px; height:40px; border-radius:50%; border:0; background:#FF8FAB; color:#fff; font-size:24px; cursor:pointer; z-index:2; }
+.pa-nav{ display:flex; align-items:center; justify-content:center; gap:14px; margin-top:10px; color:#8A7A84; font-size:13px; } .pa-b{ border:0; background:#FFE3EC; color:#C2476B; border-radius:999px; padding:8px 16px; font-weight:700; cursor:pointer; } .pa-b:disabled{ opacity:.35; cursor:default; }
+</style>`); }catch(e){}
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
@@ -18480,5 +18499,50 @@ function hmiAlien(rnd){ const kind=['pleiades','sirius','under'][(_hmiAk++)%3]; 
   if(!document.getElementById('hmiUfoCss')) document.head.insertAdjacentHTML('beforeend',`<style id="hmiUfoCss">@keyframes hmiUfo{ 0%,100%{ transform:translate(-14px,0) } 25%{ transform:translate(0,-4px) } 50%{ transform:translate(14px,0) } 75%{ transform:translate(0,3px) } } .hmi-ufo{ animation:hmiUfo 6s ease-in-out infinite; } @keyframes hmiBeam{ 0%,100%{ opacity:.12 } 50%{ opacity:.45 } } .hmi-beam{ animation:hmiBeam 2.4s ease-in-out infinite; } @keyframes hmiUfoL{ 0%,100%{ opacity:1 } 50%{ opacity:.3 } } .hmi-ufo-l{ animation:hmiUfoL 1s steps(2) infinite; } @keyframes hmiTw{ 0%,100%{ opacity:1 } 50%{ opacity:.35 } } .hmi-tw{ animation:hmiTw 1.8s ease-in-out infinite; }</style>`);
   const c0=S.p(0,0,0), sc=1.8; const svg=`<svg class="hmi-psvg" viewBox="0 0 320 220" role="img" aria-label="${T.label}の宇宙人が3人いる島"><g transform="translate(160 142) scale(${sc}) translate(${(-c0[0]).toFixed(1)} ${(-c0[1]).toFixed(1)})">${S.render()}</g></svg>`;
   return { svg, star:T.label, kind }; }
+// v162: 友だちのペットに「可愛い！」や「ごはんプレゼント🎁」を贈る（Firebase：ids/{相手}/gift/{自分_日付_種類}）
+const PG_FOOD={ dog:'🦴 ほね型クッキー', cat:'🐟 おさかな', rabbit:'🥕 にんじん', bird:'🌾 小鳥のたね', fish:'🍤 金魚のえさ', goldfish:'🍤 金魚のえさ', hamster:'🌻 ひまわりの種', turtle:'🥬 葉っぱ', ferret:'🍗 ささみ', hedgehog:'🍓 いちご' };
+function pgFood(k){ return PG_FOOD[k]||'🍎 おやつ'; }
+function pgDay(){ const d=new Date(); return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); }
+function pgOn(){ return typeof fbOnline==='function'&&fbOnline()&&typeof FB!=='undefined'&&FB&&FB.D; }
+function pgSent(oid,k){ return !!(store.get('pg.sent',{})[oid+'|'+k+'|'+pgDay()]); }
+function pgBtns(p){ if(!p||p.g||!p.oid) return ''; const L=pgSent(p.oid,'love'), F=pgSent(p.oid,'food');
+  return `<span class="pg-btns"><button type="button" class="pg-b" data-pg="${esc(p.oid)}|love" ${L?'disabled':''}>${L?'💗 贈りました':'💗 可愛い！'}</button><button type="button" class="pg-b pg-f" data-pg="${esc(p.oid)}|food" ${F?'disabled':''}>${F?'🎁 贈りました':'🎁 ごはん'}</button></span>`; }
+async function pgSend(oid,k,btn){ const fof=store.get('hitotsu.fof',{}), e=fof[oid], pet=e&&e.pet; if(!pet) return;
+  if(!pgOn()){ pgToast('いまはサーバーにつながっていません。少しあとで、もう一度押してください。'); return; }
+  const me=myId(), by=String(store.get(KEY_ME,'')||'').slice(0,20), f=k==='food'?pgFood(pet.k):'', id=me+'_'+pgDay()+'_'+k;
+  if(btn){ btn.disabled=true; btn.textContent='おくっています…'; }
+  try{ await FB.D.setDoc(FB.D.doc(FB.db,'ids',String(oid),'gift',id),{ from:me, by, k, f, pn:String(pet.b||'').slice(0,20), t:Date.now() });
+    const s=store.get('pg.sent',{}); s[oid+'|'+k+'|'+pgDay()]=1; const keep={}; Object.keys(s).filter(x=>x.endsWith(pgDay())).forEach(x=>keep[x]=1); store.set('pg.sent',keep);
+    if(btn) btn.textContent=k==='food'?'🎁 贈りました':'💗 贈りました';
+    pgToast(k==='food'?`${pet.b}に、${f}を贈りました！`:`${pet.b}に「可愛い！」を贈りました💗`);
+  }catch(err){ if(btn){ btn.disabled=false; btn.textContent=k==='food'?'🎁 ごはん':'💗 可愛い！'; } pgToast(String(err&&err.code||'').includes('permission')?'まだ贈れません（サーバーの準備中です）。':'うまく送れませんでした。少しあとで、もう一度押してください。'); } }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-pg]'); if(!b) return; e.preventDefault(); e.stopPropagation(); const [oid,k]=b.dataset.pg.split('|'); pgSend(oid,k,b); },true);
+function pgToast(t){ let d=document.getElementById('pgToast'); if(!d){ d=document.createElement('div'); d.id='pgToast'; d.className='pg-toast'; d.setAttribute('role','status'); document.body.appendChild(d); } d.textContent=t; d.classList.add('on'); clearTimeout(d._t); d._t=setTimeout(()=>d.classList.remove('on'),4200); }
+// 届いたものを受けとる
+let _pgL=false;
+function pgListen(){ if(_pgL||!pgOn()) return; _pgL=true; const { collection, onSnapshot, deleteDoc }=FB.D;
+  onSnapshot(collection(FB.db,'ids',myId(),'gift'),snap=>{ const got=[];
+    snap.forEach(d=>{ const x=d.data()||{}; if(x.k!=='love'&&x.k!=='food') return; got.push({ id:d.id, by:String(x.by||'友だち').slice(0,20), k:x.k, f:String(x.f||'').slice(0,20), t:+x.t||Date.now() }); });
+    if(!got.length) return; const p=typeof mpGet==='function'&&mpGet(); const seen=store.get('pg.seen',[]);
+    const nu=got.filter(g=>!seen.includes(g.id)); if(nu.length){ store.set('pg.seen',seen.concat(nu.map(g=>g.id)).slice(-300));
+      if(p){ p.gifts=(p.gifts||[]).concat(nu).slice(-60); nu.forEach(g=>{ p.love=(p.love||0)+(g.k==='food'?2:1); if(typeof mpLog==='function') mpLog(p,g.k==='food'?`${g.by}さんから、${g.f}のプレゼントが届いた。`:`${g.by}さんから「可愛い！」が届いた。`,'gift'); }); mpSet(p); }
+      const g=nu[nu.length-1], nm=p?p.name:'うちのペット'; pgToast(nu.length>1?`${nm}に、${nu.length}つのプレゼントが届きました🎁`:g.k==='food'?`${g.by}さんから、${nm}に${g.f}が届きました🎁`:`${g.by}さんから、${nm}に「可愛い！」が届きました💗`);
+      try{ const dl=document.getElementById('mpDlg'); if(dl&&!dl.hidden&&typeof mpOpen==='function') mpOpen(); else if(typeof render==='function'&&typeof page!=='undefined'&&page==='home') render(); }catch(_){} }
+    got.forEach(g=>{ try{ deleteDoc(FB.D.doc(FB.db,'ids',myId(),'gift',g.id)); }catch(_){} });
+  },e=>{ try{ console.warn('[petgift] 届いたプレゼントを読めませんでした',e&&e.code||e); }catch(_){} }); }
+{ let n=0; const iv=setInterval(()=>{ n++; try{ pgListen(); }catch(_){} if(_pgL||n>120) clearInterval(iv); },2000); }
+// ペットのつながりの木：贈るボタン
+if(typeof gsPetTreeHTML==='function'){ const G=gsPetTreeHTML; gsPetTreeHTML=function(fr){ const h=G.apply(this,arguments); try{ const n=gsFrPets(fr).filter(p=>!p.g).length; if(!n||!h) return h;
+    return h.replace(/<\/div>\s*$/,'')+`<button type="button" class="pg-open" data-gspz="0">🎁 友だちのペットに「可愛い！」やごはんを贈る</button></div>`; }catch(e){ return h; } }; }
+// うちのペットのページ：届いたプレゼント
+if(typeof mpPageHTML==='function'){ const MP=mpPageHTML; mpPageHTML=function(){ let h=MP.apply(this,arguments); try{ const p=mpGet(); const g=(p&&p.gifts||[]).slice(-12).reverse(); if(!g.length) return h;
+    const box=`<h4 class="mp-h4">💌 届いたプレゼント</h4><ul class="pg-got">${g.map(x=>`<li>${x.k==='food'?`<b>${esc(x.f||'🎁 ごはん')}</b>`:'<b>💗 可愛い！</b>'}<span>${esc(x.by)}さんから・${new Date(x.t).getMonth()+1}月${new Date(x.t).getDate()}日</span></li>`).join('')}</ul>`;
+    const i=h.indexOf('<h4 class="mp-h4">📷'); return i>=0?h.slice(0,i)+box+h.slice(i):h+box; }catch(e){ return h; } }; }
+try{ document.head.insertAdjacentHTML('beforeend',`<style>
+.pg-btns{ display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; } .pg-b{ border:0; background:#FFE3EC; color:#C2476B; border-radius:999px; padding:7px 12px; font-weight:700; font-size:13px; cursor:pointer; } .pg-b.pg-f{ background:#FFF1D6; color:#B86A1E; } .pg-b:disabled{ opacity:.55; cursor:default; }
+.pg-open{ display:block; margin:10px auto 0; border:0; background:#FF8FAB; color:#fff; border-radius:999px; padding:9px 16px; font-weight:700; font-size:13px; cursor:pointer; }
+.pg-got{ list-style:none; margin:0 0 12px; padding:0; display:grid; gap:6px; } .pg-got li{ background:#FFF6F9; border-radius:10px; padding:8px 12px; display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; } .pg-got span{ font-size:12px; color:#8A7A84; }
+.pg-toast{ position:fixed; left:50%; bottom:24px; transform:translate(-50%,40px); opacity:0; z-index:120; background:#C2476B; color:#fff; padding:12px 18px; border-radius:14px; font-weight:700; box-shadow:0 6px 24px rgba(0,0,0,.2); transition:.3s; max-width:calc(100% - 32px); text-align:center; pointer-events:none; z-index:300; } .pg-toast.on{ opacity:1; transform:translate(-50%,0); }
+</style>`); }catch(e){}
 </script>
 </body></html>
