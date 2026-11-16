@@ -12499,8 +12499,8 @@ function eaAlbumHTML(){ const got=new Set(eaCollected()); const ids=Object.keys(
   return `<div class="ea-how"><h3>💌 絵はがきの集め方</h3><ol><li>新しい人生が生まれると、<b>その人が生まれた国の絵はがき</b>が1枚、自動でアルバムに入ります。</li><li>まだ持っていない国に生まれるたびに、1枚ずつふえていきます。</li><li>本棚にしまった人生の国の絵はがきも、ずっと残ります。</li></ol><p>いま持っている絵はがき：<b>${mine.length}枚</b>　・　絵はがきをタップすると、大きく見られます。</p></div>
     <h3 class="ea-sh">きょうの世界の名所（${today.length}か所）</h3><p class="tiny muted">世界の国々に実在する遺跡・名所・自然です。毎日、ちがう場所に入れかわります。</p><div class="ea-grid">${today.map(id=>card(id,false)).join('')}</div>
     <h3 class="ea-sh">集めた絵はがき（${mine.length}枚）</h3><div class="ea-grid">${mine.map(id=>card(id,true)).join('')}</div>`; }
-function eaOpenDialog(){ if(document.getElementById('eaOv')) return; const d=document.createElement('div'); d.id='eaOv'; d.className='mt-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','地球アルバム');
-  d.innerHTML=`<div class="mt-card ea-dlg"><h2>地球アルバム</h2><p class="tiny muted">世界の名所を、ブロックの絵はがきで見られます。</p>${eaAlbumHTML()}<div class="mt-btns"><button type="button" class="mt-close" id="eaX">とじる</button></div></div>`;
+function eaOpenDialog(){ if(document.getElementById('eaOv')) return; const d=document.createElement('div'); d.id='eaOv'; d.className='mt-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','地球の名所');
+  d.innerHTML=`<div class="mt-card ea-dlg"><h2>地球の名所</h2><p class="tiny muted">世界の名所を、ブロックの絵はがきで見られます。</p>${eaAlbumHTML()}<div class="mt-btns"><button type="button" class="mt-close" id="eaX">とじる</button></div></div>`;
   document.body.appendChild(d); const close=()=>d.remove(); d.querySelector('#eaX').onclick=close; d.addEventListener('click',e=>{ if(e.target===d) close(); }); }
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('#eaOpen'); if(b) eaOpenDialog(); });
 
@@ -15823,7 +15823,7 @@ function homeHTML(){ if(!cur) return introHTML(); const c=clock(); const {P,L}=c
     ${typeof borrowTileHTML==='function'?homeTile('hm-borrow',`友だちからLIFE BOOKを借りる<span class="hm-n">${store.get(KEY_LOAN,[]).length}冊</span>`,borrowTileHTML()):''}
     ${typeof growthHTML==='function'&&!c.dead&&age<18?homeTile('hm-grow',`からだの成長<span class="hm-n">${Math.floor(c.ageF||age)}歳</span>`,growthHTML(P,L,Math.min(c.ageF||age,L.deathAge))):''}
     ${typeof birthMapHTML==='function'?homeTile('hm-map','生まれた場所',birthMapHTML(P)):''}
-    ${typeof eaTileHTML==='function'?homeTile('hm-ea','地球アルバム',eaTileHTML(P)):''}
+    ${typeof eaTileHTML==='function'?homeTile('hm-ea','地球の名所',eaTileHTML(P)):''}
     ${typeof relChartHTML==='function'?homeTile('hm-rel',`${esc(P.country.name)}の宗教の割合`,relChartHTML(P)):''}
     ${typeof newsHTML==='function'?homeTile('hm-news',`物語の${sy}年のNEWS<span class="nw-cntw" data-nwc="${sy}">${typeof nwCntHTML==='function'?nwCntHTML(sy):''}</span>`,newsHTML(P,sy)):''}
     ${homeTile('hm-world',`世界のいま　${new Date().getFullYear()}年`, (typeof worldNowHTML==='function'?worldNowHTML(P,new Date().getFullYear()):'')+(typeof spaceHTML==='function'?spaceHTML():'')+(typeof skyHTML==='function'?skyHTML():''))}
