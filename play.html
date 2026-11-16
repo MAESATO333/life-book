@@ -9297,11 +9297,12 @@ function scHouse(S,ctx,x,y,v){ const st=ctx.style, r=ctx.r, poor=ctx.poor, rich=
   S.end(); }
 function scTreeRow(S,ctx,pts){ pts.forEach(([x,y])=>bkTree(S,x,y,ctx.biome,ctx.season)); }
 function scRoad(S,x,y,w,d){ S.box(x,y,0,w,d,.03,'#9AA0A6'); for(let i=0;i<w;i+=1.2) S.box(x+i,y+d/2-.05,.03,.6,.1,.01,'#F2F2F2'); }
-function scCar(S,x,y,ctx){ const c=ilPick(ctx.r,['#E05A4E','#3D7CC9','#F2C94C','#FFFFFF','#4A4A4A','#58A86B']); S.begin(x+y+1); B(S,x,y,.1,1.4,.7,.4,c); B(S,x+.3,y+.05,.5,.8,.6,.32,'#BFE3F5'); B(S,x+.1,y-.05,0,.25,.8,.2,'#222'); B(S,x+1,y-.05,0,.25,.8,.2,'#222'); S.end(); }
-function scBike(S,x,y){ S.begin(x+y+.8); B(S,x,y,.1,.9,.08,.08,'#555'); B(S,x,y,0,.08,.08,.3,'#333'); B(S,x+.8,y,0,.08,.08,.3,'#333'); B(S,x+.7,y,.2,.06,.06,.4,'#888'); S.end(); }
+let _scCarN=0;
+function scCar(S,x,y,ctx){ const c=ilPick(ctx.r,['#E05A4E','#3D7CC9','#F2C94C','#FFFFFF','#4A4A4A','#58A86B']); S.begin(x+y+1,'bk-car bk-car'+((_scCarN++)%3)); B(S,x,y,.1,1.4,.7,.4,c); B(S,x+.3,y+.05,.5,.8,.6,.32,'#BFE3F5'); B(S,x+.1,y-.05,0,.25,.8,.2,'#222'); B(S,x+1,y-.05,0,.25,.8,.2,'#222'); S.end(); }
+function scBike(S,x,y){ S.begin(x+y+.8,'bk-bike'); B(S,x,y,.1,.9,.08,.08,'#555'); B(S,x,y,0,.08,.08,.3,'#333'); B(S,x+.8,y,0,.08,.08,.3,'#333'); B(S,x+.7,y,.2,.06,.06,.4,'#888'); S.end(); }
 function scSign(S,x,y,c){ S.begin(x+y+.5); B(S,x,y,0,.1,.1,1.2,'#777'); B(S,x-.2,y,1.2,.5,.08,.4,c||'#3D7CC9'); S.end(); }
 function scLamp(S,x,y){ S.begin(x+y+.4); B(S,x,y,0,.1,.1,1.8,'#555'); B(S,x-.1,y-.1,1.8,.3,.3,.2,'#FFE9A8'); S.end(); }
-function scBoat(S,x,y,c){ S.begin(x+y+1); B(S,x,y,-.1,1.8,.7,.35,c||'#E9E3D6'); B(S,x+.7,y+.3,.25,.08,.08,1.6,'#8C6A4A'); B(S,x+.78,y+.32,.7,.8,.04,.9,'#FFFFFF'); S.end(); }
+function scBoat(S,x,y,c){ S.begin(x+y+1,'bk-boat'); B(S,x,y,-.1,1.8,.7,.35,c||'#E9E3D6'); B(S,x+.7,y+.3,.25,.08,.08,1.6,'#8C6A4A'); B(S,x+.78,y+.32,.7,.8,.04,.9,'#FFFFFF'); S.end(); }
 // --- 外の場面 ---
 function scOutdoor(S,ctx,kind){ const r=ctx.r;
   if(kind==='home'){ scHouse(S,ctx,-4.3,-4.8); return; }
@@ -9315,7 +9316,7 @@ function scOutdoor(S,ctx,kind){ const r=ctx.r;
   if(kind==='farm'){ const wet=ctx.style==='jp'||ctx.style==='sea'||ctx.style==='ea'||ctx.style==='sa'; for(let i=0;i<8;i++) for(let j=0;j<3;j++){ const c=wet?(ctx.season===1?'#7DC46A':ctx.season===2?'#E2C15A':ctx.season===0?'#9AD3E8':'#BFA27A'):(ctx.season===2?'#E4C766':ctx.season===3?'#D8CDB8':'#9CCB6A'); B(S,-5+i,-5+j,0,1,1,.06,(i%2)?c:bkShade(c,.96)); } if(!(ctx.season===3)) for(let i=0;i<14;i++) B(S,-5+r()*7.5,-5+r()*2.8,.06,.12,.12,.35,wet?'#5FAE52':'#C9A74A'); S.begin(-2); B(S,3.4,-4.8,0,1.4,1.4,1.3,'#A9774E'); scRoofGable(S,3.4,-4.8,1.3,1.4,1.4,'#7A4A32',2); S.end(); return; }
   if(kind==='park'){ scTreeRow(S,ctx,[[-4.4,-4.2],[-1.6,-4.6],[2.6,-4.4],[4,-1.6]]); S.begin(-6); B(S,-4.6,-2,0,2,.6,.45,'#9C7A55'); B(S,-4.6,-1.5,.45,2,.12,.5,'#9C7A55'); S.end(); S.begin(-2); B(S,1.4,-2.8,0,.15,.15,1.8,'#E05A4E'); B(S,2.8,-2.8,0,.15,.15,1.8,'#E05A4E'); B(S,1.4,-2.8,1.8,1.55,.15,.15,'#E05A4E'); B(S,2,-2.7,.6,.4,.2,.08,'#3D3D3D'); S.end(); scLamp(S,-.5,-3.6); return; }
   if(kind==='market'){ for(let i=0;i<3;i++){ const x=-4.8+i*3.1, c=ilPick(r,['#E05A4E','#3D7CC9','#F2C94C','#58A86B','#F29E6B']); S.begin(x-4); B(S,x,-4.6,0,2.4,1.4,.8,'#B48A5E'); for(let k=0;k<6;k++) B(S,x+.2+k*.35,-4.4+(k%2)*.5,.8,.25,.25,.22,ilPick(r,['#F25C54','#F7D774','#7FC36A','#F29E6B','#B07CC6'])); [0,2.3].forEach(a=>B(S,x+a,-4.6,0,.08,.08,1.9,'#777')); for(let k=0;k<4;k++) B(S,x-.1+k*.65,-4.8,1.9,.65,1.8,.15,k%2?'#FFFFFF':c); S.end(); } return; }
-  if(kind==='station'){ S.begin(-30); B(S,-5,-5,0,10,1.2,.5,'#B9B4AA'); [-4.5,-1,2.5].forEach(x=>{ B(S,x,-5,.5,.12,.12,1.8,'#888'); }); B(S,-5,-5,2.3,10,1.2,.12,'#8E9AA6'); S.end(); S.begin(-25); B(S,-5,-3.8,0,10,.8,.05,'#7A6E62'); for(let i=0;i<10;i++) B(S,-5+i,-3.75,.05,.2,.7,.04,'#5A4E42'); S.end(); const tc=ilPick(r,['#3FA34D','#E05A4E','#3D7CC9','#F2C94C','#C9C9C9']); S.begin(-6); B(S,-4,-3.75,.15,6.5,.7,1.1,tc); for(let i=0;i<6;i++) B(S,-3.7+i*1.05,-3.06,.6,.7,.04,.4,'#CFE8F7'); S.end(); scSign(S,3.6,-2.5,'#3FA34D'); return; }
+  if(kind==='station'){ S.begin(-30); B(S,-5,-5,0,10,1.2,.5,'#B9B4AA'); [-4.5,-1,2.5].forEach(x=>{ B(S,x,-5,.5,.12,.12,1.8,'#888'); }); B(S,-5,-5,2.3,10,1.2,.12,'#8E9AA6'); S.end(); S.begin(-25); B(S,-5,-3.8,0,10,.8,.05,'#7A6E62'); for(let i=0;i<10;i++) B(S,-5+i,-3.75,.05,.2,.7,.04,'#5A4E42'); S.end(); const tc=ilPick(r,['#3FA34D','#E05A4E','#3D7CC9','#F2C94C','#C9C9C9']); S.begin(-6,'bk-train'); B(S,-4,-3.75,.15,6.5,.7,1.1,tc); for(let i=0;i<6;i++) B(S,-3.7+i*1.05,-3.06,.6,.7,.04,.4,'#CFE8F7'); S.end(); scSign(S,3.6,-2.5,'#3FA34D'); return; }
   if(kind==='worship'){ scWorship(S,ctx,false); return; }
   scHouse(S,ctx,-4.3,-4.8); }
 // 祈りの場（宗教と地域で建物が変わる）
@@ -17680,7 +17681,7 @@ function ssStreet(S,ctx,land,tod,r,mood){ const sky=tod==='night'?['#1F2B55','#4
   ssLandmark(S,ctx,land,tod,r,9);
   if(land!=='shrine'&&land!=='temple'){ S.box(-21,0,4.4,.3,7,.3,'#555'); S.box(-21.6,7,4,1.4,.6,1,'#FFE9A8'); }
   [[-24,6],[24,5.5]].forEach(([x,z])=>{ if(land==='skyscraper'&&x>0) return; S.box(x-.3,0,z,.6,3,.6,'#8C6A4A'); S.box(x-1.8,3,z-.8,3.6,3,2.2,ctx.season===2&&ctx.biome==='temp'?'#E2A24A':ctx.season===0&&ctx.style==='jp'?'#F6B8C8':'#6BB45E'); S.box(x-1.2,6,z-.4,2.4,1.4,1.4,ctx.season===0&&ctx.style==='jp'?'#F9CAD6':'#7CC66E'); });
-  if(ctx.year>=1950){ const c=ilPick(r,['#E05A4E','#3D7CC9','#F2C94C','#FFFFFF','#4A4A4A']); S.box(8,.4,.6,6,1.4,2.2,c); S.box(9.2,1.8,.8,3.4,1.2,1.8,'#BFE3F5'); S.box(8.6,0,.5,1.2,.8,.4,'#222'); S.box(12,0,.5,1.2,.8,.4,'#222'); } }
+  if(ctx.year>=1950){ const c=ilPick(r,['#E05A4E','#3D7CC9','#F2C94C','#FFFFFF','#4A4A4A']); const cc={cls:'ss-car'}; if(ctx.year>=1960){ const mb={cls:'ss-moto'}, mc=ilPick(r,['#E05A4E','#3D7CC9','#222']); S.box(-4,.5,1.2,2.6,.7,.6,mc,mb); S.box(-4.4,0,1.1,.9,.9,.3,'#222',mb); S.box(-1.9,0,1.1,.9,.9,.3,'#222',mb); S.box(-2.2,1.2,1.2,.3,1,.3,'#555',mb); S.box(-3.6,1.2,1.25,1.2,1.6,.5,'#4E5D78',mb); S.box(-3.6,2.8,1.25,1.1,1.1,.6,'#F2F2F2',mb); } S.box(8,.4,.6,6,1.4,2.2,c,cc); S.box(9.2,1.8,.8,3.4,1.2,1.8,'#BFE3F5',cc); S.box(8.6,0,.5,1.2,.8,.4,'#222',cc); S.box(12,0,.5,1.2,.8,.4,'#222',cc); { const c2=ilPick(r,['#F2C94C','#58A86B','#B79CF2','#FF8FAB']), cb={cls:'ss-car ss-car2'}; S.box(-14,.4,2.2,5,1.3,2,c2,cb); S.box(-13,1.7,2.4,3,1.1,1.6,'#BFE3F5',cb); S.box(-13.4,0,2.1,1.1,.75,.4,'#222',cb); S.box(-10.2,0,2.1,1.1,.75,.4,'#222',cb); } } }
 // --- ひとつの絵にする ---
 function sideSceneSVG(P,o,label,setting,h){ const w=ilWorld(P); const r=ilRng(h|0||1); const season=ilSeason(P,o.age); const biome=w.biome==='jp'?'temp':w.biome; const mood=o.mood??60; const st=ilStage(o.age);
   const Wc=(typeof WSTAT!=='undefined'&&WSTAT[P.countryId])||{}; const tod=o.tod||(o.v?['day','day','morning','evening','night','day'][(P.seed+o.age*3+o.v)%6]:'day');
@@ -17772,11 +17773,11 @@ function ssBear(S,x,y,z){ const c='#C98A5C'; S.box(x,y,z,1.8,1.6,1,c); S.box(x+.
     S.box(0,0,Z+1,6,6,2,'#FFB86B'); S.box(-1,6,Z+1,2,.4,2,'#FFB86B'); for(let i=0;i<4;i++) S.box(-1+i*.5,i*1.5,Z+1.2,.3,.3,1.6,'#888'); S.raw(-(Z)*100+30,(()=>{ const a=S.p(6,6,Z+2), b=S.p(12,0,Z+2); return `<path d="M${f1(a[0])},${f1(a[1])} Q${f1(a[0]+20)},${f1(a[1]+4)} ${f1(b[0])},${f1(b[1])}" stroke="#7CC8F2" stroke-width="8" fill="none"/>`; })());
     S.box(14,0,Z-2,7,.6,4,'#E8D5A8'); S.box(15,.6,Z-1,1.6,.8,1.4,'#E05A4E'); S.box(-4,0,Z-5,5,1.4,1.6,'#9C7A55'); S.box(-4,1.4,Z-4,5,1.6,.3,'#9C7A55'); [[-21,Z-2],[8,Z+3],[20,Z+2]].forEach(([x,zz])=>{ S.box(x-.3,0,zz,.6,3,.6,'#8C6A4A'); S.box(x-2,3,zz-.8,4,3.4,2.2,ctx.season===2?'#E2A24A':ctx.season===0&&ctx.style==='jp'?'#F6B8C8':'#6BB45E'); }); return; }
   if(kind==='station'){ S.box(-24,0,Z-2,48,2,3,'#B9B4AA'); S.box(-24,2,Z-2,48,.2,3.2,'#F2C94C'); for(let i=0;i<4;i++) S.box(-20+i*12,2,Z-.6,.4,8,.4,'#888'); S.box(-24,10,Z-1.4,48,.6,3,'#8E9AA6'); S.box(-4,7,Z-.62,6,1.6,0,'#2E5A9E',{ ex:p=>{ const a=p(-1,7.8,Z-.62); return `<rect x="${f1(a[0]-14)}" y="${f1(a[1]-3)}" width="28" height="3" fill="#FFFFFF"/>`; } });
-    const tc=ssPop(h,4); S.box(-22,2,Z+1.6,40,6,3.2,tc); S.box(-22,4,Z+1.58,40,2.4,0,'#FFFFFF'); for(let i=0;i<9;i++) S.box(-21+i*4.4,4.4,Z+1.56,2.6,1.6,0,'#BFE4F7'); S.box(-22,2,Z+1.57,40,.6,0,bkShade(tc,.8)); return; }
+    const tc=ssPop(h,4), tt={cls:'ss-train'}; S.box(-22,2,Z+1.6,40,6,3.2,tc,tt); S.box(-22,4,Z+1.58,40,2.4,0,'#FFFFFF',tt); for(let i=0;i<9;i++) S.box(-21+i*4.4,4.4,Z+1.56,2.6,1.6,0,'#BFE4F7',tt); S.box(-22,2,Z+1.57,40,.6,0,bkShade(tc,.8),tt); return; }
   if(kind==='harbor'){ const p=S.p; const sea=[p(-60,0,6),p(60,0,6),p(60,0,30),p(-60,0,30)].map(q=>q.map(f1).join(',')).join(' '); S.raw(-1e6+4.6,`<polygon points="${sea}" fill="#6FB7DE"/>`);
-    S.box(-24,0,Z-4,48,1,2,'#9C7A55'); S.box(-12,0,Z+2,12,1.6,3.2,'#FFFFFF'); S.box(-11,1.6,Z+2.4,6,2.4,2.4,'#FFFFFF'); S.box(-10.6,2.4,Z+2.38,5,.8,0,'#3D7CC9'); S.box(-8,4,Z+3,.3,5,.3,'#8C6A4A');
+    S.box(-24,0,Z-4,48,1,2,'#9C7A55'); const bt={cls:'ss-boat'}; S.box(-12,0,Z+2,12,1.6,3.2,'#FFFFFF',bt); S.box(-11,1.6,Z+2.4,6,2.4,2.4,'#FFFFFF',bt); S.box(-10.6,2.4,Z+2.38,5,.8,0,'#3D7CC9',bt); S.box(-8,4,Z+3,.3,5,.3,'#8C6A4A',bt);
     S.box(10,0,Z+4,3,14,3,'#FFFFFF'); for(let k=0;k<3;k++) S.box(10,3+k*4,Z+3.98,3,1.6,0,'#E05A4E'); S.box(9.6,14,Z+3.6,3.8,2.4,3.8,'#FFE9A8'); S.box(9.4,16.4,Z+3.4,4.2,.8,4.2,'#E05A4E');
-    S.box(2,0,Z+8,8,1,2,ssPop(h,2)); S.box(5.6,1,Z+8.6,.2,6,.2,'#8C6A4A'); S.box(5.8,2,Z+8.6,3,4.4,0,'#FFFFFF'); return; }
+    const bt2={cls:'ss-boat ss-boat2'}; S.box(2,0,Z+8,8,1,2,ssPop(h,2),bt2); S.box(5.6,1,Z+8.6,.2,6,.2,'#8C6A4A',bt2); S.box(5.8,2,Z+8.6,3,4.4,0,'#FFFFFF',bt2); return; }
   LM(S,ctx,kind,tod,r,z); }; }
 
 // ===== v153：絵画・家具・小物を、細かく =====
@@ -17935,6 +17936,20 @@ var _ssOut=false, _bkOut=false;
     try{ return BS(P,o,label); } finally{ _bkOut=prev; } }; }
 // v161: Life Home の一部でエラーが出ても、ページ全体が白くならないように、各カードを守る
 ['chnIdHTML','dailyThreeHTML','pwaNoteHTML','nbMeaningHTML','localTimeHTML','dailyTopHTML','gsTreeHTML','mpTileHTML','gsPetTreeHTML','dailyPlusHTML','borrowTileHTML','growthHTML','birthMapHTML','stampHTML','frReplyHTML','photoHTML','homeMoodSVG','blockSceneSVG','spineHTML'].forEach(n=>{ try{ const f=window[n]; if(typeof f!=='function'||f._safe) return; const g=function(){ try{ return f.apply(this,arguments); }catch(e){ try{ console.error(n,e); localStorage.setItem('lb.lastErr',n+': '+String(e&&e.stack||e).slice(0,500)); }catch(_){} return ''; } }; g._safe=1; window[n]=g; }catch(e){} });
+// v167: 街の乗り物（車・バイク・自転車・電車・船）が動く
+try{ document.head.insertAdjacentHTML('beforeend',`<style id="vehCss">
+@keyframes ssDrive{ 0%{ transform:translateX(-360px); opacity:0 } 6%{ opacity:1 } 90%{ opacity:1 } 100%{ transform:translateX(180px); opacity:0 } }
+@keyframes ssDriveL{ 0%{ transform:translateX(320px); opacity:0 } 6%{ opacity:1 } 90%{ opacity:1 } 100%{ transform:translateX(-220px); opacity:0 } }
+.st-side .ss-car{ animation:ssDrive 9s linear infinite; } .st-side .ss-car2{ animation:ssDriveL 12s linear infinite; animation-delay:-5s; } .st-side .ss-moto{ animation:ssDrive 6.5s linear infinite; animation-delay:-2s; }
+@keyframes ssTrain{ 0%,15%{ transform:translateX(0) } 55%,70%{ transform:translateX(-90px) } 100%{ transform:translateX(0) } } .st-side .ss-train{ animation:ssTrain 14s ease-in-out infinite; }
+@keyframes ssBoat{ 0%,100%{ transform:translate(0,0) } 25%{ transform:translate(6px,-2px) } 50%{ transform:translate(12px,0) } 75%{ transform:translate(6px,2px) } } .st-side .ss-boat{ animation:ssBoat 6s ease-in-out infinite; } .st-side .ss-boat2{ animation-duration:8s; animation-delay:-3s; }
+@keyframes bkDrive{ 0%{ transform:translate(-60px,-30px); opacity:0 } 10%{ opacity:1 } 85%{ opacity:1 } 100%{ transform:translate(60px,30px); opacity:0 } }
+@keyframes bkDriveB{ 0%{ transform:translate(60px,30px); opacity:0 } 10%{ opacity:1 } 85%{ opacity:1 } 100%{ transform:translate(-60px,-30px); opacity:0 } }
+.bk-car0{ animation:bkDrive 8s linear infinite; } .bk-car1{ animation:bkDriveB 10s linear infinite; animation-delay:-4s; } .bk-car2{ animation:bkDrive 11s linear infinite; animation-delay:-7s; }
+@keyframes bkBike{ 0%,100%{ transform:translate(-14px,-7px) } 50%{ transform:translate(14px,7px) } } .bk-bike{ animation:bkBike 7s ease-in-out infinite; }
+@keyframes bkTrain{ 0%,15%{ transform:translate(0,0) } 55%,70%{ transform:translate(-45px,-22px) } 100%{ transform:translate(0,0) } } .bk-train{ animation:bkTrain 14s ease-in-out infinite; }
+@keyframes bkBoat{ 0%,100%{ transform:translate(0,0) rotate(0) } 50%{ transform:translate(4px,2px) } } .bk-boat{ animation:bkBoat 5s ease-in-out infinite; }
+</style>`); }catch(e){}
 try{ if(typeof render==='function'&&typeof page!=='undefined'&&page==='home'){ const y=window.scrollY; render(); window.scrollTo(0,y); } }catch(e){}
 // v162: ペットのアルバムの写真を押すと、大きく見える
 function paZoomOpen(fig){ let d=document.getElementById('paZoom'); if(!d){ d=document.createElement('div'); d.id='paZoom'; d.className='pa-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','写真を大きく見る'); document.body.appendChild(d);
