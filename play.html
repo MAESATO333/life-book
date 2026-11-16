@@ -19042,7 +19042,6 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // ゲームに入っているお知らせ（LBN_BUILTIN）＋ 管理者が Firebase の os/news に書いたお知らせ（{ n:[{ i, d:ミリ秒, t:題, b:説明 }] }）。新しい順に3つ、のこりは「これまでのお知らせ」。
 const LBN_BUILTIN=[
   { i:'gw-parade', d:Date.UTC(2026,10,16,14,17), t:'Gateway に、乗り物が走る街ができました🚌✈️', b:'Gateway の「いろんな街が、空に浮かんでいます」の下で、バスや車、電車、船、飛行機、ヘリコプターなど、いろんな乗り物が次々に走っています。' },
-  { i:'v175-street', d:Date.UTC(2026,10,16,14,46), t:'Life Home に「🌊 海辺の道」ができました', b:'人生の島と浮かぶ街の下に、海辺の道があります。バス・車・バイク・自転車・救急車・タクシー・トラック、高架の電車や新幹線、海の船やヨット、空の飛行機やヘリコプターが、いろいろな組み合わせで次々に走っていきます。' },
   { i:'v175-park', d:Date.UTC(2026,10,16,14,45), t:'公園のペットたちが、道の上を走るようになりました🐾', b:'公園の道を広くして、ペットたちが道の上を走るようにしました。左を向いて、右から左へ。足を動かして走る子、とても速い子、ひと休みする子もいます。' },
   { i:'v174-park', d:Date.UTC(2026,10,16,13,32), t:'知り合いのペットたちが、公園を走るようになりました🐾', b:'Life Home のニュースの上で、ペットたちが公園の中を走ったり、ジャンプしたり、ひと休みしたりしながら通りすぎていきます。ペットを押すと大きくなって、Higher Self の名前や、さいきんのおしゃべりが見られます。その下では、ペットたちのおしゃべりが電光掲示板のように流れます。' },
   { i:'v174-street', d:Date.UTC(2026,10,16,13,31), t:'街の絵が、横はばいっぱいに広がりました🏙', b:'広い画面では、街の絵が横はばいっぱいになり、たくさんの車やバイクが走ります。うしろのビルや港の景色も、乗り物と同じくらいリアルに描きなおしました。' },
@@ -19297,7 +19296,9 @@ function lbStreetAnchor(app){ const home=app.querySelector('.home'); let a=app.q
 function lbStreetFix(){ try{ const app=document.getElementById('app'); const el=app&&app.querySelector('.lbst'); if(!el) return; const anc=lbStreetAnchor(app); if(anc&&anc.nextElementSibling!==el&&anc.parentNode){ anc.after(el); if(_lbStC&&typeof lbAnimSync==='function') lbAnimSync(el,_lbStC.t0); } }catch(e){} }
 var _lbStC=null;
 setInterval(lbStreetFix,1200);
-function lbStreetPlace(){ try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home') return; if(app.querySelector('.lbst')){ lbStreetFix(); return; }
+// v175.4：MITSUさん「今は消して」→ Life Home には出さない（true にすると、また出る）。?view=street はそのまま
+var LB_STREET_ON=false;
+function lbStreetPlace(){ try{ const app=document.getElementById('app'); if(!LB_STREET_ON) return; if(!app||typeof page==='undefined'||page!=='home') return; if(app.querySelector('.lbst')){ lbStreetFix(); return; }
   // v175d：同じ時間帯・同じ年の間は、同じ絵をそのまま使い、動きを続きから（30秒ごとの描きなおしで止まって見えないように）
   let key=''; try{ key=cur.P.seed+'|'+clock().age+'|'+lbStTod(); }catch(_){}
   let el; if(_lbStC&&_lbStC.key===key){ el=_lbStC.el; } else { const h=lbStreetCardHTML(); if(!h) return; const box=document.createElement('div'); box.innerHTML=h; el=box.firstElementChild; _lbStC={ key, el, t0:performance.now() }; }
