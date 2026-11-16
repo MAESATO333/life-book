@@ -18411,7 +18411,7 @@ function flRefreshTile(){ const t=document.querySelector('.fl-tile'); if(t){ con
 function flShelf(){ return (store.get(KEY_FLSHELF,[])||[]).filter(v=>v&&v.items&&v.items.length).slice(0,FL_SHELF_MAX); }
 function flShelfAdd(items,ves,by,from){ const L=flShelf(); if(L.length>=FL_SHELF_MAX) return false; L.push({ items:items.map(x=>({ f:x.f, c:x.c })), ves:ves==='wrap'?'vase':(ves||'vase'), by:by||'', from:from||'', t:Date.now() }); store.set(KEY_FLSHELF,L); return true; }
 // 棚の板と花びん（x0〜x1 の幅に、n こを2段で並べる）
-function flShelfSVG(L,x0,x1,y,rowH,vw,y1){ L=L||flShelf(); if(!L.length) return ''; if(y1==null) y1=y; const F=v=>(+v).toFixed(1); const per=L.length>5?Math.ceil(L.length/2):L.length; const rows=L.length>5?2:1; const th=vw*.14, ins=vw*.25; let s='<g class="fl-shelf">';
+function flShelfSVG(L,x0,x1,y,rowH,vw,y1,nr){ L=L||flShelf(); if(!L.length) return ''; if(y1==null) y1=y; const F=v=>(+v).toFixed(1); const rows=nr||(L.length>5?2:1); const per=Math.ceil(L.length/rows); const th=vw*.14, ins=vw*.25; let s='<g class="fl-shelf">';
   const Y=(r,t)=>y+(y1-y)*t-r*rowH;
   for(let r=0;r<rows;r++){ const a=Y(r,0), b=Y(r,1); s+=`<polygon points="${F(x0)},${F(a)} ${F(x1)},${F(b)} ${F(x1)},${F(b+th)} ${F(x0)},${F(a+th)}" fill="#C49A6C"/><polygon points="${F(x0)},${F(a+th)} ${F(x1)},${F(b+th)} ${F(x1)},${F(b+th*1.5)} ${F(x0)},${F(a+th*1.5)}" fill="#9C7A55"/>`;
     [[x0+ins,a],[x1-ins,b]].forEach(([bx,by])=>{ s+=`<rect x="${F(bx-vw*.04)}" y="${F(by+th)}" width="${F(vw*.08)}" height="${F(vw*.3)}" fill="#9C7A55"/>`; });
@@ -18503,8 +18503,21 @@ function flRoomSVG(w,x,y,rm){ rm=rm||store.get(KEY_FLROOM,null); if(!rm||!rm.ite
   // 小さなテーブルの上に、花びん・一輪ざし・生け花をのせる（床に直接おかない）
   const tw=w*.62, th=w*.34, tx=x-tw/2, ty=y-th; const tb=`<g class="fl-table"><rect x="${F(tx+tw*.12)}" y="${F(ty+th*.18)}" width="${F(tw*.08)}" height="${F(th*.82)}" fill="#9C7A55"/><rect x="${F(tx+tw*.8)}" y="${F(ty+th*.18)}" width="${F(tw*.08)}" height="${F(th*.82)}" fill="#9C7A55"/><rect x="${F(tx)}" y="${F(ty)}" width="${F(tw)}" height="${F(th*.2)}" rx="1.5" fill="#C49A6C"/><rect x="${F(tx+tw*.05)}" y="${F(ty+th*.2)}" width="${F(tw*.9)}" height="${F(th*.08)}" fill="#A8845C"/><rect x="${F(tx+tw*.12)}" y="${F(ty-th*.06)}" width="${F(tw*.76)}" height="${F(th*.08)}" rx="1" fill="${ves==='ike'?'#E8DCC8':'#FFF6F0'}"/></g>`;
   const vy=ty+w*.04; return tb+a.replace('<svg class="fl-art"',`<svg class="fl-art fl-room" x="${F(x-w/2)}" y="${F(vy-w*.93)}" width="${w}" height="${w}"`); }
-{ const SI=ssInterior; ssInterior=function(S,ctx,kind,tod,r){ const out=SI.apply(this,arguments); try{ if(_flOn&&['living','kitchen','bedroom','study','washitsu','kids','nursery','music','atelier'].includes(kind)){ const q=S.p(10.5,0,.8); const s=flRoomSVG(58,q[0],q[1]); if(s) S.raw(-(.8)*100+9,s); const L=flShelf(); if(L.length){ const a=S.p(.5,8.8,SS_D-.25), b=S.p(10,8.8,SS_D-.25); S.raw(-(SS_D-.25)*100+50,flShelfSVG(L,a[0],b[0],a[1],30,25)); } } }catch(e){} return out; }; }
-{ const SC=scInterior; scInterior=function(S,ctx,kind){ const out=SC.apply(this,arguments); try{ if(_flOn&&kind==='room'){ const q=S.p(3.6,-2.2,0); const s=flRoomSVG(30,q[0],q[1]); if(s) S.deco(3.6-2.2+.5,s); const L=flShelf(); if(L.length){ const a=S.p(-4.66,-.2,1.45), b=S.p(-4.66,2.7,1.45); S.deco(-2,flShelfSVG(L,b[0],a[0],b[1],17,16,a[1])); } } }catch(e){} return out; }; }
+// v171.8: 棚は窓や大きな家具のない、何もない壁に。花びんのうしろは、もようのない無地の壁にして、花束が映えるように
+var _flWall=null, _flObs=[];
+{ const RB=ssRoomBase; ssRoomBase=function(S,wall){ _flWall=wall; return RB.apply(this,arguments); }; }
+{ const WI=ssWindow; ssWindow=function(S,x,y,z,w,h){ try{ _flObs.push([x-.4,x+w+.4]); }catch(e){} return WI.apply(this,arguments); }; }
+function flShelfBest(W){ let best=1, bo=1e9; for(let x=-19;x<=13-W+.001;x+=.5){ let o=0; _flObs.forEach(([a,b])=>{ o+=Math.max(0,Math.min(b,x+W)-Math.max(a,x)); }); if(o<bo){ bo=o; best=x; } } return best; }
+function flShelfSpot(W){ const ok=x0=>!_flObs.some(([a,b])=>x0-.4<b&&x0+W+.4>a); const c=[]; for(let x=-19;x<=13-W+.001;x+=.5) c.push(x); c.sort((a,b)=>Math.abs(a-1)-Math.abs(b-1)); return c.find(ok); }
+{ const SI=ssInterior; ssInterior=function(S,ctx,kind,tod,r){ _flObs=[]; _flWall=null; const BX=S.box; S.box=function(x,y,z,w,h,d){ try{ if(d>=.15&&y+h>5.6&&z+d>=3&&w<30) _flObs.push([x,x+w]); }catch(e){} return BX.apply(this,arguments); };
+  let out; try{ out=SI.apply(this,arguments); } finally{ S.box=BX; }
+  try{ if(_flOn&&['living','kitchen','bedroom','study','washitsu','kids','nursery','music','atelier'].includes(kind)){ const q=S.p(10.5,0,.8); const s=flRoomSVG(58,q[0],q[1]); if(s) S.raw(-(.8)*100+9,s);
+    const L=flShelf(); if(L.length){ const two=L.length>5; let W=null, x0=null; for(const w of (two||L.length>3?[9,7.5,6,5,4]:[6.5,5.5,4.5,3.5])){ x0=flShelfSpot(w); if(x0!=null){ W=w; break; } } if(x0==null){ W=two?6:4.5; x0=flShelfBest(W); } const zW=SS_D-.12;
+      const nr=L.length>5?(W<6.5?3:2):(W<4.5&&L.length>2?2:1), per=Math.ceil(L.length/nr), rh=nr>2?2.3:2.8; const y0=nr===3?5.2:nr===2?6.2:7.2, yTop=Math.min(12.4,y0+rh*(nr-1)+2.9), pa=S.p(x0-.5,y0-.8,zW), pb=S.p(x0+W+.5,yTop,zW); const col=_flWall?bkShade(_flWall,.9):'#FFF8F0';
+      S.raw(-(SS_D-.3)*100-1,`<g class="fl-wall"><rect x="${f1(pa[0])}" y="${f1(pb[1])}" width="${f1(pb[0]-pa[0])}" height="${f1(pa[1]-pb[1])}" rx="4" fill="${col}"/><rect x="${f1(pa[0])}" y="${f1(pb[1])}" width="${f1(pb[0]-pa[0])}" height="${f1(pa[1]-pb[1])}" rx="4" fill="#FFFFFF" opacity=".4"/></g>`);
+      const a=S.p(x0,y0,SS_D-.25), b=S.p(x0+W,y0,SS_D-.25); S.raw(-(SS_D-.25)*100+50,flShelfSVG(L,a[0],b[0],a[1],rh*S.U,Math.min(25,rh*S.U*.9,(b[0]-a[0])/per*.95),null,nr)); } } }catch(e){} return out; }; }
+var _flIsoWall=null; { const WA=scWalls; scWalls=function(S,c){ _flIsoWall=c; return WA.apply(this,arguments); }; }
+{ const SC=scInterior; scInterior=function(S,ctx,kind){ const out=SC.apply(this,arguments); try{ if(_flOn&&kind==='room'){ const q=S.p(3.6,-2.2,0); const s=flRoomSVG(30,q[0],q[1]); if(s) S.deco(3.6-2.2+.5,s); const L=flShelf(); if(L.length){ const a=S.p(-4.66,.25,1.45), b=S.p(-4.66,2.75,1.45); const c=_flIsoWall?bkShade(bkShade(_flIsoWall,.94),.8):'#E8E2D8'; const q=[S.p(-4.68,0,1.05),S.p(-4.68,2.95,1.05),S.p(-4.68,2.95,3.0),S.p(-4.68,0,3.0)]; S.deco(-2.1,`<polygon points="${q.map(v=>v.map(f1).join(',')).join(' ')}" fill="${c}"/><polygon points="${q.map(v=>v.map(f1).join(',')).join(' ')}" fill="#FFFFFF" opacity=".3"/>`); S.deco(-2,flShelfSVG(L,b[0],a[0],b[1],17,16,a[1])); } } }catch(e){} return out; }; }
 try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .fl-tile .fl-tile-in{ display:flex; flex-direction:column; gap:6px; } .fl-tile-art{ width:120px; margin:0 auto; } .fl-tile-art svg,.fl-sel-art svg,.fl-got-art svg{ width:100%; height:auto; display:block; }
 .fl-tile-b{ display:flex; gap:8px; flex-wrap:wrap; } .fl-b2{ background:#FFE3EC!important; color:#C2476B!important; } .fl-new{ display:inline-block; margin-left:6px; min-width:20px; padding:0 6px; border-radius:999px; background:#E8508E; color:#fff; font-size:12px; text-align:center; }
@@ -18578,6 +18591,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v166: Life Home の上のほうに「✨ LIFE BOOKのニュース」。新しい機能・更新のお知らせ。
 // ゲームに入っているお知らせ（LBN_BUILTIN）＋ 管理者が Firebase の os/news に書いたお知らせ（{ n:[{ i, d:ミリ秒, t:題, b:説明 }] }）。新しい順に3つ、のこりは「これまでのお知らせ」。
 const LBN_BUILTIN=[
+  { i:'v171-machi', d:Date.UTC(2026,10,16,7,5), t:'世界の街を、空からお散歩できる「🟡街ブラ」ができました🏙', b:'Life Home の「🟡 街ブラへ行く」から、地図で街をえらぶと、空に浮かぶ街の動く写真が見られます。乗り物が走り、その街の今の時間で、朝・昼・夕方・夜が変わります。気に入った景色は📸で撮って、観光アルバムに残せます。' },
   { i:'v170-flower', d:Date.UTC(2026,10,16,7), t:'お花を、部屋に飾ったり、友だちに贈ったりできるようになりました💐', b:'Life Home の「💐 お花」から、好きなお花と色をえらんで、花びん・一輪ざし・生け花・花束にできます。部屋に飾ると、部屋の絵に出ます。友だちには、5・7・5の俳句をそえて贈れます。' },
   { i:'v169-veh', d:Date.UTC(2026,10,16,5), t:'街や空の乗り物が、動くようになりました🚗✈️', b:'車・バイク・自転車・電車・新幹線・飛行機・気球・船・ロケット・人工衛星・UFOが、街や空を走ったり飛んだりします。その時代や国に合った乗り物が出てきます。' },
   { i:'v162-gift', d:Date.UTC(2026,10,16,3), t:'友だちのペットに「可愛い！」とごはんを贈れるようになりました🎁', b:'うちのペットの「ペットのつながりの木」の下にある「🎁 友だちのペットに贈る」から、友だちのペットに「💗 可愛い！」と「🎁 ごはん」を、1日1回ずつ贈れます。届いたプレゼントは、ペットのページの「💌 届いたプレゼント」に出て、ペットの愛情もふえます。' },
