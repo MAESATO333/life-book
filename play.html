@@ -19677,6 +19677,12 @@ function mbPlate(name,addr){ const w=Math.max(name.length*34,addr.length*19)+70;
 // ===== 街ブラ：空の乗り物（画面の外から来て、旋回して、画面の外へ飛び去る） =====
 // 画面の座標で道すじを作り、animateMotion で動かす。左右の向きは進む向きで入れかえる。
 function mbAirPts(kind,r){ const P=[]; const add=(x,y)=>P.push([x,y]);
+  // 空港の画面の空の飛行機：島より上の高い空だけを飛ぶ（滑走路の飛行機とすれちがわない）
+  if(kind==='planeHi'){ const yA=50+r()*40, yB=40+r()*50, xc=420+r()*200, R=50+r()*20; const loop=r()<.6;
+    for(let x=-260;x<=xc;x+=12) add(x,yA);
+    if(loop){ const cy=yA+R*.6; for(let a=-Math.PI/2;a<=Math.PI*1.5;a+=.08) add(xc+Math.cos(a)*R*1.4,cy+Math.sin(a)*R*.6); }
+    for(let x=xc;x<=1260;x+=12){ const t=(x-xc)/(1260-xc); add(x,yA+(yB-yA)*t-Math.sin(t*Math.PI)*20); }
+    return { P, face:1 }; }
   if(kind==='plane'){ const yA=90+r()*170, yB=60+r()*150; const loop=r()<.6; const xc=380+r()*260, R=80+r()*60;
     if(loop){ for(let x=-260;x<=xc;x+=12) add(x,yA+(x-xc)*.05*(r()<.5?1:1));
       const cy=yA+R; for(let a=-Math.PI/2;a<=Math.PI*1.5;a+=.08) add(xc+Math.cos(a)*R*1.2,cy+Math.sin(a)*R);
@@ -19725,6 +19731,30 @@ function mbTakeoff(S,laneY,x0,x1,dir,col,o){ o=o||{}; mbMove(S,laneY,x0,x1,dir,o
   S.box(bx+.4,y-.08,0,.1,.1,.3,'#555'); S.box(bx+2.6,y-.08,0,.1,.1,.3,'#555'); S.box(nose-.03,y-.05,.45,.06,.1,.1,'#FFF3B0',null,{ lit:1 }); },
   o.land?{ band:9e6, keys:[[0,-1.6,30],[.5,.55,0],[.8,.82,0],[1,.82,0]], spl:['.3 .2 .7 1','.1 .5 .4 1','0 0 1 1'], durK:2.4 }
        :{ band:9e6, keys:[[0,0,0],[.1,0,0],[.45,.55,0],[1,2.6,30]], spl:['0 0 1 1','.55 0 1 1','.2 .1 .6 1'], durK:2.4 }); }
+// ===== 飛行機は1つの画面に2機まで。ぶつからないように、時間をずらして飛ぶ（MITSUさん 11-16） =====
+// 空港の画面：滑走路の飛行機は1機だけ（着陸→止まる→ターミナルへ→出てきて→離陸）。空の飛行機は、滑走路の飛行機が地上にいる間だけ飛ぶ。
+// 空港のない画面：空の飛行機は2機まで。1機目と2機目は半分ずつ時間をずらして、同時には空にいない。
+const MB_AIR_D=44, MB_RW_D=48, MB_RW_WIN=[.24,.76];
+function mbAirSlot(S){ const A=S._air||(S._air={ rw:false, n:0 }); if(A.rw){ if(A.n>=1) return null; A.n++; return { dur:MB_RW_D, w0:MB_RW_WIN[0], w1:MB_RW_WIN[1] }; }
+  if(A.n>=2) return null; const i=A.n++; return { dur:MB_AIR_D, w0:i?.5:0, w1:i?.96:.46 }; }
+mbPlane=function(S,y,z,x0,x1,dir,col,o){ o=o||{}; const sl=mbAirSlot(S); if(!sl) return; const dur=sl.dur, delay=((-sl.w0)%1+1)%1*dur;
+  mbAirGroup(S,0,0,0,S._air.rw?'planeHi':'plane',dur,delay,()=>{ const L=o.small?2:3.2, bx=-L, yy=0, zz=0;
+    S.box(bx,yy-.3,zz,L,.6,.55,col,mbWin(bx,yy-.3,zz,L,.6,.55,{ style:'band', fz:.6, wc:'#2B3A55' }));
+    S.box(bx+L*.38,yy-1.7,zz+.15,.7,3.4,.1,mbShade(col,.92)); S.box(bx+L*.4,yy-1.1,zz,.4,.22,.18,'#C9CED4'); S.box(bx+L*.4,yy+.88,zz,.4,.22,.18,'#C9CED4');
+    S.box(bx,yy-.05,zz+.55,.35,.1,.7,o.tail||'#E85D75'); S.box(bx,yy-.7,zz+.45,.35,1.4,.08,mbShade(col,.92));
+    const t=S.p(bx,yy,zz+.4), e=S.p(bx-7,yy,zz+.4); grpPost(S,`<line x1="${F1(t[0])}" y1="${F1(t[1])}" x2="${F1(e[0])}" y2="${F1(e[1])}" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".5"/><circle class="mb-blink" cx="${F1(t[0])}" cy="${F1(t[1]-6)}" r="2" fill="#FF4D4D"/>`); },
+    { travel:sl.w1-sl.w0 }); };
+// 滑走路の飛行機（1機）：左上から下りてきて着陸→滑走路の先で止まる→ターミナルへ（見えなくなる）→滑走路のはじめに出てくる→待つ→離陸→右上へ飛び去る
+function mbRunway(S,laneY,x0,x1,col,o){ o=o||{}; const A=MB_A, L=x1-x0, dur=MB_RW_D; (S._air||(S._air={ rw:false, n:0 })).rw=true;
+  const K=[[0,-1.6,30],[.18,.42,0],[.27,.85,0],[.40,.85,0],[.41,.85,0],[.42,0,0],[.62,0,0],[.80,.55,0],[1,2.6,30]];
+  const spl=['.3 .2 .7 1','.1 .5 .4 1','0 0 1 1','0 0 1 1','0 0 1 1','0 0 1 1','.55 0 1 1','.2 .1 .6 1'];
+  const vals=K.map(k=>`${F1(L*A*k[1])} ${F1(L*A/2*k[1]-k[2]*A)}`).join(';'), kt=K.map(k=>k[0]).join(';');
+  const anim=`<animateTransform attributeName="transform" type="translate" values="${vals}" keyTimes="${kt}" calcMode="spline" keySplines="${spl.join(';')}" dur="${dur}s" repeatCount="indefinite"/>`
+    +`<animate attributeName="opacity" values="1;1;0;0;1;1" keyTimes="0;.395;.405;.425;.435;1" dur="${dur}s" repeatCount="indefinite"/>`;
+  S.group(9e6,0,()=>{ const y=laneY, Lp=3.2, bx=x0-Lp, nose=bx+Lp;
+    S.box(bx,y-.3,.3,Lp,.6,.55,col,mbWin(bx,y-.3,.3,Lp,.6,.55,{ style:'band', fz:.6, wc:'#2B3A55' })); S.box(bx+1.2,y-1.7,.45,.7,3.4,.1,'#E6E9EE');
+    S.box(bx,y-.05,.85,.35,.1,.7,o.tail||'#3D9BD6'); S.box(bx,y-.6,.75,.35,1.2,.08,'#E6E9EE'); S.box(bx+1.25,y-1.1,.3,.4,.22,.18,'#C9CED4'); S.box(bx+1.25,y+.88,.3,.4,.22,.18,'#C9CED4');
+    S.box(bx+.4,y-.08,0,.1,.1,.3,'#555'); S.box(bx+2.6,y-.08,0,.1,.1,.3,'#555'); S.box(nose-.03,y-.05,.45,.06,.1,.1,'#FFF3B0',null,{ lit:1 }); },{ anim }); }
 // ===== 街ブラ：街ごとの3枚 =====
 const XA=MB_X0, XB=MB_X0+MB_NX, YA=MB_Y0, YB=MB_Y0+MB_NY;
 // 共通：ビル街ブロック
@@ -19824,7 +19854,7 @@ const MB_CITIES=[
    for(let x=XA+.5;x<XB;x+=2.4){ mbTree(S,x,-3.5,'palm',{ s:.8 }); }
    mbHouses(S,r,XA,-3,XB,2,{ oki:1, lot:[2,3], tree:.35, treeKind:'palm' });
    [[-9,3.3,'#FF8FAB'],[-4,3.6,'#4E8FD9'],[2,3.2,'#F2C94C'],[8,3.5,'#6FBF73']].forEach(([x,y,c])=>{ S.box(x,y,0,.08,.08,1.2,'#FFFFFF'); S.box(x-.6,y-.6,1.2,1.2,1.2,.15,c); });
-   mbTakeoff(S,-5.5,XA,XB,1,'#F4F6F8',{ delay:.35 }); mbTakeoff(S,-4.6,XA,XB,-1,'#F4F6F8',{ land:1, delay:.85, tail:'#F28A2E', speed:2.4 });
+   mbRunway(S,-5,XA,XB,'#F4F6F8',{ tail:'#F28A2E' });
    mbPlane(S,-9,16,-30,30,-1,'#F4F6F8',{ tail:'#F28A2E', delay:.5, speed:4 });
    for(let i=0;i<4;i++) mbSurfer(S,6+(i%2)*.1,XA,XB,i%2?1:-1,r); mbBoat(S,9,XA,XB,-1,'tour','#FFFFFF',r,{ speed:.6, roof:'#45D1C6' });
    for(let i=0;i<6;i++) mbWalker(S,3+r()*1.5,XA+1,XB-1,r()<.5?1:-1,r,{ speed:.2 });
@@ -20247,7 +20277,7 @@ airport(P){ const { S,I,r }=mbgStart(P,[[-7,3],[1,2]]); I.set(XA,-7,MB_NX,3,'a')
   S.box(-12,-3.5,0,5,3,2,'#D7DCE2'); S.box(-12.2,-3.7,2,5.4,3.4,.3,'#B8BEC6');
   if(P.lm) lmPut(S,P.lm,5,-2); else mbgTrees(S,r,I,10,-6,-3.5,12,0,P.tree||'round',.7);
   mbgBlk(S,r,P,XA,3,XB,YB,.7);
-  mbTakeoff(S,-5.5,XA,XB,1,'#F4F6F8',{ delay:.35, tail:P.tail||'#E85D75' }); mbTakeoff(S,-4.6,XA,XB,-1,'#F4F6F8',{ land:1, delay:.85, tail:P.tail2||'#3D7CC9', speed:2.4 });
+  mbRunway(S,-5.5,XA,XB,'#F4F6F8',{ tail:P.tail||'#E85D75' });
   mbgCars(S,r,P,1,4); return mbgEnd(S,I,P); },
 // 10) お寺・神社・宮殿の街
 temple(P){ const { S,I,r }=mbgStart(P,[[6,2]]); mbXRoad(S,I,6); I.set(-1,-3,3,9,'p'); I.set(-6,-10,13,7,P.court||'p');
