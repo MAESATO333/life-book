@@ -10961,7 +10961,7 @@ function receiveFriend(o){ if(o.id===myId()) return 'self'; const L=store.get(KE
   // 出会いの日の起点（ふたりで同じになるように）：リンクを押した側は押した時、届いた側は相手が押した時
   const a0=old&&old.a0?old.a0:(old&&old.got?old.got:(o.lk||(!o.re&&!o.g&&typeof o.t!=='number')?now:Math.min(now,typeof o.g==='number'?o.g:(typeof o.t==='number'?o.t:now))));
   const rec=Object.assign({},o,{ got:(old?old.got:now), a0, g:(typeof o.g==='number'?o.g:(old&&old.g)||undefined) }); delete rec.lk;
-  if(i>=0){ L[i]=rec; store.set(KEY_FRIEND,L); return 'update'; } L.unshift(rec); store.set(KEY_FRIEND,L.slice(0,20)); return 'ok'; }
+  if(i>=0){ L[i]=rec; store.set(KEY_FRIEND,L); return 'update'; } L.unshift(rec); store.set(KEY_FRIEND,L.slice(0,80)); return 'ok'; }
 // 紹介を受けた人から、紹介した人へ「つながったよ」を知らせる（サーバーを使わないので、返事のリンクを送ってもらう）
 function frReplies(){ return store.get(KEY_FRREPLY,[]); }
 function frReplyDone(id){ store.set(KEY_FRREPLY,frReplies().filter(x=>x.id!==id)); }
@@ -18347,7 +18347,7 @@ const FL_PAL={ r:['#E8394A','赤'], w:['#FBFAF5','白'], p:['#F7A1BE','ピンク
 const FL=FL_RAW.split('\n').map((l,i)=>{ const [n,s,c]=l.split('|'); return { i, n, s, c:c.split('') }; });
 const FL_MAX=10;
 const FL_VES={ vase:'花びん', one:'一輪ざし', ike:'生け花', wrap:'花束' };
-const KEY_FLROOM='fl.room', KEY_FLGOT='fl.got', KEY_FLPICK='fl.pick';
+const KEY_FLROOM='fl.room', KEY_FLGOT='fl.got', KEY_FLPICK='fl.pick', KEY_FLALB='fl.album';
 function flC(k){ return (FL_PAL[k]||FL_PAL.p)[0]; }
 function flSh(c,k){ try{ return bkShade(c,k); }catch(e){ return c; } }
 // ひとつの花（x,y は花の中心。r は大きさ）
@@ -18387,7 +18387,7 @@ function flNames(items){ return items.map(x=>`${FL[x.f].n}（${(FL_PAL[x.c]||[])
 function flMora(s){ s=String(s||'').replace(/[\s　]/g,''); if(!s) return 0; if(/[^ぁ-ゖァ-ヺー・、。！？!?〜～]/.test(s)) return null; return s.replace(/[ゃゅょぁぃぅぇぉゎャュョァィゥェォヮ・、。！？!?〜～]/g,'').length; }
 const FL_H5=['いつまでも','ありがとう','おめでとう','はなひらく','ほほえんで','だいすきよ','またあおう','はるのかぜ','なつのそら','あきのよる','ふゆのあさ','きみのため','きょうのひに','あたたかい','かがやいて'];
 const FL_H7=['あなたとともに','こころをこめて','はなたばおくる','えがおがさいた','しあわせねがう','ひかりのなかで','いつもみまもる','かぜにのせたよ','うまれたことに','であえたきせき','ゆめがかなうよ','あしたもいっしょ'];
-const FL_OCC=['なんでもない日','記念日','お誕生日','おめでとう','ありがとう','おつかれさま','元気になってね'];
+const FL_OCC=['なんでもない日','記念日','お誕生日','おめでとう','ありがとう','おつかれさま','元気になってね','あなたの幸せを祈ります','また、遊びましょう','また、会いたいです','昨日は、楽しかった。ありがとう','この前は、楽しかった。ありがとう','今度、食事に行きましょう','ヒーリングお疲れ様','チャネリングお疲れ様','宇宙人コンタクト！してください','あなたは、きっと大丈夫👌','あなたなら、出来る！','上級ヒーリング、お疲れ様！'];
 const FL_OCC_H={ 'お誕生日':[['おめでとう','うまれたことに','ありがとう']], 'ありがとう':[['いつまでも','あなたとともに','ありがとう']], 'おめでとう':[['おめでとう','えがおがさいた','はるのかぜ']], '記念日':[['きょうのひに','であえたきせき','ありがとう']], '元気になってね':[['ほほえんで','しあわせねがう','はるのかぜ']] };
 function flHaikuIdea(occ,k){ const fix=FL_OCC_H[occ]; if(fix&&!k) return fix[0].slice(); const r=()=>Math.floor(Math.random()*999); return [FL_H5[r()%FL_H5.length],FL_H7[r()%FL_H7.length],FL_H5[r()%FL_H5.length]]; }
 // --- 状態 ---
@@ -18400,18 +18400,28 @@ function flIsOne(g){ const b=flDecode(g.b); return b.items.length===1&&b.ves==='
 function flGotCount(){ let c=store.get('fl.gotN',null); if(!c){ const L=store.get(KEY_FLGOT,[]); c={ b:L.filter(g=>!flIsOne(g)).length, o:L.filter(flIsOne).length }; store.set('fl.gotN',c); } return c; }
 function flGotCountHTML(){ const c=flGotCount(); if(!c.b&&!c.o) return ''; return `<p class="fl-cnt">💐 もらった花束 <b>${c.b}</b>　🌷 もらった一輪 <b>${c.o}</b>　（ぜんぶで ${c.b+c.o}）</p>`; }
 function flTileHTML(){ const rm=store.get(KEY_FLROOM,null), got=store.get(KEY_FLGOT,[]); const un=got.filter(g=>!g.seen).length;
-  return `<section class="hm-tile fl-tile"><h3>💐 お花${un?`<span class="fl-new">${un}</span>`:''}</h3><div class="fl-tile-in">${flGotCountHTML()}${rm&&rm.items&&rm.items.length?`<div class="fl-tile-art">${flArt(rm.items,rm.ves)}</div><p class="tiny">部屋に飾っています：${esc(flNames(rm.items))}（${FL_VES[rm.ves==='wrap'?'vase':rm.ves]||''}）</p><div class="fl-tile-b"><button type="button" class="mp-btn fl-b2" data-fl-change="1">🔄 飾るお花を変える</button><button type="button" class="linkish" data-fl-clear="1">片づける</button></div>`:'<p class="tiny muted">好きなお花をえらんで、部屋に飾ったり、花束にして友だちに贈ったりできます。</p>'}
-    <div class="fl-tile-b"><button type="button" class="mp-btn" data-fl-open="pick">💐 お花をえらぶ</button><button type="button" class="mp-btn fl-b2" data-fl-open="got">💌 届いたお花${got.length?`（${got.length}）`:''}</button></div></div></section>`; }
+  return `<section class="hm-tile fl-tile"><h3>💐 お花${un?`<span class="fl-new">${un}</span>`:''}</h3><div class="fl-tile-in">${flGotCountHTML()}${rm&&rm.items&&rm.items.length?`<div class="fl-tile-art">${flArt(rm.items,rm.ves)}</div><p class="tiny">部屋に飾っています：${esc(flNames(rm.items))}（${FL_VES[rm.ves==='wrap'?'vase':rm.ves]||''}）</p><div class="fl-tile-b"><button type="button" class="mp-btn" data-fl-photo="1">📷 写真に撮る</button><button type="button" class="mp-btn fl-b2" data-fl-change="1">🔄 飾るお花を変える</button><button type="button" class="linkish" data-fl-clear="1">片づける</button></div>`:'<p class="tiny muted">好きなお花をえらんで、部屋に飾ったり、花束にして友だちに贈ったりできます。</p>'}
+    <div class="fl-tile-b"><button type="button" class="mp-btn" data-fl-open="pick">💐 お花をえらぶ</button><button type="button" class="mp-btn fl-b2" data-fl-open="got">💌 届いたお花${got.length?`（${got.length}）`:''}</button>${(()=>{ const n=store.get(KEY_FLALB,[]).length; return n?`<button type="button" class="mp-btn fl-b2" data-fl-open="album">📖 花束アルバム（${n}）</button>`:''; })()}</div></div></section>`; }
 function flPlace(){ try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home'||app.querySelector('.fl-tile')) return; const t=app.querySelector('.hm-mypet'); if(!t) return; const box=document.createElement('div'); box.innerHTML=flTileHTML(); t.after(box.firstElementChild); }catch(e){} }
 (function(){ if(typeof render1!=='function') return; const _r=render1; render1=function(){ const r=_r.apply(this,arguments); flPlace(); return r; }; })();
 setTimeout(flPlace,0);
 function flRefreshTile(){ const t=document.querySelector('.fl-tile'); if(t){ const box=document.createElement('div'); box.innerHTML=flTileHTML(); t.replaceWith(box.firstElementChild); } }
+// --- 花束アルバム：部屋に飾ったお花を写真に撮る ---
+function flPhotoSVG(ph){ const n=ph.t||0; const win=n%3, wall=['#FFF3E6','#F3F7FF','#FFF0F4'][n%3];
+  return `<svg class="fl-pho" viewBox="0 0 200 150" role="img" aria-label="${esc(flNames(ph.items))}の写真"><rect width="200" height="150" fill="${wall}"/><rect y="112" width="200" height="38" fill="#E7D2B6"/><rect y="110" width="200" height="3" fill="#D2B994"/>
+   ${win===0?'<rect x="18" y="20" width="46" height="56" rx="3" fill="#BFE3F7" stroke="#fff" stroke-width="4"/><line x1="41" y1="20" x2="41" y2="76" stroke="#fff" stroke-width="3"/>':win===1?'<rect x="150" y="26" width="34" height="26" rx="2" fill="#FFE8B8" stroke="#C49A6C" stroke-width="3"/><circle cx="167" cy="39" r="6" fill="#FFB3C8"/>':'<rect x="22" y="18" width="2" height="40" fill="#C49A6C"/><path d="M14 58 h18 l-3 10 h-12z" fill="#9BD3A8"/>'}
+   ${flRoomSVG(112,104,136,ph)}</svg>`; }
+function flTakePhoto(){ const rm=store.get(KEY_FLROOM,null); if(!rm||!rm.items||!rm.items.length) return false; const L=store.get(KEY_FLALB,[]); L.push({ items:rm.items.map(x=>({ f:x.f, c:x.c })), ves:rm.ves, t:Date.now(), by:rm.by||'' }); while(L.length>120) L.shift(); store.set(KEY_FLALB,L); return true; }
+function flAlbumHTML(){ const L=store.get(KEY_FLALB,[]); const rm=store.get(KEY_FLROOM,null); const can=rm&&rm.items&&rm.items.length;
+  const top=can?`<div class="fl-act"><button type="button" class="mp-btn" data-fl-photo="1">📷 いま飾っているお花を写真に撮る</button></div>`:'<p class="tiny muted">お花を部屋に飾ると、写真に撮れます。</p>';
+  if(!L.length) return top+'<p class="tiny muted">まだ写真はありません。部屋に飾ったお花を撮ると、ここに増えていきます。</p>';
+  return top+`<p class="tiny">📖 写真 ${L.length}枚</p><ul class="fl-alb">${L.map((ph,i)=>({ ph,i })).reverse().map(({ ph,i })=>{ const d=new Date(ph.t); return `<li><figure>${flPhotoSVG(ph)}<figcaption>${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日${ph.by?`・${esc(ph.by)}さんのお花`:''}<br><span class="tiny muted">${esc(flNames(ph.items))}</span></figcaption></figure><button type="button" class="linkish fl-alb-x" data-fl-phdel="${i}">この写真を消す</button></li>`; }).join('')}</ul>`; }
 // --- ダイアログ ---
 function flOpen(tab){ if(tab) _flTab=tab; let d=document.getElementById('flDlg'); if(!d){ d=document.createElement('div'); d.id='flDlg'; d.className='pa-ov fl-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','お花'); document.body.appendChild(d);
     d.addEventListener('click',flClick); d.addEventListener('input',flInput); d.addEventListener('change',flInput); }
   d.innerHTML=`<div class="pa-in fl-in"><button type="button" class="pa-x" data-fl-x="1" aria-label="閉じる">×</button><h3 class="fl-h">💐 お花</h3>
-   <div class="fl-tabs" role="tablist">${[['pick','えらぶ・飾る'],['send','贈る'],['got','届いたお花']].map(([k,t])=>`<button type="button" role="tab" aria-selected="${_flTab===k}" class="fl-tab${_flTab===k?' on':''}" data-fl-tab="${k}">${t}</button>`).join('')}</div>
-   <div class="fl-body">${_flTab==='send'?flSendHTML():_flTab==='got'?flGotHTML():flPickHTML()}</div>
+   <div class="fl-tabs" role="tablist">${[['pick','えらぶ・飾る'],['send','贈る'],['got','届いたお花'],['album','花束アルバム']].map(([k,t])=>`<button type="button" role="tab" aria-selected="${_flTab===k}" class="fl-tab${_flTab===k?' on':''}" data-fl-tab="${k}">${t}</button>`).join('')}</div>
+   <div class="fl-body">${_flTab==='send'?flSendHTML():_flTab==='got'?flGotHTML():_flTab==='album'?flAlbumHTML():flPickHTML()}</div>
    ${_flMsg?`<p class="fl-msg" role="status">${esc(_flMsg)}</p>`:''}<button type="button" class="pa-x pa-back" data-fl-x="1">← もどる</button></div>`;
   d.hidden=false; document.body.classList.add('gsz-open'); }
 function flClose(){ const d=document.getElementById('flDlg'); if(d){ d.hidden=true; d.innerHTML=''; } document.body.classList.remove('gsz-open'); _flMsg=''; flRefreshTile(); }
@@ -18427,7 +18437,7 @@ function flFriends(){ try{ return (typeof fbFriends==='function'?fbFriends():sto
 function flSendHTML(){ const pk=flPick(); if(!pk.items.length) return `<p>まず「えらぶ・飾る」で、お花をえらんでね。</p><button type="button" class="mp-btn" data-fl-tab="pick">💐 お花をえらぶ</button>`;
   const fr=flFriends(); if(!_flH) _flH=flHaikuIdea(_flOcc); const m=_flH.map(flMora); const want=[5,7,5];
   return `<div class="fl-send"><div class="fl-sel-art">${flArt(pk.items,pk.ves)}</div><div class="fl-sel-r"><p class="tiny">${esc(flNames(pk.items))}・${pk.items.length===1&&pk.ves==='one'?'一輪':FL_VES[pk.ves]}</p>
-   <label class="fl-lb">だれに贈る？<select id="flTo">${fr.length?fr.map(f=>`<option value="${esc(f.id)}"${_flTo===f.id?' selected':''}>${esc(f.by||'友だち')}さん</option>`).join(''):'<option value="">（友だちがまだいません）</option>'}</select></label>
+   <label class="fl-lb">だれに贈る？<select id="flTo">${fr.length?`<option value=""${_flTo?'':' selected'}>Higher Self名を選ぶ</option>`+fr.map(f=>`<option value="${esc(f.id)}"${_flTo===f.id?' selected':''}>${esc(f.by||'友だち')}さん</option>`).join(''):'<option value="">（友だちがまだいません）</option>'}</select></label>
    <label class="fl-lb">どんな日？<select id="flOcc">${FL_OCC.map(o=>`<option${o===_flOcc?' selected':''}>${o}</option>`).join('')}</select></label>
    <p class="fl-lb">メッセージは、5・7・5の俳句で</p>
    <div class="fl-hk">${[0,1,2].map(i=>`<div class="fl-hl"><input type="text" id="flH${i}" maxlength="16" value="${esc(_flH[i]||'')}" aria-label="${['はじめの5音','まんなかの7音','おわりの5音'][i]}"><span class="fl-mc ${m[i]===want[i]?'ok':''}">${m[i]==null?'読みで'+want[i]+'音':m[i]+'/'+want[i]+'音'}</span></div>`).join('')}</div>
@@ -18445,6 +18455,8 @@ function flClick(e){ const t=e.target; const d=document.getElementById('flDlg');
   const vs=t.closest('[data-fl-ves]'); if(vs){ flPick().ves=vs.dataset.flVes; flSavePick(); flOpen(); return; }
   if(t.closest('[data-fl-room]')){ const pk=flPick(); store.set(KEY_FLROOM,{ items:pk.items.slice(), ves:pk.ves, t:Date.now() }); _flMsg=`部屋に${FL_VES[pk.ves==='wrap'?'vase':pk.ves]}で飾りました🌷 いつでも、えらび直して飾りかえられます。`; flOpen(); return; }
   const rg=t.closest('[data-fl-roomgot]'); if(rg){ const g=store.get(KEY_FLGOT,[])[+rg.dataset.flRoomgot]; if(g){ const b=flDecode(g.b); store.set(KEY_FLROOM,{ items:b.items, ves:b.ves, t:Date.now(), by:g.by }); _flMsg=`${g.by}さんのお花を、部屋に飾りました🌷`; flOpen(); } return; }
+  if(t.closest('[data-fl-photo]')){ if(flTakePhoto()){ _flMsg='📷 写真に撮りました！花束アルバムに入れました。'; _flTab='album'; } flOpen(); return; }
+  const pd=t.closest('[data-fl-phdel]'); if(pd){ const L=store.get(KEY_FLALB,[]); L.splice(+pd.dataset.flPhdel,1); store.set(KEY_FLALB,L); _flMsg='写真を消しました。'; flOpen(); return; }
   if(t.closest('[data-fl-idea]')){ _flH=flHaikuIdea(_flOcc,1); flOpen(); return; }
   if(t.closest('[data-fl-send]')){ flReadForm(); if(typeof flSend==='function') flSend(_flTo,flPick(),_flOcc,_flH); else { _flMsg='いまは贈れません。サイトの LIFE BOOK から贈ってね。'; flOpen(); } return; } }
 function flReadForm(){ const g=id=>document.getElementById(id); if(g('flTo')) _flTo=g('flTo').value; if(g('flOcc')) _flOcc=g('flOcc').value; if(g('flH0')) _flH=[0,1,2].map(i=>g('flH'+i).value.trim().slice(0,16)); }
@@ -18453,12 +18465,12 @@ function flInput(e){ const t=e.target; if(t.id==='flQ'){ _flQ=t.value; const d=d
   if(t.id==='flOcc'&&e.type==='change'){ flReadForm(); _flH=flHaikuIdea(_flOcc); flOpen(); return; }
   if(/^flH\d$/.test(t.id)){ flReadForm(); const i=+t.id[3], m=flMora(t.value), want=[5,7,5][i]; const sp=t.parentNode.querySelector('.fl-mc'); if(sp){ sp.textContent=m==null?'読みで'+want+'音':m+'/'+want+'音'; sp.classList.toggle('ok',m===want); } return; }
   if(t.id==='flTo') _flTo=t.value; }
-document.addEventListener('click',e=>{ const c=e.target.closest&&e.target.closest('[data-fl-change],[data-fl-clear]'); if(c){ e.preventDefault(); const rm=store.get(KEY_FLROOM,null); if(c.dataset.flClear){ store.set(KEY_FLROOM,null); flRefreshTile(); try{ if(typeof render==='function') render(); }catch(_){} return; } if(rm&&rm.items){ _flPick={ items:rm.items.map(x=>({ f:x.f, c:x.c })), ves:rm.ves==='wrap'?'vase':rm.ves }; flSavePick(); } _flMsg='いま飾っているお花です。足したり、はずしたり、色や花びんを変えてから「部屋に飾る」を押してね。'; flOpen('pick'); return; } const b=e.target.closest&&e.target.closest('[data-fl-open]'); if(b){ e.preventDefault(); _flMsg=''; flOpen(b.dataset.flOpen); } });
+document.addEventListener('click',e=>{ const ph=e.target.closest&&e.target.closest('.fl-tile [data-fl-photo]'); if(ph){ e.preventDefault(); if(flTakePhoto()){ _flMsg='📷 写真に撮りました！花束アルバムに入れました。'; flOpen('album'); } return; } const c=e.target.closest&&e.target.closest('[data-fl-change],[data-fl-clear]'); if(c){ e.preventDefault(); const rm=store.get(KEY_FLROOM,null); if(c.dataset.flClear){ store.set(KEY_FLROOM,null); flRefreshTile(); try{ if(typeof render==='function') render(); }catch(_){} return; } if(rm&&rm.items){ _flPick={ items:rm.items.map(x=>({ f:x.f, c:x.c })), ves:rm.ves==='wrap'?'vase':rm.ves }; flSavePick(); } _flMsg='いま飾っているお花です。足したり、はずしたり、色や花びんを変えてから「部屋に飾る」を押してね。'; flOpen('pick'); return; } const b=e.target.closest&&e.target.closest('[data-fl-open]'); if(b){ e.preventDefault(); _flMsg=''; flOpen(b.dataset.flOpen); } });
 document.addEventListener('keydown',e=>{ const d=document.getElementById('flDlg'); if(d&&!d.hidden&&e.key==='Escape') flClose(); });
 // --- 部屋の絵に、飾ったお花を出す（いまの Channel の部屋だけ） ---
 var _flOn=false;
 { const BS=blockSceneSVG; blockSceneSVG=function(P,o,label){ const pv=_flOn; try{ _flOn=!!(typeof cur!=='undefined'&&cur&&cur.P&&P&&P.seed===cur.P.seed&&!viewing); }catch(e){ _flOn=false; } try{ return BS(P,o,label); } finally{ _flOn=pv; } }; }
-function flRoomSVG(w,x,y){ const rm=store.get(KEY_FLROOM,null); if(!rm||!rm.items||!rm.items.length) return ''; const ves=rm.ves==='wrap'?'vase':rm.ves; const a=flArt(rm.items,ves); if(!a) return ''; const F=v=>(+v).toFixed(1);
+function flRoomSVG(w,x,y,rm){ rm=rm||store.get(KEY_FLROOM,null); if(!rm||!rm.items||!rm.items.length) return ''; const ves=rm.ves==='wrap'?'vase':rm.ves; const a=flArt(rm.items,ves); if(!a) return ''; const F=v=>(+v).toFixed(1);
   // 小さなテーブルの上に、花びん・一輪ざし・生け花をのせる（床に直接おかない）
   const tw=w*.62, th=w*.34, tx=x-tw/2, ty=y-th; const tb=`<g class="fl-table"><rect x="${F(tx+tw*.12)}" y="${F(ty+th*.18)}" width="${F(tw*.08)}" height="${F(th*.82)}" fill="#9C7A55"/><rect x="${F(tx+tw*.8)}" y="${F(ty+th*.18)}" width="${F(tw*.08)}" height="${F(th*.82)}" fill="#9C7A55"/><rect x="${F(tx)}" y="${F(ty)}" width="${F(tw)}" height="${F(th*.2)}" rx="1.5" fill="#C49A6C"/><rect x="${F(tx+tw*.05)}" y="${F(ty+th*.2)}" width="${F(tw*.9)}" height="${F(th*.08)}" fill="#A8845C"/><rect x="${F(tx+tw*.12)}" y="${F(ty-th*.06)}" width="${F(tw*.76)}" height="${F(th*.08)}" rx="1" fill="${ves==='ike'?'#E8DCC8':'#FFF6F0'}"/></g>`;
   const vy=ty+w*.04; return tb+a.replace('<svg class="fl-art"',`<svg class="fl-art fl-room" x="${F(x-w/2)}" y="${F(vy-w*.93)}" width="${w}" height="${w}"`); }
@@ -18474,6 +18486,8 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .fl-dot{ width:12px; height:12px; border-radius:50%; display:inline-block; border:1px solid #ddd; } .fl-rm{ border:0; background:#FFE3EC; color:#C2476B; border-radius:50%; width:24px; height:24px; cursor:pointer; }
 .fl-ves{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; } .fl-vb{ border:1px solid #F4C6D4; background:#fff; border-radius:999px; padding:6px 12px; cursor:pointer; color:#6A4A58; font-size:14px; } .fl-vb.on{ background:#FF8FAB; color:#fff; border-color:#FF8FAB; }
 .fl-act{ display:flex; gap:8px; flex-wrap:wrap; }
+.fl-alb{ list-style:none; margin:8px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; } .fl-alb li{ background:#fff; padding:8px 8px 6px; border-radius:6px; box-shadow:0 2px 8px rgba(194,71,107,.18); transform:rotate(-.6deg); } .fl-alb li:nth-child(2n){ transform:rotate(.7deg); }
+.fl-alb figure{ margin:0; } .fl-pho{ width:100%; height:auto; display:block; border-radius:3px; } .fl-alb figcaption{ font-size:13px; color:#6A4A58; margin-top:6px; line-height:1.5; } .fl-alb-x{ font-size:12px; margin-top:2px; }
 .fl-find{ display:flex; gap:8px; margin:12px 0 8px; } .fl-q{ flex:1; min-width:0; font-size:16px; padding:9px 12px; border-radius:12px; border:1px solid #F4C6D4; } .fl-find select,.fl-lb select{ font-size:16px; padding:8px; border-radius:12px; border:1px solid #F4C6D4; background:#fff; }
 .fl-list{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:6px; max-height:46vh; overflow:auto; }
 .fl-list li{ background:#FFF6F9; border-radius:12px; padding:6px 10px; } .fl-list b{ display:block; font-size:14px; color:#6A4A58; } .fl-cs{ display:flex; gap:4px; flex-wrap:wrap; margin-top:2px; }
@@ -19172,7 +19186,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v170: お花を贈る・受け取る（Firebase：ids/{相手}/flower/{自分_日付_1〜3}）
 function flOn(){ return typeof fbOnline==='function'&&fbOnline()&&typeof FB!=='undefined'&&FB&&FB.D; }
 function flDay(){ const d=new Date(); return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); }
-async function flSend(to,pk,occ,h){ const fr=flFriends().find(f=>f.id===to)||flFriends()[0]; if(!fr){ _flMsg='贈る友だちが、まだいません。'; flOpen(); return; }
+async function flSend(to,pk,occ,h){ if(!to&&flFriends().length){ _flMsg='だれに贈るか、Higher Self名を選んでね。'; flOpen(); return; } const fr=flFriends().find(f=>f.id===to); if(!fr){ _flMsg='贈る友だちが、まだいません。'; flOpen(); return; }
   if(!pk.items.length){ _flMsg='お花をえらんでね。'; flOpen(); return; }
   if(!h||h.some(x=>!x)){ _flMsg='俳句を3行とも書いてね。'; flOpen(); return; }
   if(!flOn()){ _flMsg='いまはサーバーにつながっていません。少しあとで、もう一度押してください。'; flOpen(); return; }
