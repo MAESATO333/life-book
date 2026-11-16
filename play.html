@@ -18441,7 +18441,7 @@ function vhViaduct(y,tod){ const X0=typeof _ssX0!=='undefined'?_ssX0:0, W=typeof
 { const SST=ssStreet; ssStreet=function(S,ctx,land,tod,r,mood){ SST.apply(this,arguments); try{ const h=ssH('veh|'+_ssHH+'|'+land), y=ctx.year||2000, st=ctx.style||'eu';
     // 地面を走る（2台目の車線）
     const WIDE=typeof _ssWideNow!=='undefined'&&_ssWideNow, STR=typeof _lbStreetNow!=='undefined'&&_lbStreetNow, MANY=WIDE||STR; // v175f：海辺の道(STR)は、同時に見える数を前の3分の1くらいに
-    const gp=vhPool(VH_GROUND,y,st); const RV=y>=1950&&typeof ssRVOk==='function'&&ssRVOk();
+    const gp=vhPool(VH_GROUND,y,st); const RV=y>=1950&&typeof ssRVOk==='function'&&ssRVOk()&&!(STR&&window._lbStOld);
     if(RV){ const L=window.lbVehicles.list(), cars=L.filter(v=>v.cat==='car'||(v.cat==='tri'&&['tuk','auto','trikeM'].includes(v.type))), two=L.filter(v=>v.cat==='moto'||v.cat==='bike'); const q=S.p(0,0,2.5); S.raw(-(2.5)*100+5,vhMoveRV(cars[h%cars.length],q[1]+1,10.5*S.U/120,h,'vh-gr'));
       if((STR||h%3!==0)&&two.length){ const q2=S.p(0,0,-.6); S.raw(60+1,vhMoveRV(two[(h>>>6)%two.length],q2[1]+2,11*S.U/120,h>>>3,'vh-gr')); }
       // v174: 横はばいっぱいの絵では、乗り物をもっとたくさん。v175c：同じ種類が重ならないように、毎回ちがう組み合わせで
@@ -18451,12 +18451,12 @@ function vhViaduct(y,tod){ const X0=typeof _ssX0!=='undefined'?_ssX0:0, W=typeof
     else if(gp.length){ const v=gp[h%gp.length], q=S.p(0,0,2.5); S.raw(-(2.5)*100+5,vhMoveG(v,q[1]+1,S.U,h)); }
     // v174: バス・トラック・ジープニーも、ときどき（大きさは車とそろえる）
     // v175c：海辺の道・横はばいっぱいの絵では、バス・トラック・救急車・タクシー・パトカー・消防車なども（同じものは2台出さない）
-    if(RV&&MANY){ const wk=vhPool(['car','bus','truck','jeepney'],y,st).filter(v=>v.t!=='car'||/救急|パトカー|タクシー|キャブ/.test(v.n)); const got=new Set(), q=S.p(0,0,3.1); let n=0;
+    if((RV&&MANY)||(STR&&!RV)){ const wk=vhPool(['car','bus','truck','jeepney'],y,st).filter(v=>v.t!=='car'||/救急|パトカー|タクシー|キャブ/.test(v.n)); const got=new Set(), q=S.p(0,0,3.1); let n=0;
       for(let k=0;k<wk.length*2&&n<(STR?1:WIDE?3:2);k++){ const hk=ssH('wk|'+k+'|'+h), v=wk[hk%wk.length]; const grp=v.t==='car'?v.n:v.t; if(got.has(grp)) continue; got.add(grp); S.raw(-(3.1)*100+5+n*.01,vhMoveG(v,q[1]+1,S.U,hk)); n++; } }
     else if(RV&&(h>>>5)%3===0){ const bb=gp.filter(v=>['bus','truck','jeepney'].includes(v.t)); if(bb.length){ const v=bb[(h>>>7)%bb.length], q=S.p(0,0,3.1); S.raw(-(3.1)*100+5,vhMoveG(v,q[1]+1,S.U,h>>>2)); } }
-    if(!RV&&gp.length&&h%3!==0){ const gb=gp.filter(v=>['bike','moto','penny','rickshaw','tuk'].includes(v.t)); if(gb.length){ const v=gb[(h>>>6)%gb.length], q=S.p(0,0,-.6); S.raw(60+1,vhMoveG(v,q[1]+2,S.U,h>>>3)); } }
+    if(!RV&&gp.length&&(STR||h%3!==0)){ const gb=gp.filter(v=>['bike','moto','penny','rickshaw','tuk'].includes(v.t)); if(gb.length){ const v=gb[(h>>>6)%gb.length], q=S.p(0,0,-.6); S.raw(60+1,vhMoveG(v,q[1]+2,S.U,h>>>3)); } }
     // 高架を走る電車・新幹線
-    if((!STR||(h>>>3)%2===0)&&(['town','bigcity','park','station','harbor','market','skyscraper'].includes(land)||h%2===0)){ let rp=vhPool(VH_RAIL,y,st); const sk=rp.filter(v=>v.t==='shink'); if(sk.length&&h%3!==2) rp=sk; if(rp.length&&(h>>>8)%3!==1){ const v=rp[(h>>>9)%rp.length]; S.raw(-1e6+2.5,`<g class="vh-via">${vhViaduct(118,tod)}${vhMove(v,118,1.5,h>>>5,'vh-rail')}</g>`); } }
+    if(!STR&&(['town','bigcity','park','station','harbor','market','skyscraper'].includes(land)||h%2===0)){ let rp=vhPool(VH_RAIL,y,st); const sk=rp.filter(v=>v.t==='shink'); if(sk.length&&h%3!==2) rp=sk; if(rp.length&&(h>>>8)%3!==1){ const v=rp[(h>>>9)%rp.length]; S.raw(-1e6+2.5,`<g class="vh-via">${vhViaduct(118,tod)}${vhMove(v,118,1.5,h>>>5,'vh-rail')}</g>`); } }
     // 空：飛行機・ヘリ・気球
     const sp=vhPool(VH_SKY,y,st); if(!(MANY&&RV)&&sp.length&&(h>>>11)%3!==0){ const v=sp[(h>>>12)%sp.length]; S.raw(-1e6+1.5,vhMove(v,30+(h>>>13)%40,.55,h>>>7,'vh-sky')); }
     // v175d：海辺の道では、気球・飛行船だけ、ときどき（いつも同じジェットにならないように）
