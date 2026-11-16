@@ -78,6 +78,12 @@ textarea:focus{ outline:2px solid var(--pink2); }
 .osm-item .tx{ flex:1; min-width:0; white-space:pre-wrap; overflow-wrap:anywhere; }
 .osm-item .dt{ font-size:12px; color:var(--muted); display:block; }
 .btn.small{ font-size:13px; padding:6px 14px; }
+/* LIFE BOOKのニュース */
+.news-card{ border:2px solid #F5C77A; }
+.news-card h2{ color:#C98A1E; }
+.news-card input[type=text]{ width:100%; font-family:var(--sans); font-size:16px; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin-bottom:8px; }
+.news-card input[type=text]:focus{ outline:2px solid var(--pink2); }
+.osm-item .tx b{ display:block; }
 
 </style>
 </head>
@@ -111,6 +117,17 @@ textarea:focus{ outline:2px solid var(--pink2); }
       <p class="note" id="osmMsg"></p>
       <h2 style="font-size:15px;margin-top:14px">送ったメッセージ</h2>
       <div id="osmList"><p class="empty">読みこみ中…</p></div>
+    </section>
+
+    <section class="card news-card" id="newsCard">
+      <h2>✨ LIFE BOOKのニュース</h2>
+      <p class="sub">ここに書いて「のせる」を押すと、ゲームのホームの「LIFE BOOKのニュース」に、参加者みんなに表示されます。新しいものから3つが出て、のこりは「これまでのニュース」にたまります。</p>
+      <input type="text" id="newsTitle" maxlength="60" placeholder="題（60字まで）">
+      <textarea id="newsBody" rows="4" maxlength="600" placeholder="説明（600字まで・改行できます）"></textarea>
+      <div class="row" style="margin:8px 0 0"><span class="note" id="newsCount" style="margin:0">0 / 600字</span><button class="btn" id="newsSend" type="button">のせる</button></div>
+      <p class="note" id="newsMsg"></p>
+      <h2 style="font-size:15px;margin-top:14px">のせたニュース</h2>
+      <div id="newsList"><p class="empty">読みこみ中…</p></div>
     </section>
 
     <div class="tiles" id="tiles"></div>
@@ -190,7 +207,7 @@ U.onAuthStateChanged(auth,async user=>{
   if(!user||user.isAnonymous){ $('#gate').hidden=false; $('#main').hidden=true; $('#who').hidden=true; return; }
   $('#whoName').textContent=user.displayName||user.email||''; $('#who').hidden=false;
   $('#gate').querySelector('h2').textContent='読みこみ中…'; $('#login').hidden=true;
-  try{ await loadAll(); $('#gate').hidden=true; $('#main').hidden=false; draw(); osmLoad(); }
+  try{ await loadAll(); $('#gate').hidden=true; $('#main').hidden=false; draw(); osmLoad(); newsLoad(); }
   catch(e){ $('#gate').querySelector('h2').textContent='このアカウントでは見られません'; $('#login').hidden=false;
     $('#gateMsg').innerHTML=e&&e.code==='permission-denied'?'運営者として登録したGoogleアカウントでログインしてください。':'<span class="err">読みこめませんでした</span>（'+esc(e.code||e.message)+'）'; console.warn(e); }
 });
@@ -215,6 +232,28 @@ $('#osmSend').onclick=async()=>{ const t=$('#osmText').value.trim(); if(!t){ $('
   finally{ $('#osmSend').disabled=false; $('#osmSend').textContent='送る'; } };
 async function osmDel(b){ if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent='本当に消す'; setTimeout(()=>{ b.dataset.arm=''; b.textContent='消す'; },5000); return; }
   b.disabled=true; try{ await osmSave(OSM.filter(x=>x.i!==b.dataset.del)); $('#osmMsg').textContent='消しました。'; }catch(e){ b.disabled=false; $('#osmMsg').innerHTML='<span class="err">消せませんでした</span>（'+esc(e.code||e.message)+'）'; } }
+
+// ---- LIFE BOOKのニュース（os/news = { n:[{i,d,t,b}] } 新しい順・最大50件） ----
+let NEWS=[], newsArm=0;
+const newsDt=ms=>{ const d=new Date(ms); return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+async function newsLoad(){ const { doc, getDoc }=D;
+  try{ const s=await getDoc(doc(db,'os','news')); NEWS=s.exists()?(s.data().n||[]):[]; newsDraw(); }
+  catch(e){ $('#newsList').innerHTML='<p class="empty">読みこめませんでした（'+esc(e.code||e.message)+'）</p>'; } }
+function newsDraw(){
+  $('#newsList').innerHTML=NEWS.length?NEWS.map((x,k)=>`<div class="osm-item"><div class="tx"><span class="dt">${newsDt(x.d)}${k<3?'　（いま表示中）':''}</span><b>${esc(x.t)}</b>${esc(x.b||'')}</div><button class="btn ghost small" type="button" data-ndel="${esc(x.i)}">消す</button></div>`).join(''):'<p class="empty">まだのせたニュースはありません</p>';
+  $('#newsList').querySelectorAll('[data-ndel]').forEach(b=>b.onclick=()=>newsDel(b)); }
+async function newsSave(n){ const { doc, setDoc }=D; await setDoc(doc(db,'os','news'),{ n:n.slice(0,50) }); NEWS=n.slice(0,50); newsDraw(); }
+$('#newsBody').oninput=()=>{ $('#newsCount').textContent=$('#newsBody').value.length+' / 600字'; };
+$('#newsSend').onclick=async()=>{ const t=$('#newsTitle').value.trim(), b=$('#newsBody').value.trim(); if(!t){ $('#newsMsg').innerHTML='<span class="err">題を書いてください</span>'; return; }
+  if(Date.now()-newsArm>6000){ newsArm=Date.now(); $('#newsSend').textContent='みんなにのせる（もう一度押す）'; $('#newsMsg').textContent='のせると、すぐに参加者みんなのゲームに表示されます。'; setTimeout(()=>{ if(Date.now()-newsArm>=6000) $('#newsSend').textContent='のせる'; },6100); return; }
+  newsArm=0; $('#newsSend').disabled=true;
+  try{ const { doc, getDoc }=D; const s=await getDoc(doc(db,'os','news')); const now=s.exists()?(s.data().n||[]):[];
+    await newsSave([{ i:'n'+Date.now().toString(36), d:Date.now(), t:t.slice(0,60), b:b.slice(0,600) }].concat(now));
+    $('#newsTitle').value=''; $('#newsBody').value=''; $('#newsCount').textContent='0 / 600字'; $('#newsMsg').textContent='のせました。ゲームをひらくと表示されます。'; }
+  catch(e){ $('#newsMsg').innerHTML='<span class="err">のせられませんでした</span>（'+esc(e.code||e.message)+'）'; }
+  finally{ $('#newsSend').disabled=false; $('#newsSend').textContent='のせる'; } };
+async function newsDel(b){ if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent='本当に消す'; setTimeout(()=>{ b.dataset.arm=''; b.textContent='消す'; },5000); return; }
+  b.disabled=true; try{ await newsSave(NEWS.filter(x=>x.i!==b.dataset.ndel)); $('#newsMsg').textContent='消しました。'; }catch(e){ b.disabled=false; $('#newsMsg').innerHTML='<span class="err">消せませんでした</span>（'+esc(e.code||e.message)+'）'; } }
 
 // ---- 読みこみ ----
 // 過ぎた日は sum/{日付} にまとめて保存し、次からはまとめだけを読む（読み取りの回数を少なくするため）
