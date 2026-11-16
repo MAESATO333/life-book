@@ -9708,6 +9708,13 @@ function petBreedApply(P,L){ if(!L||L._pb||!L.pets) return; L._pb=1;
     const old=`${pet.personality}${pet.species}の${pet.name}`, nw=`${pet.personality}${b.name}の${pet.name}`;
     const y=L.years.find(y=>y.age===pet.from); if(y) for(const e of y.events){ if(e.kind==='pet'&&e.text&&e.text.includes(old)) e.text=e.text.replace(old,nw); } } }
 function pbSeen(){ try{ return new Set(JSON.parse(localStorage.getItem('hitotsu.petzukan')||'[]')); }catch(e){ return new Set(); } }
+// v171.9: 図鑑の「出会ったペットの種類」＝うちで飼ったペット（いま・むかし）＋友だちのペット＋人生の中のペット
+function pbMetAll(L,age){ const s=pbMark(L,age); let ch=false; const add=b=>{ if(b&&typeof PB_ALL!=='undefined'&&PB_ALL[b]&&!s.has(b)){ s.add(b); ch=true; } };
+  try{ const p=typeof mpGet==='function'&&mpGet(); if(p) add(p.breed); }catch(e){}
+  try{ (JSON.parse(localStorage.getItem('hitotsu.mypetPast')||'[]')||[]).forEach(x=>add(x&&x.breed)); }catch(e){}
+  try{ const fof=JSON.parse(localStorage.getItem('hitotsu.fof')||'{}')||{}; Object.values(fof).forEach(e=>add(e&&e.pet&&e.pet.p)); }catch(e){}
+  if(ch) try{ localStorage.setItem('hitotsu.petzukan',JSON.stringify([...s])); }catch(e){}
+  return s; }
 function pbMark(L,age){ try{ const s=pbSeen(); let ch=false; for(const p of (L.pets||[])) if(p.breedId&&p.from<=age&&!s.has(p.breedId)){ s.add(p.breedId); ch=true; } if(ch) localStorage.setItem('hitotsu.petzukan',JSON.stringify([...s])); return s; }catch(e){ return new Set(); } }
 
 // ---- ブロック絵 ----
@@ -12772,7 +12779,7 @@ function worldNow(P,year){ const k=dayKey(); const ids=Object.keys(WSTAT).filter
 function zukan(P,L,age){ const arc=store.get(KEY_ARC,[]); const cs=new Set([P.countryId]); const bel=new Set(Object.values(L.beliefs||{}).filter(b=>b.age<=age).map(b=>b.id)); let met=(L.persons||[]).filter(p=>p.metAge!=null&&p.metAge<=age).length;
   for(const a of arc.slice(0,30)){ try{ const Q=makeBirth(a.seed,{country:a.country||null,force:a.force||null}); cs.add(Q.countryId); } catch(e){} }
   const egsSeen=new Set(L.years.filter(y=>y.age<=age&&y.egs).map(y=>y.egs));
-  return [['生まれた国',cs.size,(typeof COUNTRIES!=='undefined'&&COUNTRIES.length)||189,'か国'],['この人生の観念',bel.size,Object.keys(BELIEFS).length,'こ'],['感じた感情',egsSeen.size,22,'こ'],['出会った人',met,null,'人'],['本棚の本',arc.length,null,'冊']].concat(typeof pbMark==='function'?[['出会ったペットの種類',pbMark(L,age).size,PB_COUNT,'種']]:[]); }
+  return [['生まれた国',cs.size,(typeof COUNTRIES!=='undefined'&&COUNTRIES.length)||189,'か国'],['この人生の観念',bel.size,Object.keys(BELIEFS).length,'こ'],['感じた感情',egsSeen.size,22,'こ'],['出会った人',met,null,'人'],['本棚の本',arc.length,null,'冊']].concat(typeof pbMetAll==='function'?[['出会ったペットの種類',pbMetAll(L,age).size,PB_COUNT,'種']]:[]); }
 // --- 見守りスタンプ（ホームをひらいた日に、ひとつ押される） ---
 function stampToday(){ const s=store.get(KEY_STAMP,[]); const k=dayKey(); if(!s.includes(k)){ s.push(k); store.set(KEY_STAMP,s.slice(-400)); } return s; }
 function stampHTML(){ const s=new Set(store.get(KEY_STAMP,[])); const days=[]; const d=new Date(); for(let i=13;i>=0;i--){ const x=new Date(d); x.setDate(d.getDate()-i); days.push(x); }
