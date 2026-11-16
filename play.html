@@ -16583,10 +16583,14 @@ function refSecHTML(){
     <p class="tiny muted">数字は研究の結果を、この試作版の目盛りに置きかえた近似です。国の統計は、世界銀行・国連などが各国政府の統計から集めた値（Gapminder 経由）を使っています。</p></div></details></section>`;
 }
 // ===== スマホが「ダークモード」のときも、明るい色の箱の中の文字は、濃い色でくっきり見せる =====
-(function(){ const B='.hm-hint,.d3-c,.pwa-note,.hm-scene,.lt-letter,.nd-time,.mt-appeal,.wk,.ea-card,.nw-box,.sp,.wn-box';
+(function(){ const B='.pa-in,.hm-hint,.d3-c,.pwa-note,.hm-scene,.lt-letter,.nd-time,.mt-appeal,.wk,.ea-card,.nw-box,.sp,.wn-box';
   const R=`{ --ink:#3A2E38; --muted:#6B5E68; color:#3A2E38; }`;
   const sel=p=>B.split(',').map(x=>p+' '+x).join(',');
-  const c=document.createElement('style'); c.textContent=`@media (prefers-color-scheme: dark){ ${sel(':root:not([data-theme="light"])')}${R} } ${sel(':root[data-theme="dark"]')}${R}`; document.head.appendChild(c); })();
+  const c=document.createElement('style'); c.textContent=`@media (prefers-color-scheme: dark){ ${sel(':root:not([data-theme="light"])')}${R} } ${sel(':root[data-theme="dark"]')}${R}`; document.head.appendChild(c);
+  // v172: 明るい箱の中のえらぶ欄・入力欄は、ダークモードでも白地に濃い文字（iPhone で、えらんだ名前が見えなくなるのを防ぐ）
+  const F=`{ color:#3A2E38 !important; -webkit-text-fill-color:#3A2E38; background-color:#FFFFFF !important; color-scheme:light; }`;
+  const fsel=p=>['select','input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color])','textarea','option'].map(t=>p+' '+t).join(',');
+  const c2=document.createElement('style'); c2.textContent=`@media (prefers-color-scheme: dark){ ${fsel(':root:not([data-theme="light"])')}${F} } ${fsel(':root[data-theme="dark"]')}${F}`; document.head.appendChild(c2); })();
 // ===== 読んでいる場所が、勝手に最初にもどらないようにする =====
 // 1) 画面を描き直すとき、スクロールできる箱の位置とページの位置を覚えて、もとにもどす
 // 2) さわってから20秒は、30秒ごとの自動の描き直しをお休みする
@@ -18416,7 +18420,7 @@ setTimeout(flPlace,0);
 function flRefreshTile(){ const t=document.querySelector('.fl-tile'); if(t){ const box=document.createElement('div'); box.innerHTML=flTileHTML(); t.replaceWith(box.firstElementChild); } }
 // --- 壁の棚：もらった花束などを、花びんで10こまで並べる ---
 function flShelf(){ return (store.get(KEY_FLSHELF,[])||[]).filter(v=>v&&v.items&&v.items.length).slice(0,FL_SHELF_MAX); }
-function flShelfAdd(items,ves,by,from){ const L=flShelf(); if(L.length>=FL_SHELF_MAX) return false; L.push({ items:items.map(x=>({ f:x.f, c:x.c })), ves:ves==='wrap'?'vase':(ves||'vase'), by:by||'', from:from||'', t:Date.now() }); store.set(KEY_FLSHELF,L); return true; }
+function flShelfAdd(items,ves,by,from,gk){ const L=flShelf(); if(L.length>=FL_SHELF_MAX) return false; L.push({ items:items.map(x=>({ f:x.f, c:x.c })), ves:ves==='wrap'?'vase':(ves||'vase'), by:by||'', from:from||'', gk:gk||'', t:Date.now() }); store.set(KEY_FLSHELF,L); return true; }
 // 棚の板と花びん（x0〜x1 の幅に、n こを2段で並べる）
 function flShelfSVG(L,x0,x1,y,rowH,vw,y1,nr){ L=L||flShelf(); if(!L.length) return ''; if(y1==null) y1=y; const F=v=>(+v).toFixed(1); const rows=nr||(L.length>5?2:1); const per=Math.ceil(L.length/rows); const th=vw*.14, ins=vw*.25; let s='<g class="fl-shelf">';
   const Y=(r,t)=>y+(y1-y)*t-r*rowH;
@@ -18447,19 +18451,21 @@ function flAlbumHTML(){ const L=store.get(KEY_FLALB,[]); const rm=store.get(KEY_
   if(!L.length) return top+'<p class="tiny muted">まだ写真はありません。部屋に飾ったお花を撮ると、ここに増えていきます。</p>'+got;
   return top+`<p class="fl-lb">📖 わたしの写真（${L.length}枚）</p><ul class="fl-alb">${L.map((ph,i)=>({ ph,i })).reverse().map(({ ph,i })=>`<li><figure>${flPhotoSVG(ph)}<figcaption>${flPhDate(ph.t)}${ph.by?`・${esc(ph.by)}さんのお花`:''}<br><span class="tiny muted">${esc(flPhCap(ph))}</span></figcaption></figure>${_flPhSend===i?flPhSendForm(ph):`<button type="button" class="mp-btn fl-b2 fl-phbtn" data-fl-phsend="${i}">💌 この写真を送る</button>`}<button type="button" class="linkish fl-alb-x" data-fl-phdel="${i}">この写真を消す</button></li>`).join('')}</ul>`+got; }
 // --- ダイアログ ---
-function flOpen(tab){ if(tab) _flTab=tab; let d=document.getElementById('flDlg'); if(!d){ d=document.createElement('div'); d.id='flDlg'; d.className='pa-ov fl-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','お花'); document.body.appendChild(d);
+var _flDone=null, _flLastTab=''; function flGk(g){ return String(g&&(g.id||g.t)||''); }
+function flOpen(tab){ if(tab) _flTab=tab; let d=document.getElementById('flDlg'); const keepY=d&&!d.hidden&&_flLastTab===_flTab&&d.querySelector('.fl-in')?d.querySelector('.fl-in').scrollTop:0; if(_flLastTab!==_flTab) _flDone=null; _flLastTab=_flTab; if(!d){ d=document.createElement('div'); d.id='flDlg'; d.className='pa-ov fl-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','お花'); document.body.appendChild(d);
     d.addEventListener('click',flClick); d.addEventListener('input',flInput); d.addEventListener('change',flInput); }
   d.innerHTML=`<div class="pa-in fl-in"><button type="button" class="pa-x" data-fl-x="1" aria-label="閉じる">×</button><h3 class="fl-h">💐 お花</h3>
    <div class="fl-tabs" role="tablist">${[['pick','えらぶ・飾る'],['send','贈る'],['got','届いたお花'],['shelf','🪴 棚'],['album','花束アルバム']].map(([k,t])=>`<button type="button" role="tab" aria-selected="${_flTab===k}" class="fl-tab${_flTab===k?' on':''}" data-fl-tab="${k}">${t}</button>`).join('')}</div>
    <div class="fl-body">${_flTab==='send'?flSendHTML():_flTab==='got'?flGotHTML():_flTab==='album'?flAlbumHTML():_flTab==='shelf'?flShelfHTML():flPickHTML()}</div>
    ${_flMsg?`<p class="fl-msg" role="status">${esc(_flMsg)}</p>`:''}<button type="button" class="pa-x pa-back" data-fl-x="1">← もどる</button></div>`;
+  if(keepY) try{ d.querySelector('.fl-in').scrollTop=keepY; }catch(e){}
   d.hidden=false; document.body.classList.add('gsz-open'); }
-function flClose(){ const d=document.getElementById('flDlg'); if(d){ d.hidden=true; d.innerHTML=''; } document.body.classList.remove('gsz-open'); _flMsg=''; flRefreshTile(); }
+function flClose(){ const d=document.getElementById('flDlg'); if(d){ d.hidden=true; d.innerHTML=''; } document.body.classList.remove('gsz-open'); _flMsg=''; flRefreshTile(); try{ if(typeof lbnRefresh==='function') lbnRefresh(); }catch(e){} }
 function flSelHTML(){ const pk=flPick(); const its=pk.items;
   return `<div class="fl-sel"><div class="fl-sel-art">${its.length?flArt(its,pk.ves):'<p class="tiny muted">下のリストから、お花と色をえらんでね（10種類まで）</p>'}</div><div class="fl-sel-r">
     <p class="fl-sel-h">えらんだお花（${its.length}/${FL_MAX}）</p><ul class="fl-sel-l">${its.map((x,i)=>`<li><span class="fl-dot" style="background:${flC(x.c)}"></span>${esc(FL[x.f].n)}（${esc(FL_PAL[x.c][1])}）<button type="button" class="fl-rm" data-fl-rm="${i}" aria-label="${esc(FL[x.f].n)}をはずす">×</button></li>`).join('')}</ul>
     <div class="fl-ves">${Object.entries(FL_VES).map(([k,t])=>`<button type="button" class="fl-vb${pk.ves===k?' on':''}" data-fl-ves="${k}">${t}</button>`).join('')}</div>
-    ${its.length?`<div class="fl-act"><button type="button" class="mp-btn" data-fl-room="1">🏠 部屋に飾る</button><button type="button" class="mp-btn fl-b2" data-fl-shadd="1">🪴 棚に飾る</button><button type="button" class="mp-btn fl-b2" data-fl-tab="send">🎁 友だちに贈る</button></div>`:''}</div></div>`; }
+    ${its.length?`<div class="fl-act"><button type="button" class="mp-btn" data-fl-room="1">🏠 部屋に飾る</button>${_flDone&&_flDone.k==='room'?`<span class="fl-done fl-pop" role="status">${_flDone.t}</span>`:''}<button type="button" class="mp-btn fl-b2" data-fl-shadd="1">🪴 棚に飾る</button>${_flDone&&_flDone.k==='shadd'?`<span class="${_flDone.warn?'fl-warn':'fl-done'} fl-pop" role="status">${_flDone.t}</span>`:''}<button type="button" class="mp-btn fl-b2" data-fl-tab="send">🎁 友だちに贈る</button></div>`:''}</div></div>`; }
 function flPickHTML(){ const q=_flQ.trim(); const list=FL.filter(f=>(!_flShape||f.s===_flShape)&&(!q||f.n.includes(q))); const pk=flPick();
   return `${flSelHTML()}<div class="fl-find"><input type="search" class="fl-q" id="flQ" placeholder="お花の名前でさがす" value="${esc(_flQ)}" aria-label="お花の名前でさがす"><select id="flShape" aria-label="花の形">${Object.entries(FL_SHN).map(([k,t])=>`<option value="${k}"${_flShape===k?' selected':''}>${t}</option>`).join('')}</select></div>
    <ul class="fl-list">${list.map(f=>`<li><b>${esc(f.n)}</b><span class="fl-cs">${f.c.map(c=>{ const on=pk.items.some(x=>x.f===f.i&&x.c===c); return `<button type="button" class="fl-c${on?' on':''}" data-fl-add="${f.i}.${c}" title="${esc(FL_PAL[c][1])}" aria-label="${esc(f.n)}・${esc(FL_PAL[c][1])}"><svg viewBox="0 0 30 30" width="30" height="30">${flHead(f.s,flC(c),15,15,11)}</svg></button>`; }).join('')}</span></li>`).join('')||'<li class="tiny muted">見つかりませんでした</li>'}</ul>`; }
@@ -18474,19 +18480,26 @@ function flSendHTML(){ const pk=flPick(); if(!pk.items.length) return `<p>まず
    <button type="button" class="linkish" data-fl-idea="1">✨ ほかの俳句の例</button>
    <p class="tiny muted">ひらがなで書くと、音の数を数えます。漢字は、読みで5・7・5になっていればOKです。</p>
    <button type="button" class="mp-btn" data-fl-send="1" ${fr.length?'':'disabled'}>💐 俳句と花を贈る</button></div></div>`; }
+// ボタンを押したら、そのボタンが「✓ 飾りました」に変わる（下のメッセージを見なくても分かるように）
+function flStateBtn(kind,j,g){ const k=flGk(g), rm=store.get(KEY_FLROOM,null); const just=_flDone&&_flDone.k===kind+'|'+k;
+  if(kind==='roomgot'){ const on=rm&&rm.gk===k; return on?`<span class="fl-done${just?' fl-pop':''}" role="status">✓ テーブルに飾っています</span>`:`<button type="button" class="mp-btn" data-fl-roomgot="${j}">🏠 テーブルに飾る</button>`; }
+  const on=flShelf().some(v=>v.gk===k); if(on) return `<span class="fl-done${just?' fl-pop':''}" role="status">✓ 棚に飾っています</span><button type="button" class="linkish fl-mini" data-fl-shoff="${esc(k)}">棚からおろす</button>`;
+  if(_flDone&&_flDone.k==='full|'+k) return `<button type="button" class="mp-btn fl-b2" data-fl-shgot="${j}">🪴 棚に飾る</button><span class="fl-warn fl-pop" role="status">棚がいっぱいです（10こ）。「🪴 棚」でおろしてね</span>`;
+  return `<button type="button" class="mp-btn fl-b2" data-fl-shgot="${j}">🪴 棚に飾る</button>`; }
 function flGotHTML(){ const got=store.get(KEY_FLGOT,[]); if(got.some(g=>!g.seen)){ got.forEach(g=>g.seen=1); store.set(KEY_FLGOT,got); }
   if(!got.length) return '<p class="tiny muted">まだ届いたお花はありません。友だちから花束や一輪のお花が届くと、ここに残ります。</p>';
-  return flGotCountHTML()+`<ul class="fl-got">${got.slice().reverse().map((g,i)=>{ const b=flDecode(g.b); const j=got.length-1-i; return `<li><div class="fl-got-art">${flArt(b.items,b.ves)}</div><div><p class="fl-got-by"><b>${esc(g.by)}さん</b>から・${esc(g.o||'')}・${esc(new Date(g.t).getMonth()+1+'月'+new Date(g.t).getDate()+'日')}</p><p class="fl-haiku">${(g.h||'').split('／').map(esc).join('<br>')}</p><p class="tiny muted">${esc(flNames(b.items))}</p><div class="fl-act"><button type="button" class="mp-btn" data-fl-roomgot="${j}">🏠 テーブルに飾る</button><button type="button" class="mp-btn fl-b2" data-fl-shgot="${j}">🪴 棚に飾る</button></div></div></li>`; }).join('')}</ul>`; }
+  return flGotCountHTML()+`<ul class="fl-got">${got.slice().reverse().map((g,i)=>{ const b=flDecode(g.b); const j=got.length-1-i; return `<li><div class="fl-got-art">${flArt(b.items,b.ves)}</div><div><p class="fl-got-by"><b>${esc(g.by)}さん</b>から・${esc(g.o||'')}・${esc(new Date(g.t).getMonth()+1+'月'+new Date(g.t).getDate()+'日')}</p><p class="fl-haiku">${(g.h||'').split('／').map(esc).join('<br>')}</p><p class="tiny muted">${esc(flNames(b.items))}</p><div class="fl-act">${flStateBtn('roomgot',j,g)}${flStateBtn('shgot',j,g)}</div></div></li>`; }).join('')}</ul>`; }
 function flClick(e){ const t=e.target; const d=document.getElementById('flDlg');
   if(t===d||t.closest('[data-fl-x]')){ flClose(); return; }
   const tb=t.closest('[data-fl-tab]'); if(tb){ _flTab=tb.dataset.flTab; _flMsg=''; flOpen(); return; }
   const ad=t.closest('[data-fl-add]'); if(ad){ const [f,c]=ad.dataset.flAdd.split('.'); const pk=flPick(); const k=pk.items.findIndex(x=>x.f===+f&&x.c===c); if(k>=0) pk.items.splice(k,1); else { const k2=pk.items.findIndex(x=>x.f===+f); if(k2>=0) pk.items[k2].c=c; else if(pk.items.length<FL_MAX) pk.items.push({ f:+f, c }); else { _flMsg='花束は10種類までです。'; } } if(pk.items.length>1&&pk.ves==='one') pk.ves='vase'; flSavePick(); const sc=d.querySelector('.fl-list'), y=sc?sc.scrollTop:0, iy=d.querySelector('.fl-in').scrollTop; flOpen(); const sc2=d.querySelector('.fl-list'); if(sc2) sc2.scrollTop=y; d.querySelector('.fl-in').scrollTop=iy; return; }
   const rm=t.closest('[data-fl-rm]'); if(rm){ flPick().items.splice(+rm.dataset.flRm,1); flSavePick(); flOpen(); return; }
   const vs=t.closest('[data-fl-ves]'); if(vs){ flPick().ves=vs.dataset.flVes; flSavePick(); flOpen(); return; }
-  if(t.closest('[data-fl-room]')){ const pk=flPick(); store.set(KEY_FLROOM,{ items:pk.items.slice(), ves:pk.ves, t:Date.now() }); _flMsg=`部屋に${FL_VES[pk.ves==='wrap'?'vase':pk.ves]}で飾りました🌷 いつでも、えらび直して飾りかえられます。`; flOpen(); return; }
-  const rg=t.closest('[data-fl-roomgot]'); if(rg){ const g=store.get(KEY_FLGOT,[])[+rg.dataset.flRoomgot]; if(g){ const b=flDecode(g.b); store.set(KEY_FLROOM,{ items:b.items, ves:b.ves, t:Date.now(), by:g.by, from:flFromOf(g) }); _flMsg=`${g.by}さんのお花を、部屋に飾りました🌷`; flOpen(); } return; }
-  if(t.closest('[data-fl-shadd]')){ const pk=flPick(); _flMsg=flShelfAdd(pk.items,pk.ves)?'🪴 棚に飾りました。':'棚はいっぱいです（10こまで）。「🪴 棚」で、おろしてから飾ってね。'; flOpen(); return; }
-  const sg=t.closest('[data-fl-shgot]'); if(sg){ const g=store.get(KEY_FLGOT,[])[+sg.dataset.flShgot]; if(g){ const b=flDecode(g.b); _flMsg=flShelfAdd(b.items,b.ves,g.by,flFromOf(g))?`${g.by}さんのお花を、棚に飾りました🪴`:'棚はいっぱいです（10こまで）。「🪴 棚」で、おろしてから飾ってね。'; flOpen(); } return; }
+  if(t.closest('[data-fl-room]')){ const pk=flPick(); store.set(KEY_FLROOM,{ items:pk.items.slice(), ves:pk.ves, t:Date.now() }); _flMsg=''; _flDone={ k:'room', t:`✓ 部屋に${FL_VES[pk.ves==='wrap'?'vase':pk.ves]}で飾りました` }; flOpen(); return; }
+  const rg=t.closest('[data-fl-roomgot]'); if(rg){ const g=store.get(KEY_FLGOT,[])[+rg.dataset.flRoomgot]; if(g){ const b=flDecode(g.b); store.set(KEY_FLROOM,{ items:b.items, ves:b.ves, t:Date.now(), by:g.by, from:flFromOf(g), gk:flGk(g) }); _flMsg=''; _flDone={ k:'roomgot|'+flGk(g) }; flOpen(); } return; }
+  if(t.closest('[data-fl-shadd]')){ const pk=flPick(); _flMsg=''; _flDone=flShelfAdd(pk.items,pk.ves)?{ k:'shadd', t:'✓ 棚に飾りました' }:{ k:'shadd', t:'棚がいっぱいです（10こ）。「🪴 棚」でおろしてね', warn:1 }; flOpen(); return; }
+  const sg=t.closest('[data-fl-shgot]'); if(sg){ const g=store.get(KEY_FLGOT,[])[+sg.dataset.flShgot]; if(g){ const b=flDecode(g.b); _flMsg=''; _flDone={ k:(flShelfAdd(b.items,b.ves,g.by,flFromOf(g),flGk(g))?'shgot|':'full|')+flGk(g) }; flOpen(); } return; }
+  const so=t.closest('[data-fl-shoff]'); if(so){ const L=flShelf().filter(v=>v.gk!==so.dataset.flShoff); store.set(KEY_FLSHELF,L); _flMsg=''; _flDone=null; flOpen(); return; }
   const sd=t.closest('[data-fl-shdel]'); if(sd){ const L=flShelf(); L.splice(+sd.dataset.flShdel,1); store.set(KEY_FLSHELF,L); _flMsg='棚からおろしました。'; flOpen(); return; }
   const ps=t.closest('[data-fl-phsend]'); if(ps){ _flPhSend=+ps.dataset.flPhsend; _flPhTo=''; _flPhMsg=''; _flMsg=''; flOpen(); return; }
   if(t.closest('[data-fl-phcancel]')){ _flPhSend=-1; flOpen(); return; }
@@ -18534,7 +18547,11 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .fl-sel-h{ margin:0 0 4px; font-weight:700; color:#6A4A58; } .fl-sel-l{ list-style:none; margin:0 0 8px; padding:0; display:flex; flex-wrap:wrap; gap:6px; } .fl-sel-l li{ background:#fff; border-radius:999px; padding:3px 6px 3px 10px; font-size:13px; display:flex; align-items:center; gap:4px; border:1px solid #F4C6D4; }
 .fl-dot{ width:12px; height:12px; border-radius:50%; display:inline-block; border:1px solid #ddd; } .fl-rm{ border:0; background:#FFE3EC; color:#C2476B; border-radius:50%; width:24px; height:24px; cursor:pointer; }
 .fl-ves{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; } .fl-vb{ border:1px solid #F4C6D4; background:#fff; border-radius:999px; padding:6px 12px; cursor:pointer; color:#6A4A58; font-size:14px; } .fl-vb.on{ background:#FF8FAB; color:#fff; border-color:#FF8FAB; }
-.fl-act{ display:flex; gap:8px; flex-wrap:wrap; } .fl-shl{ list-style:none; margin:8px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; } .fl-shl li{ background:#FFF8FA; border-radius:12px; padding:8px; text-align:center; } .fl-shl .fl-got-art{ width:90px; margin:0 auto; }
+.fl-act{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.fl-done{ display:inline-flex; align-items:center; gap:4px; padding:9px 16px; border-radius:999px; background:#E3F6EA; color:#23794A; font-weight:700; font-size:15px; border:2px solid #9BD8B2; }
+.fl-warn{ display:inline-flex; align-items:center; padding:8px 14px; border-radius:999px; background:#FFF1D6; color:#8A5A00; font-weight:700; font-size:14px; border:2px solid #F2C46D; }
+.fl-mini{ font-size:13px; } .fl-pop{ animation:flPop .45s ease-out; } @keyframes flPop{ 0%{ transform:scale(.8); opacity:0 } 70%{ transform:scale(1.06); opacity:1 } 100%{ transform:scale(1) } }
+@media (prefers-reduced-motion:reduce){ .fl-pop{ animation:none; } } .fl-shl{ list-style:none; margin:8px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; } .fl-shl li{ background:#FFF8FA; border-radius:12px; padding:8px; text-align:center; } .fl-shl .fl-got-art{ width:90px; margin:0 auto; }
 .fl-phbtn{ margin-top:6px; font-size:14px; padding:7px 12px; } .fl-phs{ margin-top:6px; } .fl-phs input{ display:block; width:100%; box-sizing:border-box; margin-top:4px; font-size:16px; padding:8px 10px; border-radius:12px; border:1px solid #F4C6D4; font-family:inherit; }
 .fl-alb{ list-style:none; margin:8px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; } .fl-alb li{ background:#fff; padding:8px 8px 6px; border-radius:6px; box-shadow:0 2px 8px rgba(194,71,107,.18); transform:rotate(-.6deg); } .fl-alb li:nth-child(2n){ transform:rotate(.7deg); }
 .fl-alb figure{ margin:0; } .fl-pho{ width:100%; height:auto; display:block; border-radius:3px; } .fl-alb figcaption{ font-size:13px; color:#6A4A58; margin-top:6px; line-height:1.5; } .fl-alb-x{ font-size:12px; margin-top:2px; }
@@ -18612,10 +18629,16 @@ const KEY_LBN='hitotsu.news', KEY_LBNSEEN='hitotsu.newsSeen'; let _lbnAt=0, _lbn
 function lbnList(){ let r=[]; try{ r=store.get(KEY_LBN,[]); }catch(e){} const all=(Array.isArray(r)?r:[]).concat(LBN_BUILTIN), seen={}, out=[];
   all.forEach(x=>{ if(!x||!x.t||seen[x.i]) return; seen[x.i]=1; out.push(x); }); return out.sort((a,b)=>(b.d||0)-(a.d||0)).slice(0,30); }
 function lbnDate(ms){ const d=new Date(ms); return isNaN(d)?'':`${d.getMonth()+1}月${d.getDate()}日`; }
-function lbnHTML(){ const L=lbnList(); if(!L.length) return ''; const seen=store.get(KEY_LBNSEEN,{}); const nNew=L.filter(x=>!seen[x.i]).length;
+// v172: その人だけのお知らせ（まだ見ていないお花・写真が届いていたら、ニュースのいちばん上に出す）
+function lbnMine(){ const out=[]; try{ if(typeof KEY_FLGOT==='undefined') return out; const g=(store.get(KEY_FLGOT,[])||[]).filter(x=>!x.seen); if(g.length){ const bq=g.some(x=>!(typeof flIsOne==='function'&&flIsOne(x))); const who=[...new Set(g.map(x=>x.by).filter(Boolean))].slice(0,2).map(n=>esc(n)+'さん').join('、');
+    out.push(`<button type="button" class="lbn-me" data-lbn-me="got"><span class="lbn-new">NEW</span><span class="lbn-t">${bq?'あなたに、花束💐が届いています':'あなたに、お花🌷が届いています'}</span><span class="lbn-who">${who?who+'から':''}</span></button>`); }
+  const ph=(store.get('fl.phGot',[])||[]).filter(x=>!x.seen); if(ph.length){ const who=[...new Set(ph.map(x=>x.fromBy).filter(Boolean))].slice(0,2).map(n=>esc(n)+'さん').join('、'); out.push(`<button type="button" class="lbn-me" data-lbn-me="album"><span class="lbn-new">NEW</span><span class="lbn-t">あなたに、お花の写真📷が届いています</span><span class="lbn-who">${who?who+'から':''}</span></button>`); } }catch(e){} return out; }
+function lbnRefresh(){ try{ const o=document.querySelector('#app .lbn'); if(o) o.remove(); lbnPlace(); }catch(e){} }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-lbn-me]'); if(!b) return; e.preventDefault(); const k=b.dataset.lbnMe; try{ if(k==='album'){ const L=store.get('fl.phGot',[]); L.forEach(x=>x.seen=1); store.set('fl.phGot',L); } if(typeof flOpen==='function'){ _flMsg=''; flOpen(k); } }catch(_){} b.remove(); });
+function lbnHTML(){ const L=lbnList(), me=lbnMine(); if(!L.length&&!me.length) return ''; const seen=store.get(KEY_LBNSEEN,{}); const nNew=L.filter(x=>!seen[x.i]).length;
   const item=x=>`<details class="lbn-i" data-lbn="${esc(x.i)}"><summary>${!seen[x.i]?'<span class="lbn-new">NEW</span>':''}<span class="lbn-t">${esc(x.t)}</span><span class="lbn-d">${lbnDate(x.d)}</span></summary>${x.b?`<p>${esc(x.b).replace(/\n/g,'<br>')}</p>`:''}</details>`;
   const top=L.slice(0,3), past=L.slice(3);
-  return `<section class="lbn" aria-label="LIFE BOOKのニュース"><h3 class="lbn-h">✨ LIFE BOOKのニュース${nNew?`<span class="lbn-n">${nNew}</span>`:''}</h3>${top.map(item).join('')}${past.length?`<details class="lbn-past"${_lbnOpen?' open':''}><summary>これまでのお知らせ（${past.length}）</summary>${past.map(item).join('')}</details>`:''}</section>`; }
+  return `<section class="lbn" aria-label="LIFE BOOKのニュース"><h3 class="lbn-h">✨ LIFE BOOKのニュース${nNew?`<span class="lbn-n">${nNew}</span>`:''}</h3>${me.join('')}${top.map(item).join('')}${past.length?`<details class="lbn-past"${_lbnOpen?' open':''}><summary>これまでのお知らせ（${past.length}）</summary>${past.map(item).join('')}</details>`:''}</section>`; }
 function lbnPlace(){ try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home'||app.querySelector('.lbn')) return; const html=lbnHTML(); if(!html) return;
   const box=document.createElement('div'); box.innerHTML=html; const el=box.firstElementChild;
   const cid=app.querySelector('.hm-cid'), osm=app.querySelector('.osm'), hint=app.querySelector('.hm-hint'), home=app.querySelector('.home');
@@ -18640,6 +18663,8 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .lbn-i summary, .lbn-past > summary{ cursor:pointer; list-style:none; padding:7px 0; display:flex; align-items:baseline; gap:8px; font-size:14px; } .lbn-i summary::-webkit-details-marker, .lbn-past > summary::-webkit-details-marker{ display:none; }
 .lbn-i summary::before{ content:'▸'; color:#E0809A; } .lbn-i[open] summary::before{ content:'▾'; }
 .lbn-t{ flex:1; font-weight:700; line-height:1.5; } .lbn-d{ font-size:11px; color:#9A8A80; white-space:nowrap; }
+.lbn-me{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; width:100%; text-align:left; border:2px solid #FFB3C8; background:#FFF0F5; border-radius:12px; padding:10px 12px; margin:4px 0 8px; cursor:pointer; font:inherit; color:#6A2A44; font-weight:700; animation:lbnGlow 2.4s ease-in-out infinite; } .lbn-me:hover{ background:#FFE3EC; } .lbn-me:focus-visible{ outline:3px solid #8EC3E6; } .lbn-who{ font-size:12px; font-weight:400; color:#9A6A7E; }
+@keyframes lbnGlow{ 0%,100%{ box-shadow:0 0 0 0 rgba(255,143,171,.0) } 50%{ box-shadow:0 0 0 5px rgba(255,143,171,.25) } } @media (prefers-reduced-motion:reduce){ .lbn-me{ animation:none; } }
 .lbn-new{ background:#FF5C8A; color:#fff; font-size:10px; font-weight:800; border-radius:6px; padding:1px 6px; white-space:nowrap; }
 .lbn-i p{ margin:0 0 10px 18px; font-size:13px; line-height:1.8; color:#5A4A44; }
 .lbn-past > summary{ font-size:12px; color:#B0607A; padding:6px 0 2px; } .lbn-past[open] > summary{ margin-bottom:2px; }
@@ -19255,7 +19280,7 @@ function flListen(){ if(_flL||!flOn()) return; _flL=true; const { collection, on
     if(!got.length) return; const seen=store.get('fl.seenIds',[]); const nu=got.filter(g=>!seen.includes(g.id));
     if(nu.length){ store.set('fl.seenIds',seen.concat(nu.map(g=>g.id)).slice(-300)); const c=flGotCount(); nu.forEach(x=>{ if(flIsOne(x)) c.o++; else c.b++; }); store.set('fl.gotN',c); const L=store.get(KEY_FLGOT,[]).concat(nu).slice(-60); store.set(KEY_FLGOT,L);
       try{ if(typeof pgToast==='function') pgToast(nu.length>1?`お花が${nu.length}つ届きました💐`:`${nu[0].by}さんから、お花と俳句が届きました💐`); }catch(_){}
-      try{ const dl=document.getElementById('flDlg'); if(dl&&!dl.hidden) flOpen(); else flRefreshTile(); }catch(_){} }
+      try{ const dl=document.getElementById('flDlg'); if(dl&&!dl.hidden) flOpen(); else flRefreshTile(); }catch(_){} try{ if(typeof lbnRefresh==='function') lbnRefresh(); }catch(_){} }
     got.forEach(g=>{ try{ deleteDoc(FB.D.doc(FB.db,'ids',myId(),'flower',g.id)); }catch(_){} }); },()=>{ _flL=false; }); }
 setInterval(flListen,4000); setTimeout(flListen,1500);
 // v171.6: 部屋に飾ったお花の写真を、友だちに送る（Firebase：ids/{相手}/photo/{自分_日付_1〜3}）
@@ -19277,7 +19302,7 @@ function flPhListen(){ if(_flPL||!flOn()) return; _flPL=true; const { collection
     if(!got.length) return; const seen=store.get('fl.phSeen',[]); const nu=got.filter(g=>!seen.includes(g.id)&&(g.items.length||g.sh.length));
     if(nu.length){ store.set('fl.phSeen',seen.concat(nu.map(g=>g.id)).slice(-300)); store.set(KEY_FLPHGOT,store.get(KEY_FLPHGOT,[]).concat(nu).slice(-60));
       try{ if(typeof pgToast==='function') pgToast(`${nu[0].fromBy}さんから、お花の写真が届きました💌`); }catch(_){}
-      try{ const dl=document.getElementById('flDlg'); if(dl&&!dl.hidden) flOpen(); else flRefreshTile(); }catch(_){} }
+      try{ const dl=document.getElementById('flDlg'); if(dl&&!dl.hidden) flOpen(); else flRefreshTile(); }catch(_){} try{ if(typeof lbnRefresh==='function') lbnRefresh(); }catch(_){} }
     got.forEach(g=>{ try{ deleteDoc(FB.D.doc(FB.db,'ids',myId(),'photo',g.id)); }catch(_){} }); },()=>{ _flPL=false; }); }
 setInterval(flPhListen,4000); setTimeout(flPhListen,1800);
 </script>
@@ -20956,6 +20981,23 @@ const MBX_KEY='hitotsu.machiAlbum';
 const MBX_CSS=`
 .mbx-strip{ margin:12px -6px 2px; padding:12px 0 8px; border-radius:22px; background:linear-gradient(180deg,#FFE9A8,#FFF6DA); overflow:hidden; text-align:center; }
 .mbx-strip .mbx-st{ margin:0 0 4px; padding-inline:14px; font-weight:700; font-size:clamp(13px,3.6vw,16px); letter-spacing:.08em; color:#22304D; font-family:inherit; }
+.mbx-tile{ margin:0 0 14px; --tc:#F2C94C; }
+.mbx-tg{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); gap:14px; align-items:start; }
+@media (max-width:640px){ .mbx-tg{ grid-template-columns:1fr; } }
+.mbx-tg small{ display:block; font-size:12px; color:var(--muted,#857A8A); font-weight:700; margin-bottom:4px; }
+.mbx-today{ border:0; border-radius:16px; background:linear-gradient(180deg,#FFE9A8,#FFF6DA); padding:10px 10px 12px; text-align:center; font:inherit; color:#22304D; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:0; }
+.mbx-today small{ color:#B07A1E; }
+.mbx-today img{ width:100%; max-width:260px; height:auto; aspect-ratio:320/220; animation:mbxFloat 5s ease-in-out infinite; }
+.mbx-today b{ font-size:16px; } .mbx-today span{ font-size:12px; color:#5D6B85; }
+.mbx-today .mbx-ltime{ margin:4px 0 0; color:#fff; font-size:12px; }
+.mbx-recent{ min-width:0; }
+.mbx-rg{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.mbx-ra{ background:#fff; border-radius:8px; padding:5px; box-shadow:0 2px 8px rgba(0,0,0,.12); border:0; font:inherit; color:#3B3240; font-size:11px; line-height:1.4; cursor:pointer; text-align:left; min-width:0; }
+.mbx-ra .mb-scene{ display:block; width:100%; height:auto; border-radius:4px; } .mbx-ra b{ display:block; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.mbx-recent .mbx-empty{ font-size:13px; background:var(--bg,#FFF7F9); border:1px dashed var(--line,#F3DCE3); border-radius:12px; padding:14px; }
+.mbx-tf{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.mbx-today:focus-visible,.mbx-ra:focus-visible{ outline:3px solid #3B3240; outline-offset:2px; }
+.mbx-strip .mbx-sn{ margin:-2px 0 6px; padding-inline:14px; font-size:12px; color:#B07A1E; font-weight:500; }
 .mbx-view{ overflow:hidden; }
 .mbx-track{ display:flex; width:max-content; animation:mbxRun 300s linear infinite; }
 .mbx-track:hover{ animation-play-state:paused; }
@@ -21090,7 +21132,7 @@ function mbxModal(c,v,saved){ const vv=mbxV(c,v); if(!vv) return; mbxCss(); cons
     if(a==='flip'){ flip=!flip; st.classList.toggle('mbx-flip',flip); }
     if(a==='zoom'){ big=!big; st.classList.toggle('big',big); b.textContent=big?'🔍 もどす':'🔍 大きく'; if(big) st.scrollLeft=(st.scrollWidth-st.clientWidth)/2; }
     if(a==='shot'){ const s=st.querySelector('svg'); const t=s&&s.getCurrentTime?s.getCurrentTime():0; let f=document.querySelector('.mbx-flash'); if(!f){ f=document.createElement('div'); f.className='mbx-flash'; document.body.appendChild(f); } f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
-      const al=mbxGet(); al.unshift({ c:MB_CITIES[c].id, v, t:+t.toFixed(2), f:flip?1:0, d:mbxToday(), tod }); mbxSet(al.slice(0,30)); mbxAlbum(); mbxToast('📔 観光アルバムに保存しました'); } }); }
+      const al=mbxGet(); al.unshift({ c:MB_CITIES[c].id, v, t:+t.toFixed(2), f:flip?1:0, d:mbxToday(), tod }); mbxSet(al.slice(0,30)); mbxAlbum(); mbxTileRefresh();mbxToast('📔 観光アルバムに保存しました'); } }); }
 // 🟡街ブラの画面
 function mbxQ(s){ return mbxEl&&mbxEl.querySelector(s); }
 function mbxMap(){ const R=mbxLv.reg&&MBM_REG.find(r=>r.id===mbxLv.reg), C=mbxLv.cty&&MBM_C[mbxLv.cty];
@@ -21105,8 +21147,10 @@ function mbxAlbum(){ if(!mbxEl) return; const al=mbxGet(); const list=al.map((a,
   if(!list.length){ box.innerHTML='<p class="mbx-empty">まだ写真がありません。街の写真を開いて「📸 写真をとる」を押してみてね。</p>'; return; }
   box.innerHTML=list.map(x=>{ const v=mbxV(x.ci,x.a.v); return `<button class="mbx-ap" type="button" data-i="${x.i}"><span class="${x.a.f?'mbx-flip':''}" style="display:block">${mbxDraw(x.ci,x.a.v,x.a.tod||'day')}</span><b>${v.pl}</b>${x.a.d}</button>`; }).join('');
   box.querySelectorAll('.mbx-ap').forEach(el=>mbxFreeze(el,al[+el.dataset.i].t)); }
+function mbxGo(id){ const ci=mbxCI(id); if(ci<0) return; const C=MB_CITIES[ci]; const cc=C.cc; if(cc&&MBM_C[cc]){ mbxLv={ reg:(MBM_REG.find(r=>r.cs.includes(cc))||{}).id||null, cty:cc }; mbxMap(); } mbxCity(ci); }
 function mbxClose(){ if(!mbxEl) return; mbxEl.remove(); mbxEl=null; document.documentElement.style.overflow=''; clearInterval(mbxTimer); document.querySelectorAll('.mbx-modal').forEach(m=>m.remove()); }
-function machiBuraOpen(){ try{ mbxCss(); if(mbxEl) return; mbxLv={ reg:null, cty:null }; mbxCur=-1;
+// machiBuraOpen() で世界地図から。machiBuraOpen('venice') のように街の id を渡すと、その街の写真の画面で開く（乗り物レンタルの到着から使う）
+function machiBuraOpen(cityId){ try{ mbxCss(); const goId=typeof cityId==='string'?cityId:null; if(mbxEl){ if(goId) mbxGo(goId); return; } mbxLv={ reg:null, cty:null }; mbxCur=-1;
   const el=document.createElement('div'); el.className='mbx'; el.setAttribute('role','dialog'); el.setAttribute('aria-label','街ブラ');
   el.innerHTML=`<div class="mbx-wrap">
   <div class="mbx-top"><b>🟡 街ブラ</b><button class="mbx-pbtn mbx-sub2 mbx-close" type="button">✕ とじる</button></div>
@@ -21121,7 +21165,7 @@ function machiBuraOpen(){ try{ mbxCss(); if(mbxEl) return; mbxLv={ reg:null, cty
   mbxQ('.mbx-back').addEventListener('click',()=>{ mbxQ('.mbx-city').hidden=true; el.scrollTo({ top:0, behavior:'smooth' }); });
   mbxQ('.mbx-photos').addEventListener('click',e=>{ const b=e.target.closest('.mbx-pc'); if(!b) return; const n=b.querySelector('.mbx-new'); if(n) n.remove(); mbxModal(mbxCur,+b.dataset.v); });
   mbxQ('.mbx-album').addEventListener('click',e=>{ const b=e.target.closest('.mbx-ap'); if(!b) return; const a=mbxGet()[+b.dataset.i]; if(a) mbxModal(mbxCI(a.c),a.v,a); });
-  mbxMap(); mbxAlbum();
+  mbxMap(); mbxAlbum(); if(goId) mbxGo(goId);
   mbxTimer=setInterval(()=>{ if(mbxEl&&mbxCur>=0) mbxQ('.mbx-ctime').textContent=mbxLtxt(mbxCur); document.querySelectorAll('[data-mbxlt]').forEach(x=>x.textContent=mbxLtxt(+x.dataset.mbxlt)); },20000);
 }catch(e){ try{ console.warn('[街ブラ]',e); }catch(_){} } }
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; const m=document.querySelectorAll('.mbx-modal'); if(m.length){ m[m.length-1].remove(); return; } if(mbxEl) mbxClose(); });
@@ -21130,14 +21174,33 @@ let mbxStripEl=null;
 function mbxStripBuild(){ const isl=MB_STRIP.map(key=>{ const k=key.lastIndexOf('-'), id=key.slice(0,k), vi=+key.slice(k+1)-1, ci=mbxCI(id); if(ci<0||!MB_THUMB2[key]) return ''; const C=MB_CITIES[ci], v=mbxV(ci,vi);
     return `<button type="button" class="mbx-isle" data-c="${ci}" data-v="${vi}" aria-label="${v.pl}の写真をひらく"><img src="${MB_THUMB2[key]}" alt="" width="320" height="220" loading="lazy" decoding="async"><span class="mbx-fc"><b>${C.name.replace(/^.*・/,'')}</b><span>${C.area.split('・')[0]}</span></span></button>`; }).join('');
   const s=document.createElement('section'); s.className='mbx-strip'; s.setAttribute('aria-label','いろんな街');
-  s.innerHTML=`<p class="mbx-st">🟡いろんな街が、空に浮かんでいます</p><div class="mbx-view"><div class="mbx-track">${isl}${isl.replace(/<button /g,'<button tabindex="-1" aria-hidden="true" ')}</div></div><button type="button" class="mbx-pbtn mbx-go">🟡 街ブラへ行く</button>`;
+  s.innerHTML=`<p class="mbx-st">いろんな街が、空に浮かんでいます</p><p class="mbx-sn">街は、その国の本当の時間に合わせて、朝・昼・夕方・夜で見え方が変わります</p><div class="mbx-view"><div class="mbx-track">${isl}${isl.replace(/<button /g,'<button tabindex="-1" aria-hidden="true" ')}</div></div><button type="button" class="mbx-pbtn mbx-go">🟡 街ブラへ行く</button>`;
   s.querySelector('.mbx-track').addEventListener('click',e=>{ const b=e.target.closest('.mbx-isle'); if(b) mbxModal(+b.dataset.c,+b.dataset.v); });
   s.querySelector('.mbx-go').addEventListener('click',machiBuraOpen); return s; }
 function mbxPlace(){ try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home'||(typeof viewing!=='undefined'&&viewing)) return; const home=app.querySelector('.home'); if(!home) return;
   mbxCss(); if(!mbxStripEl) mbxStripEl=mbxStripBuild();
   const lives=app.querySelector('.hmi'), slot=app.querySelector('.hmi-slot'), news=app.querySelector('.lbn');
   if(lives) lives.after(mbxStripEl); else if(slot) slot.after(mbxStripEl); else if(news) news.before(mbxStripEl); else home.prepend(mbxStripEl);
+  mbxTilePlace(app);
 }catch(e){ try{ console.warn('[街ブラ]',e); }catch(_){} } }
+// Life Home の「友だちの木・うちのペット」の下に、街ブラのカード（きょうのおすすめの街 ＋ 観光アルバムの最近の写真 ＋ 街ブラへ行く）
+let mbxTileEl=null, mbxTileKey='';
+function mbxPick(){ const d=new Date(); const n=d.getFullYear()*400+d.getMonth()*32+d.getDate(); const keys=MB_STRIP.filter(k=>MB_THUMB2[k]); const key=keys[(n*7919)%keys.length]; const k=key.lastIndexOf('-'); return { key, ci:mbxCI(key.slice(0,k)), vi:+key.slice(k+1)-1 }; }
+function mbxTileBuild(){ const P=mbxPick(), al=mbxGet(); const C=MB_CITIES[P.ci], v=mbxV(P.ci,P.vi);
+  const list=al.map((a,i)=>({ a, i, ci:mbxCI(a.c) })).filter(x=>x.ci>=0&&mbxV(x.ci,x.a.v)).slice(0,3);
+  const s=document.createElement('section'); s.className='hm-tile mbx-tile';
+  s.innerHTML=`<h3>🟡 街ブラ<span class="hm-n">📔 観光アルバム ${al.length}枚</span></h3>
+  <div class="mbx-tg"><button type="button" class="mbx-today" data-c="${P.ci}" data-v="${P.vi}" aria-label="${C.name}の写真をひらく"><small>きょうのおすすめの街</small><img src="${MB_THUMB2[P.key]}" alt="" width="320" height="220" decoding="async"><b>${C.name}</b><span>${C.area}・${v.t}</span><span class="mbx-ltime" data-mbxlt="${P.ci}">${mbxLtxt(P.ci)}</span></button>
+  <div class="mbx-recent"><small>最近の観光アルバム</small>${list.length?`<div class="mbx-rg">${list.map(x=>`<button type="button" class="mbx-ra" data-i="${x.i}" aria-label="${mbxV(x.ci,x.a.v).pl}の写真"><span class="${x.a.f?'mbx-flip':''}" style="display:block">${mbxDraw(x.ci,x.a.v,x.a.tod||'day')}</span><b>${MB_CITIES[x.ci].name.replace(/^.*・/,'')}</b></button>`).join('')}</div>`:'<p class="mbx-empty">まだ写真がありません。街の写真を開いて「📸 写真をとる」を押すと、ここにたまります。</p>'}</div></div>
+  <div class="hm-foot mbx-tf"><button type="button" class="mbx-pbtn mbx-goc" data-id="${C.id}">${C.name.replace(/^.*・/,'')}へ行く</button><button type="button" class="mbx-pbtn mbx-sub2 mbx-gow">🌏 地図から街をえらぶ</button></div>`;
+  s.querySelectorAll('.mbx-ra').forEach(el=>mbxFreeze(el,al[+el.dataset.i].t));
+  s.addEventListener('click',e=>{ const t=e.target.closest('.mbx-today'); if(t){ mbxModal(+t.dataset.c,+t.dataset.v); return; }
+    const a=e.target.closest('.mbx-ra'); if(a){ const x=mbxGet()[+a.dataset.i]; if(x) mbxModal(mbxCI(x.c),x.v,x); return; }
+    const g=e.target.closest('.mbx-goc'); if(g){ machiBuraOpen(g.dataset.id); return; } if(e.target.closest('.mbx-gow')) machiBuraOpen(); });
+  return s; }
+function mbxTilePlace(app){ const pair=app.querySelector('.hm-pair'); if(!pair) return; const al=mbxGet(); const key=mbxPick().key+'|'+al.length+'|'+(al[0]?al[0].t:'');
+  if(!mbxTileEl||key!==mbxTileKey){ mbxTileEl=mbxTileBuild(); mbxTileKey=key; } if(pair.nextElementSibling!==mbxTileEl) pair.after(mbxTileEl); }
+function mbxTileRefresh(){ try{ const app=document.getElementById('app'); if(app&&mbxTileEl&&mbxTileEl.isConnected){ mbxTileKey=''; const old=mbxTileEl; mbxTilePlace(app); if(old!==mbxTileEl) old.remove(); } }catch(e){} }
 (function(){ if(typeof render1!=='function') return; const _r=render1; render1=function(){ const r=_r.apply(this,arguments); mbxPlace(); return r; }; })();
 setTimeout(mbxPlace,0);
 window.machiBuraOpen=machiBuraOpen;
