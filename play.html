@@ -17952,7 +17952,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style id="vehCss">
 </style>`); }catch(e){}
 try{ if(typeof render==='function'&&typeof page!=='undefined'&&page==='home'){ const y=window.scrollY; render(); window.scrollTo(0,y); } }catch(e){}
 // v168: 寝ている Channel は、ベッド・布団・ベビーベッドで寝る（床のまんなかや、変な場所では寝ない）
-var _slp=false, _slpJp=false, _slpSt='', _slpN=0;
+var _slp=false, _slpJp=false, _slpSt='', _slpN=0, _slpSet='room';
 const SLP_RE=/眠って|眠り|眠る|寝て|寝る|寝た|寝息|お昼寝|ねんね|布団の中|すやすや|うとうと|ぐっすり/;
 function slpEyes(p,a,b){ const f=v=>v.toFixed(1); return `<rect x="${f(a[0]-1.4)}" y="${f(a[1]-.4)}" width="2.8" height="1" rx=".5" fill="#2B2230"/><rect x="${f(b[0]-1.4)}" y="${f(b[1]-.4)}" width="2.8" height="1" rx=".5" fill="#2B2230"/>`; }
 const SLP_BLK=['#F7B8CB','#8EC3E6','#F7D774','#9ACD9F','#C7B8EA','#F4A9A0'];
@@ -17979,7 +17979,7 @@ function bkCrib(S,x,y,o,zzz){ const wood='#E8C99A', f=v=>v.toFixed(1); S.begin(x
   // 手前の柵（細くして、赤ちゃんが見えるように）
   S.end(); S.begin(x+y+2.6,'bk-crib-f'); for(let i=0;i<=8;i++) S.box(x-.25+i*.28,y+1.27,.66,.07,.07,.3,wood); S.box(x-.25,y+1.27,.96,2.3,.08,.08,wood);
   for(let j=0;j<=5;j++) S.box(x+1.97,y-.25+j*.3,.66,.07,.07,.3,wood); S.box(x+1.97,y-.25,.96,.08,1.6,.08,wood); S.end(); }
-{ const BB=bkBaby; bkBaby=function(S,x,y,o){ if(_bkOut) return BB(S,x,y,o); return bkCrib(S,x,y,o,_slp); }; }
+{ const BB=bkBaby; bkBaby=function(S,x,y,o){ if(_bkOut) return BB(S,x,y,o); if(!['room','home','hospital'].includes(_slpSet)){ const pv=_bkOut; _bkOut=true; try{ return BB(S,x,y,o); } finally{ _bkOut=pv; } } return bkCrib(S,x,y,o,_slp); }; }
 { const BP=bkPerson; bkPerson=function(S,x,y,o){ if(_slp&&!_bkOut) return bkSleeper(S,x,y,o); return BP(S,x,y,o); }; }
 // 横から見た絵：ベッド・布団・ベビーベッド
 function ssSleeper(S,x,z,o){ const k={ baby:.5, toddler:.7, child:.8, teen:.92, adult:1, elder:.97 }[o.stage]||1; const f=v=>v.toFixed(1);
@@ -17994,13 +17994,13 @@ function ssSleeper(S,x,z,o){ const k={ baby:.5, toddler:.7, child:.8, teen:.92, 
   S.box(hx+hs*.8,top+.25,z-.12,hs*.38,hs+.1,1,o.stage==='elder'?'#C9C4BC':(o.hair||'#3A2A22'));
   S.box(x-L/2+.15,top,z-.02,hx-(x-L/2+.15)-.05,1.1*k+.2,2.5,blk);
   if(o.stage==='baby'){ const wood='#E8C99A'; for(let i=0;i<9;i++) S.box(x-L/2+.35+i*(L-.7)/8-.08,1.8,z-.15,.16,2.8,.12,wood); S.box(x-L/2,4.5,z-.15,L,.3,.14,wood); } }
-{ const SP=ssPerson; ssPerson=function(S,x,z,o){ if(!_ssOut&&(_slp||o.stage==='baby')) return ssSleeper(S,x,z,o); return SP(S,x,z,o); }; }
+{ const SP=ssPerson; ssPerson=function(S,x,z,o){ if(!_ssOut&&o.stage==='baby'&&!_slp&&!['room','home','hospital'].includes(_slpSet)){ const pv=_ssOut; _ssOut=true; try{ return SP(S,x,z,o); } finally{ _ssOut=pv; } } if(!_ssOut&&(_slp||o.stage==='baby')) return ssSleeper(S,x,z,o); return SP(S,x,z,o); }; }
 // 寝ている場面か？ 寝ているなら、かならず部屋の中にする
-{ const BS=blockSceneSVG; blockSceneSVG=function(P,o,label){ const prev=_slp, pj=_slpJp; _slpN=0; try{ _slp=!!(o&&(o.sleep||SLP_RE.test(o.text||'')));
+{ const BS=blockSceneSVG; blockSceneSVG=function(P,o,label){ const prev=_slp, pj=_slpJp, ps=_slpSet; _slpN=0; try{ _slpSet=(o&&o.setting)||(typeof scPick==='function'?scPick(P,o):'home'); _slp=!!(o&&(o.sleep||SLP_RE.test(o.text||'')));
       if(_slp){ const setting=o.setting||(typeof scPick==='function'?scPick(P,o):'home'); o=Object.assign({},o); if(!(typeof SC_INTERIOR!=='undefined'&&SC_INTERIOR.has(setting))||!['room','home'].includes(setting)) o.setting='room'; if(o.petB){ const hh=ssH('snug|'+(P.seed||0)+'|'+(o.age||0)+'|'+(o.v||0)+'|'+(typeof dayKey==='function'?dayKey():'')); if(hh%5<2){ o.petSpot=ilStage(o.age||0)==='baby'?[2.15,1.15]:[2.6,1.5]; try{ const b=PB_ALL[o.petB], A=(PP_ACTS[b.kind]||PP_ACTS.dog).filter(a=>a.b==='sleep'&&!a.p2); const a=A[hh%A.length]||A[0]; if(a) o.petPose=Object.assign({},o.petPose||{},ppAct(b.kind,a.id),{ g:o.petPose&&o.petPose.g||1 }); }catch(e){} } else if(o.petSpot&&Math.abs(o.petSpot[0]-.1)<1.6&&Math.abs(o.petSpot[1]-.7)<1.6) o.petSpot=[-2.6,2.4]; } }
       try{ _slpSt=ilStage(o.age||0); }catch(e){} _slpJp=(typeof archStyle==='function'&&archStyle(P)==='jp')&&(((P.seed||0)+(o.age||0))%3!==0);
     }catch(e){}
-    try{ return BS(P,o,label); } finally{ _slp=prev; _slpJp=pj; } }; }
+    try{ if(_slp) _slpSet=o.setting||_slpSet; return BS(P,o,label); } finally{ _slp=prev; _slpJp=pj; _slpSet=ps; } }; }
 // ペットのアルバム：ときどき、Channel といっしょの写真
 function mpWithCh(x){ if(x.w!=null) return !!x.w; try{ return ssH('w|'+x.t)%3===0; }catch(e){ return false; } }
 function mpChArt(p,x){ try{ if(typeof cur==='undefined'||!cur||typeof clock!=='function') return ''; const c=clock(); if(c.dead) return ''; const P=cur.P, L=cur.L; const age=Math.max(0,Math.floor(c.age));
@@ -18477,6 +18477,30 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .fl-haiku{ font-size:18px; line-height:1.8; color:#4A3A44; margin:6px 0; font-family:"Hiragino Mincho ProN","Yu Mincho",serif; } .fl-got-by{ margin:0; color:#8A7A84; font-size:13px; }
 @media (max-width:560px){ .fl-sel,.fl-send{ grid-template-columns:1fr; } .fl-sel-art{ width:150px; margin:0 auto; } .fl-got li{ grid-template-columns:90px 1fr; } }
 </style>`); }catch(e){}
+// v171: 今日のひとことを増やして、同じ文がつづけて出ないようにする（見た文は、ひととおり出るまで出さない）
+const HITO_MORE={
+ child:{ hi:['{n}は、水たまりをぜんぶ、ジャンプでこえた。','あたらしいことばを、ひとつおぼえた。','{n}は、だれよりも大きな声で「おはよう」と言えた。','おひさまの においが する ふとんで、ごろごろした。','{n}は、きれいな石を見つけて、ポケットにしまった。','きょうのおやつは、とくべつおいしかった。','{n}は、ころんでも、自分でたちあがった。','だれかと手をつないで歩くと、うれしい。','{n}は、ちょうちょを ずっと おいかけた。','歌をうたったら、みんながわらってくれた。','{n}は、はじめて、ひとりでできた。','おふろで、あわを いっぱい つくった。','{n}の つくった どろだんごは、ぴかぴかだった。','あしたは、なにして あそぼうかな。','{n}は、ねる前のお話が、だいすきだ。','空に にじが 出ていた。','{n}は、いい においの はなを、くんくん かいだ。','ほめられて、ちょっとだけ てれた。'],
+   mid:['{n}は、ありの行列を、しゃがんで見ていた。','きょうは、雨の音を聞いていた。','{n}は、つみきを高く高くつんだ。','くもの形が、くじらに見えた。','{n}は、おひるねのあと、ぼんやりしていた。','どうして、夜になると くらくなるんだろう。','{n}は、絵本を、さかさまにして読んでいた。','かげふみをして、ひとりであそんだ。','{n}は、まどに はあっと息をかけて、絵をかいた。','おなじ道でも、きょうは ちがって見えた。','{n}は、ねこと、目が合った。','風の音が、だれかの声みたいだった。','{n}は、おもちゃを ぜんぶ ならべてみた。','きょうも、ごはんを ぜんぶ食べた。','{n}は、かがみの中の自分に、手をふった。','ちいさな花を、だれにも言わずに見ていた。','{n}は、くつを左右ぎゃくに はいていた。','時計の はりが、ゆっくり うごいていた。'],
+   lo:['{n}は、おもちゃを とられて、くやしかった。','きょうは、なんだか、さびしかった。','{n}は、ひざを すりむいて、ちょっと ないた。','ほんとうは、もっと あそびたかった。','{n}は、だれかが けんかしているのを、こわいと思った。','おなかが いたくて、げんきが 出なかった。','{n}は、ないしょで、ぬいぐるみに おはなしした。','「だめ」って言われて、しょんぼりした。','{n}は、くらい ろうかが、ちょっと こわかった。','だいじな ものを、なくしてしまった。','{n}は、だっこしてほしかったけど、言えなかった。','みんなが いそがしそうで、ひとりで まっていた。']},
+ teen:{ hi:['{n}は、帰り道に、なぜか笑いがとまらなかった。','好きなものの話をしていたら、時間をわすれた。','{n}は、きょうの自分を、ちょっと好きになれた。','新しい音楽に出会った。耳からはなれない。','{n}は、だれかの「ありがとう」に、心があたたかくなった。','夕焼けが、写真にとりたくなるほど、きれいだった。','{n}は、むずかしい問題が、ふいに とけた。','友だちの何気ない一言に、すくわれた。','{n}は、自転車で風を切って、自由な気持ちになった。','あの人と、目が合った気がする。','{n}は、夢中になれるものが、ひとつ見つかった。','たぶん、今日は、いい日だった。'],
+   mid:['{n}は、窓ぎわの席で、雲の流れを見ていた。','好きと、きらいの、あいだにいる気がする。','{n}は、だれにも見せない日記を、少しだけ書いた。','何になりたいか、まだ分からない。','{n}は、同じ曲を、何回もくり返して聞いた。','親の言うことが、半分だけ分かる。','{n}は、帰り道を、わざと遠回りした。','本屋で、知らない世界の本を立ち読みした。','{n}は、すこし背がのびた気がした。','周りと同じでいたい日と、ちがっていたい日がある。','{n}は、夜空を見上げて、宇宙の広さを考えた。','時間が、早いようで、おそい。'],
+   lo:['{n}は、うまく言えなかった言葉を、ずっと考えていた。','笑っていたけど、本当は、つかれていた。','{n}は、だれとも話したくない気分だった。','比べても仕方ないのに、比べてしまう。','{n}は、布団をかぶって、何もかも忘れたかった。','がんばっても、うまくいかない日もある。','{n}は、ひとりで、泣くのをがまんした。','自分の居場所は、どこだろう。','{n}は、スマホの画面を、意味もなく見つづけた。','あの一言が、胸にささったまま、ぬけない。']},
+ adult:{ hi:['{n}は、久しぶりに、心から笑った。','仕事がひと段落して、深呼吸をした。','{n}は、だれかに「助かったよ」と言われた。','おいしいごはんは、それだけで幸せだ。','{n}は、帰り道の月が、やけにきれいだと思った。','小さな約束を、ちゃんと守れた。','{n}は、好きな人の笑顔を思い出して、あたたかくなった。','新しいことを始める勇気が、少しわいた。','{n}は、休みの日の朝、ゆっくりコーヒーをいれた。','がんばってきたことが、形になりはじめた。','{n}は、だれかと分け合ったおやつが、おいしかった。','今日の自分に、まるをつけたい。'],
+   mid:['{n}は、通勤の電車で、ぼんやり外を見ていた。','やらなきゃいけないことと、やりたいことを、紙に書いた。','{n}は、洗濯物をたたみながら、考えごとをした。','季節が、いつのまにか変わっていた。','{n}は、昔聞いていた曲を、ふと口ずさんだ。','「ふつう」って、なんだろう。','{n}は、冷蔵庫の中を見て、今夜の献立を考えた。','あの日の選択は、正しかったのかな。','{n}は、街の音を聞きながら、歩いた。','まあ、なんとかなる。たぶん。','{n}は、だれかに手紙を書こうか、迷った。','忙しい毎日の中に、小さな休みを見つけた。'],
+   lo:['{n}は、言いたいことを、のみこんだ。','がんばりすぎていることに、気づいていた。','{n}は、帰り道、少しだけ遠回りして、気持ちを落ちつけた。','だれかに、話を聞いてほしかった。','{n}は、ため息をついて、それから、また前を向いた。','思いどおりにいかない一日だった。','{n}は、夜中に目がさめて、いろいろ考えてしまった。','自分は、ちゃんとやれているのかな。','{n}は、何もしたくない日も、あっていいと思うことにした。','お金のことが、少し心配だ。']},
+ elder:{ hi:['{n}は、久しぶりに会った人と、昔話に花がさいた。','朝の空気が、すがすがしかった。','{n}は、小さな子に手をふられて、ふりかえした。','好きなものを、好きなだけ食べた。','{n}は、今日も、ちゃんと自分の足で歩けた。','季節の花を、今年も見られた。','{n}は、だれかの役に立てて、うれしかった。','笑いじわが、また一本ふえた気がする。','{n}は、昔の写真を見て、にっこりした。','電話の向こうの声が、元気そうでよかった。'],
+   mid:['{n}は、縁側で、雲の流れを見ていた。','新しいことは、ゆっくり覚えればいい。','{n}は、古い手紙を、読み返していた。','毎日の小さな習慣が、心を落ちつかせる。','{n}は、窓の外の鳥の声に、耳をすませた。','昔とは、町の景色がずいぶん変わった。','{n}は、眼鏡をどこに置いたか、思い出そうとした。','季節の移り変わりが、前よりよく分かる。','{n}は、ゆっくり、お茶をもう一杯いれた。','若いころの自分に、なんと言うだろう。'],
+   lo:['{n}は、体のあちこちが、少し痛んだ。','会いたい人に、なかなか会えない。','{n}は、夜が長く感じた。','できなくなったことを、数えてしまう日もある。','{n}は、先に行った人たちのことを思った。','少し、心細い一日だった。','{n}は、だれかの声を聞きたくて、ラジオをつけた。','覚えていたいことが、こぼれていく気がする。']}
+};
+for(const a in HITO_MORE) for(const b in HITO_MORE[a]) if(HITO[a]&&HITO[a][b]) HITO[a][b]=HITO[a][b].concat(HITO_MORE[a][b].filter(x=>!HITO[a][b].includes(x)));
+{ const HK=hitokoto; hitokoto=function(P,L,age){ try{ const st2=age<=12?'child':age<=19?'teen':age<=64?'adult':'elder'; const y=[...L.years].reverse().find(y=>y.age<=age&&y.h!=null); const h=y?y.h:60;
+    const band=h>=68?'hi':h>=45?'mid':'lo'; const k=dayKey(); const key='hito.hist.'+P.seed; const H=store.get(key,{ d:{}, u:[] });
+    if(H.d[k]) return H.d[k];
+    const own=[]; L.years.filter(y=>y.age<=age&&y.age>=age-1).forEach(y=>y.events.forEach(e=>{ if(e.inner&&e.kind!=='death') own.push(`「${e.inner}」`); }));
+    const pool=HITO[st2][band].map(t=>t.replace(/\{n\}/g,P.given)); let cand=(own.length&&dHash(P.seed,k,'own')%3===0?own:[]).filter(t=>!H.u.includes(t)); if(!cand.length) cand=pool.filter(t=>!H.u.includes(t));
+    if(!cand.length){ cand=pool.filter(t=>!H.u.slice(-3).includes(t)); H.u=H.u.slice(-3); } if(!cand.length) cand=pool;
+    const t=cand[dHash(P.seed,k,'nr')%cand.length];
+    H.d[k]=t; const ks=Object.keys(H.d); if(ks.length>14) delete H.d[ks[0]]; H.u.push(t); if(H.u.length>200) H.u=H.u.slice(-200); store.set(key,H); return t; }catch(e){ return HK(P,L,age); } }; }
 // v162: ペットのアルバムの写真を押すと、大きく見える
 function paZoomOpen(fig){ let d=document.getElementById('paZoom'); if(!d){ d=document.createElement('div'); d.id='paZoom'; d.className='pa-ov'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','写真を大きく見る'); document.body.appendChild(d);
     d.addEventListener('click',e=>{ if(e.target===d||e.target.closest('.pa-x')) paZoomClose(); }); }
