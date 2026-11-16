@@ -16576,7 +16576,8 @@ function navFromHash(){ try{ const m=(location.hash||'').match(/^#(gateway|birth
 window.addEventListener('hashchange',navFromHash);
 function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); try{ render(); }catch(e){ try{ console.error(e); localStorage.setItem('lb.lastErr',String(e&&e.stack||e).slice(0,600)); }catch(_){} } navFromHash(); if(typeof friendFromHash==='function') friendFromHash(); if(typeof loanFromHash==='function') loanFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
 start();
-setInterval(()=>{ if(st && st.stage==='life' && !viewing && !inspAnim && document.visibilityState==='visible' && !document.activeElement.matches('textarea')){ window._skAuto=true; try{ render(); }finally{ window._skAuto=false; } } }, 30000);
+// v175f：Life Home は動く絵が多く、描きなおしのたびに一瞬かたまるので、自動の描きなおしは5分に1回（ほかのページは30秒のまま）
+setInterval(()=>{ if(st && st.stage==='life' && !viewing && !inspAnim && document.visibilityState==='visible' && !document.activeElement.matches('textarea')){ if(typeof page!=='undefined'&&page==='home'&&Date.now()-(window._lbAutoR||0)<300000) return; window._lbAutoR=Date.now(); window._skAuto=true; try{ render(); }finally{ window._skAuto=false; } } }, 30000);
 
 function refSecHTML(){
   return `<section class="chap"><details><summary class="tiny muted">この人生の心の動きと暮らしは、どんな研究をもとに計算しているか</summary>
@@ -18439,37 +18440,41 @@ function vhViaduct(y,tod){ const X0=typeof _ssX0!=='undefined'?_ssX0:0, W=typeof
 // 横から見た街に、乗り物を足す
 { const SST=ssStreet; ssStreet=function(S,ctx,land,tod,r,mood){ SST.apply(this,arguments); try{ const h=ssH('veh|'+_ssHH+'|'+land), y=ctx.year||2000, st=ctx.style||'eu';
     // 地面を走る（2台目の車線）
-    const WIDE=typeof _ssWideNow!=='undefined'&&_ssWideNow, MANY=WIDE||(typeof _lbStreetNow!=='undefined'&&_lbStreetNow);
+    const WIDE=typeof _ssWideNow!=='undefined'&&_ssWideNow, STR=typeof _lbStreetNow!=='undefined'&&_lbStreetNow, MANY=WIDE||STR; // v175f：海辺の道(STR)は、同時に見える数を前の3分の1くらいに
     const gp=vhPool(VH_GROUND,y,st); const RV=y>=1950&&typeof ssRVOk==='function'&&ssRVOk();
     if(RV){ const L=window.lbVehicles.list(), cars=L.filter(v=>v.cat==='car'||(v.cat==='tri'&&['tuk','auto','trikeM'].includes(v.type))), two=L.filter(v=>v.cat==='moto'||v.cat==='bike'); const q=S.p(0,0,2.5); S.raw(-(2.5)*100+5,vhMoveRV(cars[h%cars.length],q[1]+1,10.5*S.U/120,h,'vh-gr'));
-      if(h%3!==0&&two.length){ const q2=S.p(0,0,-.6); S.raw(60+1,vhMoveRV(two[(h>>>6)%two.length],q2[1]+2,11*S.U/120,h>>>3,'vh-gr')); }
+      if((STR||h%3!==0)&&two.length){ const q2=S.p(0,0,-.6); S.raw(60+1,vhMoveRV(two[(h>>>6)%two.length],q2[1]+2,11*S.U/120,h>>>3,'vh-gr')); }
       // v174: 横はばいっぱいの絵では、乗り物をもっとたくさん。v175c：同じ種類が重ならないように、毎回ちがう組み合わせで
-      if(MANY){ const used=new Set([cars[h%cars.length].type]); const pickU=(A,key,n)=>{ const o=[]; for(let k=0;k<A.length*2&&o.length<n;k++){ const hk=ssH(key+'|'+k+'|'+h), v=A[hk%A.length]; if(used.has(v.cat+v.type)) continue; used.add(v.cat+v.type); o.push([v,hk]); } return o; };
+      if(MANY&&!STR){ const used=new Set([cars[h%cars.length].type]); const pickU=(A,key,n)=>{ const o=[]; for(let k=0;k<A.length*2&&o.length<n;k++){ const hk=ssH(key+'|'+k+'|'+h), v=A[hk%A.length]; if(used.has(v.cat+v.type)) continue; used.add(v.cat+v.type); o.push([v,hk]); } return o; };
         pickU(cars,'vw',WIDE?3:1).forEach(([v,hk],k)=>S.raw(-(2.5)*100+5+(k+1)*.01,vhMoveRV(v,q[1]+1,10.5*S.U/120,hk,'vh-gr')));
         if(two.length){ const q2=S.p(0,0,-.6); pickU(two,'vm',WIDE?2:1).forEach(([v,hk],k)=>S.raw(60+1+(k+1)*.01,vhMoveRV(v,q2[1]+2,11*S.U/120,hk,'vh-gr'))); } } }
     else if(gp.length){ const v=gp[h%gp.length], q=S.p(0,0,2.5); S.raw(-(2.5)*100+5,vhMoveG(v,q[1]+1,S.U,h)); }
     // v174: バス・トラック・ジープニーも、ときどき（大きさは車とそろえる）
     // v175c：海辺の道・横はばいっぱいの絵では、バス・トラック・救急車・タクシー・パトカー・消防車なども（同じものは2台出さない）
     if(RV&&MANY){ const wk=vhPool(['car','bus','truck','jeepney'],y,st).filter(v=>v.t!=='car'||/救急|パトカー|タクシー|キャブ/.test(v.n)); const got=new Set(), q=S.p(0,0,3.1); let n=0;
-      for(let k=0;k<wk.length*2&&n<(WIDE?3:2);k++){ const hk=ssH('wk|'+k+'|'+h), v=wk[hk%wk.length]; const grp=v.t==='car'?v.n:v.t; if(got.has(grp)) continue; got.add(grp); S.raw(-(3.1)*100+5+n*.01,vhMoveG(v,q[1]+1,S.U,hk)); n++; } }
+      for(let k=0;k<wk.length*2&&n<(STR?1:WIDE?3:2);k++){ const hk=ssH('wk|'+k+'|'+h), v=wk[hk%wk.length]; const grp=v.t==='car'?v.n:v.t; if(got.has(grp)) continue; got.add(grp); S.raw(-(3.1)*100+5+n*.01,vhMoveG(v,q[1]+1,S.U,hk)); n++; } }
     else if(RV&&(h>>>5)%3===0){ const bb=gp.filter(v=>['bus','truck','jeepney'].includes(v.t)); if(bb.length){ const v=bb[(h>>>7)%bb.length], q=S.p(0,0,3.1); S.raw(-(3.1)*100+5,vhMoveG(v,q[1]+1,S.U,h>>>2)); } }
     if(!RV&&gp.length&&h%3!==0){ const gb=gp.filter(v=>['bike','moto','penny','rickshaw','tuk'].includes(v.t)); if(gb.length){ const v=gb[(h>>>6)%gb.length], q=S.p(0,0,-.6); S.raw(60+1,vhMoveG(v,q[1]+2,S.U,h>>>3)); } }
     // 高架を走る電車・新幹線
-    if(['town','bigcity','park','station','harbor','market','skyscraper'].includes(land)||h%2===0){ let rp=vhPool(VH_RAIL,y,st); const sk=rp.filter(v=>v.t==='shink'); if(sk.length&&h%3!==2) rp=sk; if(rp.length&&(h>>>8)%3!==1){ const v=rp[(h>>>9)%rp.length]; S.raw(-1e6+2.5,`<g class="vh-via">${vhViaduct(118,tod)}${vhMove(v,118,1.5,h>>>5,'vh-rail')}</g>`); } }
+    if((!STR||(h>>>3)%2===0)&&(['town','bigcity','park','station','harbor','market','skyscraper'].includes(land)||h%2===0)){ let rp=vhPool(VH_RAIL,y,st); const sk=rp.filter(v=>v.t==='shink'); if(sk.length&&h%3!==2) rp=sk; if(rp.length&&(h>>>8)%3!==1){ const v=rp[(h>>>9)%rp.length]; S.raw(-1e6+2.5,`<g class="vh-via">${vhViaduct(118,tod)}${vhMove(v,118,1.5,h>>>5,'vh-rail')}</g>`); } }
     // 空：飛行機・ヘリ・気球
-    const sp=vhPool(VH_SKY,y,st); if(sp.length&&(h>>>11)%3!==0){ const v=sp[(h>>>12)%sp.length]; S.raw(-1e6+1.5,vhMove(v,30+(h>>>13)%40,.55,h>>>7,'vh-sky')); }
+    const sp=vhPool(VH_SKY,y,st); if(!(MANY&&RV)&&sp.length&&(h>>>11)%3!==0){ const v=sp[(h>>>12)%sp.length]; S.raw(-1e6+1.5,vhMove(v,30+(h>>>13)%40,.55,h>>>7,'vh-sky')); }
+    // v175d：海辺の道では、気球・飛行船だけ、ときどき（いつも同じジェットにならないように）
+    if(MANY&&RV){ const bl=sp.filter(v=>['balloon','airship'].includes(v.t)); if(bl.length&&(h>>>11)%(STR?4:2)===0){ const v=bl[(h>>>12)%bl.length]; S.raw(-1e6+1.5,vhMove(v,26+(h>>>13)%30,.55,h>>>7,'vh-sky')); } }
     // 港：船
-    if(land==='harbor'){ const shp=vhPool(['ship'],y,st); if(shp.length){ const v=shp[(h>>>18)%shp.length], q=S.p(0,0,16); S.raw(-1e6+4.7,vhMove(v,q[1],.6,h>>>2,'vh-sea')); const v2=shp[(h>>>21)%shp.length], q2=S.p(0,0,24); S.raw(-1e6+4.65,vhMove(v2,q2[1],.42,h>>>6,'vh-sea')); } }
+    if(land==='harbor'){ const shp=vhPool(['ship'],y,st); if(shp.length){ const v=shp[(h>>>18)%shp.length], q=S.p(0,0,16); S.raw(-1e6+4.7,vhMove(v,q[1],.6,h>>>2,'vh-sea')); if(!STR){ const v2=shp[(h>>>21)%shp.length], q2=S.p(0,0,24); S.raw(-1e6+4.65,vhMove(v2,q2[1],.42,h>>>6,'vh-sea')); } } }
     // v175: 横はばいっぱいの絵では、空と海の乗り物も、いろいろな種類を
     if(MANY&&RV&&window.lbVehicles){ const L=window.lbVehicles.list(), civ=v=>!['stealth','twinf','singlef','dd','cv','sub'].includes(v.type);
       const pl=L.filter(v=>v.cat==='plane'&&civ(v)), he=L.filter(v=>v.cat==='heli'), bt=L.filter(v=>(v.cat==='yacht'||v.cat==='boat'||v.cat==='ship')&&civ(v));
       const h1=ssH('sky1|'+h), h2=ssH('sky2|'+h), h3=ssH('sea1|'+h);
-      if(pl.length) S.raw(-1e6+1.52,vhMoveRV(pl[h1%pl.length],52+(h1>>>5)%22,4.2*S.U/120,h1,'vh-sky'));
-      if(he.length) S.raw(-1e6+1.53,vhMoveRV(he[h2%he.length],78+(h2>>>5)%18,4.8*S.U/120,h2,'vh-sky'));
-      if(land==='harbor'&&bt.length){ const q=S.p(0,0,10); S.raw(-1e6+4.72,vhMoveRV(bt[h3%bt.length],q[1]+2,4.6*S.U/120,h3,'vh-sea')); } }
+      const skyOne=STR?((h1>>>3)%2):-1; // 海辺の道：飛行機かヘリのどちらか1機
+      if(pl.length&&skyOne!==1){ const a=h1%pl.length; S.raw(-1e6+1.52,vhMoveRV(pl[a],52+(h1>>>5)%22,4.2*S.U/120,h1,'vh-sky'));
+        if(!STR&&pl.length>1&&(h1>>>9)%3!==0){ const hb=ssH('sky3|'+h), b2=(a+1+hb%(pl.length-1))%pl.length; S.raw(-1e6+1.515,vhMoveRV(pl[b2],40+(hb>>>5)%14,3.4*S.U/120,hb,'vh-sky')); } }
+      if(he.length&&skyOne!==0) S.raw(-1e6+1.53,vhMoveRV(he[h2%he.length],78+(h2>>>5)%18,4.8*S.U/120,h2,'vh-sky'));
+      if(!STR&&land==='harbor'&&bt.length){ const q=S.p(0,0,10); S.raw(-1e6+4.72,vhMoveRV(bt[h3%bt.length],q[1]+2,4.6*S.U/120,h3,'vh-sea')); } }
     vhSpace(S,y,st,h,tod);
     // UFO：ときどき
-    if((h>>>15)%5===0){ const up=vhPool(['ufo'],y,st); const v=up[(h>>>16)%up.length]; S.raw(-1e6+1.6,vhMove(v,24+(h>>>17)%36,.7,h>>>9,'vh-ufo')); }
+    if(!STR&&(h>>>15)%5===0){ const up=vhPool(['ufo'],y,st); const v=up[(h>>>16)%up.length]; S.raw(-1e6+1.6,vhMove(v,24+(h>>>17)%36,.7,h>>>9,'vh-ufo')); }
   }catch(e){} }; }
 // ロケット（ときどき打ち上げ）と、夜の人工衛星
 function vhSpace(S,y,st,h,tod,add){ let out='';
@@ -19036,6 +19041,9 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v166: Life Home の上のほうに「✨ LIFE BOOKのニュース」。新しい機能・更新のお知らせ。
 // ゲームに入っているお知らせ（LBN_BUILTIN）＋ 管理者が Firebase の os/news に書いたお知らせ（{ n:[{ i, d:ミリ秒, t:題, b:説明 }] }）。新しい順に3つ、のこりは「これまでのお知らせ」。
 const LBN_BUILTIN=[
+  { i:'gw-parade', d:Date.UTC(2026,10,16,14,17), t:'Gateway に、乗り物が走る街ができました🚌✈️', b:'Gateway の「いろんな街が、空に浮かんでいます」の下で、バスや車、電車、船、飛行機、ヘリコプターなど、いろんな乗り物が次々に走っています。' },
+  { i:'v175-street', d:Date.UTC(2026,10,16,14,46), t:'Life Home に「🌊 海辺の道」ができました', b:'人生の島と浮かぶ街の下に、海辺の道があります。バス・車・バイク・自転車・救急車・タクシー・トラック、高架の電車や新幹線、海の船やヨット、空の飛行機やヘリコプターが、いろいろな組み合わせで次々に走っていきます。' },
+  { i:'v175-park', d:Date.UTC(2026,10,16,14,45), t:'公園のペットたちが、道の上を走るようになりました🐾', b:'公園の道を広くして、ペットたちが道の上を走るようにしました。左を向いて、右から左へ。足を動かして走る子、とても速い子、ひと休みする子もいます。' },
   { i:'v174-park', d:Date.UTC(2026,10,16,13,32), t:'知り合いのペットたちが、公園を走るようになりました🐾', b:'Life Home のニュースの上で、ペットたちが公園の中を走ったり、ジャンプしたり、ひと休みしたりしながら通りすぎていきます。ペットを押すと大きくなって、Higher Self の名前や、さいきんのおしゃべりが見られます。その下では、ペットたちのおしゃべりが電光掲示板のように流れます。' },
   { i:'v174-street', d:Date.UTC(2026,10,16,13,31), t:'街の絵が、横はばいっぱいに広がりました🏙', b:'広い画面では、街の絵が横はばいっぱいになり、たくさんの車やバイクが走ります。うしろのビルや港の景色も、乗り物と同じくらいリアルに描きなおしました。' },
   { i:'v174-pastchat', d:Date.UTC(2026,10,16,13,30), t:'ペットたちの、これまでのおしゃべりを読めるようになりました📖', b:'「📖 これまでのおしゃべりを読む」から、過去のおしゃべりをまとめて読めます。ペットが本当にごはんやプレゼントをもらった日は、そのことも話してくれます。' },
@@ -19054,7 +19062,7 @@ const LBN_BUILTIN=[
 const KEY_LBN='hitotsu.news', KEY_LBNSEEN='hitotsu.newsSeen'; let _lbnAt=0, _lbnOpen=false;
 function lbnList(){ let r=[]; try{ r=store.get(KEY_LBN,[]); }catch(e){} const all=(Array.isArray(r)?r:[]).concat(LBN_BUILTIN), seen={}, out=[];
   all.forEach(x=>{ if(!x||!x.t||seen[x.i]) return; seen[x.i]=1; out.push(x); }); return out.sort((a,b)=>(b.d||0)-(a.d||0)).slice(0,30); }
-function lbnDate(ms){ const d=new Date(ms); return isNaN(d)?'':`${d.getMonth()+1}月${d.getDate()}日`; }
+function lbnDate(ms){ const d=new Date(ms); return isNaN(d)?'':`${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`; }
 // v172: その人だけのお知らせ（まだ見ていないお花・写真が届いていたら、ニュースのいちばん上に出す）
 function lbnMine(){ const out=[]; try{ if(typeof KEY_FLGOT==='undefined') return out; const g=(store.get(KEY_FLGOT,[])||[]).filter(x=>!x.seen); if(g.length){ const bq=g.some(x=>!(typeof flIsOne==='function'&&flIsOne(x))); const who=[...new Set(g.map(x=>x.by).filter(Boolean))].slice(0,2).map(n=>esc(n)+'さん').join('、');
     out.push(`<button type="button" class="lbn-me" data-lbn-me="got"><span class="lbn-new">NEW</span><span class="lbn-t">${bq?'あなたに、花束💐が届いています':'あなたに、お花🌷が届いています'}</span><span class="lbn-who">${who?who+'から':''}</span></button>`); }
@@ -19178,7 +19186,7 @@ function prRunHTML(){ const L=prPets(); _prL=L; if(!L.length) return ''; const a
   // 画面の幅で、1本の道に走れる数を決める（ペットどうしが重ならないように、間を110px以上あける）
   const W=Math.max(320,Math.min(1400,(document.getElementById('app')||document.body).clientWidth||window.innerWidth||400)), per=Math.max(2,Math.floor((W+160)/115));
   const lanes=[[],[],[]]; all.forEach(p=>{ const fast=gsHash(p.s+'|sp')%5===0; const ln=fast?2:(lanes[0].length<=lanes[1].length?0:1); if(lanes[ln].length<per) lanes[ln].push(p); else if(lanes[1-Math.min(ln,1)].length<per) lanes[1-Math.min(ln,1)].push(p); });
-  const base=Math.max(16,per*2.6); let h='';
+  const tot=lanes[0].length+lanes[1].length+lanes[2].length; _prF=Math.max(1,tot*(W/(W+140))/3.5); const base=Math.max(16,per*2.6)*_prF; let h=''; /* v175f：画面に一度に見えるのは3〜4匹。1周のうち 1/_prF の時間で走りぬけ、のこりは外で待つ（全員が順番に出る） */
   lanes.forEach((A,ln)=>A.forEach((p,k)=>{ h+=prOne(p,ln,k,A.length,base); }));
   return `<div class="pr-run" aria-label="知り合いのペットたち">${prParkSVG()}${h}</div>`; }
 // 電光掲示板：さいきんのおしゃべりを、つなげて流す（1周ごとに、新しいおしゃべりに入れかえる）
@@ -19192,14 +19200,24 @@ function prFit(root){ root.querySelectorAll('.pr-hop').forEach(h=>{ const S=[...
   S.forEach(s=>{ try{ const b=s.getBBox(); if(b.width>0){ x0=Math.min(x0,b.x); y0=Math.min(y0,b.y); x1=Math.max(x1,b.x+b.width); y1=Math.max(y1,b.y+b.height); } }catch(e){} });
   if(x1<=x0) return; const H=Math.max(106,(y1-y0)+4,((x1-x0)+6)*106/200), W=H*200/106, vx=(x0+x1)/2-W/2, vy=y1+2-H;
   S.forEach(s=>s.setAttribute('viewBox',`${vx.toFixed(1)} ${vy.toFixed(1)} ${W.toFixed(1)} ${H.toFixed(1)}`)); }); }
+var _prF=1;
+function prKf(){ const X=100/_prF, P=v=>(v*X/100).toFixed(2)+'%'; let st=document.getElementById('prKf'); if(!st){ st=document.createElement('style'); st.id='prKf'; document.head.appendChild(st); }
+  st.textContent=`@keyframes prWalk{ 0%{ left:100% } ${P(100)}{ left:-140px } 100%{ left:-140px } }
+@keyframes prWalkNap{ 0%{ left:100% } ${P(38)}{ left:45% } ${P(62)}{ left:45% } ${P(100)}{ left:-140px } 100%{ left:-140px } }
+@keyframes prNapA{ 0%{ visibility:visible } ${P(40)}{ visibility:hidden } ${P(60)}{ visibility:visible } 100%{ visibility:visible } }
+@keyframes prNapZ{ 0%{ opacity:0 } ${P(40)}{ opacity:1 } ${P(60)}{ opacity:0 } 100%{ opacity:0 } }`; }
 function prSetW(){ document.querySelectorAll('.pr-run').forEach(r=>r.style.setProperty('--prW',(r.clientWidth||360)+'px')); }
 window.addEventListener('resize',prSetW);
+// v175d：Life Home は30秒ごとに描きなおされる。そのたびに動きが最初にもどって「止まった」ように見えないよう、
+// 同じ絵はそのまま使い、動きの時間を、最初に出した時からの続きに合わせる
+function lbAnimSync(root,t0){ const el=(performance.now()-t0)/1000; root.querySelectorAll('[style*="animation-delay"]').forEach(e=>{ try{ if(e.dataset.d0==null){ const m=/animation-delay:\s*(-?[\d.]+)s/.exec(e.getAttribute('style')||''); if(!m) return; e.dataset.d0=m[1]; } e.style.animationDelay=(+e.dataset.d0-el).toFixed(2)+'s'; }catch(_){} }); }
+var _prC=null;
 function prPlace(){ try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home'||app.querySelector('.pr-w')) return;
-  const run=prRunHTML(); if(!run) return; const html=`<section class="pr-w">${run}${prBoardHTML()}</section>`;
-  const box=document.createElement('div'); box.innerHTML=html; const el=box.firstElementChild;
+  const run=prRunHTML(); if(!run) return; let el, fresh=false;
+  if(_prC&&_prC.key===run){ el=_prC.el; _prF=_prC.f; } else { const box=document.createElement('div'); box.innerHTML=`<section class="pr-w">${run}${prBoardHTML()}</section>`; el=box.firstElementChild; _prC={ key:run, el, t0:performance.now(), f:_prF }; fresh=true; } prKf();
   const lbn=app.querySelector('.lbn'), cid=app.querySelector('.hm-cid'), osm=app.querySelector('.osm'), home=app.querySelector('.home');
   if(lbn) lbn.before(el); else if(cid) cid.after(el); else if(osm) osm.before(el); else if(home) home.prepend(el); else return;
-  prFit(el); const bd=el.querySelector('.pr-bd'); if(bd) prBoardFit(bd); prSetW();
+  if(fresh){ prFit(el); const bd=el.querySelector('.pr-bd'); if(bd) prBoardFit(bd); } lbAnimSync(el,_prC.t0); prSetW();
 }catch(e){ try{ console.warn('[petrun]',e); }catch(_){} } }
 // 走っているペットを押すと：大きな絵・Higher Self の名前・Higher Self のじまん・さいきんのおしゃべり
 function prOpen(p){ let art=''; try{ art=petPortraitSVG(p.id,'',prPose(p)).replace(/<svg class="pet-art"/,'<svg class="pr-big"'); }catch(e){}
@@ -19222,7 +19240,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .pr-p.pr-l1{ z-index:2; } .pr-p.pr-l1 .pr-hop{ transform-origin:bottom; } .pr-p.pr-l2 .pr-art{ width:66px; height:35px; }
 .pr-p.pr-l0{ z-index:3; } .pr-p.pr-l2{ z-index:1; }
 .pr-run:hover .pr-p,.pr-run:hover .pr-bg,.pr-run:hover .pr-hop,.pr-run:hover .pr-art,.pr-run:hover .pr-z{ animation-play-state:paused; }
-@keyframes prWalk{ from{ left:100% } to{ left:-140px } }
 .pr-hop{ position:relative; display:block; }
 .pr-art{ display:block; width:80px; height:42px; transform:scaleX(-1); } /* 左を向いて走る */
 .pr-sh{ display:block; width:40px; height:6px; margin:-6px auto 0; border-radius:50%; background:rgba(60,90,40,.22); }
@@ -19231,7 +19248,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .pr-jump .pr-hop{ animation:prJump 1.8s cubic-bezier(.3,0,.4,1) infinite; }
 @keyframes prJump{ 0%,55%,100%{ transform:translateY(0) } 70%{ transform:translateY(-14px) rotate(-6deg) } 85%{ transform:translateY(-6px) } }
 .pr-nap{ animation-name:prWalkNap!important; }
-@keyframes prWalkNap{ 0%{ left:100% } 38%{ left:45% } 62%{ left:45% } 100%{ left:-140px } }
 .pr-nap .pr-hop{ animation:none; }
 .pr-nap .pr-hop>.pr-art:first-child,.pr-nap .pr-hop>.pr-aw{ animation-name:prNapA; animation-timing-function:linear; animation-iteration-count:infinite; animation-duration:inherit; animation-delay:inherit; }
 .pr-zz{ position:absolute; left:0; top:0; opacity:0; } .pr-nap .pr-zz,.pr-nap .pr-z,.pr-nap .pr-hop>.pr-aw,.pr-nap .pr-hop>.pr-art:first-child{ animation-timing-function:steps(1,end)!important; }
@@ -19243,8 +19259,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .pr-fast .pr-n{ background:#FFF4D6; border-color:#F6C66A; }
 
 .pr-nap .pr-zz,.pr-nap .pr-z{ animation-name:prNapZ; animation-timing-function:linear; animation-iteration-count:infinite; animation-duration:inherit; animation-delay:inherit; }
-@keyframes prNapA{ 0%{ visibility:visible } 40%{ visibility:hidden } 60%{ visibility:visible } 100%{ visibility:visible } }
-@keyframes prNapZ{ 0%{ opacity:0 } 40%{ opacity:1 } 60%{ opacity:0 } 100%{ opacity:0 } }
 @keyframes prRun{ from{ transform:translateX(0) } to{ transform:translateX(-50%) } }
 .pr-z{ position:absolute; right:4px; top:-4px; font-style:normal; font-weight:700; color:#8FA6D8; font-size:13px; opacity:0; }
 .pr-z b{ font-size:10px; margin-left:1px; }
@@ -19280,13 +19294,16 @@ function lbStreetSVG(P,age,o0){ if(typeof sideSceneSVG!=='function'||!P) return 
 function lbStreetCardHTML(){ try{ if(typeof cur==='undefined'||!cur||!cur.P) return ''; const c=clock(); if(c.dead) return ''; const s=lbStreetSVG(cur.P,c.age); if(!s) return '';
   return `<section class="lbst"><h3 class="lbst-h">🌊 海辺の道 <span>物語の中の、いまの時代の乗り物が走っています</span></h3><div class="lbst-art">${s}</div></section>`; }catch(e){ return ''; } }
 function lbStreetAnchor(app){ const home=app.querySelector('.home'); let a=app.querySelector('.mbx-strip')||app.querySelector('.hmi-slot')||app.querySelector('.hmi'); if(!a||!home) return null; while(a.parentNode&&a.parentNode!==home) a=a.parentNode; return a.parentNode===home?a:null; }
-function lbStreetFix(){ try{ const app=document.getElementById('app'); const el=app&&app.querySelector('.lbst'); if(!el) return; const anc=lbStreetAnchor(app); if(anc&&anc.nextElementSibling!==el&&anc.parentNode) anc.after(el); }catch(e){} }
+function lbStreetFix(){ try{ const app=document.getElementById('app'); const el=app&&app.querySelector('.lbst'); if(!el) return; const anc=lbStreetAnchor(app); if(anc&&anc.nextElementSibling!==el&&anc.parentNode){ anc.after(el); if(_lbStC&&typeof lbAnimSync==='function') lbAnimSync(el,_lbStC.t0); } }catch(e){} }
+var _lbStC=null;
 setInterval(lbStreetFix,1200);
 function lbStreetPlace(){ try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home') return; if(app.querySelector('.lbst')){ lbStreetFix(); return; }
-  const h=lbStreetCardHTML(); if(!h) return; const box=document.createElement('div'); box.innerHTML=h; const el=box.firstElementChild;
+  // v175d：同じ時間帯・同じ年の間は、同じ絵をそのまま使い、動きを続きから（30秒ごとの描きなおしで止まって見えないように）
+  let key=''; try{ key=cur.P.seed+'|'+clock().age+'|'+lbStTod(); }catch(_){}
+  let el; if(_lbStC&&_lbStC.key===key){ el=_lbStC.el; } else { const h=lbStreetCardHTML(); if(!h) return; const box=document.createElement('div'); box.innerHTML=h; el=box.firstElementChild; _lbStC={ key, el, t0:performance.now() }; }
   // 上から3番目：人生の島 → 浮かぶ街の帯 → 海辺の道
   const anc=lbStreetAnchor(app), lbn=app.querySelector('.lbn'), home=app.querySelector('.home');
-  if(anc) anc.after(el); else if(lbn) lbn.before(el); else if(home) home.prepend(el); }catch(e){ try{ console.warn('[lbstreet]',e); }catch(_){} } }
+  if(anc) anc.after(el); else if(lbn) lbn.before(el); else if(home) home.prepend(el); if(typeof lbAnimSync==='function') lbAnimSync(el,_lbStC.t0); }catch(e){ try{ console.warn('[lbstreet]',e); }catch(_){} } }
 (function(){ if(typeof render1!=='function') return; const _r=render1; render1=function(){ const r=_r.apply(this,arguments); lbStreetPlace(); return r; }; })();
 setTimeout(lbStreetPlace,0);
 // Gateway など、ほかのページに埋めこむとき：play.html?view=street（絵だけを横いっぱいに出す）
