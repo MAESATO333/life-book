@@ -17954,6 +17954,8 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .pa-art svg{ width:100%; height:auto; display:block; border-radius:10px; } .pa-cap{ margin:10px 4px 0; font-size:15px; line-height:1.7; color:#4A3A44; }
 .pa-x{ position:absolute; top:8px; right:8px; width:40px; height:40px; border-radius:50%; border:0; background:#FF8FAB; color:#fff; font-size:24px; cursor:pointer; z-index:2; }
 .pa-back{ position:static; display:block; width:auto; height:auto; margin:14px auto 2px; padding:12px 32px; border-radius:999px; font-size:16px; font-weight:700; } .pa-nav{ display:flex; align-items:center; justify-content:center; gap:14px; margin-top:10px; color:#8A7A84; font-size:13px; } .pa-b{ border:0; background:#FFE3EC; color:#C2476B; border-radius:999px; padding:8px 16px; font-weight:700; cursor:pointer; } .pa-b:disabled{ opacity:.35; cursor:default; }
+/* v164: スマホでは、上の帯（ロゴ・メニュー・紹介ボタン）を画面にくっつけない。スクロールすると上に消えて、画面が広く見える */
+@media (max-width:820px){ .masthead{ position:static!important; } .masthead .mast-r{ justify-content:flex-start!important; gap:8px!important; } .masthead .fr-top{ font-size:12px; padding:6px 12px 6px 10px; box-shadow:0 2px 0 #D85878; } }
 </style>`); }catch(e){}
 </script>
 <script>
