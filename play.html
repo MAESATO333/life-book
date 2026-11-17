@@ -19318,7 +19318,7 @@ function lbStreetFix(){ try{ const app=document.getElementById('app'); const el=
 var _lbStC=null;
 setInterval(lbStreetFix,1200);
 // v175.4：MITSUさん「今は消して」→ Life Home には出さない（true にすると、また出る）。?view=street はそのまま
-var LB_STREET_ON=true;
+var LB_STREET_ON=false;
 function lbStreetPlace(){ try{ const app=document.getElementById('app'); if(!LB_STREET_ON) return; if(!app||typeof page==='undefined'||page!=='home') return; if(app.querySelector('.lbst')){ lbStreetFix(); return; }
   // v175d：同じ時間帯・同じ年の間は、同じ絵をそのまま使い、動きを続きから（30秒ごとの描きなおしで止まって見えないように）
   let key=''; try{ key=cur.P.seed+'|'+clock().age+'|'+lbStTod(); }catch(_){}
@@ -19355,19 +19355,29 @@ setInterval(lbHsTripBtn,1000); setTimeout(lbHsTripBtn,300);
 (function(){
   if(window._lbPerf) return; window._lbPerf=true;
   const st=document.createElement('style'); st.id='lbPerfCss';
-  st.textContent=`.lb-off *{ animation-play-state:paused!important; }
+  st.textContent=`.lb-off *, .lb-gone *{ animation-play-state:paused!important; } .lb-gone{ visibility:hidden; }
 .home > .hm-pair, .home > .hm-grid, .home > .hm-tile, .home > section.hm-tile{ content-visibility:auto; contain-intrinsic-size:auto 520px; }
 body.lb-lite .pr-p:nth-of-type(2n){ display:none!important; }
 body.lb-lite .mbx-isle img, body.lb-lite .hmi-isle img{ animation:none!important; }`;
   document.head.appendChild(st);
-  // ---- 1) 画面の外は止める ----
-  const SEL='.hmi-slot, .lbst, .pr-w, .hm-hero, .hm-daily, .hm-pair, .hm-grid, .hm-tile, .life-art, .mbx-isle, .hmi-isle, .pr-p, .gsz-art, .pa-art';
+  // ---- 1) 画面の外は止める（カード・帯の単位）----
+  const SEL='.hmi-slot, .lbst, .pr-w, .hm-hero, .hm-daily, .hm-pair, .hm-grid, .hm-tile, .life-art, .gsz-art, .pa-art';
   let io=null; const seen=new WeakSet();
   function setOff(el,off){ if(el.classList.contains('lb-off')===off) return; el.classList.toggle('lb-off',off);
     if(el.querySelectorAll) el.querySelectorAll('svg').forEach(s=>{ try{ if(s.pauseAnimations) off?s.pauseAnimations():s.unpauseAnimations(); }catch(_){} }); }
   try{ io=new IntersectionObserver(es=>es.forEach(e=>setOff(e.target,!e.isIntersecting)),{ rootMargin:'120px 120px' }); }catch(_){ io=null; }
-  function scan(){ if(!io) return; try{ document.querySelectorAll(SEL).forEach(el=>{ if(!seen.has(el)){ seen.add(el); io.observe(el); } }); }catch(_){} }
-  let qd=0; function later(){ if(qd) return; qd=setTimeout(()=>{ qd=0; scan(); },250); }
+  // ---- 1b) v177.3 動くもの（ペット・車・船・浮かぶ島）は、帯の中で見えている分だけ描く。見えないものは、絵を消して（作らないで）、動きも止める ----
+  // ペットは、見えないあいだ 中の絵（SVG）をとりはずして、見える少し前に もどす。外側の「横に進む動き」だけは止めない（また入ってくるため）
+  const MOV='.pr-p, .mbx-isle, .hmi-isle, .lbst g.vh, .lbst .ss-car, .lbst .ss-moto, .lbst .ss-boat, .lbst .rb-ferry';
+  const BOX='.pr-run, .mbx-view, .hmi-slot, .lbst';
+  const ios=new WeakMap(), stash=new WeakMap();
+  function moverOff(el,off){ if(el.classList.contains('lb-gone')===off) return; el.classList.toggle('lb-gone',off);
+    if(el.classList.contains('pr-p')){ if(off){ if(el.firstElementChild){ stash.set(el,el.innerHTML); if(!el.style.minHeight){ const r=el.getBoundingClientRect(); if(r.height){ el.style.minHeight=Math.round(r.height)+'px'; el.style.minWidth=Math.round(r.width)+'px'; } } el.innerHTML=''; } }
+      else { const h=stash.get(el); if(h!=null&&!el.firstElementChild){ el.innerHTML=h; stash.delete(el); } } } }
+  function boxIO(box){ let o=ios.get(box); if(o) return o; try{ o=new IntersectionObserver(es=>es.forEach(e=>moverOff(e.target,!e.isIntersecting)),{ root:box, rootMargin:box.classList.contains('pr-run')?'0px -3px 0px -3px':'0px 160px 0px 160px' }); }catch(_){ o=null; } if(o) ios.set(box,o); return o; }
+  function scan(){ try{ if(io) document.querySelectorAll(SEL).forEach(el=>{ if(!seen.has(el)){ seen.add(el); io.observe(el); } });
+    document.querySelectorAll(MOV).forEach(el=>{ if(seen.has(el)) return; const box=el.parentElement&&el.parentElement.closest(BOX); if(!box) return; const o=boxIO(box); if(!o) return; seen.add(el); o.observe(el); }); }catch(_){} }
+  let qd=0; function later(){ if(qd) return; qd=setTimeout(()=>{ qd=0; scan(); },200); }
   try{ new MutationObserver(later).observe(document.body,{ childList:true, subtree:true }); }catch(_){}
   scan();
   // ---- 2) さわっている最中・窓を開いている時は、作り直さない ----
@@ -19433,12 +19443,13 @@ async function fbStart(){
   let step='load';
   try{
     const base='https://www.gstatic.com/firebasejs/'+FB_VER+'/';
-    const [A,U,D]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]);
-    const app=A.initializeApp(FB_CONFIG,'lifebook'); const auth=U.getAuth(app); const db=D.getFirestore(app);
+    const TO=(p,ms)=>Promise.race([p,new Promise((_,rj)=>setTimeout(()=>rj({ code:'timeout' }),ms))]); // v177.3：どこかで止まったままにならないように
+    const [A,U,D]=await TO(Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]),25000);
+    const app=(A.getApps&&A.getApps().find(a=>a.name==='lifebook'))||A.initializeApp(FB_CONFIG,'lifebook'); const auth=U.getAuth(app); const db=D.getFirestore(app);
     if(window.FB_EMU){ U.connectAuthEmulator(auth,'http://127.0.0.1:'+FB_EMU.auth,{ disableWarnings:true }); D.connectFirestoreEmulator(db,'127.0.0.1',FB_EMU.fs); }
-    step='auth'; const cred=await U.signInAnonymously(auth);
+    step='auth'; const cred=(auth.currentUser?{ user:auth.currentUser }:await TO(U.signInAnonymously(auth),20000));
     FB={ U, D, auth, db, uid:cred.user.uid, seenOnce:false };
-    step='register'; await fbMakeIv(); await fbRegister(); step='listen'; FB_ST='ok'; FB_ERR=''; fbListen(); fbListenReq(); try{ fbDlgRefresh(); }catch(_){} await fbPush();
+    step='register'; await TO(fbMakeIv(),20000); await TO(fbRegister(),20000); step='listen'; FB_ST='ok'; FB_ERR=''; fbListen(); fbListenReq(); try{ fbDlgRefresh(); }catch(_){} await fbPush();
     setInterval(()=>fbPush(),60000);
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden) fbPush(); });
   }catch(e){ const code=(e&&(e.code||e.message))||String(e);
