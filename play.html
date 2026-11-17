@@ -20051,6 +20051,73 @@ body.lb-lite .mbx-isle img, body.lb-lite .hmi-isle img{ animation:none!important
   requestAnimationFrame(tick);
   window.lbLite=function(on){ if(on) goLite(); else { document.body.classList.remove('lb-lite'); try{ sessionStorage.removeItem(LITE_KEY); }catch(_){} } };
 })();
+// v178.3: ペットの魂。Channel が亡くなると、ペットもいっしょに旅立つ。旅立ったあと、希望すれば同じ魂のまま、次の動物に生まれ変われる。
+// 亡くなるまでは、ペットの変更はできない（mypet3.js）。
+let _psSoul=false;
+function psKindName(k){ const x=MP_KIND.find(a=>a[0]===k); return x?x[1]:''; }
+function psLast(){ try{ const a=JSON.parse(localStorage.getItem(MP_PAST)||'[]'); return a.length?a[a.length-1]:null; }catch(e){ return null; } }
+function psLives(p){ return ((p&&p.soul&&p.soul.lives)||[]); }
+// Channel が亡くなったら、ペットもいっしょに旅立つ
+function psCheck(){ try{ const p=mpGet(); if(!p||mpGone(p)) return; if(typeof st==='undefined'||!st||typeof cur==='undefined'||!cur||viewing) return; const c=clock();
+  if(p.chS==null||p.chS!==st.seed){ if(!c.dead){ p.chS=st.seed; mpSet(p); } return; }
+  if(!c.dead) return;
+  const a=mpAge(p); p.life0=p.life; p.life=Math.max(0,Math.floor(a)); p.endAt=Date.now(); p.endCh=1;
+  mpLog(p,`Channel といっしょに、虹の橋をわたった。`,'rb'); mpSet(p); }catch(e){} }
+setInterval(psCheck,5000);
+const PS_RULE='※ 亡くなるまで、ペットの変更はできません。Channel が亡くなると、ペットもいっしょに旅立ちます。旅立ったあとは、希望すれば、同じ魂のまま、次にえらぶ動物に生まれ変わらせることができます。';
+{ const T=mpTileHTML; mpTileHTML=function(){ psCheck(); let h=T(); const p=mpGet(); if(!p) return h;
+    if(p.endCh) h=h.replace('🌈 虹の橋をわたりました（',`🌈 Channel といっしょに、虹の橋をわたりました（`);
+    if(mpGone(p)) h+=`<p class="tiny ps-note">🌟 ${esc(p.name)}の魂を引きついで、次の動物に生まれ変わらせることができます。</p>`;
+    else h+=`<p class="tiny muted ps-note">※ 亡くなるまで、ペットの変更はできません。亡くなったあとは、同じ魂のまま、次の動物をえらべます。</p>`;
+    return h; }; }
+{ const P=mpPageHTML; mpPageHTML=function(){ psCheck(); let h=P.apply(this,arguments); const p=mpGet(); if(!p) return h;
+    if(p.endCh){ h=h.replace(`は、${p.life}歳で虹の橋をわたりました。`,`は、Channel といっしょに、${p.life}歳で虹の橋をわたりました。`).replace(`は、${p.life}歳まで、たくさんの愛情に包まれて生きました。`,`は、Channel といっしょに、${p.life}歳まで、たくさんの愛情に包まれて生きました。`); }
+    const L=psLives(p); if(L.length){ const s=`<p class="mp-sub ps-soul-line">🌟 前は ${L.slice().reverse().map(x=>esc(x.n)+'（'+esc(x.k)+'）').join(' ← ')} だった魂です（${L.length}回目の生まれ変わり）</p>`; h=h.replace('<p class="mp-sub">🏠 お迎えした日',s+'<p class="mp-sub">🏠 お迎えした日'); }
+    if(mpGone(p)) h=h.replace('<div class="mp-row"><button type="button" class="mp-btn" data-mp="again">',`<p class="tiny ps-note">🌟 次の子をえらぶとき、${esc(p.name)}の魂を引きついで、ちがう動物に生まれ変わらせることもできます。</p><div class="mp-row"><button type="button" class="mp-btn" data-mp="again">`);
+    else h=h.replace('<p class="mp-src">',`<p class="tiny muted ps-note">${PS_RULE}</p><p class="mp-src">`);
+    return h; }; }
+{ const N=mpNewHTML; mpNewHTML=function(){ let h=N.apply(this,arguments); const q=psLast();
+    h=h.replace('<p class="tiny muted">※ 一度お迎えしたら、ペットの動物・種類は変えられません。（名前は、あとで1回だけ直せます）</p>',`<p class="tiny muted">${PS_RULE}（名前は、あとで1回だけ直せます）</p>`);
+    if(q&&q.name){ const k=psKindName(q.kind)||'ペット', n=psLives(q).length+1;
+      h=h.replace('<div class="mp-row"><button type="button" class="mp-btn" data-mp="adopt">',`<div class="ps-box"><label><input type="checkbox" id="psSoul"${_psSoul?' checked':''}> 🌟 ${esc(q.name)}（${esc(k)}）の魂を引きつぐ</label><p class="tiny">チェックすると、${esc(q.name)}の魂のまま、上でえらんだ動物に生まれ変わります（性格は同じです）。${n>1?`これまで${n}回、生まれ変わってきた魂です。`:''}名前は、新しくつけても、同じ名前でも大丈夫です。</p></div><div class="mp-row"><button type="button" class="mp-btn" data-mp="adopt">`); }
+    return h; }; }
+document.addEventListener('change',e=>{ if(e.target&&e.target.id==='psSoul') _psSoul=e.target.checked; });
+{ const A=mpAdopt; mpAdopt=function(){ const before=mpGet(); const want=_psSoul, q=psLast(); const r=A.apply(this,arguments); try{ const p=mpGet();
+    if(p&&p!==before&&(!before||before.at!==p.at)){ _psSoul=false;
+      if(want&&q&&q.name){ const lives=psLives(q).concat([{ n:q.name, k:psKindName(q.kind)||'ペット' }]).slice(-20); p.soul={ id:(q.soul&&q.soul.id)||String(q.at), lives }; if(q.per!=null) p.per=q.per;
+        mpLog(p,`前は${q.name}（${psKindName(q.kind)}）だった魂が、${p.name}として生まれ変わってきた。`,'in'); p.msg=`${q.name}の魂が、${p.name}になって帰ってきました！ また、よろしくね。`; mpSet(p); mpOpen(); } } }catch(e){} return r; }; }
+(function(){ const s=document.createElement('style'); s.textContent='.ps-note{ margin:6px 0 2px; line-height:1.6; } .ps-box{ margin:10px 0 4px; padding:10px 12px; border-radius:14px; background:linear-gradient(135deg,#FFF6E0,#FFF0F5); border:1.5px solid #F4C6D4; } .ps-box label{ font-weight:700; font-size:14px; cursor:pointer; display:flex; gap:6px; align-items:center; } .ps-box input{ width:18px; height:18px; accent-color:#E86A88; } .ps-box p{ margin:6px 0 0; line-height:1.6; } .ps-soul-line{ color:#9A6A10; font-weight:700; }'; document.head.appendChild(s); })();
+// v178.3: 「新しい仲間」— 新しくペットにできる動物たちのお披露目
+// 1) 「新しい仲間」のページ（押した時だけ絵をつくる）
+// 2) 公園の道に、ときどき友だちのペットではない、新しい仲間も走ってくる（名前は「キリン」など種類名）
+function npKinds(){ return (typeof PW_KIND!=='undefined'?PW_KIND:[]).map(x=>({ k:x[0], n:x[1], e:x[2] })); }
+function npBreeds(k){ return Object.keys(PB_ALL).filter(i=>PB_ALL[i].pw&&PB_ALL[i].kind===k); }
+function npPageHTML(){ let h=`<h3 class="gsz-h">🎉 新しい仲間</h3><p class="np-lead">ペットとして、お迎えできる動物がふえました。公園の道にも、ときどき走ってきます。</p>`;
+  npKinds().forEach(K=>{ const ids=npBreeds(K.k); if(!ids.length) return;
+    h+=`<h4 class="np-k">${K.e} ${esc(K.n)}</h4><div class="np-g">${ids.map(i=>{ let a=''; try{ const pose=typeof prPose==='function'?prPose({ k:K.k, s:i }):null; a=petPortraitSVG(i,'',pose); }catch(e){} return `<figure class="np-c">${a}<figcaption>${esc(PB_ALL[i].name)}</figcaption></figure>`; }).join('')}</div>`; });
+  let can=false; try{ const p=typeof mpGet==='function'?mpGet():null; can=!p||(typeof mpGone==='function'&&mpGone(p)); }catch(e){}
+  h+=can?`<div class="np-row"><button type="button" class="mp-btn" data-np="adopt">🐾 ペットをお迎えする</button></div>`:`<p class="tiny muted np-nt">※ 今のペットが亡くなるまで、ペットの変更はできません。</p>`;
+  return h; }
+function npOpen(){ if(typeof gsZoomOpen==='function') gsZoomOpen(`<div class="np">${npPageHTML()}</div>`); }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-np]'); if(!b) return; e.preventDefault(); e.stopPropagation();
+  if(b.dataset.np==='open') npOpen(); else if(b.dataset.np==='adopt'){ try{ if(typeof gsZoomClose==='function') gsZoomClose(); else { const z=document.getElementById('gsZoom'); if(z) z.hidden=true; } }catch(_){} mpOpen('new'); } },true);
+// 公園：6時間ごとに、新しい仲間が2〜3匹まじる（クジラは海なので走らない）
+function npGuests(){ const ids=Object.keys(PB_ALL).filter(i=>PB_ALL[i].pw&&!/whale/.test(PB_ALL[i].kind)); if(!ids.length) return [];
+  const slot=Math.floor(Date.now()/(6*3600e3)); const n=2+slot%2; const out=[], used=new Set();
+  for(let j=0;out.length<n&&j<20;j++){ const id=ids[gsHash('np|'+slot+'|'+j)%ids.length], k=PB_ALL[id].kind; if(used.has(k)) continue; used.add(k);
+    const K=npKinds().find(x=>x.k===k)||{ n:'' }; out.push({ id, k, n:K.n, s:'np'+id+slot, guest:1 }); }
+  return out; }
+if(typeof prPets==='function'){ const P=prPets; prPets=function(){ const L=P.apply(this,arguments); try{ const G=npGuests(); if(!G.length) return L;
+  // 友だちのペットのあいだに、間をあけて入れる
+  const step=Math.max(2,Math.floor(L.length/G.length)); G.forEach((g,i)=>L.splice(Math.min(L.length,(i+1)*step+i),0,g)); }catch(e){} return L; }; }
+if(typeof prOpen==='function'){ const O=prOpen; prOpen=function(p){ if(!p||!p.guest) return O.apply(this,arguments);
+  let art=''; try{ art=petPortraitSVG(p.id,'',prPose(p)).replace(/<svg class="pet-art"/,'<svg class="pr-big"'); }catch(e){}
+  const b=PB_ALL[p.id]||{}; const K=npKinds().find(x=>x.k===p.k)||{ e:'🐾' };
+  gsZoomOpen(`<h3 class="gsz-h">${K.e} ${esc(p.n)}</h3><div class="pr-dl">${art}<p class="pr-own">🎉 <b>新しい仲間</b>${b.name?`<br><small>${esc(b.name)}</small>`:''}</p></div><p class="np-lead">${esc(p.n)}は、新しくペットにできるようになった動物です。公園に、あそびに来てくれました。</p><div class="np-row"><button type="button" class="mp-btn" data-np="open">🎉 新しい仲間を見る</button></div>`); }; }
+// 公園の右上に「新しい仲間」ボタン、うちのペットの欄にもリンク
+if(typeof prRunHTML==='function'){ const R=prRunHTML; prRunHTML=function(){ const h=R.apply(this,arguments); return h?h.replace(/<\/div>$/,'<button type="button" class="np-btn" data-np="open">🎉 新しい仲間</button></div>'):h; }; }
+if(typeof mpTileHTML==='function'){ const T=mpTileHTML; mpTileHTML=function(){ return T.apply(this,arguments)+`<button type="button" class="linkish np-link" data-np="open">🎉 新しい仲間（新しくお迎えできる動物）を見る</button>`; }; }
+(function(){ const s=document.createElement('style'); s.textContent='.np-btn{ position:absolute; right:8px; top:6px; z-index:5; font:inherit; font-size:12px; font-weight:700; color:#fff; background:#E86A88; border:0; border-radius:999px; padding:4px 12px; cursor:pointer; box-shadow:0 2px 6px rgba(232,106,136,.35); } .np-lead{ margin:4px 0 10px; font-size:14px; line-height:1.7; } .np-k{ margin:14px 0 6px; font-size:16px; color:#5A4636; } .np-g{ display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; } .np-c{ margin:0; background:#fff; border-radius:14px; box-shadow:0 2px 6px rgba(224,85,139,.15); padding:4px 4px 6px; text-align:center; } .np-c svg{ width:100%; height:auto; max-height:110px; display:block; } .np-c figcaption{ font-size:12px; line-height:1.4; color:#3A2E38; } .np-row{ margin:14px 0 4px; text-align:center; } .np-nt{ margin:12px 0 0; text-align:center; } .np-link{ display:block; margin-top:4px; } @media (max-width:560px){ .np-btn{ top:34px; } }'; document.head.appendChild(s); })();
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
