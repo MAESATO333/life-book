@@ -418,7 +418,7 @@ requestAnimationFrame(step);
       <p class="worlds-title">友だちや、友だちの友だちが交差する街</p>
       <p class="worlds-sub">バスや電車、船や飛行機に、Higher Self の名前が乗っています</p>
       <div class="pd-frame"><div id="parade" class="pd-view"></div><div id="pdFlash" class="pd-flash" aria-hidden="true"></div></div>
-      <div class="pd-cam"><span id="pdMsg" class="pd-msg" role="status" aria-live="polite"></span><button type="button" id="pdShot" class="pd-btn">📷 写真を撮る</button><button type="button" id="pdPick" class="pd-btn">🔍 えらんでアップで撮る</button><button type="button" id="pdAlb" class="pd-btn pd-btn2">📒 アルバム<span></span></button></div>
+      <div class="pd-cam"><span id="pdMsg" class="pd-msg" role="status" aria-live="polite"></span><button type="button" id="pdShot" class="pd-btn">📷 写真を撮る</button><button type="button" id="pdPick" class="pd-btn">🔍 選んでアップで撮る</button><button type="button" id="pdAlb" class="pd-btn pd-btn2">📒 アルバム<span></span></button></div>
       <div id="pdAlbum" class="pd-modal" hidden role="dialog" aria-modal="true" aria-label="Gateway アルバム"><div class="pd-box"><div class="pd-head"><b>📒 Gateway アルバム</b><button type="button" class="pd-btn" data-close>← もどる</button></div><p class="pd-note">海辺の街で撮った写真です。このブラウザの中にだけ入っています。</p><div id="pdGrid" class="pd-grid"></div><button type="button" id="pdMore" class="pd-btn pd-btn2" hidden>もっと見る</button></div></div>
       <div id="pdTalk" class="pd-modal" hidden role="dialog" aria-modal="true" aria-label="海辺の街の会話"><div class="pd-box pd-tbox"><div class="pd-head"><b>💬 海辺の街の会話</b><button type="button" class="pd-btn" data-close>← もどる</button></div><p class="pd-lab"></p><div class="pd-lines"></div><p class="pd-note">※ 海辺の街の中の、想像の会話です。本当のメッセージではありません。</p></div></div>
     </div>
@@ -764,7 +764,7 @@ if(dlg) dlg.addEventListener('click',function(ev){ var t=ev.target; if(t===dlg||
 document.addEventListener('keydown',function(ev){ if(ev.key==='Escape'&&dlg&&!dlg.hidden) closeAlb(); });
 // ---- 🔍 ひとつの乗り物・ひとり・話しているふたりを、アップで撮る（えらぶ間は止めて軽くする） ----
 var pickB=document.getElementById('pdPick'), picking=false;
-function pickMode(on){ picking=on; box.classList.toggle('pick',on); if(pickB){ pickB.classList.toggle('on',on); pickB.textContent=on?'✕ やめる':'🔍 えらんでアップで撮る'; } if(on){ stop(); say('撮りたい乗り物や人を、押してください。'); } else { say(''); go(); } }
+function pickMode(on){ picking=on; box.classList.toggle('pick',on); if(pickB){ pickB.classList.toggle('on',on); pickB.textContent=on?'✕ やめる':'🔍 選んでアップで撮る'; } if(on){ stop(); say('撮りたい乗り物や人を、押してください。'); } else { say(''); go(); } }
 if(pickB) pickB.addEventListener('click',function(){ pickMode(!picking); });
 function bbOf(c){ var b=c.e.getBBox(), k=c.k||1; return {x:c.x+b.x*k,y:c.y+b.y*k,w:b.width*k,h:b.height*k}; }
 function closeShot(c){ var set=[c], tk=null; TK.forEach(function(t){ if(t.a===c||t.b===c) tk=t; }); if(tk) set=[tk.a,tk.b];
