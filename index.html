@@ -532,7 +532,7 @@ var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce
 function rnd(a,b){ return a+Math.random()*(b-a); }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function build(){ var wide=(window.innerWidth||1000)>=600; if(wide===wideNow) return; wideNow=wide; var bg=wide?D.bgW:D.bgN; var vb=bg.vb.split(' ').map(Number); X0=vb[0]; W=vb[2];
-  box.className='pd-view'+(wide?'':' n'); box.innerHTML='<svg xmlns="'+NS+'" viewBox="'+bg.vb+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="街の中を、乗り物が走る絵"><g>'+bg.inner+'</g></svg>'; S=box.firstChild;
+  box.className='pd-view'+(wide?'':' n'); box.innerHTML='<svg xmlns="'+NS+'" viewBox="'+bg.vb+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="街の中を、乗り物が走る絵"><g>'+PP(bg.inner)+'</g></svg>'; S=box.firstChild;
   // 道・線路・海・空のレーン（y は地面の高さ。dir 1 は右へ、-1 は左へ）
   var L=[ {lane:'sky',y:[26,64],dir:0,sp:[16,22],gap:[60,220]}, {lane:'sky',y:[40,80],dir:0,sp:[14,20],gap:[120,320]},
     {lane:'rail',y:[118,118],dir:-1,sp:[34,42],gap:[200,500]},

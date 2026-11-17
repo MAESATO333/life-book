@@ -19669,6 +19669,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v166: Life Home の上のほうに「✨ LIFE BOOKのニュース」。新しい機能・更新のお知らせ。
 // ゲームに入っているお知らせ（LBN_BUILTIN）＋ 管理者が Firebase の os/news に書いたお知らせ（{ n:[{ i, d:ミリ秒, t:題, b:説明 }] }）。新しい順に3つ、のこりは「これまでのお知らせ」。
 const LBN_BUILTIN=[
+  { i:'v178-nakama', d:Date.UTC(2026,10,17,9,56), t:'🎉 新しい仲間が、やってきました！', b:'カンガルー、パンダ、ライオン、キリン、ゾウ、ワシ、恐竜など、新しくペットにできる動物たちです。公園の右上の「🎉 新しい仲間」ボタンや、「うちのペット」の欄から、みんなの姿が見られます。公園の道にも、ときどき走ってきます。' },
   { i:'v175-flthx', d:Date.UTC(2026,10,17,6,15), t:'届いたお花から、すぐにお礼のお花を贈れるようになりました💌', b:'「💐 お花」の「届いたお花」で、お花の下の「💌 お礼のお花を贈る」を押すと、送ってくれた人あての「贈る」画面が開きます。どんな日は「ありがとう」になっています。' },
   { i:'v175-petmove', d:Date.UTC(2026,10,16,15,37), t:'公園のペットが、1匹ずつちがう走り方になりました🐾', b:'走る速さ、足のテンポ、ぴょんぴょんのゆれ、ジャンプの高さが、ペットごとにちがいます。空に浮かぶ街の帯も、前よりゆっくり流れるようになりました。' },
   { i:'gw-parade', d:Date.UTC(2026,10,16,14,17), t:'Gateway に、乗り物が走る街ができました🚌✈️', b:'Gateway の「いろんな街が、空に浮かんでいます」の下で、バスや車、電車、船、飛行機、ヘリコプターなど、いろんな乗り物が次々に走っています。' },
@@ -20092,9 +20093,9 @@ document.addEventListener('change',e=>{ if(e.target&&e.target.id==='psSoul') _ps
 // 2) 公園の道に、ときどき友だちのペットではない、新しい仲間も走ってくる（名前は「キリン」など種類名）
 function npKinds(){ return (typeof PW_KIND!=='undefined'?PW_KIND:[]).map(x=>({ k:x[0], n:x[1], e:x[2] })); }
 function npBreeds(k){ return Object.keys(PB_ALL).filter(i=>PB_ALL[i].pw&&PB_ALL[i].kind===k); }
-function npPageHTML(){ let h=`<h3 class="gsz-h">🎉 新しい仲間</h3><p class="np-lead">ペットとして、お迎えできる動物がふえました。公園の道にも、ときどき走ってきます。</p>`;
+function npPageHTML(){ let h=`<h3 class="gsz-h">🎉 新しい仲間</h3><p class="np-lead">ペットとして、お迎えできる動物がふえました。公園の道にも、ときどき走ってきます。<br>🔍 動物を押すと、大きく見られます。</p>`;
   npKinds().forEach(K=>{ const ids=npBreeds(K.k); if(!ids.length) return;
-    h+=`<h4 class="np-k">${K.e} ${esc(K.n)}</h4><div class="np-g">${ids.map(i=>{ let a=''; try{ const pose=typeof prPose==='function'?prPose({ k:K.k, s:i }):null; a=petPortraitSVG(i,'',pose); }catch(e){} return `<figure class="np-c">${a}<figcaption>${esc(PB_ALL[i].name)}</figcaption></figure>`; }).join('')}</div>`; });
+    h+=`<h4 class="np-k">${K.e} ${esc(K.n)}</h4><div class="np-g">${ids.map(i=>{ let a=''; try{ const pose=typeof prPose==='function'?prPose({ k:K.k, s:i }):null; a=petPortraitSVG(i,'',pose); }catch(e){} return `<figure class="np-c" data-npz="${i}" role="button" tabindex="0" title="押すと大きく見られます">${a}<figcaption>${esc(PB_ALL[i].name)}</figcaption></figure>`; }).join('')}</div>`; });
   let can=false; try{ const p=typeof mpGet==='function'?mpGet():null; can=!p||(typeof mpGone==='function'&&mpGone(p)); }catch(e){}
   h+=can?`<div class="np-row"><button type="button" class="mp-btn" data-np="adopt">🐾 ペットをお迎えする</button></div>`:`<p class="tiny muted np-nt">※ 今のペットが亡くなるまで、ペットの変更はできません。</p>`;
   return h; }
@@ -20118,6 +20119,15 @@ if(typeof prOpen==='function'){ const O=prOpen; prOpen=function(p){ if(!p||!p.gu
 if(typeof prRunHTML==='function'){ const R=prRunHTML; prRunHTML=function(){ const h=R.apply(this,arguments); return h?h.replace(/<\/div>$/,'<button type="button" class="np-btn" data-np="open">🎉 新しい仲間</button></div>'):h; }; }
 if(typeof mpTileHTML==='function'){ const T=mpTileHTML; mpTileHTML=function(){ return T.apply(this,arguments)+`<button type="button" class="linkish np-link" data-np="open">🎉 新しい仲間（新しくお迎えできる動物）を見る</button>`; }; }
 (function(){ const s=document.createElement('style'); s.textContent='.np-btn{ position:absolute; right:8px; top:6px; z-index:5; font:inherit; font-size:12px; font-weight:700; color:#fff; background:#E86A88; border:0; border-radius:999px; padding:4px 12px; cursor:pointer; box-shadow:0 2px 6px rgba(232,106,136,.35); } .np-lead{ margin:4px 0 10px; font-size:14px; line-height:1.7; } .np-k{ margin:14px 0 6px; font-size:16px; color:#5A4636; } .np-g{ display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; } .np-c{ margin:0; background:#fff; border-radius:14px; box-shadow:0 2px 6px rgba(224,85,139,.15); padding:4px 4px 6px; text-align:center; } .np-c svg{ width:100%; height:auto; max-height:110px; display:block; } .np-c figcaption{ font-size:12px; line-height:1.4; color:#3A2E38; } .np-row{ margin:14px 0 4px; text-align:center; } .np-nt{ margin:12px 0 0; text-align:center; } .np-link{ display:block; margin-top:4px; } @media (max-width:560px){ .np-btn{ top:34px; } }'; document.head.appendChild(s); })();
+
+// 押すと大きく見られる（ポーズは押すたびに変わる）
+let _npZ=0;
+function npBig(id){ const b=PB_ALL[id]; if(!b) return; const K=npKinds().find(x=>x.k===b.kind)||{ e:'🐾', n:'' }; let a='';
+  try{ const A=(PP_ACTS[b.kind]||[]).filter(x=>x.b!=='sleep'); const pose=A.length?A[(_npZ++)%A.length]:null; a=petPortraitSVG(id,'',pose); }catch(e){}
+  gsZoomOpen(`<div class="np np-z"><h3 class="gsz-h">${K.e} ${esc(b.name)}</h3><p class="np-lead">${esc(K.n)}</p><div class="np-zart" data-npz="${id}" role="button" tabindex="0" title="押すと、ちがうポーズになります">${a}</div><p class="tiny muted np-nt">👆 絵を押すと、ちがうポーズになります</p><div class="np-row"><button type="button" class="mp-btn" data-np="open">← 新しい仲間の一覧にもどる</button></div></div>`); }
+document.addEventListener('click',e=>{ const f=e.target.closest&&e.target.closest('[data-npz]'); if(!f) return; e.preventDefault(); e.stopPropagation(); npBig(f.dataset.npz); },true);
+document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return; const f=e.target.closest&&e.target.closest('[data-npz]'); if(f){ e.preventDefault(); npBig(f.dataset.npz); } });
+(function(){ const s=document.createElement('style'); s.textContent='.np-c{ cursor:zoom-in; transition:transform .15s; } .np-c:hover{ transform:translateY(-2px); } .np-zart{ cursor:pointer; max-width:520px; margin:0 auto; } .np-zart svg{ width:100%; height:auto; display:block; }'; document.head.appendChild(s); })();
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
