@@ -19045,6 +19045,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v166: Life Home の上のほうに「✨ LIFE BOOKのニュース」。新しい機能・更新のお知らせ。
 // ゲームに入っているお知らせ（LBN_BUILTIN）＋ 管理者が Firebase の os/news に書いたお知らせ（{ n:[{ i, d:ミリ秒, t:題, b:説明 }] }）。新しい順に3つ、のこりは「これまでのお知らせ」。
 const LBN_BUILTIN=[
+  { i:'v177-hstrip', d:Date.UTC(2026,10,17,8,0), t:'Higher Self で、日本の街へ旅に行けるようになりました✈️', b:'Life Home の「🟡 街ブラ」のカードにある「✈️ Higher Self で旅に行く」を押すと、住んでいる都道府県の空港から、日本の街へ飛行機で旅に行けます。飛んでいるあいだは、地図や窓からの景色が見られます。着いたら、その街を街ブラできます。' },
   { i:'v175-flthx', d:Date.UTC(2026,10,17,6,15), t:'届いたお花から、すぐにお礼のお花を贈れるようになりました💌', b:'「💐 お花」の「届いたお花」で、お花の下の「💌 お礼のお花を贈る」を押すと、送ってくれた人あての「贈る」画面が開きます。どんな日は「ありがとう」になっています。' },
   { i:'v175-petmove', d:Date.UTC(2026,10,16,15,37), t:'公園のペットが、1匹ずつちがう走り方になりました🐾', b:'走る速さ、足のテンポ、ぴょんぴょんのゆれ、ジャンプの高さが、ペットごとにちがいます。空に浮かぶ街の帯も、前よりゆっくり流れるようになりました。' },
   { i:'gw-parade', d:Date.UTC(2026,10,16,14,17), t:'Gateway に、乗り物が走る街ができました🚌✈️', b:'Gateway の「いろんな街が、空に浮かんでいます」の下で、バスや車、電車、船、飛行機、ヘリコプターなど、いろんな乗り物が次々に走っています。' },
@@ -19337,6 +19338,11 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .mbx-track{ animation-duration:300s!important; }
 body.lbst-only{ margin:0; background:transparent; } body.lbst-only .lbst-art{ border:0; border-radius:0; }
 </style>`); }catch(e){}
+// v177: Higher Self の旅の入口（街ブラのカードの中）。旅の本体は rental.js の hsTripOpen
+function lbHsTripBtn(){ try{ if(typeof hsTripOpen!=='function') return; const f=document.querySelector('.mbx-tile .mbx-tf'); if(!f||f.querySelector('.lb-hstrip')) return;
+  const b=document.createElement('button'); b.type='button'; b.className='mbx-pbtn lb-hstrip'; b.textContent='✈️ Higher Self で旅に行く'; f.appendChild(b); }catch(_){} }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('.lb-hstrip'); if(!b) return; e.preventDefault(); e.stopPropagation(); try{ hsTripOpen(); }catch(err){ try{ console.warn('[hstrip]',err); }catch(_){} } },true);
+setInterval(lbHsTripBtn,1000); setTimeout(lbHsTripBtn,300);
 // v176: 固まらない仕組み
 //  1) 画面の外にある動く絵は、中の動きを止める（見えたら、また動く）
 //  2) 窓を開いている時・さわっている最中は、自動の作り直しをしない（ui.js の自動 render を待たせる）
@@ -22763,7 +22769,7 @@ function rvPlane(c,o,R){ if(o.kind==='small'||o.kind==='bi'||o.kind==='boat') re
 // 軍用機：戦闘機（ステルス・双発・単発・アクロバット練習機）
 function rvFighter(c,o,R){ const L=o.L||196, yc=o.yc||70, x0=120-L/2, x1=x0+L; const P=f=>x0+L*f; const st=o.st||'twin';
   const lt=rvShade(c,1.22), dk=rvShade(c,.7), dk2=rvShade(c,.55); const g=rvId('rvfg'), fc=rvId('rvfc'), gg=rvId('rvfgl'); let s='';
-  const stealth=st==='stealth', acro=st==='acro', single=st==='single'||acro;
+  const stealth=st==='stealth', acro=st==='acro', single=(st==='single'||acro||o.one)&&!o.twinT;
   // 胴体（先がとがった形）
   const fus=`M${F(P(.03))} ${F(yc-7)} L${F(P(.5))} ${F(yc-9)} Q${F(P(.68))} ${F(yc-10.5)} ${F(P(.82))} ${F(yc-6)} Q${F(P(.93))} ${F(yc-2.4)} ${F(x1)} ${F(yc+1)} Q${F(P(.94))} ${F(yc+4.4)} ${F(P(.82))} ${F(yc+6.4)} L${F(P(.32))} ${F(yc+(acro?8:9))} L${F(P(.03))} ${F(yc+7)}Z`;
   s+=`<defs>${rvGrad(g,[[0,lt],[.45,c],[1,dk]],1)}${rvGrad(gg,[[0,'#E9F6FF'],[.5,'#9FCDEB'],[1,'#4E7FA6']],1)}<clipPath id="${fc}"><path d="${fus}"/></clipPath></defs>`;
@@ -22780,7 +22786,12 @@ function rvFighter(c,o,R){ const L=o.L||196, yc=o.yc||70, x0=120-L/2, x1=x0+L; c
   if(acro) ld+=rvRect(x0,yc-1,L,3.4,'#FFFFFF',0)+rvRect(x0,yc+2.6,L,1.6,'#F2C230',0);
   ld+=[.3,.46,.62].map(f=>rvLine(P(f),yc-9,P(f),yc+9,dk2,.5,' opacity=".6"')).join('');
   if(stealth) ld+=`<path d="M${F(P(.12))} ${F(yc-1)} L${F(P(.6))} ${F(yc-2)} L${F(P(.88))} ${F(yc+1)}" stroke="${dk2}" stroke-width=".9" fill="none" opacity=".7"/>`;
+  if(o.camo){ const cm=o.camo===2?['#2E4F86','#6F9BD1']:['#5C6B4A','#8A8F6A']; [[.1,-4,22,7],[.3,2,26,8],[.5,-6,20,6],[.72,0,16,6],[.2,5,14,5]].forEach((q,i)=>{ ld+=`<ellipse cx="${F(P(q[0]))}" cy="${F(yc+q[1])}" rx="${F(q[2]/2)}" ry="${F(q[3]/2)}" fill="${cm[i%2]}" opacity=".75"/>`; }); }
+  if(o.lift) ld+=rvRect(P(.55),yc-9.5,L*.06,2.2,'#2B2E35',.5);
   s+=`<g clip-path="url(#${fc})">${ld}</g>`;
+  if(o.lift) s+=rvPoly([[P(.55),yc-9],[P(.6),yc-9],[P(.56),yc-22],[P(.53),yc-21]],rvShade(c,.85));
+  if(o.pods) s+=rvRect(P(.12),yc-17,L*.16,9,rvShade(c,.9),4.5)+rvRect(P(.12),yc-16,3,7,'#2B2E35',1.5)+rvRect(P(.25),yc-15,4,6,'#55595F',1)+rvLine(P(.2),yc-9,P(.2),yc-7,'#55595F',2);
+  if(o.sting) s+=rvRect(x0-14,yc-1.6,16,3.2,rvShade(c,.8),1.6);
   // 空気の取り入れ口
   if(stealth) s+=rvPoly([[P(.52),yc-3],[P(.64),yc-5],[P(.62),yc+6],[P(.52),yc+7]],dk2)+rvPoly([[P(.62),yc-4.6],[P(.65),yc-5.4],[P(.63),yc+6],[P(.61),yc+6]],'#2B2E35');
   else if(single) s+=`<path d="M${F(P(.5))} ${F(yc+6)} L${F(P(.66))} ${F(yc+6)} Q${F(P(.68))} ${F(yc+11)} ${F(P(.64))} ${F(yc+11)} L${F(P(.52))} ${F(yc+10)}Z" fill="${dk2}"/>`+rvRect(P(.645),yc+6.4,2,4.2,'#2B2E35',1);
@@ -22799,9 +22810,13 @@ function rvFighter(c,o,R){ const L=o.L||196, yc=o.yc||70, x0=120-L/2, x1=x0+L; c
   s+=`<path d="${cnp}" fill="none" stroke="${dk2}" stroke-width="1.2"/>`+rvLine(P(.735),yc-21.5,P(.74),yc-9.6,dk2,1.2)+`<path d="M${F(ca+L*.03)} ${F(yc-14)} Q${F(ca+L*.08)} ${F(yc-21)} ${F(ca+L*.14)} ${F(yc-19)}" stroke="#FFFFFF" stroke-width="1.3" fill="none" opacity=".7"/>`;
   // 手前の水平尾翼・主翼
   s+=rvPoly([[P(.03),yc+3],[P(.17),yc+3.4],[P(.08),yc+15],[P(.0),yc+15]],c)+rvLine(P(.03),yc+4,P(.005),yc+14,dk,.6);
-  const wg=stealth?[[P(.3),yc+4],[P(.6),yc+4],[P(.38),yc+28],[P(.26),yc+28]]:acro?[[P(.36),yc+5],[P(.56),yc+5],[P(.48),yc+24],[P(.36),yc+24]]:[[P(.3),yc+5],[P(.58),yc+5],[P(.36),yc+27],[P(.27),yc+27]];
+  const wg=o.wing==='fwd'?[[P(.38),yc+4],[P(.52),yc+4],[P(.6),yc+26],[P(.5),yc+26]]:o.wing==='delta'?[[P(.14),yc+4],[P(.58),yc+4],[P(.2),yc+30],[P(.1),yc+30]]:o.wing==='vg'?[[P(.36),yc+4],[P(.56),yc+4],[P(.22),yc+20],[P(.15),yc+20]]:o.wing==='straight'?[[P(.36),yc+4],[P(.5),yc+4],[P(.5),yc+30],[P(.38),yc+30]]:stealth?[[P(.3),yc+4],[P(.6),yc+4],[P(.38),yc+28],[P(.26),yc+28]]:acro?[[P(.36),yc+5],[P(.56),yc+5],[P(.48),yc+24],[P(.36),yc+24]]:[[P(.3),yc+5],[P(.58),yc+5],[P(.36),yc+27],[P(.27),yc+27]];
   s+=rvPoly(wg,c)+rvPoly([wg[2],wg[3],[wg[3][0]+1,wg[3][1]-2.4],[wg[2][0]+1,wg[2][1]-2.4]],dk)+`<path d="M${F(wg[0][0]+4)} ${F(yc+6)} L${F(wg[3][0]+4)} ${F(wg[3][1]-3)}" stroke="#FFFFFF" stroke-width="1" opacity=".4"/>`;
   s+=rvCirc(wg[3][0]+2,wg[3][1]-1,1.2,'#3FBF6B',' class="rv-blink"');
+  if(o.wing==='vg') s+=rvCirc(P(.48),yc+5,2.4,dk2);
+  if(o.canard) s+=rvPoly([[P(.7),yc+2],[P(.78),yc+2],[P(.72),yc+10],[P(.67),yc+10]],c)+rvPoly([[P(.7),yc-5],[P(.77),yc-5],[P(.71),yc-12],[P(.67),yc-12]],rvShade(c,.82));
+  if(o.hook) s+=rvLine(P(.06),yc+7,P(-.02),yc+13,'#3A3D44',1.4)+rvRect(P(-.03),yc+12,4,2,'#F2C230',1);
+  if(o.straight||o.wing==='straight') s+=rvRect(P(.44),yc+28,6,3,'#8E959E',1);
   if(o.gearDown) s+=rvLine(P(.42),yc+7,P(.42),yc+17,'#8E959E',1.8)+rvCirc(P(.42),yc+19,3.2,'#2E2E33')+rvLine(P(.84),yc+5,P(.84),yc+15,'#8E959E',1.6)+rvCirc(P(.84),yc+17,2.6,'#2E2E33');
   // 機首の番号・プローブ
   s+=`<text x="${F(P(.86))}" y="${F(yc+4.2)}" font-size="5" font-weight="700" fill="${rvShade(c,.5)}" font-family="sans-serif" text-anchor="middle">${o.no||'01'}</text>`;
@@ -22892,6 +22907,184 @@ function rvNavy(c,o,R){ const dk=rvShade(c,.72), lt=rvShade(c,1.15), sup='#C9CFD
     s+=jet(30,'#8E959E')+jet(66,'#9AA1AA')+jet(100,'#8E959E')+jet(190,'#9AA1AA');
     if(R) s+=R('p',134,W-31,{ pose:'stand', k:.6, wave:1 }); }
   return s; }
+// 軍用の潜水艦（いろいろな形）
+function rvSubX(c,o,R){ const L=o.L||190, H=o.H||24, x0=120-L/2-4, x1=x0+L, yc=W+(o.dive?-2:H*.22); const lt=rvShade(c,1.22), dk=rvShade(c,.66); const g=rvId('rvxg'); let s=`<defs>${rvGrad(g,[[0,lt],[.5,c],[1,dk]],1)}</defs>`;
+  const tear=o.shape==='tear', old=o.shape==='old';
+  // うしろのかじ（十字 か X字）
+  if(o.xtail) s+=rvPoly([[x0+6,yc-2],[x0-6,yc-H*.62],[x0,yc-H*.66],[x0+14,yc-3]],dk)+rvPoly([[x0+6,yc+2],[x0-6,yc+H*.62],[x0,yc+H*.66],[x0+14,yc+3]],dk);
+  else s+=rvPoly([[x0+4,yc-2],[x0-8,yc-H*.6],[x0-2,yc-H*.6],[x0+12,yc-3]],dk)+rvPoly([[x0+4,yc+2],[x0-8,yc+H*.5],[x0-2,yc+H*.5],[x0+12,yc+3]],dk)+rvRect(x0-8,yc-1.6,22,3.2,dk,1.5);
+  if(o.pump) s+=rvRect(x0-10,yc-H*.3,10,H*.6,'#55595F',3); else s+=`<g class="rv-prop">${rvRect(x0-7,yc-9,3,18,'#C9A23A',1.5)}</g>`+rvCirc(x0-5,yc,2.4,'#8E959E');
+  // 船体
+  const hull=tear?`M${F(x0)} ${F(yc)} Q${F(x0+L*.25)} ${F(yc-H/2-2)} ${F(x0+L*.6)} ${F(yc-H/2-2)} Q${F(x1+4)} ${F(yc-H/2)} ${F(x1+4)} ${F(yc)} Q${F(x1+4)} ${F(yc+H/2)} ${F(x0+L*.6)} ${F(yc+H/2+2)} Q${F(x0+L*.25)} ${F(yc+H/2+2)} ${F(x0)} ${F(yc)}Z`
+   :old?`M${F(x0)} ${F(yc-2)} L${F(x0+L*.1)} ${F(yc-H/2)} L${F(x1-L*.02)} ${F(yc-H/2)} L${F(x1+8)} ${F(yc-H/2-3)} Q${F(x1)} ${F(yc+H/3)} ${F(x1-L*.12)} ${F(yc+H/2)} L${F(x0+L*.15)} ${F(yc+H/2)} Z`
+   :`M${F(x0)} ${F(yc)} Q${F(x0+L*.1)} ${F(yc-H/2)} ${F(x0+L*.28)} ${F(yc-H/2)} L${F(x1-L*.16)} ${F(yc-H/2)} Q${F(x1+2)} ${F(yc-H/2)} ${F(x1+2)} ${F(yc)} Q${F(x1+2)} ${F(yc+H/2)} ${F(x1-L*.16)} ${F(yc+H/2)} L${F(x0+L*.28)} ${F(yc+H/2)} Q${F(x0+L*.1)} ${F(yc+H/2)} ${F(x0)} ${F(yc)}Z`;
+  // 司令塔
+  const sx=x0+L*(o.sx||.56), sw=o.sw||24, sh=o.sh||22, top=yc-H/2;
+  if(old) s+=rvPoly([[sx-4,top+1],[sx,top-sh],[sx+sw,top-sh],[sx+sw+6,top+1]],`url(#${g})`)+rvRect(sx-2,top-sh-2,sw+4,3,dk,1)+rvLine(sx+6,top-sh,sx+6,top-sh-14,'#55595F',1.4);
+  else { s+=`<path d="M${F(sx)} ${F(top+2)} L${F(sx+3)} ${F(top-sh)} L${F(sx+sw-4)} ${F(top-sh)} Q${F(sx+sw+2)} ${F(top-sh)} ${F(sx+sw+4)} ${F(top+2)}Z" fill="url(#${g})"/>`;
+    if(o.sailfin) s+=rvRect(sx-7,top-sh*.62,sw+16,3,dk,1.5);
+    s+=rvLine(sx+8,top-sh,sx+8,top-sh-11,'#55595F',1.4)+rvLine(sx+13,top-sh,sx+13,top-sh-7,'#55595F',1.2); }
+  s+=`<path d="${hull}" fill="url(#${g})"/>`+`<path d="M${F(x0+L*.12)} ${F(yc-H*.3)} Q${F(x0+L*.5)} ${F(yc-H*.42)} ${F(x1-L*.1)} ${F(yc-H*.3)}" stroke="#FFFFFF" stroke-width="1.5" fill="none" opacity=".38"/>`;
+  if(o.bowfin) s+=rvPoly([[x1-L*.2,yc-3],[x1-L*.1,yc-3],[x1-L*.16,yc-11]],dk);
+  // 背中のハッチ（大きな潜水艦）
+  if(o.hatch){ const n=o.hatch, a=sx+(o.hatchFwd?-n*9-10:sw+8); for(let i=0;i<n;i++) s+=rvRect(a+i*9,top-1.6,7,2.6,dk,1)+rvLine(a+i*9+3.5,top-1.6,a+i*9+3.5,top+1,lt,.5); }
+  if(o.hump) s+=`<path d="M${F(sx+sw+4)} ${F(top+1)} Q${F(sx+sw+30)} ${F(top-7)} ${F(sx+sw+60)} ${F(top+1)}Z" fill="${c}"/>`;
+  if(o.gun) s+=rvRect(sx+sw+16,top-6,8,6,dk,1.5)+rvLine(sx+sw+22,top-4,sx+sw+38,top-6,'#55595F',2)+rvRect(sx-26,top-4,6,4,dk,1)+rvLine(sx-24,top-3,sx-14,top-5,'#55595F',1.4);
+  if(o.dsrv){ const dx=sx-L*.24; s+=rvRect(dx-24,top-11,44,11,'#EEF0F2',5.5,' stroke="#8E98A3" stroke-width=".8"')+rvRect(dx-24,top-6,44,2.4,'#F08A24',1)+rvRect(dx-4,top-2,8,3,'#55595F',1); }
+  if(old) s+=rvLine(x0+L*.08,yc+2,x1-2,yc+2,'#FFFFFF',.8,' opacity=".4"');
+  else s+=[.18,.3,.42,.74,.86].map(f=>rvRect(x0+L*f,yc-H*.34,L*.05,1.3,dk,.6)).join('');
+  s+=`<text x="${F(x0+L*.8)}" y="${F(yc+2)}" font-size="6" font-weight="700" fill="#FFFFFF" opacity=".8" font-family="sans-serif">${o.no||'02'}</text>`;
+  if(R) s+=R('p',sx+sw*.55,top-sh+1,{ pose:'stand', k:.66, wave:1 });
+  s+=`<path d="M${F(x1-6)} ${F(W+1)} Q${F(x1+8)} ${F(W-3)} ${F(x1+16)} ${F(W)}" stroke="#FFFFFF" stroke-width="1.6" fill="none" opacity=".8" class="rv-bob"/>`;
+  return s; }
+// 深い海の探査艇・小型潜水艇
+function rvDeepSub(c,o,R){ const cx=118, yc=W+16, mini=o.kind==='mini'; const lt=rvShade(c,1.2), dk=rvShade(c,.68); const g=rvId('rvdsg'), gl=rvId('rvdsl'); let s=`<defs>${rvGrad(g,[[0,lt],[.5,c],[1,dk]],1)}<radialGradient id="${gl}" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#F2FBFF"/><stop offset="1" stop-color="#6FB3DA" stop-opacity=".9"/></radialGradient></defs>`;
+  if(mini){ s+=`<ellipse cx="${cx}" cy="${yc}" rx="54" ry="16" fill="url(#${g})"/>`+rvRect(cx-70,yc-3,18,6,dk,3)+`<g class="rv-prop">${rvRect(cx-74,yc-8,3,16,'#C9A23A',1.5)}</g>`+rvRect(cx-30,yc+12,60,4,dk,2);
+    const dm=`M${cx+2} ${yc-8} Q${cx+4} ${yc-34} ${cx+28} ${yc-34} Q${cx+52} ${yc-32} ${cx+52} ${yc-6}Z`, id=rvId('rvdm'); s+=`<clipPath id="${id}"><path d="${dm}"/></clipPath><path d="${dm}" fill="url(#${gl})"/>`;
+    if(R) s+=`<g clip-path="url(#${id})">${R('d',cx+20,yc+2,{ pose:'head', k:.8 })}${R('p',cx+38,yc+2,{ pose:'head', k:.8, wave:1 })}</g>`;
+    s+=`<path d="${dm}" fill="none" stroke="${dk}" stroke-width="1.4"/>`+rvCirc(cx+54,yc+2,3,'#FFF6CF')+rvRect(cx-48,yc-14,10,14,dk,2); }
+  else { s+=rvRect(cx-70,yc-26,140,40,'url(#'+g+')',14)+rvRect(cx-70,yc-26,140,8,'#FFFFFF',4,' opacity=".9"')+rvRect(cx-70,yc+8,140,6,'#F08A24',3);
+    s+=rvRect(cx-82,yc-14,14,18,dk,3)+`<g class="rv-prop">${rvRect(cx-86,yc-18,3,24,'#55595F',1.5)}</g>`+rvRect(cx-20,yc-40,30,14,'#F08A24',4)+rvCirc(cx-5,yc-44,3,'#FFF6CF',' class="rv-blink"');
+    const wx=cx+56, wy=yc-4, id=rvId('rvdw'); s+=`<clipPath id="${id}">${rvCirc(wx,wy,11,'#000')}</clipPath>${rvCirc(wx,wy,13.5,'#E8EBEE',` stroke="${dk}" stroke-width="1.6"`)}${rvCirc(wx,wy,11,'#CFEAFB')}`+(R?`<g clip-path="url(#${id})">${R('p',wx-1,wy+15,{ pose:'head', k:.8, wave:1 })}</g>`:'');
+    s+=rvLine(cx+60,yc+14,cx+76,yc+24,'#8E959E',2.6)+rvLine(cx+76,yc+24,cx+86,yc+20,'#8E959E',2.2)+rvLine(cx+40,yc+14,cx+54,yc+26,'#8E959E',2.4)+rvCirc(cx+72,yc-20,3.4,'#FFF6CF')+rvCirc(cx+40,yc-20,3.4,'#FFF6CF')+`<path d="M${cx+72} ${yc-20} L${cx+110} ${yc-6} L${cx+110} ${yc-34}Z" fill="#FFF6B0" opacity=".3"/>`; }
+  for(let i=0;i<4;i++) s+=rvCirc(cx-40+i*12,yc-30-i*8,1.6+i*.4,'#FFFFFF',' opacity=".6" class="rv-bob"');
+  return s; }
+// 護衛艦・軍艦（いろいろな形）
+const LCF=['#D8343A','#F2C230','#2F6FC1','#3E9A5B','#FFFFFF'];
+function rvWar(c,o,R){ const sup=o.sup||'#C9CFD6', sup2=o.sup2||'#AEB6C0', dk=rvShade(c,.72), win='#2B3A4C'; let s='';
+  const x0=o.x0||22, x1=o.x1||204, fb=o.fb||16; s+=rvHull(x0,x1,o.deep||18,c,{ fb, bow:o.bow||16, rise:o.rise||8, boot:o.boot });
+  const dy=W-fb; s+=rvRect(x0,dy-2,x1-x0,3,rvShade(c,1.15),1);
+  if(o.stripe) s+=rvPoly([[x1-62,dy+3],[x1-50,dy+3],[x1-66,W-2],[x1-78,W-2]],o.stripe)+rvPoly([[x1-46,dy+3],[x1-40,dy+3],[x1-56,W-2],[x1-62,W-2]],o.stripe);
+  if(o.no) s+=`<text x="${x1-28}" y="${W-6}" font-size="9" font-weight="800" fill="#FFFFFF" font-family="sans-serif">${o.no}</text>`;
+  const k=o.kind;
+  const turret=(x,big,flip)=>{ const w=big?22:14, h=big?9:7; let t=`<path d="M${x-w/2} ${dy} L${x-w/2+2} ${dy-h} Q${x} ${dy-h-3} ${x+w/2-2} ${dy-h} L${x+w/2} ${dy}Z" fill="${sup2}"/>`; const n=big?3:1; for(let i=0;i<n;i++) t+=rvLine(x+(flip?-w/2:w/2)-(flip?-1:1)*2,dy-h+2+i*2.4,x+(flip?-1:1)*(w/2+(big?20:14)),dy-h+1+i*2.4,'#8E959E',big?1.8:2); return t; };
+  const mast=(x,h,type)=>{ let t=''; if(type==='aegis') t+=rvPoly([[x-16,dy-24],[x-14,dy-50],[x+14,dy-50],[x+18,dy-24]],sup)+rvPoly([[x-8,dy-42],[x+2,dy-42],[x+2,dy-30],[x-8,dy-30]],'#9AA6B4')+rvPoly([[x+4,dy-50],[x+8,dy-60],[x+12,dy-60],[x+12,dy-50]],sup2)+rvLine(x+10,dy-60,x+10,dy-76,'#6B717A',1.4);
+    else if(type==='stealth') t+=rvPoly([[x-18,dy],[x-12,dy-40],[x+18,dy-40],[x+26,dy]],sup)+rvPoly([[x-10,dy-40],[x-6,dy-58],[x+12,dy-58],[x+16,dy-40]],sup2)+rvRect(x-4,dy-36,18,3,win,1);
+    else if(type==='unified') t+=rvPoly([[x-6,dy-24],[x-3,dy-66],[x+9,dy-66],[x+12,dy-24]],sup)+rvRect(x-3,dy-58,12,5,'#9AA6B4',1)+rvRect(x-1,dy-72,8,6,sup2,3);
+    else t+=rvPoly([[x-3,dy-24],[x,dy-24-h],[x+3,dy-24-h],[x+6,dy-24]],sup2)+rvRect(x-7,dy-24-h*.7,18,2.6,sup2,1)+rvRect(x-3,dy-24-h-8,10,8,sup,2)+rvLine(x+2,dy-24-h-8,x+2,dy-24-h-16,'#6B717A',1.2);
+    return t+rvCirc(x+2,dy-24-h-17,1.4,'#E8504A',' class="rv-blink"'); };
+  const bridge=(a,b,h)=>`<path d="M${a} ${dy} L${a+4} ${dy-h} L${b-4} ${dy-h} L${b} ${dy}Z" fill="${sup}"/>`+rvRect(a+8,dy-h+4,b-a-16,3.6,win,1.2);
+  const funnel=(x,w,h)=>rvPoly([[x,dy-2],[x+3,dy-h],[x+w-1,dy-h],[x+w,dy-2]],sup2)+rvRect(x+2,dy-h-3,w-2,3,'#55595F',1);
+  const heli=(x)=>rvRect(x-18,dy-14,36,14,sup,1.5)+rvRect(x-22,dy-1,40,1.4,'#F2C230',.6);
+  switch(k){
+  case 'aegis': s+=bridge(92,160,22)+mast(126,20,'aegis')+funnel(70,16,26)+funnel(160,12,20)+turret(184,0)+rvRect(166,dy-6,12,6,dk,1)+rvRect(40,dy-8,20,8,sup2,1)+heli(40); break;
+  case 'stealthdd': s+=mast(120,0,'stealth')+rvPoly([[60,dy],[66,dy-18],[96,dy-18],[100,dy]],sup)+turret(170,0)+rvRect(150,dy-4,14,4,dk,1); break;
+  case 'compact': s+=bridge(96,150,20)+mast(126,0,'unified')+funnel(80,14,20)+turret(178,0)+heli(46); break;
+  case 'missile': s+=bridge(104,150,18)+mast(124,18,'lattice')+rvRect(70,dy-8,26,6,sup2,1.5)+rvLine(72,dy-8,94,dy-12,'#8E959E',4)+turret(170,0); break;
+  case 'mine': s+=bridge(110,160,20)+mast(132,26,'lattice')+funnel(92,14,22)+rvLine(40,dy,30,dy-26,'#8E959E',1.6)+rvLine(30,dy-26,22,dy+6,'#55595F',.8)+rvRect(46,dy-8,30,8,'#F08A24',3)+turret(180,0); break;
+  case 'supply': s+=bridge(160,196,26)+mast(176,14,'lattice')+[54,86,118].map(x=>rvLine(x,dy,x,dy-36,'#8E959E',2)+rvLine(x-12,dy-34,x+12,dy-34,'#8E959E',1.6)+rvLine(x-10,dy-34,x-10,dy-6,'#55595F',.7)+rvLine(x+10,dy-34,x+10,dy-6,'#55595F',.7)).join('')+funnel(140,14,30)+rvRect(36,dy-10,120,10,sup2,1); break;
+  case 'battle': s+=turret(178,1)+turret(152,1)+turret(48,1,1)+`<path d="M92 ${dy} L94 ${dy-22} L136 ${dy-22} L138 ${dy}Z" fill="${sup}"/>`+rvPoly([[108,dy-22],[110,dy-52],[124,dy-52],[128,dy-22]],sup)+rvRect(106,dy-56,24,5,sup2,1.5)+rvRect(110,dy-46,14,3,win,1)+funnel(86,14,34)+rvLine(116,dy-56,116,dy-74,'#6B717A',1.4)+rvLine(70,dy-12,64,dy-40,'#8E959E',1.4); break;
+  case 'cruiser': s+=bridge(100,160,22)+mast(128,22,'aegis')+funnel(80,16,28)+turret(186,0)+turret(42,0,1)+rvRect(166,dy-6,14,6,dk,1)+rvRect(58,dy-6,16,6,dk,1); break;
+  case 'ice': s+=bridge(122,186,30)+rvRect(130,dy-44,46,14,sup,2)+rvRect(136,dy-40,34,4,win,1)+mast(152,10,'lattice')+funnel(98,18,30)+heli(56)+rvRect(36,dy-24,20,10,sup2,2); break;
+  case 'patrol': s+=bridge(110,170,26)+mast(140,20,'lattice')+funnel(92,14,22)+turret(186,0)+heli(54)+rvRect(122,dy-38,32,12,sup,2)+rvRect(126,dy-34,24,3,win,1); break;
+  case 'transport': s+=bridge(150,200,30)+mast(176,14,'lattice')+funnel(132,14,24)+rvRect(30,dy-3,100,3,'#5E6671',1)+[40,62,86].map(x=>rvRect(x,dy-12,18,9,'#7D8A6E',2)+rvCirc(x+4,dy-2,2.4,'#2E2E33')+rvCirc(x+14,dy-2,2.4,'#2E2E33')).join('')+rvRect(108,dy-14,18,11,'#C9A23A',1); break;
+  case 'survey': s+=rvRect(60,dy-40,100,40,sup,3)+rvRect(66,dy-34,88,4,win,1)+rvRect(100,dy-56,30,16,sup2,2)+mast(116,14,'lattice')+rvRect(40,W-4,150,6,rvShade(c,.7),3); break;
+  case 'training': s+=bridge(100,160,24)+mast(130,28,'lattice')+funnel(80,16,22)+turret(184,0)+rvRect(40,dy-10,30,10,sup,2)+rvLine(30,dy-10,30,dy-40,'#8E959E',1.2)+`<path d="M30 ${dy-40} L60 ${dy-12}" stroke="#F07FA2" stroke-width=".8"/>`+[0,1,2,3,4].map(i=>rvRect(32+i*6,dy-38+i*5.4,5,3.6,LCF[i%5],.6)).join(''); break;
+  default: s+=bridge(92,156,22)+mast(132,26,'lattice')+funnel(70,16,22)+turret(178,0)+heli(40);
+  }
+  if(R) s+=R('p',o.px||164,dy,{ pose:'stand', k:.6, wave:1 });
+  return s; }
+// 空母（いろいろな形）
+function rvCarrier(c,o,R){ const sup='#C9CFD6', sup2='#AEB6C0', dk=rvShade(c,.72), win='#2B3A4C'; let s='';
+  const x0=o.x0||18, x1=o.x1||206, dw=o.deck||'#5E6671'; s+=rvHull(x0,x1,o.deep||22,c,{ fb:o.fb||20, bow:10, rise:2 });
+  const dy=W-(o.fb||20)-10, a=o.da??6, b=o.db??228;
+  s+=rvPoly([[a,dy],[b,dy],[b-6,dy+8],[a+10,dy+8]],dk)+rvRect(a,dy-1,b-a,3,dw,1);
+  if(o.wood) s+=rvRect(a,dy-1,b-a,3,'#B9824F',1)+`<path d="M${a+4} ${dy+.5} L${b-4} ${dy+.5}" stroke="#8A5A3C" stroke-width=".5" stroke-dasharray="3 3"/>`;
+  else s+=`<path d="M${a+14} ${dy+.4} L${b-8} ${dy+.4}" stroke="#FFFFFF" stroke-width=".8" stroke-dasharray="6 5" opacity=".8"/>`;
+  if(o.angled) s+=`<path d="M${a+20} ${dy+.4} L${a+110} ${dy-1.2}" stroke="#F2C230" stroke-width=".8" opacity=".9"/>`;
+  if(o.ski) s+=`<path d="M${b-30} ${dy-1} Q${b-6} ${dy-2} ${b+4} ${dy-12} L${b+4} ${dy+4} L${b-30} ${dy+2}Z" fill="${dw}"/>`;
+  if(o.well) s+=rvRect(x0+4,W-10,22,8,'#2B3A4C',1.5);
+  if(o.no) s+=`<text x="${x1-14}" y="${W-6}" font-size="9" font-weight="800" fill="#FFFFFF" font-family="sans-serif">${o.no}</text>`;
+  const island=(x,w,h,one)=>rvRect(x,dy-h,w,h,sup,2)+rvRect(x-3,dy-h-6,w+6,7,sup2,2)+rvRect(x+3,dy-h+4,w-6,4,win,1.5)+(one?'':rvPoly([[x+w/2-4,dy-h-6],[x+w/2-2,dy-h-24],[x+w/2+2,dy-h-24],[x+w/2+4,dy-h-6]],sup2)+rvRect(x+w/2-8,dy-h-18,16,3,sup2,1))+rvCirc(x+w/2,dy-h-26,1.4,'#E8504A',' class="rv-blink"')+rvRect(x+4,dy-h+12,5,5,win,1)+rvRect(x+w-9,dy-h+12,5,5,win,1);
+  (o.islands||[[150,26,26]]).forEach((q,i)=>s+=island(q[0],q[1],q[2],i>0));
+  const jet=(x,col)=>`<g transform="translate(${x} ${dy-6})">`+`<path d="M0 3 L18 2 Q26 3 30 5 L18 6 L2 6Z" fill="${col}"/>`+rvPoly([[2,3],[0,-4],[4,-4],[8,3]],col)+rvPoly([[10,5],[16,5],[12,10],[8,10]],rvShade(col,.8))+rvRect(16,1,6,2.4,'#9FCDEB',1.2)+`</g>`;
+  const heli=(x)=>`<g transform="translate(${x} ${dy-9})">`+rvRect(0,2,20,7,'#7D8A6E',3.5)+rvRect(-12,4,14,2,'#7D8A6E',1)+rvRect(14,3,5,3,'#9FCDEB',1.4)+rvRect(9,-1,2,3,'#55595F')+rvRect(-6,-1.4,32,1.4,'#3A3F47',.7)+rvRect(3,9,14,1,'#55595F')+`</g>`;
+  const prop=(x)=>`<g transform="translate(${x} ${dy-8})">`+`<path d="M0 4 L20 3 Q26 4 26 6 L20 8 L2 8Z" fill="#6E8B6A"/>`+rvRect(6,6,14,2,'#56704F',1)+rvPoly([[1,4],[0,-2],[3,-2],[6,4]],'#6E8B6A')+rvRect(25,1,1.4,10,'#3A3F47',.6)+`</g>`;
+  const drone=(x)=>`<g transform="translate(${x} ${dy-6})">`+`<path d="M0 3 L16 3 Q22 4 22 5 L16 6 L0 6Z" fill="#F4F6F8"/>`+rvRect(4,4,16,1.4,'#8E98A3',.7)+`</g>`;
+  const tilt=(x)=>`<g transform="translate(${x} ${dy-9})">`+rvRect(0,3,22,6,'#7D8A6E',3)+rvRect(8,0,8,3,'#6B7A5E',1)+rvRect(10,-6,3,7,'#55595F',1)+rvRect(2,-7.4,20,1.4,'#3A3F47',.7)+rvRect(18,4,4,3,'#9FCDEB',1)+`</g>`;
+  if(o.crane) s+=rvLine(60,dy,60,dy-36,'#8E959E',2.2)+rvLine(60,dy-36,30,dy-18,'#8E959E',1.6)+rvLine(30,dy-18,30,dy+2,'#55595F',.7);
+  (o.air||['j','j','j']).forEach((t,i)=>{ const x=(o.ax||[30,66,102,190])[i]; s+=t==='j'?jet(x,i%2?'#9AA1AA':'#8E959E'):t==='h'?heli(x):t==='t'?tilt(x):t==='p'?prop(x):drone(x); });
+  if(R) s+=R('p',o.px||134,dy,{ pose:'stand', k:.6, wave:1 });
+  return s; }
+// 宇宙戦艦（LIFE BOOK オリジナル）・とても大きな母船
+function rvSpace(c,o,R){ const lt=rvShade(c,1.3), dk=rvShade(c,.6), cy=o.yc||68, g=rvId('rvspg'); let s=`<defs>${rvGrad(g,[[0,lt],[.5,c],[1,dk]],1)}</defs>`;
+  if(o.kind==='ship'){ // 宇宙戦艦
+    s+=`<g class="rv-scroll" opacity=".9">${[0,1,2].map(i=>`<path d="M${30-i*4} ${cy-6+i*6} L${-10-i*12} ${cy-6+i*6}" stroke="#9FE8FF" stroke-width="${4-i}" stroke-linecap="round" opacity="${.8-i*.2}"/>`).join('')}</g>`;
+    s+=rvPoly([[36,cy-14],[200,cy-10],[226,cy],[200,cy+12],[44,cy+16],[30,cy]],`url(#${g})`);
+    s+=rvPoly([[44,cy+2],[200,cy+2],[220,cy],[200,cy+12],[44,cy+16]],dk,' opacity=".35"')+rvLine(46,cy-3,206,cy-2,'#FFFFFF',1.2,' opacity=".5"');
+    s+=rvPoly([[86,cy+12],[136,cy+12],[110,cy+40],[80,cy+40]],rvShade(c,.85))+rvPoly([[86,cy-12],[132,cy-11],[106,cy-30],[78,cy-30]],rvShade(c,.8));
+    s+=rvPoly([[110,cy-14],[118,cy-34],[160,cy-34],[172,cy-12]],lt)+rvRect(124,cy-30,32,4,'#7FE0FF',2)+rvPoly([[134,cy-34],[138,cy-46],[146,cy-46],[150,cy-34]],c)+rvLine(142,cy-46,142,cy-56,'#C9D3DE',1.2)+rvCirc(142,cy-57,1.8,'#FF7AA8',' class="rv-blink"');
+    for(let i=0;i<9;i++) s+=rvCirc(56+i*15,cy+4,2.2,'#FFE14D',i%3===0?' class="rv-blink"':'');
+    s+=rvCirc(34,cy-6,8,'#3A3D44')+rvCirc(34,cy-6,5,'#9FE8FF',' class="rv-blink"')+rvCirc(36,cy+9,7,'#3A3D44')+rvCirc(36,cy+9,4.4,'#9FE8FF',' class="rv-blink"');
+    s+=rvLogo(96,cy-4,.9,c)+`<ellipse cx="226" cy="${cy}" rx="4" ry="6" fill="#FFF6B0" opacity=".8"/>`;
+    if(R){ const wx=146, wy=cy-22, id=rvId('rvsw'); s+=`<clipPath id="${id}">${rvRect(122,cy-31,36,8,'#000',2)}</clipPath><g clip-path="url(#${id})">${R('p',wx,wy+12,{ pose:'head', k:.5, wave:1 })}${R('d',132,wy+12,{ pose:'head', k:.5 })}</g>`; } }
+  else { // とても大きな母船（画面からはみ出すほど）
+    const W2=124, H=30; s+=`<ellipse cx="120" cy="${cy-10}" rx="${W2+30}" ry="${H+30}" fill="${c}" opacity=".12"/>`;
+    s+=`<path d="M${120-W2} ${cy} Q120 ${cy-H*2.2} ${120+W2} ${cy} Z" fill="url(#${g})"/><ellipse cx="120" cy="${cy}" rx="${W2}" ry="${H*.55}" fill="url(#${g})"/>`;
+    for(let r=0;r<3;r++) for(let i=0;i<14;i++){ const x=120-W2*.75+i*W2*.115+r*4, y=cy-H*(.95-r*.32); if(Math.abs(x-120)<W2*(.4+r*.2)) s+=rvRect(x,y,5,3,r===1&&i%4===0?'#FFE14D':'#9FDDF5',1.2,i%5===0?' class="rv-blink"':''); }
+    s+=`<ellipse cx="120" cy="${cy+H*.4}" rx="${W2*.55}" ry="${H*.35}" fill="${dk}"/>`+[-110,-70,-30,10,50,90].map((x,i)=>rvCirc(120+x+10,cy+H*.25,3.6,['#FFE14D','#FF7AA8','#7FE0FF','#9BFF8A','#C79BFF','#FFE14D'][i],' class="rv-blink"')).join('');
+    s+=`<path d="M106 ${cy+H*.6} L84 ${cy+70} L156 ${cy+70} L134 ${cy+H*.6}Z" fill="#FFF6B0" opacity=".35" class="rv-blink"/>`;
+    [[38,cy+40],[196,cy+32]].forEach(([x,y])=>s+=`<ellipse cx="${x}" cy="${y}" rx="12" ry="3.4" fill="${lt}"/>`+`<path d="M${x-5} ${y-1} Q${x} ${y-8} ${x+5} ${y-1}Z" fill="#CFEAFB"/>`+rvCirc(x,y+2,1.2,'#FFE14D',' class="rv-blink"'));
+    if(R){ const wx=120, wy=cy-H*1.18, id=rvId('rvgm'); s+=`<clipPath id="${id}">${rvCirc(wx,wy,10,'#000')}</clipPath>${rvCirc(wx,wy,12,'#FFFFFF',` stroke="${dk}" stroke-width="1.6"`)}${rvCirc(wx,wy,10,'#CFEAFB')}<g clip-path="url(#${id})">${R('p',wx-1,wy+13,{ pose:'head', k:.7, wave:1 })}</g>`; } }
+  return `<g class="rv-ufo">${s}</g>`; }
+// 宇宙の船（オリジナル）いろいろ
+function rvSpace2(c,o,R){ const k=o.kind, cx=120, cy=o.yc||66, lt=rvShade(c,1.3), dk=rvShade(c,.6), g=rvId('rvs2g'), gr=rvId('rvs2r'); let s=`<defs>${rvGrad(g,[[0,lt],[.5,c],[1,dk]],1)}<radialGradient id="${gr}" cx=".38" cy=".35" r=".75"><stop offset="0" stop-color="${lt}"/><stop offset=".6" stop-color="${c}"/><stop offset="1" stop-color="${dk}"/></radialGradient></defs>`;
+  const LC=['#FFE14D','#FF7AA8','#7FE0FF','#9BFF8A','#C79BFF'];
+  const lamps=(pts)=>pts.map((p,i)=>rvCirc(p[0],p[1],p[2]||2.2,LC[i%5],i%2?' class="rv-blink"':'')).join('');
+  const win=(x,y,r)=>{ const id=rvId('rvs2w'); return `<clipPath id="${id}">${rvCirc(x,y,r,'#000')}</clipPath>${rvCirc(x,y,r+2.2,'#FFFFFF',` stroke="${dk}" stroke-width="1.4"`)}${rvCirc(x,y,r,'#CFEAFB')}`+(R?`<g clip-path="url(#${id})">${R('p',x-1,y+r*1.3,{ pose:'head', k:r/14, wave:1 })}</g>`:''); };
+  const trail=(x,y,n)=>`<g opacity=".85">${Array.from({length:n||2},(_,i)=>`<path d="M${x} ${y+i*7} L${x-46-i*10} ${y+i*7}" stroke="#9FE8FF" stroke-width="${3.4-i}" stroke-linecap="round" opacity="${.8-i*.2}"/>`).join('')}</g>`;
+  const beam=(x,y,w)=>`<path d="M${x-w*.3} ${y} L${x-w} ${y+56} L${x+w} ${y+56} L${x+w*.3} ${y}Z" fill="#FFF6B0" opacity=".35" class="rv-blink"/>`;
+  switch(k){
+  case 'twin': s+=trail(40,cy-12,1)+trail(40,cy+12,1); [-12,12].forEach(d=>s+=rvPoly([[40,cy+d-7],[196,cy+d-5],[214,cy+d],[196,cy+d+5],[40,cy+d+7]],`url(#${g})`)); s+=rvRect(90,cy-8,70,16,dk,3)+rvPoly([[110,cy-8],[118,cy-28],[150,cy-28],[158,cy-8]],lt)+win(136,cy-18,6)+lamps([[60,cy-12],[80,cy-12],[170,cy-12],[60,cy+12],[80,cy+12],[170,cy+12]]); break;
+  case 'arrow': s+=trail(52,cy,2)+rvPoly([[52,cy-30],[226,cy],[52,cy+30],[76,cy]],`url(#${g})`)+rvPoly([[76,cy],[226,cy],[52,cy+30]],dk,' opacity=".35"')+rvLine(80,cy,210,cy,'#FFFFFF',1,' opacity=".5"')+win(150,cy-4,7)+lamps([[64,cy-24],[64,cy+24],[110,cy-14],[110,cy+14]]); break;
+  case 'scarrier': s+=trail(30,cy+2,2)+rvPoly([[30,cy-10],[214,cy-10],[228,cy-2],[214,cy+16],[40,cy+16]],`url(#${g})`)+rvRect(36,cy-12,176,3,'#5E6671',1)+`<path d="M44 ${cy-10.6} L206 ${cy-10.6}" stroke="#7FE0FF" stroke-width=".8" stroke-dasharray="5 4"/>`+rvRect(150,cy-30,24,18,lt,2)+win(162,cy-22,5)+rvRect(40,cy+2,30,8,'#2B3A4C',2)+rvRect(42,cy+4,26,4,'#7FE0FF',1,' class="rv-blink"');
+    [[70,cy-15],[104,cy-15],[200,cy-26],[214,cy-34]].forEach(([x,y])=>s+=rvPoly([[x,y],[x+16,y+2.5],[x,y+5]],'#E8EBEE')+rvCirc(x,y+2.5,1,'#7FE0FF')); s+=lamps([[60,cy+8],[100,cy+8],[140,cy+8],[180,cy+8]]); break;
+  case 'whale': s+=`<path d="M40 ${cy} Q60 ${cy-34} 140 ${cy-30} Q214 ${cy-24} 222 ${cy+2} Q214 ${cy+26} 140 ${cy+24} Q70 ${cy+22} 40 ${cy}Z" fill="url(#${g})"/>`+`<path d="M44 ${cy} L14 ${cy-20} L22 ${cy} L14 ${cy+20}Z" fill="${c}"/>`+`<path d="M90 ${cy+8} Q140 ${cy+22} 200 ${cy+10}" stroke="${lt}" stroke-width="2" fill="none" opacity=".6"/>`+[0,1,2,3,4].map(i=>rvLine(150+i*8,cy+12,148+i*8,cy+20,dk,1.2)).join('')+win(184,cy-6,7)+rvPoly([[110,cy+18],[130,cy+18],[118,cy+34]],dk)+lamps([[70,cy-10],[96,cy-18],[122,cy-20]]); break;
+  case 'dragonfly': s+=[[-1,-1],[1,-1],[-1,1],[1,1]].map(([a,b])=>`<ellipse cx="${cx-10+a*16}" cy="${cy+b*16}" rx="40" ry="9" transform="rotate(${a*b*14} ${cx-10+a*16} ${cy+b*16})" fill="#CFEAFB" stroke="${lt}" stroke-width="1" opacity=".75"/>`).join('')+rvRect(30,cy-4,150,8,`url(#${g})`,4)+rvCirc(196,cy,18,`url(#${gr})`)+win(200,cy-2,8)+lamps([[44,cy],[60,cy],[76,cy],[92,cy]]); break;
+  case 'crystal': s+=rvPoly([[60,cy],[120,cy-40],[180,cy],[120,cy+40]],`url(#${g})`,' opacity=".9"')+rvPoly([[120,cy-40],[150,cy],[120,cy+40],[100,cy]],lt,' opacity=".45"')+rvPoly([[30,cy],[60,cy-10],[60,cy+10]],c)+rvPoly([[210,cy],[180,cy-10],[180,cy+10]],c)+win(120,cy-4,9)+`<g class="rv-blink">${rvCirc(84,cy-14,2,'#FFFFFF')}${rvCirc(150,cy+16,2,'#FFFFFF')}</g>`; break;
+  case 'ring': s+=`<ellipse cx="${cx}" cy="${cy}" rx="78" ry="20" fill="none" stroke="${dk}" stroke-width="7"/>`+rvRect(56,cy-10,128,20,`url(#${g})`,10)+`<path d="M42 ${cy+6} A78 20 0 0 0 198 ${cy+6}" fill="none" stroke="${c}" stroke-width="7"/>`+trail(56,cy-4,1)+win(160,cy-1,7)+lamps([[80,cy],[100,cy],[120,cy]]); break;
+  case 'needle': s+=trail(24,cy,1)+rvPoly([[24,cy-6],[200,cy-3],[234,cy],[200,cy+3],[24,cy+6]],`url(#${g})`)+rvCirc(60,cy,16,`url(#${gr})`)+`<ellipse cx="150" cy="${cy}" rx="10" ry="30" fill="none" stroke="${lt}" stroke-width="2"/>`+rvLine(150,cy-30,150,cy-40,'#C9D3DE',1)+win(60,cy-2,7)+lamps([[100,cy],[180,cy],[220,cy]]); break;
+  case 'heart': s+=`<path d="M120 ${cy+34} C60 ${cy} 64 ${cy-40} 98 ${cy-34} C110 ${cy-32} 118 ${cy-24} 120 ${cy-18} C122 ${cy-24} 130 ${cy-32} 142 ${cy-34} C176 ${cy-40} 180 ${cy} 120 ${cy+34}Z" fill="url(#${gr})"/>`+beam(120,cy+30,22)+win(120,cy-6,10)+lamps([[86,cy-20],[100,cy+4],[154,cy-20],[140,cy+4],[120,cy+22]]); break;
+  case 'star': { const P=[]; for(let i=0;i<10;i++){ const a=-Math.PI/2+i*Math.PI/5, r=i%2?20:50; P.push([cx+Math.cos(a)*r*1.3,cy+6+Math.sin(a)*r]); } s+=rvPoly(P,`url(#${gr})`)+win(cx,cy+4,10)+lamps(P.filter((_,i)=>i%2===0).map(p=>[p[0],p[1],2.6])); } break;
+  case 'saturn': s+=`<ellipse cx="${cx}" cy="${cy}" rx="96" ry="14" fill="none" stroke="${dk}" stroke-width="5" opacity=".7"/>`+rvCirc(cx,cy,40,`url(#${gr})`)+`<path d="M24 ${cy+2} A96 14 0 0 0 216 ${cy+2}" fill="none" stroke="${lt}" stroke-width="5"/>`+win(cx+6,cy-14,9)+lamps([[cx-26,cy+18],[cx,cy+26],[cx+26,cy+18]])+beam(cx,cy+36,16); break;
+  case 'cube': s+=rvPoly([[80,cy-20],[150,cy-20],[170,cy-36],[100,cy-36]],lt)+rvPoly([[150,cy-20],[170,cy-36],[170,cy+30],[150,cy+46]],dk)+rvRect(80,cy-20,70,66,`url(#${g})`,0)+[0,1,2].map(r=>[0,1,2].map(q=>rvRect(86+q*22,cy-14+r*20,14,12,(r+q)%2?'#7FE0FF':'#FFE14D',2,(r*q)%2?' class="rv-blink"':'')).join('')).join('')+win(115,cy+6,7); break;
+  case 'pyramid': s+=rvPoly([[44,cy+30],[196,cy+30],[120,cy-42]],`url(#${g})`)+rvPoly([[120,cy-42],[196,cy+30],[150,cy+30]],dk,' opacity=".4"')+rvCirc(120,cy-42,4,'#FFE14D',' class="rv-blink"')+[0,1,2,3].map(i=>rvLine(70+i*4,cy+18-i*14,170-i*4,cy+18-i*14,lt,1,' opacity=".6"')).join('')+win(120,cy+6,8)+beam(120,cy+30,26); break;
+  case 'jelly': s+=[0,1,2,3,4,5].map(i=>`<path d="M${84+i*14} ${cy+6} q${i%2?6:-6} 16 0 30 q${i%2?-6:6} 12 0 22" stroke="${lt}" stroke-width="2.4" fill="none" opacity=".8" class="rv-bob"/>`).join('')+`<path d="M70 ${cy+8} Q70 ${cy-40} 120 ${cy-40} Q170 ${cy-40} 170 ${cy+8} Q145 ${cy+14} 120 ${cy+8} Q95 ${cy+14} 70 ${cy+8}Z" fill="url(#${gr})" opacity=".92"/>`+win(120,cy-14,10)+lamps([[82,cy],[100,cy+4],[140,cy+4],[158,cy]]); break;
+  case 'castle': s+=`<path d="M40 ${cy+12} Q120 ${cy+60} 200 ${cy+12}Z" fill="#8A6B4A"/>`+`<path d="M40 ${cy+12} L200 ${cy+12} L196 ${cy+18} L44 ${cy+18}Z" fill="#7CCB6B"/>`+[[60,26],[88,44],[120,58],[152,44],[180,26]].map(([x,h])=>rvRect(x-9,cy+12-h,18,h,`url(#${g})`,1)+rvPoly([[x-12,cy+12-h],[x,cy-6-h],[x+12,cy+12-h]],rvShade(c,.8))+rvRect(x-3,cy+2-h*.6,6,8,'#FFE14D',3,' class="rv-blink"')).join('')+win(120,cy-30,7)+beam(120,cy+40,14); break;
+  case 'shell': { let p=`M${cx} ${cy}`; for(let t=0;t<=5.4*Math.PI;t+=.3){ const r=3+t*3.4; p+=` L${F(cx+Math.cos(t)*r*1.2)} ${F(cy+Math.sin(t)*r)}`; } s+=rvCirc(cx,cy,60,`url(#${gr})`,' opacity=".25"')+`<ellipse cx="${cx}" cy="${cy}" rx="70" ry="58" fill="url(#${gr})"/>`+`<path d="${p}" stroke="${dk}" stroke-width="2" fill="none" opacity=".6"/>`+win(cx+30,cy+20,8)+lamps([[cx-50,cy+20],[cx-30,cy+40],[cx+50,cy-20]]); } break;
+  case 'flower': s+=[0,1,2,3,4,5,6,7].map(i=>`<ellipse cx="${F(cx+Math.cos(i*Math.PI/4)*44)}" cy="${F(cy+Math.sin(i*Math.PI/4)*24)}" rx="24" ry="12" transform="rotate(${i*45} ${F(cx+Math.cos(i*Math.PI/4)*44)} ${F(cy+Math.sin(i*Math.PI/4)*24)})" fill="${i%2?lt:c}"/>`).join('')+rvCirc(cx,cy,24,'#FFE14D')+rvCirc(cx,cy,24,`url(#${gr})`,' opacity=".35"')+win(cx,cy,10)+beam(cx,cy+20,14); break;
+  case 'cloudcity': s+=[[70,cy+14,30],[110,cy+6,38],[160,cy+12,32],[196,cy+18,22],[46,cy+20,20]].map(([x,y,r])=>rvCirc(x,y,r,'#FFFFFF',' opacity=".95"')).join('')+[[86,30],[110,48],[134,38],[158,26]].map(([x,h])=>rvRect(x-8,cy-h,16,h+6,`url(#${g})`,3)+rvRect(x-4,cy-h+6,8,4,'#7FE0FF',1,' class="rv-blink"')).join('')+win(110,cy-34,6); break;
+  }
+  return `<g class="rv-ufo">${s}</g>`; }
+// UFO（空想の乗り物）
+function rvUfo(c,o,R){ const k=o.kind||'saucer', cx=120, cy=o.yc||70; const lt=rvShade(c,1.3), dk=rvShade(c,.62); const g=rvId('rvug'), gd=rvId('rvud'), cl=rvId('rvuc'); let s='';
+  const lights=(n,rx,y,ry)=>{ let t=''; const cols=['#FFE14D','#FF7AA8','#7FE0FF','#9BFF8A','#C79BFF']; for(let i=0;i<n;i++){ const a=Math.PI*(i+.5)/n; t+=rvCirc(cx-Math.cos(a)*rx,y+Math.sin(a)*ry,2.4,cols[i%cols.length],` class="rv-blink" style="animation-delay:${(i*.13).toFixed(2)}s"`); } return t; };
+  const dome=(w,h,y)=>{ const p=`M${F(cx-w)} ${F(y)} Q${F(cx-w)} ${F(y-h)} ${F(cx)} ${F(y-h)} Q${F(cx+w)} ${F(y-h)} ${F(cx+w)} ${F(y)}Z`;
+    let t=`<clipPath id="${cl}"><path d="${p}"/></clipPath><path d="${p}" fill="url(#${gd})"/>`;
+    if(R) t+=`<g clip-path="url(#${cl})">${R('d',cx+w*.42,y+h*.62,{ pose:'head', k:Math.min(.8,h/30) })}${R('p',cx-3,y+h*.6,{ pose:'head', k:Math.min(.95,h/26), wave:1 })}</g>`;
+    return t+`<path d="M${F(cx-w*.6)} ${F(y-h*.55)} Q${F(cx-w*.3)} ${F(y-h*.9)} ${F(cx+w*.05)} ${F(y-h*.92)}" stroke="#FFFFFF" stroke-width="2" fill="none" opacity=".8"/>`; };
+  s+=`<defs>${rvGrad(g,[[0,lt],[.45,c],[1,dk]],1)}<radialGradient id="${gd}" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#F2FBFF"/><stop offset=".6" stop-color="#9FDDF5" stop-opacity=".85"/><stop offset="1" stop-color="#5FA8D3" stop-opacity=".9"/></radialGradient></defs>`;
+  if(k==='beam'||o.beam) s+=`<path d="M${cx-14} ${cy+8} L${cx-40} ${cy+62} L${cx+40} ${cy+62} L${cx+14} ${cy+8}Z" fill="#FFF6B0" opacity=".45" class="rv-blink"/>`;
+  if(k==='saucer'||k==='beam'||k==='mini'){ const W=k==='mini'?44:62, H=k==='mini'?9:12;
+    s+=dome(k==='mini'?24:28,k==='mini'?26:28,cy-H*.45);
+    s+=`<ellipse cx="${cx}" cy="${cy}" rx="${W}" ry="${H}" fill="url(#${g})"/><ellipse cx="${cx}" cy="${cy-H*.35}" rx="${W*.86}" ry="${H*.45}" fill="${lt}" opacity=".55"/>`;
+    s+=`<ellipse cx="${cx}" cy="${cy+H*.7}" rx="${W*.42}" ry="${H*.5}" fill="${dk}"/>`+rvCirc(cx,cy+H*.9,4,'#FFF6B0',' class="rv-blink"');
+    s+=lights(k==='mini'?6:9,W*.82,cy+1,H*.35);
+    if(k==='mini') s+=rvLine(cx-26,cy+8,cx-32,cy+18,'#9AA1AA',1.6)+rvLine(cx+26,cy+8,cx+32,cy+18,'#9AA1AA',1.6)+rvRect(cx-36,cy+17,9,2,'#6B717A',1)+rvRect(cx+27,cy+17,9,2,'#6B717A',1); }
+  else if(k==='cigar'){ const L=200, H=30; s+=`<rect x="${cx-L/2}" y="${cy-H/2}" width="${L}" height="${H}" rx="${H/2}" fill="url(#${g})"/>`+rvRect(cx-L/2+10,cy-H/2+3,L-20,4,'#FFFFFF',2,' opacity=".35"');
+    for(let i=0;i<11;i++) s+=rvCirc(cx-L/2+24+i*16,cy-2,3.6,i%3===1?'#FFE14D':'#9FDDF5',i%3===1?' class="rv-blink"':'');
+    s+=rvRect(cx-L/2+16,cy+H/2-6,L-32,3,dk,1.5)+lights(10,L*.44,cy+H/2-2,2);
+    if(R){ const wx=cx+40, wy=cy-1, id=rvId('rvuw'); s+=`<clipPath id="${id}">${rvCirc(wx,wy,9,'#000')}</clipPath>${rvCirc(wx,wy,11,'#FFFFFF',` stroke="${dk}" stroke-width="1.6"`)}${rvCirc(wx,wy,9,'#CFEAFB')}<g clip-path="url(#${id})">${R('p',wx-1,wy+12,{ pose:'head', k:.64, wave:1 })}</g>`; } }
+  else if(k==='tri'){ const P=[[cx-74,cy+14],[cx+74,cy+14],[cx,cy-30]]; s+=rvPoly(P,`url(#${g})`)+rvPoly([[cx-60,cy+10],[cx+60,cy+10],[cx,cy-22]],lt,' opacity=".3"')+rvLine(cx-74,cy+14,cx+74,cy+14,dk,2.4);
+    s+=rvCirc(cx-62,cy+12,4.4,'#FFF6B0',' class="rv-blink"')+rvCirc(cx+62,cy+12,4.4,'#FFF6B0',' class="rv-blink"')+rvCirc(cx,cy-20,4.4,'#FF7AA8',' class="rv-blink"');
+    s+=dome(16,14,cy+2); }
+  else if(k==='orb'){ s+=`<circle cx="${cx}" cy="${cy}" r="40" fill="${c}" opacity=".18"/><circle cx="${cx}" cy="${cy}" r="30" fill="url(#${g})"/>`+`<ellipse cx="${cx}" cy="${cy+2}" rx="38" ry="6" fill="none" stroke="${lt}" stroke-width="2.4"/>`+lights(8,36,cy+2,5);
+    const id=rvId('rvuo'); s+=`<clipPath id="${id}">${rvCirc(cx+4,cy-6,13,'#000')}</clipPath>${rvCirc(cx+4,cy-6,13,'#CFEAFB',' opacity=".95"')}${R?`<g clip-path="url(#${id})">${R('p',cx+3,cy+9,{ pose:'head', k:.8, wave:1 })}</g>`:''}<path d="M${cx-4} ${cy-14} q6 -5 12 -2" stroke="#FFFFFF" stroke-width="2" fill="none" opacity=".8"/>`; }
+  else if(k==='mother'){ const W=104, H=18; s+=dome(40,28,cy-H*.3);
+    s+=`<ellipse cx="${cx}" cy="${cy}" rx="${W}" ry="${H}" fill="url(#${g})"/><ellipse cx="${cx}" cy="${cy-H*.3}" rx="${W*.9}" ry="${H*.45}" fill="${lt}" opacity=".5"/>`;
+    for(let i=0;i<14;i++) s+=rvRect(cx-W*.8+i*W*.123,cy-2,6,4,'#9FDDF5',1.5);
+    s+=`<ellipse cx="${cx}" cy="${cy+H*.75}" rx="${W*.5}" ry="${H*.5}" fill="${dk}"/>`+lights(14,W*.9,cy+4,H*.45)+[-50,0,50].map(x=>rvCirc(cx+x,cy+H*.95,4,'#FFF6B0',' class="rv-blink"')).join(''); }
+  return `<g class="rv-ufo">${s}</g>`; }
 // 小さな飛行機・複葉機・飛行艇
 function rvSmallPlane(c,o,R){ const L=o.L, D=o.D, yc=o.yc||64, x0=120-L/2, x1=x0+L, top=yc-D/2, bot=yc+D/2; const g=rvId('rvsp'), fc=rvId('rvspc'); const lt=rvShade(c,1.15), dk=rvShade(c,.78); let s='';
   const boat=o.kind==='boat';
@@ -22931,6 +23124,7 @@ const C10={
  bike:[['ホワイト','#F4F3EE'],['ブラック','#34363C'],['レッド','#D8343A'],['ブルー','#2F6FC1'],['イエロー','#F2C230'],['グリーン','#3E9A5B'],['オレンジ','#F08A24'],['ピンク','#F49AB5'],['ミント','#8FD3BE'],['パープル','#8E6CCF']],
  boat:[['ホワイト','#F4F3EE'],['レッド','#D8343A'],['ブルー','#2F6FC1'],['イエロー','#F2C230'],['オレンジ','#F08A24'],['グリーン','#3E9A5B'],['ピンク','#F49AB5'],['ネイビー','#253B6E'],['ミント','#8FD3BE'],['ウッド','#B9824F']],
  ship:[['ネイビー','#253B6E'],['レッド','#B83A35'],['ブラック','#34363C'],['グリーン','#2E7D5B'],['ブルー','#2F6FC1'],['スカイブルー','#46A6E0'],['オレンジ','#F08A24'],['ピンク','#F07FA2'],['ホワイト','#EEF0F2'],['グレー','#8E98A3']],
+ ufo:[['シルバー','#C9D1DA'],['ゴールド','#E6C15A'],['ピンク','#F49AB5'],['ミント','#7FD9C4'],['ラベンダー','#B79BE8'],['スカイブルー','#7FC4EA'],['ホワイト','#F4F3EE'],['ブラック','#3A3D44'],['グリーン','#7CCB6B'],['オレンジ','#F5A04A']],
  yacht:[['ホワイト','#F4F3EE'],['ネイビー','#253B6E'],['レッド','#D8343A'],['ブルー','#2F6FC1'],['スカイブルー','#46A6E0'],['グリーン','#3E9A5B'],['イエロー','#F2C230'],['ピンク','#F49AB5'],['ブラック','#34363C'],['ウッド','#B9824F']]
 };
 // mode: drive=運転する（age 歳から。それまでは大人が運転して、Channel はとなり）／pedal=自分でこぐ／pass=乗せてもらう
@@ -22976,6 +23170,16 @@ const RV_CATS=[
   { id:'stealth', g:'軍用機', n:'ステルス戦闘機', d:'レーダーに映りにくい、角ばった形。今いちばん新しい世代の戦闘機。', mode:'pass', range:2900, kmh:1800, o:{ kind:'fighter', st:'stealth', no:'22' } },
   { id:'twinf', g:'軍用機', n:'双発の大型戦闘機', d:'エンジン2つ、尾翼も2枚。日本の空も守っている力持ちの戦闘機。', mode:'pass', range:3900, kmh:1700, o:{ kind:'fighter', st:'twin', no:'15' } },
   { id:'singlef', g:'軍用機', n:'単発の軽戦闘機', d:'エンジン1つで小回りがきく。世界中でいちばん多く飛んでいる戦闘機の形。', mode:'pass', range:3200, kmh:1500, o:{ kind:'fighter', st:'single', no:'16' } },
+  { id:'stealth1', g:'軍用機', n:'エンジン1つのステルス戦闘機', d:'角ばった形でレーダーに映りにくい。世界の多くの国で使われている新しい戦闘機。', mode:'pass', range:2200, kmh:1900, o:{ kind:'fighter', st:'stealth', no:'35' } },
+  { id:'stealthv', g:'軍用機', n:'垂直に着陸できるステルス戦闘機', d:'背中のふたを開けて、ヘリのように真下へ降りられます。小さな船からも飛べます。', mode:'pass', range:1600, kmh:1900, o:{ kind:'fighter', st:'stealth', lift:1, no:'36' } },
+  { id:'navyf', g:'軍用機', n:'空母から飛ぶ艦上戦闘機', d:'おしりのフックで、空母の短い甲板にもピタッと止まれる戦闘機。', mode:'pass', range:3300, kmh:1900, o:{ kind:'fighter', st:'twin', hook:1, no:'18' } },
+  { id:'delta', g:'軍用機', n:'カナード付きデルタ翼の戦闘機', d:'三角形の大きな翼と、前の小さな翼。くるっと素早く曲がれます。', mode:'pass', range:2900, kmh:2100, o:{ kind:'fighter', st:'single', wing:'delta', canard:1, no:'09' } },
+  { id:'vg', g:'軍用機', n:'翼の角度が変わる可変翼戦闘機', d:'速く飛ぶ時は翼をうしろにたたみ、ゆっくり飛ぶ時は広げます。', mode:'pass', range:2900, kmh:2400, o:{ kind:'fighter', st:'twin', wing:'vg', hook:1, no:'14' } },
+  { id:'heavyf', g:'軍用機', n:'長い尾の大型双発戦闘機', d:'大きな体で遠くまで飛べる、力強い戦闘機。空中で宙返りのような技も。', mode:'pass', range:3500, kmh:2500, o:{ kind:'fighter', st:'twin', sting:1, L:206, no:'27' } },
+  { id:'seaf', g:'軍用機', n:'青い迷彩の支援戦闘機', d:'海の色にとけこむ青い迷彩。日本のまわりの海と空を守ります。', mode:'pass', range:2800, kmh:2000, o:{ kind:'fighter', st:'single', camo:2, no:'02' } },
+  { id:'attack', g:'軍用機', n:'まっすぐな翼の攻撃機', d:'エンジンが背中に2つ。低くゆっくり飛んで、地上の仲間を守ります。', mode:'pass', range:2500, kmh:700, o:{ kind:'fighter', st:'single', wing:'straight', pods:1, twinT:1, camo:1, no:'10' } },
+  { id:'vetf', g:'軍用機', n:'長く活躍したベテラン戦闘機', d:'迷彩をまとった双発の戦闘機。50年以上も世界の空を飛んできた形。', mode:'pass', range:2600, kmh:2300, o:{ kind:'fighter', st:'twin', one:1, camo:1, no:'04' } },
+  { id:'fwdf', g:'軍用機', n:'前進翼の実験戦闘機', d:'翼の先が前を向いている、めずらしい形の実験機。ゆっくりでもよく曲がれます。', mode:'pass', range:2400, kmh:2000, o:{ kind:'fighter', st:'twin', one:1, wing:'fwd', canard:1, no:'47' } },
   { id:'acro', g:'軍用機', n:'アクロバット飛行の練習機', d:'白いスモークで空に絵をかく、航空ショーの人気者。', mode:'pass', range:1600, kmh:800, o:{ kind:'fighter', st:'acro', L:170, no:'04' } },
   { id:'cargo', g:'軍用機', n:'大型プロペラ輸送機', d:'プロペラ4つ。荷物や車も積めて、短い滑走路にも降りられます。', mode:'pass', range:3800, kmh:550, o:{ L:206, D:30, kind:'jet', high:1, eng:'prop', four:1, mil:1 } },
   { id:'tilt', g:'軍用機', n:'ティルトローター機', d:'プロペラを上に向けるとヘリのように浮かび、前に向けると飛行機のように速く飛べます。', mode:'pass', range:1600, kmh:450, o:{ kind:'tilt' } } ] },
@@ -23036,15 +23240,75 @@ const RV_CATS=[
   { id:'foil', n:'水中翼船', d:'水の中の翼で船体をうかせて、速く走ります。', mode:'pass', o:{ kind:'foil' } },
   { id:'tug', n:'タグボート', d:'小さくて力持ち。大きな船をおして港へ。', mode:'pass', o:{ kind:'tug' } },
   { id:'subtour', n:'観光潜水艦', d:'まるい窓から、海の中の魚やサンゴを見られる潜水艦。', mode:'pass', f:rvSub, o:{ kind:'tour' } },
-  { id:'dd', n:'護衛艦', d:'レーダーと大砲をそなえ、日本のまわりの海を守る灰色の船。', mode:'pass', f:rvNavy, o:{ kind:'dd' } },
-  { id:'cv', n:'空母（航空母艦）', d:'広い甲板から飛行機が飛び立てる、海の上の空港のような大きな船。', mode:'pass', f:rvNavy, o:{ kind:'cv' } },
-  { id:'sub', n:'大型潜水艦', d:'深い海にもぐって長く進める、大きな潜水艦。浮かんでいる時は上に立てます。', mode:'pass', f:rvSub, o:{ kind:'big' } } ] },
+  { id:'dd', g:'護衛艦・軍艦', n:'護衛艦', d:'レーダーと大砲をそなえ、日本のまわりの海を守る灰色の船。', mode:'pass', f:rvNavy, o:{ kind:'dd' } },
+  { id:'aegis', g:'護衛艦・軍艦', n:'イージス護衛艦', d:'艦橋のまわりに平たいレーダー板。遠くの空まで見はれる護衛艦。', mode:'pass', f:rvWar, o:{ kind:'aegis', no:'173' } },
+  { id:'ffm', g:'護衛艦・軍艦', n:'新しい小型の多機能護衛艦', d:'すっきりした塔のようなマスト。少ない人数で動かせる新しい形。', mode:'pass', f:rvWar, o:{ kind:'compact', no:'1' } },
+  { id:'sdd', g:'護衛艦・軍艦', n:'角ばったステルス艦', d:'でこぼこを減らした角ばった形で、レーダーに映りにくい軍艦。', mode:'pass', f:rvWar, o:{ kind:'stealthdd', no:'1000', fb:12 } },
+  { id:'cg', g:'護衛艦・軍艦', n:'大型の巡洋艦', d:'前とうしろに大砲。たくさんのミサイルを積んだ大きな軍艦。', mode:'pass', f:rvWar, o:{ kind:'cruiser', x0:16, x1:210, no:'52' } },
+  { id:'pg', g:'護衛艦・軍艦', n:'小さくて速いミサイル艇', d:'小さな船体で、海の上をとても速く走ります。', mode:'pass', f:rvWar, o:{ kind:'missile', x0:56, x1:190, fb:10, deep:12, no:'821' } },
+  { id:'msc', g:'護衛艦・軍艦', n:'掃海艦', d:'海にしずんだ機雷を見つけて、取りのぞく船。', mode:'pass', f:rvWar, o:{ kind:'mine', x0:30, x1:196, no:'304' } },
+  { id:'aoe', g:'護衛艦・軍艦', n:'補給艦', d:'燃料や水、食料を、海の上でほかの船に渡します。', mode:'pass', f:rvWar, o:{ kind:'supply', x0:20, x1:210, fb:14, no:'425' } },
+  { id:'bb', g:'護衛艦・軍艦', n:'むかしの戦艦', d:'大きな大砲がずらり。80年ほど前の海で活躍した大きな軍艦の形。', mode:'pass', f:rvWar, o:{ kind:'battle', x0:16, x1:212, fb:14, deep:20 } },
+  { id:'agb', g:'護衛艦・軍艦', n:'南極へ行く砕氷艦', d:'オレンジ色の船体で厚い氷をわって進み、南極へ人や荷物を運びます。', mode:'pass', f:rvWar, o:{ kind:'ice', no:'5003', boot:'#C8283A' } },
+  { id:'pl', g:'護衛艦・軍艦', n:'海を見回る巡視船', d:'白い船体に青いライン。海の安全を守るために見回ります。', mode:'pass', f:rvWar, o:{ kind:'patrol', stripe:'#2F6FC1', sup:'#F4F6F8', sup2:'#DCE2E8' } },
+  { id:'lst', g:'護衛艦・軍艦', n:'輸送艦', d:'広い甲板に車や荷物を積んで、島へ運びます。災害の時も助けに行きます。', mode:'pass', f:rvWar, o:{ kind:'transport', x0:18, x1:210, no:'4001', px:120 } },
+  { id:'aos', g:'護衛艦・軍艦', n:'双胴の海洋観測艦', d:'2つの船体でゆれにくい。海の中の音を聞いて、海を調べます。', mode:'pass', f:rvWar, o:{ kind:'survey', x0:40, x1:196, fb:20, no:'5201' } },
+  { id:'tv', g:'護衛艦・軍艦', n:'練習艦', d:'船の仕事を学ぶ人たちが乗って、世界の港をめぐる白い船。', mode:'pass', f:rvWar, o:{ kind:'training', no:'3508', sup:'#F4F6F8', sup2:'#DCE2E8' } },
+  { id:'cv', g:'空母', n:'空母（航空母艦）', d:'広い甲板から飛行機が飛び立てる、海の上の空港のような大きな船。', mode:'pass', f:rvNavy, o:{ kind:'cv' } },
+  { id:'cvn', g:'空母', n:'原子力の超大型空母', d:'何か月も港に寄らずに走れる、世界でいちばん大きな軍艦の形。', mode:'pass', f:rvCarrier, o:{ angled:1, x0:12, x1:212, da:2, db:234, islands:[[164,22,28]], air:['j','j','j','j'], ax:[24,58,92,126], no:'78', px:150 } },
+  { id:'cvski', g:'空母', n:'スキージャンプの空母', d:'先がスキーのジャンプ台のように反り上がっていて、短い距離で飛び立てます。', mode:'pass', f:rvCarrier, o:{ ski:1, islands:[[122,24,26]], air:['j','j','j'], ax:[26,62,166], no:'R08', px:110 } },
+  { id:'cvtwin', g:'空母', n:'艦橋が2つの空母', d:'前とうしろに2つの艦橋。前で船を動かし、うしろで飛行機を見守ります。', mode:'pass', f:rvCarrier, o:{ ski:1, islands:[[150,20,24],[96,18,22]], air:['j','j','h'], ax:[24,58,176], no:'08', px:130 } },
+  { id:'ddh', g:'空母', n:'ヘリコプター護衛艦（全通甲板）', d:'船の前からうしろまで続く平らな甲板に、ヘリコプターがたくさん降りられます。', mode:'pass', f:rvCarrier, o:{ islands:[[132,34,24]], air:['h','h','h'], ax:[30,72,180], no:'183', px:118 } },
+  { id:'lhd', g:'空母', n:'強襲揚陸艦', d:'うしろのドックから小さな船も出せる、ヘリや飛行機を積んだ大きな船。', mode:'pass', f:rvCarrier, o:{ well:1, islands:[[140,28,26]], air:['h','j','h'], ax:[28,66,180], no:'1', px:126 } },
+  { id:'cvl', g:'空母', n:'小さな軽空母', d:'ふつうの空母よりひと回り小さく、少ない人数で動かせます。', mode:'pass', f:rvCarrier, o:{ x0:44, x1:190, da:36, db:204, deep:18, fb:18, islands:[[146,20,22]], air:['j','j'], ax:[48,84], no:'11', px:132 } },
+  { id:'cvold', g:'空母', n:'むかしの空母', d:'木の甲板に、プロペラの飛行機。80年ほど前の海で使われた形。', mode:'pass', f:rvCarrier, o:{ wood:1, islands:[[150,18,22]], air:['p','p','p','p'], ax:[24,56,88,182], px:136 } },
+  { id:'cvd', g:'空母', n:'ドローン空母', d:'人が乗らない飛行機（ドローン）をたくさん積んだ、新しい形の空母。', mode:'pass', f:rvCarrier, o:{ ski:1, islands:[[144,24,24]], air:['d','d','d','d'], ax:[24,52,80,108], no:'03', px:130 } },
+  { id:'cvcat', g:'空母', n:'カタパルト付きの中型空母', d:'甲板の機械（カタパルト）で、飛行機を勢いよく空へ送り出します。', mode:'pass', f:rvCarrier, o:{ angled:1, x0:24, x1:204, islands:[[148,22,24]], air:['j','j','j'], ax:[32,66,180], no:'91', px:132 } },
+  { id:'avp', g:'空母', n:'水上機母艦', d:'クレーンで水上飛行機を海から持ち上げる、むかしの船。', mode:'pass', f:rvCarrier, o:{ wood:1, crane:1, islands:[[100,22,24]], air:['p','p','p'], ax:[30,150,182], px:90 } },
+  { id:'lhdt', g:'空母', n:'ティルトローター機を積んだ揚陸艦', d:'プロペラが上を向く飛行機とヘリを積んで、島の人を助けに行きます。', mode:'pass', f:rvCarrier, o:{ well:1, islands:[[134,26,26]], air:['t','t','h'], ax:[30,70,176], no:'6', px:118 } },
+  { id:'sub', g:'潜水艦', n:'大型潜水艦', d:'深い海にもぐって長く進める、大きな潜水艦。浮かんでいる時は上に立てます。', mode:'pass', f:rvSub, o:{ kind:'big' } },
+  { id:'subx', g:'潜水艦', n:'X字のかじの潜水艦', d:'うしろのかじがX字。日本のまわりの海を静かに守る潜水艦。', mode:'pass', f:rvSubX, o:{ xtail:1, sailfin:1, sx:.6, no:'513' } },
+  { id:'subtear', g:'潜水艦', n:'涙のしずく形の潜水艦', d:'水の抵抗が少ない、まるいしずくのような形。', mode:'pass', f:rvSubX, o:{ shape:'tear', L:160, H:30, sx:.58, sh:20, no:'569' } },
+  { id:'subssbn', g:'潜水艦', n:'背中にハッチが並ぶ大型潜水艦', d:'背中にたくさんのハッチがある、とても長い潜水艦。', mode:'pass', f:rvSubX, o:{ L:206, H:24, sx:.68, sh:20, hatch:9, hatchFwd:1, pump:1, no:'730' } },
+  { id:'subwide', g:'潜水艦', n:'世界一大きな形の潜水艦', d:'太くて大きな船体。氷をやぶって浮かび上がることもできます。', mode:'pass', f:rvSubX, o:{ L:200, H:34, sx:.38, sh:20, sw:30, hump:1, no:'941' } },
+  { id:'subrescue', g:'潜水艦', n:'救難艇を背負った潜水艦', d:'背中に小さな救助艇。海の中で困っている潜水艦を助けに行きます。', mode:'pass', f:rvSubX, o:{ dsrv:1, sx:.62, sailfin:1, no:'404' } },
+  { id:'subold', g:'潜水艦', n:'むかしの潜水艦', d:'甲板に大砲がある、80年ほど前の形の潜水艦。', mode:'pass', f:rvSubX, o:{ shape:'old', H:22, sx:.48, sh:16, sw:26, gun:1, no:'I-1' } },
+  { id:'subaip', g:'潜水艦', n:'空気を使わずに長くもぐれる潜水艦', d:'特別なエンジンで、何週間も海の上に出ずに静かに進めます。', mode:'pass', f:rvSubX, o:{ xtail:1, L:176, H:26, sx:.46, sh:18, sw:28, bowfin:1, no:'504' } },
+  { id:'subdeep', g:'潜水艦', n:'深海を調べる探査艇', d:'白とオレンジの小さな船体。とても深い海の底まで行って、ロボットの手で調べます。', mode:'pass', f:rvDeepSub, o:{ kind:'deep' } },
+  { id:'submini', g:'潜水艦', n:'2人乗りの小型潜水艇', d:'ガラスのドームから海の中がよく見える、小さな潜水艇。', mode:'pass', f:rvDeepSub, o:{ kind:'mini' } } ] },
  { id:'yacht', e:'⛵', n:'ヨット', where:'water', cols:C10.yacht, draw:rvYacht, types:[
   { id:'dinghy', n:'ディンギー', d:'1〜2人乗りの小さなヨット。風を読んで走ります。', mode:'drive', age:10, o:{ kind:'dinghy' } },
   { id:'cruiser', n:'クルーザーヨット', d:'船室付き。泊まりながら海を旅できます。', mode:'drive', age:18, o:{ kind:'cruiser' } },
   { id:'cat', n:'カタマラン', d:'2つの船体をつないだ、ゆれにくいヨット。', mode:'pass', o:{ kind:'cat' } },
   { id:'ketch', n:'2本マストのヨット（ケッチ）', d:'マストが2本の、大きな帆走ヨット。', mode:'pass', o:{ kind:'ketch' } },
-  { id:'motor', n:'モーターヨット', d:'エンジンで走る、大きくてごうかなヨット。', mode:'pass', o:{ kind:'motor' } } ] }
+  { id:'motor', n:'モーターヨット', d:'エンジンで走る、大きくてごうかなヨット。', mode:'pass', o:{ kind:'motor' } } ] },
+ { id:'ufo', e:'🛸', n:'UFO', where:'sky', cols:C10.ufo, draw:rvUfo, fly:1, paid:1, types:[
+  { id:'saucer', n:'円ばんのUFO', d:'まるい円ばんに、光る窓。いちばんよく知られているUFOの形。', mode:'auto', range:40000, kmh:20000, o:{ kind:'saucer' } },
+  { id:'mini', n:'2人乗りの小さなUFO', d:'ガラスのドームから空が見える、ちょっと散歩用のUFO。', mode:'auto', range:40000, kmh:12000, o:{ kind:'mini' } },
+  { id:'beam', n:'光のビームのUFO', d:'下から光のビームを出して、ふわっと乗り降りできます。', mode:'auto', range:40000, kmh:20000, o:{ kind:'beam' } },
+  { id:'cigar', n:'葉巻形のUFO', d:'細長い船体に、窓がずらり。大勢で旅ができます。', mode:'auto', range:40000, kmh:25000, o:{ kind:'cigar' } },
+  { id:'tri', n:'三角形のUFO', d:'3つの角に光。音もなくすべるように飛びます。', mode:'auto', range:40000, kmh:30000, o:{ kind:'tri' } },
+  { id:'orb', n:'光の玉のUFO', d:'光につつまれた、まんまるの乗り物。', mode:'auto', range:40000, kmh:30000, o:{ kind:'orb' } },
+  { id:'mother', n:'大きな母船', d:'空に浮かぶ、街のように大きなUFO。', mode:'auto', range:40000, kmh:15000, o:{ kind:'mother' } },
+  { id:'giant', n:'宇宙人の大きな大きな母船', d:'空をおおうほど大きな母船。小さなUFOが出たり入ったりしています。', mode:'auto', range:40000, kmh:15000, f:rvSpace, o:{ kind:'giant' } },
+  { id:'sp_twin', n:'双胴の宇宙戦艦', d:'2つの船体を橋でつないだ、とても安定した宇宙戦艦。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'twin' } },
+  { id:'sp_arrow', n:'矢じり形の高速宇宙戦艦', d:'矢じりのような形で、星から星へいちばん速く飛べます。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'arrow' } },
+  { id:'sp_scarrier', n:'宇宙空母', d:'背中の長い甲板から、小さな宇宙船が次々に飛び立ちます。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'scarrier' } },
+  { id:'sp_whale', n:'クジラ形の宇宙船', d:'星の海をゆったり泳ぐ、クジラのような形。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'whale' } },
+  { id:'sp_dragonfly', n:'トンボ形の宇宙船', d:'4枚のすきとおった羽で、ふわりと飛びます。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'dragonfly' } },
+  { id:'sp_crystal', n:'水晶の宇宙船', d:'光にあたるとキラキラかがやく、水晶のような船。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'crystal' } },
+  { id:'sp_ring', n:'リング付きの宇宙船', d:'まわりの大きな輪を回して、船の中に重さを作ります。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'ring' } },
+  { id:'sp_needle', n:'長い針の探査船', d:'細く長い体で、遠い星まで調べに行く船。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'needle' } },
+  { id:'sp_heart', n:'ハートの母船', d:'大きなハートの形。やさしい光で人を乗せます。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'heart' } },
+  { id:'sp_star', n:'星形の母船', d:'5つのとがった先が光る、星の形の母船。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'star' } },
+  { id:'sp_saturn', n:'輪のある星の母船', d:'土星のような輪をまとった、まるい母船。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'saturn' } },
+  { id:'sp_cube', n:'四角い箱の母船', d:'窓がチェック模様に光る、立方体の母船。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'cube' } },
+  { id:'sp_pyramid', n:'ピラミッドの母船', d:'空にうかぶ大きなピラミッド。てっぺんが光ります。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'pyramid' } },
+  { id:'sp_jelly', n:'クラゲの母船', d:'長い光の足をゆらして、空をただよう母船。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'jelly' } },
+  { id:'sp_castle', n:'空飛ぶお城の母船', d:'島ごとうかぶお城。塔の窓に明かりがともります。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'castle' } },
+  { id:'sp_shell', n:'巻き貝の母船', d:'うずまきの形をした、大きな貝のような母船。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'shell' } },
+  { id:'sp_flower', n:'お花の母船', d:'花びらを広げた、花の形の母船。', mode:'auto', range:40000, kmh:30000, f:rvSpace2, o:{ kind:'flower' } },
+  { id:'spacebs', n:'宇宙戦艦（LIFE BOOK オリジナル）', d:'星の海をこえて飛ぶ、ハートのしるしの大きな宇宙戦艦。', mode:'auto', range:40000, kmh:30000, f:rvSpace, o:{ kind:'ship' } } ] }
 ];
 const rvCat=id=>RV_CATS.find(c=>c.id===id);
 const rvType=(cid,tid)=>{ const c=rvCat(cid); return c&&c.types.find(t=>t.id===tid); };
@@ -23059,7 +23323,7 @@ function rvSet(k,v){ try{ if(typeof store!=='undefined'&&store.set) store.set(k,
 function rvRides(){ const a=rvGet(K_RIDES,[]); return Array.isArray(a)?a.filter(r=>r&&rvType(r.cat,r.type)):[]; }
 // 1週間たった乗り物は、自動で返す
 function rvSweep(){ const now=Date.now(), a=rvRides(), keep=a.filter(r=>r.end>now), gone=a.filter(r=>r.end<=now); if(!gone.length) return [];
-  rvSet(K_RIDES,keep); if(!keep.some(r=>r.cat==='plane')) rvSet(K_LOC,null); return gone; }
+  rvSet(K_RIDES,keep); if(!keep.some(r=>(r.cat==='plane'||r.cat==='ufo'))) rvSet(K_LOC,null); return gone; }
 const rvLeft=r=>{ const ms=Math.max(0,r.end-Date.now()); const d=Math.floor(ms/86400000), h=Math.floor(ms%86400000/3600000), m=Math.floor(ms%3600000/60000); return d?`あと${d}日${h?h+'時間':''}`:h?`あと${h}時間${m}分`:`あと${m}分`; };
 const rvToday=()=>{ const d=new Date(); return `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`; };
 function rvToast(t){ const d=document.createElement('div'); d.className='rv-toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2600); }
@@ -23146,8 +23410,8 @@ const RV_FOODC={ sapporo:[['🍜','みそラーメン'],['🦀','カニ料理']]
   paris:[['🥐','クロワッサン'],['🥩','ビストロ料理']], rome:[['🍝','カルボナーラ'],['🍨','ジェラート']], venice:[['🦑','イカスミのパスタ'],['🍷','バーカロの小皿料理']], florence:[['🥩','フィレンツェ風ステーキ'],['🍨','ジェラート']], milan:[['🍚','ミラノ風リゾット'],['🍖','カツレツ']], barcelona:[['🥘','パエリア'],['🍢','タパス']], madrid:[['🍩','チュロス'],['🥘','コシード']], london:[['🐟','フィッシュ＆チップス'],['🫖','アフタヌーンティー']], berlin:[['🌭','カリーヴルスト'],['🥨','プレッツェル']], munich:[['🌭','白ソーセージ'],['🥨','プレッツェル']], vienna:[['🍰','ザッハトルテ'],['🍖','シュニッツェル']], brussels:[['🧇','ワッフル'],['🍟','フリッツ']],
   ny:[['🍕','ニューヨークピザ'],['🥯','ベーグル']], honolulu:[['🍚','ロコモコ'],['🐟','ポケ丼']], seoul:[['🍖','焼肉（サムギョプサル）'],['🍲','スンドゥブ']], taipei:[['🥟','小籠包'],['🍧','マンゴーかき氷']], bangkok:[['🍜','トムヤムクン'],['🍝','パッタイ']], hanoi:[['🍜','フォー'],['🥖','バインミー']], singapore:[['🍗','チキンライス'],['🦀','チリクラブ']], hongkong:[['🥟','飲茶'],['🍮','エッグタルト']], delhi:[['🍛','カレーとナン'],['🫖','チャイ']], mexicocity:[['🌮','タコス'],['🫔','タマレス']], istanbul:[['🥙','ドネルケバブ'],['🍬','ロクム']] };
 function rvAreaLL(la,lo){ if(lo>-30&&lo<60&&la<36&&la>-36&&!(lo>34&&la>12)) return 'af'; if(lo>=-30&&lo<45&&la>=36) return 'eu'; if(lo>=34&&lo<63&&la>12&&la<42) return 'me'; if(lo<-30) return la>15&&!(lo>-90&&la<24)?'na':'la'; if(lo>110&&la<-8) return 'oc'; if(lo>160||lo<-150) return 'oc'; return 'asia'; }
-function rvArea(){ const loc=rvGet(K_LOC,null); if(loc&&loc.city&&rvRides().some(r=>r.cat==='plane')) return RV_AREA_OF[loc.city]||'asia'; const me=rvMe(); try{ if(!me||!me.P) return 'jp'; if(me.P.countryId==='jp') return 'jp'; const h=rvHomeAirport(me.P); return h?rvAreaLL(h.la,h.lo):'asia'; }catch(e){ return 'jp'; } }
-function rvCityId(){ const loc=rvGet(K_LOC,null); return loc&&loc.city&&rvRides().some(r=>r.cat==='plane')?loc.city:null; }
+function rvArea(){ const loc=rvGet(K_LOC,null); if(loc&&loc.city&&rvRides().some(r=>(r.cat==='plane'||r.cat==='ufo'))) return RV_AREA_OF[loc.city]||'asia'; const me=rvMe(); try{ if(!me||!me.P) return 'jp'; if(me.P.countryId==='jp') return 'jp'; const h=rvHomeAirport(me.P); return h?rvAreaLL(h.la,h.lo):'asia'; }catch(e){ return 'jp'; } }
+function rvCityId(){ const loc=rvGet(K_LOC,null); return loc&&loc.city&&rvRides().some(r=>(r.cat==='plane'||r.cat==='ufo'))?loc.city:null; }
 function rvFoods(){ const c=rvCityId(); return (RV_FOODC[c]||[]).concat(RV_FOODA[rvArea()]||RV_FOODA.jp).slice(0,8); }
 // 旅先の写真（ホテル・食事）。p.kind / p.name / p.e
 function rvTravelSVG(p){ const tod=p.tod||'day', night=tod==='night'; const look=p.look||RV_GUEST, age=p.age??30, ad=rvAdult(look); const kid=age<12; let s='';
@@ -23184,7 +23448,7 @@ function rvTravelSVG(p){ const tod=p.tod||'day', night=tod==='night'; const look
   return s; }
 // 写真1枚。p:{ cat,type,col,bg,tod,look,age,place,still }
 function rvPhotoSVG(p){ const C=rvCat(p.cat), T=rvType(p.cat,p.type); if(!C||!T) return '';
-  const look=p.look||RV_GUEST, age=p.age??30; const who=rvRiders(T,look,age); const extra=(p.cat==='bike'&&age<6&&(T.id==='city'||T.id==='ebike'))?{ cseat:1 }:{};
+  const look=p.look||RV_GUEST, age=p.age??30; const who=p.noRider?{ R:null }:rvRiders(T,look,age); const extra=(p.cat==='bike'&&age<6&&(T.id==='city'||T.id==='ebike'))?{ cseat:1 }:{};
   const col=(C.cols[p.col]||C.cols[0])[1]; const f=T.f||C.draw; let v=''; try{ v=f(col,Object.assign({},T.o,extra,(p.scene==='takeoff'||p.scene==='landing')?{ gearDown:1, gear:1 }:{}),who.R); }catch(e){ v=''; }
   const sc=p.scene, hs=p.hs===0?'':(sc==='hotel'||sc==='meal'?rvHS(sc==='meal'?300:300,sc==='meal'?214:222,sc==='meal'?92:96,{}):rvHS(46,104,70,{ aura:true }));
   const cls=`rv-photo${p.still?' rv-still':''}`;
@@ -23198,6 +23462,63 @@ function rvCardSVG(cid,tid,ci){ const C=rvCat(cid); const vb=C.where==='sky'?'0 
   return `<svg class="rv-card-art" viewBox="${vb}" aria-hidden="true">${C.where==='water'?rvRect(0,W,240,40,'#BFE4F7'):C.where==='land'?rvRect(0,G,240,10,'#E3E6EA'):''}${rvVehicle(cid,tid,ci,null)}</svg>`; }
 
 // ===== 空の旅 =====
+// ===== 飛んでいるあいだ（地図＋いまどこ？／窓から／横から） =====
+const RV_LANDPT=[['日本',36,138],['韓国',36,128],['中国',35,105],['中国',28,115],['中国',42,118],['モンゴル',46,104],['ロシア',60,90],['ロシア',56,40],['ロシア',64,130],['ロシア',62,60],['カザフスタン',48,67],['インド',22,79],['パキスタン',30,70],['ネパール',28,84],['ミャンマー',20,96],['タイ',15,101],['ベトナム',16,107],['マレーシア',4,102],['インドネシア',-2,118],['フィリピン',12,122],['台湾',24,121],['オーストラリア',-25,134],['ニュージーランド',-41,173],['イラン',32,53],['サウジアラビア',24,45],['トルコ',39,35],['エジプト',26,30],['ギリシャ',39,22],['イタリア',43,12],['フランス',46,2],['スペイン',40,-4],['ドイツ',51,10],['ポーランド',52,19],['ウクライナ',49,32],['スウェーデン',62,15],['ノルウェー',64,12],['フィンランド',64,26],['イギリス',54,-2],['アイスランド',65,-18],['グリーンランド',72,-40],['カナダ',58,-100],['カナダ',50,-75],['アラスカ',64,-152],['アメリカ',39,-98],['アメリカ',37,-118],['アメリカ',40,-80],['メキシコ',23,-102],['ブラジル',-10,-52],['アルゼンチン',-35,-65],['ペルー',-10,-75],['コロンビア',4,-73],['ナイジェリア',9,8],['ケニア',0,38],['南アフリカ',-29,24],['モロッコ',32,-6],['アルジェリア',28,2],['スーダン',15,30],['コンゴ',-2,23],['マダガスカル',-19,47],['ウズベキスタン',41,64],['アフガニスタン',33,66],['チリ',-30,-71],['ボリビア',-17,-64],['エチオピア',9,39],['リビア',27,17],['チャド',15,19],['マリ',17,-4]];
+const RV_SEAPT=[['太平洋',20,-150],['太平洋',30,170],['太平洋',0,-120],['太平洋',-20,-140],['太平洋',5,160],['北太平洋',45,170],['日本海',40,135],['東シナ海',29,125],['南シナ海',14,114],['フィリピン海',20,130],['インド洋',-10,80],['インド洋',-30,70],['アラビア海',15,65],['ベンガル湾',15,88],['地中海',35,18],['黒海',43,34],['カスピ海',42,51],['大西洋',30,-40],['大西洋',0,-25],['大西洋',-25,-15],['北大西洋',50,-30],['カリブ海',15,-75],['メキシコ湾',25,-90],['北海',56,3],['バルト海',58,20],['北極海',80,0],['北極海',78,150],['オホーツク海',53,150],['ベーリング海',58,-178],['タスマン海',-38,160],['紅海',20,38],['ペルシャ湾',27,51],['南極の海',-60,0],['南極の海',-60,120]];
+function rvLandAt(la,lo){ try{ if(typeof GEO==='undefined') return null; const m=(typeof geoMask==='function')?geoMask():geoUnRLE(GEO.mask); lo=((lo+540)%360)-180; const r=Math.floor((GEO.LAT0-la)/GEO.S), c=Math.floor((lo+180)/GEO.S); if(r<0||r>=GEO.H) return false; return m[r*GEO.W+c]==='1'; }catch(e){ return null; } }
+function rvNearName(L,la,lo){ let b=null, bd=1e9; L.forEach(p=>{ let dl=Math.abs(lo-p[2]); if(dl>180) dl=360-dl; const d=Math.hypot(la-p[1],dl*Math.cos(la*Math.PI/180)); if(d<bd){ bd=d; b=p[0]; } }); return b; }
+function rvWhereNow(la,lo){ const land=rvLandAt(la,lo); return land===false?{ sea:1, n:rvNearName(RV_SEAPT,la,lo) }:{ sea:0, n:rvNearName(RV_LANDPT,la,lo) }; }
+function rvAltOf(C,T){ const o=T.o||{}; if(C.id==='ufo') return String(T.id).indexOf('sp_')===0||T.id==='spacebs'||T.id==='giant'?400000:30000; if(T.mode==='auto') return 300; if(o.kind==='fighter') return 12000; if(o.kind==='small'||o.kind==='bi') return 3000; if(o.kind==='tilt') return 6000; if(o.eng==='prop') return 7000; return 10500; }
+function rvInFlight(box,ctx){ const { r, T, C, from, to, km, me, onArrive }=ctx; const hours=km/T.kmh+.4; const dur=Math.round(Math.min(40,12+hours*2.2)); const mp=rvMap(from,to);
+  const tod0=rvTod(ctx.fromTz), tod1=rvTod(ctx.tz); const night=hours>=5; let view='map', p=0, stage=-1, ev=[], done=false; const t0=Date.now();
+  const alt0=rvAltOf(C,T), space=alt0>=400000;
+  let lo1=to.lo; if(lo1-from.lo>180) lo1-=360; if(from.lo-lo1>180) lo1+=360;
+  const posAt=q=>({ la:from.la+(to.la-from.la)*q, lo:from.lo+(lo1-from.lo)*q });
+  const stageOf=q=>q<.13?0:q>.87?3:(night&&q>.4&&q<.7)?2:1;
+  const todOf=s=>s===0?tod0:s===3?tod1:s===2?'night':(tod0==='night'&&tod1==='night'?'night':'day');
+  const fmtAlt=a=>a>=100000?`宇宙 ${Math.round(a/1000).toLocaleString()}km`:`${Math.round(a/100)*100}m`.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  const tempOf=a=>a>=100000?'−270度（宇宙）':`${Math.round(Math.max(-56,15-6.5*a/1000))}度`;
+  box.innerHTML=`<button class="rvx-x" type="button" aria-label="とじる">✕</button><h2>${C.e} ${esc2(from.name)} → ${esc2(to.name)}</h2>
+   <div class="rvx-vt" role="tablist">${[['map','🗺️ 地図'],['win','🪟 窓から'],['side','🛫 横から']].map(([k,n])=>`<button class="rvx-tab" type="button" data-view="${k}" aria-selected="${k==='map'}">${n}</button>`).join('')}</div>
+   <div class="rvx-fv"></div>
+   <div class="rvx-now"></div>
+   <div class="rvx-pg"><span>🛫${esc2(from.code)}</span><div class="rvx-bar"><i></i><b>${C.e}</b></div><span>${esc2(to.code)}🛬</span></div>
+   <p class="rvx-p rvx-left" style="text-align:center"></p>
+   <div class="rvh-btns rvx-tko"><button class="rv-btn rv-sub" type="button" data-shot="takeoff">📸 離陸の写真をとる</button><button class="rv-btn rv-sub" type="button" data-skip="1">⏩ すぐ着く</button></div><div class="rvx-arr"></div>`;
+  const fv=box.querySelector('.rvx-fv'), now=box.querySelector('.rvx-now'), bar=box.querySelector('.rvx-bar'), left=box.querySelector('.rvx-left');
+  const mapSVG=()=>`<svg class="rvx-mapsvg" viewBox="0 0 360 200">${mp.svg}<path class="rvx-route" d="${mp.path}" stroke="#FF8FAB" stroke-width="2.4" stroke-dasharray="6 5" fill="none"/>${rvCirc(mp.x1,mp.y1,5,'#FFFFFF',' stroke="#E0557C" stroke-width="2"')}${rvCirc(mp.x2,mp.y2,5,'#E0557C',' stroke="#FFFFFF" stroke-width="2"')}<text x="${F(mp.x1)}" y="${F(mp.y1+17)}" text-anchor="middle" font-size="11" font-weight="700" fill="#22304D">${from.code}</text><text x="${F(mp.x2)}" y="${F(mp.y2+17)}" text-anchor="middle" font-size="11" font-weight="700" fill="#22304D">${to.code}</text><g class="rvx-mk"><circle r="11" fill="#FFFFFF" stroke="#E0557C" stroke-width="2"/><text y="5" font-size="13" text-anchor="middle">${C.e}</text></g></svg>`;
+  const winSVG=(s,w)=>{ const tod=todOf(s), sk=RV_SKY[tod]||RV_SKY.day, id=rvId('rvwin'), gid=rvId('rvwg'); let sc=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${space?'#0B1030':sk[0]}"/><stop offset="1" stop-color="${space?'#1B2350':sk[1]}"/></linearGradient></defs><rect x="170" y="26" width="150" height="150" fill="url(#${gid})"/>`;
+    if(space||tod==='night') for(let i=0;i<18;i++) sc+=rvCirc(172+(i*47)%146,30+(i*29)%90,i%3?.8:1.3,'#FFFFFF',' class="rv-tw"');
+    if(space) sc+=rvCirc(250,190,70,'#3E8EDB')+`<path d="M200 150 q20 -10 40 0 t40 4" stroke="#7CCB6B" stroke-width="10" fill="none" opacity=".8"/>`;
+    else if(s===0||s===3) sc+=rvRect(170,140,150,36,'#9CC9A0')+[0,1,2,3,4,5].map(i=>rvRect(176+i*24,140-8-(i*13)%18,16,8+(i*13)%18,tod==='night'?'#3B4A6B':'#D7DEE6')).join('')+(tod==='night'?[0,1,2,3,4,5].map(i=>rvCirc(184+i*24,136,1.4,'#FFE9A8')).join(''):'');
+    else { sc+=w.sea?rvRect(170,128,150,48,tod==='night'?'#1D3557':'#4FA6DC'):rvRect(170,128,150,48,tod==='night'?'#2A3B2E':'#8DBF7A'); sc+=rvScroll(rvCloud(200,96,.7)+rvCloud(280,118,.9)+rvCloud(240,70,.5),14); }
+    if(ev.some(e=>e.k==='aurora')&&(s===2||tod==='night')) sc+=`<path d="M170 60 q30 -26 60 -6 t60 -10 t40 4" stroke="#7CFFB2" stroke-width="12" fill="none" opacity=".5" class="rv-blink"/>`;
+    let a=`<rect width="360" height="240" fill="#F3ECE4"/><rect x="0" y="196" width="360" height="44" fill="#D9CBBB"/><clipPath id="${id}"><rect x="170" y="26" width="150" height="150" rx="62"/></clipPath><g clip-path="url(#${id})">${sc}</g><rect x="170" y="26" width="150" height="150" rx="62" fill="none" stroke="#FFFFFF" stroke-width="12"/><rect x="164" y="20" width="162" height="162" rx="68" fill="none" stroke="#D9CBBB" stroke-width="2"/>`;
+    a+=`<rect x="74" y="78" width="30" height="96" rx="12" fill="#6F95C9"/><rect x="78" y="70" width="22" height="16" rx="6" fill="#FFFFFF" opacity=".85"/><rect x="74" y="150" width="70" height="22" rx="8" fill="#7FA6D9"/><rect x="132" y="138" width="12" height="20" rx="4" fill="#6F95C9"/><rect x="86" y="172" width="6" height="22" fill="#9AA6B4"/><rect x="124" y="172" width="6" height="22" fill="#9AA6B4"/>`+(ctx.hs?rvHS(108,174,104,{})+(ctx.pet?hsPetArt(ctx.pet,ctx.pet.kind==='fish'?150:116,ctx.pet.kind==='fish'?172:168,ctx.pet.kind==='dog'||ctx.pet.kind==='cat'?118:100,'hold'):''):rvPerson(102,152,me.look||RV_GUEST,{ pose:'sit', foot:[136,190], hand:[128,146] })+rvHS(44,214,92,{}));
+    a+=`<rect x="18" y="20" width="104" height="66" rx="8" fill="#22304D"/><path d="M28 70 Q70 30 112 60" stroke="#FF8FAB" stroke-width="2" stroke-dasharray="4 3" fill="none"/><text class="rvx-sbt" x="70" y="80" font-size="8" fill="#FFFFFF" text-anchor="middle"></text><text x="70" y="48" font-size="16" text-anchor="middle">${C.e}</text>`;
+    return `<svg class="rv-photo" viewBox="0 0 360 240">${a}</svg>`; };
+  const sideSVG=s=>rvPhotoSVG({ noRider:ctx.hs?1:0, cat:r.cat, type:r.type, col:r.col, bg:s===2?1:0, tod:todOf(s), look:me.look, age:me.age, scene:s===0?'takeoff':s===3?'landing':null, code:s===0?from.code:to.code });
+  const draw=()=>{ const w=rvWhereNow(posAt(p).la,posAt(p).lo); fv.innerHTML=view==='map'?mapSVG():view==='win'?winSVG(stage,w):sideSVG(stage); tick(true); };
+  const EV=[['🌈','虹が見えた！','day'],['☁️','ふわふわの雲の上を通っています','day'],['🍱','おいしい食事の時間です','any'],['✨','流れ星が見えた！','night'],['🌅','朝日がきれい！','morning']];
+  const addEv=(e,n,k)=>{ if(ev.some(x=>x.n===n)) return; ev.unshift({ e,n,k }); if(view==='win') draw(); };
+  const tick=(nodraw)=>{ const w=rvWhereNow(posAt(p).la,posAt(p).lo); const ns=stageOf(p); if(ns!==stage){ stage=ns; if(!nodraw&&view!=='map'){ draw(); return; } }
+    const pa=posAt(p); const a=p<.12?alt0*p/.12:p>.88?alt0*(1-p)/.12:alt0;
+    if(view==='map'){ const pt=fv.querySelector('.rvx-route'), mk=fv.querySelector('.rvx-mk'); if(pt&&mk){ try{ const L=pt.getTotalLength(), q=pt.getPointAtLength(L*p); mk.setAttribute('transform',`translate(${F(q.x)} ${F(q.y)})`); }catch(e){} } }
+    const sbt=fv.querySelector('.rvx-sbt'); const rest=Math.max(0,hours*(1-p)); if(sbt) sbt.textContent=`あと ${rvHM(rest)}`;
+    // 出来事
+    const prevLo=ctx._lo, prevLa=ctx._la; ctx._lo=pa.lo; ctx._la=pa.la;
+    if(prevLo!=null){ const a1=((prevLo+540)%360)-180, a2=((pa.lo+540)%360)-180; if(Math.abs(a1-a2)>180) addEv('📅','日付変更線をこえた！'); if(prevLa*pa.la<0) addEv('🌐','赤道をこえた！'); }
+    if(Math.abs(pa.la)>55&&(stage===2||todOf(stage)==='night')) addEv('🌌','オーロラが見えた！','aurora');
+    if(w.sea&&p>.2&&p<.8&&!space&&alt0<5000) addEv('🐋','海にクジラが見えた！');
+    if(space&&p>.3) addEv('🌏','まるい地球が見えた！');
+    const evIdx=Math.floor(p*6); if(!space&&p>.25&&p<.85&&evIdx%2===1){ const cand=EV.filter(x=>x[2]==='any'||x[2]===todOf(stage)); const x=cand[(km+evIdx)%cand.length]; if(x&&!(x[0]==='🍱'&&(T.o||{}).kind==='fighter')) addEv(x[0],x[1]); }
+    now.innerHTML=`<div class="rvx-nowh">📍 いまどこ？</div><p>いまは <b>${esc2(p<.04?from.name:p>.96?to.name:(space?'宇宙':w.n)+(w.sea||space?'':'')+(p<.04||p>.96?'':(space?'':'の上空')))}</b></p><p>⛰️ 高さ ${fmtAlt(a)}　🌡️ 外は ${tempOf(a)}</p><p>💨 時速 ${T.kmh.toLocaleString()}km</p>${p>=1?`<p class="rvx-ev">🛬 着きました！</p>`:ev.length?`<p class="rvx-ev">${ev[0].e} ${esc2(ev[0].n)}</p>`:''}`;
+    bar.querySelector('i').style.width=(p*100).toFixed(1)+'%'; bar.querySelector('b').style.left=(4+p*92).toFixed(1)+'%';
+    left.textContent=p>=1?'':`${km.toLocaleString()}km・${rvHM(hours)}のフライト。${ctx.hs?(ctx.pet?'Higher Self と '+esc2(ctx.pet.name):'Higher Self'):'Channel と Higher Self'} は${space?'宇宙を旅しています':'空の上'}…`; };
+  const iv=setInterval(()=>{ if(!document.body.contains(box)){ clearInterval(iv); return; } if(done) return; p=Math.min(1,(Date.now()-t0)/(dur*1000)+(ctx._skip||0)); tick(); if(p>=1){ done=true; clearInterval(iv); onArrive(); } },250);
+  box.addEventListener('click',e=>{ const vb=e.target.closest('[data-view]'); if(vb){ view=vb.dataset.view; box.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-selected',b===vb)); draw(); }
+    if(e.target.closest('[data-skip]')){ ctx._skip=1; e.target.closest('[data-skip]').remove(); } });
+  stage=stageOf(0); draw(); }
 const RV_MBC=()=>{ try{ return typeof window.machiBuraCities==='function'?window.machiBuraCities():null; }catch(e){ return null; } };
 const RV_DEST=Object.keys(RV_MBAP).map(id=>Object.assign({ id },rvApParse(RV_MBAP[id])));
 const RV_CITYN={ tokyo:'東京',miyako:'宮古島',ny:'ニューヨーク',london:'ロンドン',singapore:'シンガポール',sapporo:'札幌',tanegashima:'種子島',hokkaido:'北海道・富良野',osaka:'大阪',aichi:'愛知・名古屋',fukuoka:'福岡',okinawa:'沖縄・那覇',shiga:'滋賀',wakayama:'和歌山',miyagi:'宮城・仙台',saitama:'埼玉',chiba:'千葉',kanagawa:'神奈川・横浜',hiroshima:'広島',oita:'大分',kyoto:'京都',beijing:'北京',shanghai:'上海',guilin:'桂林',hongkong:'香港',macau:'マカオ',taipei:'台北',seoul:'ソウル',busan:'釜山',ulaanbaatar:'ウランバートル',bangkok:'バンコク',phuket:'プーケット',hanoi:'ハノイ',hochiminh:'ホーチミン',danang:'ダナン',siemreap:'シェムリアップ',luangprabang:'ルアンパバーン',yangon:'ヤンゴン',kualalumpur:'クアラルンプール',jakarta:'ジャカルタ',bali:'バリ島',manila:'マニラ',cebu:'セブ島',delhi:'デリー',mumbai:'ムンバイ',agra:'アグラ',kathmandu:'カトマンズ',colombo:'コロンボ',male:'モルディブ',thimphu:'ティンプー',dubai:'ドバイ',abudhabi:'アブダビ',doha:'ドーハ',istanbul:'イスタンブール',cappadocia:'カッパドキア',petra:'ペトラ',paris:'パリ',nice:'ニース',montstmichel:'モン・サン・ミシェル',edinburgh:'エディンバラ',dublin:'ダブリン',rome:'ローマ',venice:'ベネチア',florence:'フィレンツェ',milan:'ミラノ',barcelona:'バルセロナ',madrid:'マドリード',lisbon:'リスボン',amsterdam:'アムステルダム',brussels:'ブリュッセル',berlin:'ベルリン',munich:'ミュンヘン',vienna:'ウィーン',zurich:'チューリッヒ',zermatt:'ツェルマット',prague:'プラハ',budapest:'ブダペスト',athens:'アテネ',santorini:'サントリーニ',dubrovnik:'ドブロブニク',moscow:'モスクワ',warsaw:'ワルシャワ',stockholm:'ストックホルム',tromso:'トロムソ',copenhagen:'コペンハーゲン',helsinki:'ヘルシンキ',reykjavik:'レイキャビク',washington:'ワシントンD.C.',sanfrancisco:'サンフランシスコ',losangeles:'ロサンゼルス',lasvegas:'ラスベガス',chicago:'シカゴ',seattle:'シアトル',honolulu:'ホノルル',miami:'マイアミ',orlando:'フロリダ・ケープカナベラル',boston:'ボストン',neworleans:'ニューオーリンズ',anchorage:'アラスカ・アンカレッジ',toronto:'トロント',vancouver:'バンクーバー',montreal:'モントリオール',mexicocity:'メキシコシティ',cancun:'カンクン',havana:'ハバナ',rio:'リオデジャネイロ',saopaulo:'サンパウロ',buenosaires:'ブエノスアイレス',lima:'リマ',cusco:'クスコ',bogota:'ボゴタ',santiago:'サンティアゴ',easterisland:'イースター島',uyuni:'ウユニ',galapagos:'ガラパゴス',cairo:'カイロ',marrakech:'マラケシュ',capetown:'ケープタウン',nairobi:'ナイロビ',zanzibar:'ザンジバル',victoriafalls:'ビクトリアの滝',sydney:'シドニー',melbourne:'メルボルン',goldcoast:'ゴールドコースト',uluru:'ウルル',auckland:'オークランド',queenstown:'クイーンズタウン',fiji:'フィジー' };
@@ -23210,9 +23531,9 @@ const RV_AREA_OF=(()=>{ const m={}; const put=(a,ids)=>ids.split(' ').forEach(i=
   put('af','cairo marrakech capetown nairobi zanzibar victoriafalls'); put('oc','sydney melbourne goldcoast uluru auckland queenstown fiji'); return m; })();
 const rvHM=h=>{ const m=Math.max(5,Math.round(h*60/5)*5); const hh=Math.floor(m/60), mm=m%60; return hh?`約${hh}時間${mm?mm+'分':''}`:`約${mm}分`; };
 // いまいる空港（旅のあとは着いた空港、それ以外は家の近く）
-function rvWhere(me){ const loc=rvGet(K_LOC,null); if(loc&&loc.code&&rvRides().some(r=>r.cat==='plane')) return Object.assign({ away:true },loc); const h=me?rvHomeAirport(me.P):null; return h?Object.assign({ away:false, city:me.P.city },h):null; }
-function rvPlaceName(me){ const loc=rvGet(K_LOC,null); if(loc&&loc.cityName&&rvRides().some(r=>r.cat==='plane')) return loc.cityName; if(!me) return ''; const c=String(me.P.city||''); return (typeof cityShort==='function'?cityShort(c):c)||c; }
-function rvPlaceTz(){ const loc=rvGet(K_LOC,null); if(loc&&loc.tz&&rvRides().some(r=>r.cat==='plane')) return loc.tz; return null; }
+function rvWhere(me){ const loc=rvGet(K_LOC,null); if(loc&&loc.code&&rvRides().some(r=>(r.cat==='plane'||r.cat==='ufo'))) return Object.assign({ away:true },loc); const h=me?rvHomeAirport(me.P):null; return h?Object.assign({ away:false, city:me.P.city },h):null; }
+function rvPlaceName(me){ const loc=rvGet(K_LOC,null); if(loc&&loc.cityName&&rvRides().some(r=>(r.cat==='plane'||r.cat==='ufo'))) return loc.cityName; if(!me) return ''; const c=String(me.P.city||''); return (typeof cityShort==='function'?cityShort(c):c)||c; }
+function rvPlaceTz(){ const loc=rvGet(K_LOC,null); if(loc&&loc.tz&&rvRides().some(r=>(r.cat==='plane'||r.cat==='ufo'))) return loc.tz; return null; }
 // 地図（ブロックの世界地図の一部）
 function rvMap(a,b){ let la0=a.lo, lb=b.lo; if(lb-la0>180) lb-=360; if(la0-lb>180) lb+=360; const lo0=Math.min(la0,lb), lo1=Math.max(la0,lb), at0=Math.min(a.la,b.la), at1=Math.max(a.la,b.la);
   let span=Math.max(lo1-lo0,(at1-at0)*1.8,18)*1.35; const cx=(lo0+lo1)/2, cy=(at0+at1)/2; const W2=360, H2=200; const k=W2/span; const vx=lo=>W2/2+(lo-cx)*k, vy=la=>H2/2-(la-cy)*k*1.15;
@@ -23294,6 +23615,12 @@ const RV_CSS=`
 .rv-prop{ transform-box:fill-box; transform-origin:center; animation:rvProp .14s linear infinite; } @keyframes rvProp{ 50%{ transform:scaleY(.12) } }
 .rv-rotor{ transform-box:fill-box; transform-origin:center; animation:rvRot .22s linear infinite; } @keyframes rvRot{ 50%{ transform:scaleX(.1) } }
 .rv-trot{ transform-box:fill-box; transform-origin:center; animation:rvProp .12s linear infinite; }
+.hs-opt{ display:flex; justify-content:space-between; align-items:center; gap:8px; background:#F7F3FF; border:1px dashed #C9B6F2; border-radius:12px; padding:8px 12px; margin:8px 0; font-size:13.5px; color:#5B4A85; } .hs-gem{ flex:0 0 auto; font-size:12px; font-weight:700; color:#7A4BC2; background:#fff; border-radius:999px; padding:3px 9px; }
+.hs-prefs{ display:flex; flex-wrap:wrap; gap:6px; } .hs-prefs .rvx-tab{ min-width:64px; } .hs-alb{ display:grid; grid-template-columns:1fr 1fr; gap:8px; } .hs-alb svg{ width:100%; border-radius:10px; display:block; } .hs-alb small{ font-size:11px; color:#6B7280; }
+.rvx-vt{ display:flex; gap:6px; margin:4px 0 8px; } .rvx-vt .rvx-tab{ flex:1; }
+.rvx-fv svg{ width:100%; display:block; border-radius:14px; background:#DDF1FF; }
+.rvx-now{ background:#FFF5F8; border:1px solid #FFD3DF; border-radius:14px; padding:8px 12px; margin:8px 0 0; font-size:14px; line-height:1.6; color:#22304D; } .rvx-now p{ margin:0; } .rvx-nowh{ font-weight:800; color:#E0557C; } .rvx-ev{ font-weight:700; color:#7A4BC2; }
+.rvx-pg{ display:flex; align-items:center; gap:6px; margin:10px 0 2px; font:700 12px/1 inherit; color:#E0557C; } .rvx-bar{ position:relative; flex:1; height:8px; border-radius:4px; background:#FFE1EA; } .rvx-bar i{ position:absolute; left:0; top:0; bottom:0; border-radius:4px; background:#FF8FAB; } .rvx-bar b{ position:absolute; top:-9px; transform:translateX(-50%); font-size:16px; }
 .rv-bob{ animation:rvBob 2.6s ease-in-out infinite; } @keyframes rvBob{ 0%,100%{ transform:translateY(0) rotate(0) } 50%{ transform:translateY(-2px) rotate(-.6deg) } }
 .rv-float{ animation:rvFl 3.2s ease-in-out infinite; } @keyframes rvFl{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-5px) } }
 .rv-ride{ animation:rvRide .4s steps(2) infinite; } @keyframes rvRide{ 50%{ transform:translateY(-.6px) } }
@@ -23313,7 +23640,7 @@ let rvEl=null, rvTab='car';
 const rvQ=s=>rvEl&&rvEl.querySelector(s);
 function rvColName(r){ const C=rvCat(r.cat); return (C.cols[r.col]||C.cols[0])[0]; }
 function rvOwnHTML(){ const a=rvRides(); let h=a.map((r,i)=>{ const T=rvType(r.cat,r.type), C=rvCat(r.cat);
-  return `<div class="rvx-o">${rvCardSVG(r.cat,r.type,r.col)}<h3>${C.e} ${esc2(T.n)}</h3><p>${rvColName(r)}・${rvLeft(r)}（${new Date(r.end).getMonth()+1}月${new Date(r.end).getDate()}日まで）</p><div class="rvx-ob"><button class="rv-btn rv-sm" type="button" data-a="photo" data-i="${i}">📸 乗っている写真</button>${C.fly?`<button class="rv-btn rv-sm" type="button" data-a="fly" data-i="${i}">✈️ 空港から飛ぶ</button>`:''}<button class="rv-btn rv-sm" type="button" data-a="trav" data-i="${i}">🧳 旅を楽しむ</button><button class="rv-btn rv-sub rv-sm" type="button" data-a="ret" data-i="${i}">返す</button></div></div>`; }).join('');
+  return `<div class="rvx-o">${rvCardSVG(r.cat,r.type,r.col)}<h3>${C.e} ${esc2(T.n)}</h3><p>${rvColName(r)}・${rvLeft(r)}（${new Date(r.end).getMonth()+1}月${new Date(r.end).getDate()}日まで）</p><div class="rvx-ob"><button class="rv-btn rv-sm" type="button" data-a="photo" data-i="${i}">📸 乗っている写真</button>${C.fly?`<button class="rv-btn rv-sm" type="button" data-a="fly" data-i="${i}">${C.id==='ufo'?'🛸 好きな街へ飛ぶ':'✈️ 空港から飛ぶ'}</button>`:''}<button class="rv-btn rv-sm" type="button" data-a="trav" data-i="${i}">🧳 旅を楽しむ</button><button class="rv-btn rv-sub rv-sm" type="button" data-a="ret" data-i="${i}">返す</button></div></div>`; }).join('');
   for(let i=a.length;i<RV_MAX;i++) h+=`<div class="rvx-emp">あいています<br>下からえらんでね</div>`; return h; }
 function rvTypesHTML(){ const C=rvCat(rvTab); let g0=''; return C.types.map((T,i)=>{ let h=''; if(T.g&&T.g!==g0){ g0=T.g; h=`<p class="rvx-g">${esc2(T.g)}</p>`; } return h+`<button class="rvx-tc" type="button" data-t="${T.id}">${rvCardSVG(C.id,T.id,(i*3+3)%10)}<b>${esc2(T.n)}</b></button>`; }).join(''); }
 function rvAlbumHTML(){ const al=rvGet(K_ALB,[]).filter(x=>x&&rvType(x.cat,x.type)); if(!al.length) return '<p class="rvx-p">まだ写真がありません。借りた乗り物の「📸 乗っている写真」から撮ってみてね。</p>';
@@ -23323,9 +23650,9 @@ function rvRender(){ if(!rvEl) return; rvQ('.rvx-own').innerHTML=rvOwnHTML(); rv
 function rvTabs(){ rvQ('.rvx-tabs').innerHTML=RV_CATS.map(C=>`<button class="rvx-tab" type="button" role="tab" aria-selected="${C.id===rvTab}" data-c="${C.id}">${C.e} ${C.n}</button>`).join(''); rvQ('.rvx-grid').innerHTML=rvTypesHTML(); }
 // 乗り物をえらぶ（色・借りる）
 function rvDetail(cid,tid){ const C=rvCat(cid), T=rvType(cid,tid); let ci=0; const me=rvMe(); const age=me?me.age:30;
-  const rule=()=>{ let r=[]; if(T.mode==='pass') r.push('運転する人がいて、Channel は乗せてもらいます。'); else if(T.age) r.push(`${T.mode==='drive'?'運転できる':'ひとりで乗れる'}のは${T.age}歳から。${age<T.age?`いまの Channel（${age}歳）は、大人の人といっしょに乗ります。`:''}`); if(T.range) r.push(`この飛行機で飛べる距離は、約${T.range.toLocaleString()}kmまで。`); return r.join('<br>'); };
+  const rule=()=>{ let r=[]; if(T.mode==='pass') r.push('運転する人がいて、Channel は乗せてもらいます。'); else if(T.age) r.push(`${T.mode==='drive'?'運転できる':'ひとりで乗れる'}のは${T.age}歳から。${age<T.age?`いまの Channel（${age}歳）は、大人の人といっしょに乗ります。`:''}`); if(T.range) r.push(`${C.id==='ufo'?'このUFO':'この飛行機'}で飛べる距離は、約${T.range.toLocaleString()}kmまで。`); return r.join('<br>'); };
   const full=()=>rvRides().length>=RV_MAX;
-  const html=()=>`<h2>${C.e} ${esc2(T.n)}</h2><div class="rvx-big">${rvCardSVG(cid,tid,ci)}</div><p class="rvx-p">${esc2(T.d)}</p><div class="rvx-cn">色：${C.cols[ci][0]}</div><div class="rvx-cols">${C.cols.map((c,i)=>`<button class="rvx-sw" type="button" style="background:${c[1]}" aria-label="${c[0]}" aria-pressed="${i===ci}" data-ci="${i}"></button>`).join('')}</div><p class="rvx-rule">${rule()}<br>試作版のレンタルは1週間。Higher Self が Channel のかわりに借りて、あずかります。</p><div class="rvh-btns"><button class="rv-btn" type="button" data-a="rent" ${full()?'disabled':''}>${full()?'いっぱいです（2台まで）':'🔑 1週間かりる'}</button></div>${full()?'<p class="rvx-p" style="text-align:center">あずかっている乗り物を返すと、借りられます。</p>':''}`;
+  const html=()=>`<h2>${C.e} ${esc2(T.n)}</h2><div class="rvx-big">${rvCardSVG(cid,tid,ci)}</div><p class="rvx-p">${esc2(T.d)}</p><div class="rvx-cn">色：${C.cols[ci][0]}</div><div class="rvx-cols">${C.cols.map((c,i)=>`<button class="rvx-sw" type="button" style="background:${c[1]}" aria-label="${c[0]}" aria-pressed="${i===ci}" data-ci="${i}"></button>`).join('')}</div><p class="rvx-rule">${rule()}<br>試作版のレンタルは1週間。Higher Self が Channel のかわりに借りて、あずかります。</p>${C.paid&&!window.LB_UFO_FREE?`<div class="rvh-btns"><button class="rv-btn" type="button" disabled>🛸 有料版で持てるようになります</button></div><p class="rvx-p" style="text-align:center">いまは見るだけです。</p>`:`<div class="rvh-btns"><button class="rv-btn" type="button" data-a="rent" ${full()?'disabled':''}>${full()?'いっぱいです（2台まで）':'🔑 1週間かりる'}</button></div>`}${full()?'<p class="rvx-p" style="text-align:center">あずかっている乗り物を返すと、借りられます。</p>':''}`;
   const m=rvModal(html(),(e,m)=>{ const sw=e.target.closest('[data-ci]'); if(sw){ ci=+sw.dataset.ci; m.querySelector('.rvx-mbox').innerHTML=`<button class="rvx-x" type="button" aria-label="とじる">✕</button>`+html(); return; }
     const b=e.target.closest('[data-a="rent"]'); if(b&&!b.disabled){ const a=rvRides(); if(a.length>=RV_MAX) return; const now=Date.now(); a.push({ cat:cid, type:tid, col:ci, start:now, end:now+RV_WEEK }); rvSet(K_RIDES,a); m.remove(); rvRender(); rvToast(`🔑 ${T.n}を借りました（1週間）`); try{ rvQ('.rvx-own').scrollIntoView({ behavior:'smooth', block:'center' }); }catch(_){} } }); }
 // 乗っている写真
@@ -23346,13 +23673,14 @@ function rvFly(r){ const me=rvMe(); const T=rvType(r.cat,r.type); const from=rvW
     ${from.away&&home?`<button class="rv-btn rv-sub" type="button" data-home="1">🏠 家の近くの空港（${esc2(home.name)}）へ帰る</button>`:''}
     <p class="rvx-p">行きたい街をえらんでね。着いたら、その街を🟡街ブラできます。この飛行機で飛べるのは約${T.range.toLocaleString()}kmまで。</p>
     <div class="rvx-tabs">${[['','ぜんぶ']].concat(RV_AREA).map(([k,n])=>`<button class="rvx-tab" type="button" data-area="${k}" aria-selected="${(area||'')===k}">${n}</button>`).join('')}</div><div class="rvx-dests">${list()}</div>`;
-  const go=(to,toName,id,tz)=>{ const km=rvDist(from,to); const mp=rvMap(from,to); const dur=4;
-    const box=m.querySelector('.rvx-mbox'); box.innerHTML=`<button class="rvx-x" type="button" aria-label="とじる">✕</button><h2>🛫 ${esc2(from.name)} → 🛬 ${esc2(to.name)}</h2><div class="rvx-map"><svg viewBox="0 0 360 200">${mp.svg}<path d="${mp.path}" stroke="#FF8FAB" stroke-width="2.4" stroke-dasharray="6 5" fill="none"/>${rvCirc(mp.x1,mp.y1,5,'#FFFFFF',' stroke="#E0557C" stroke-width="2"')}${rvCirc(mp.x2,mp.y2,5,'#E0557C',' stroke="#FFFFFF" stroke-width="2"')}<text x="${F(mp.x1)}" y="${F(mp.y1+17)}" text-anchor="middle" font-size="11" font-weight="700" fill="#22304D">${from.code}</text><text x="${F(mp.x2)}" y="${F(mp.y2+17)}" text-anchor="middle" font-size="11" font-weight="700" fill="#22304D">${to.code}</text><g><g transform="translate(-10 -6)"><path d="M0 6 L14 4 L20 6 L14 8Z M6 6 L10 0 L12 0 L10 6Z M6 6 L10 12 L12 12 L10 6Z M1 6 L0 2 L2 2 L4 6Z" fill="#FFFFFF" stroke="#22304D" stroke-width=".8"/></g><animateMotion dur="${dur}s" fill="freeze" rotate="auto" path="${mp.path}"/></g></svg></div><p class="rvx-p" style="text-align:center">${km.toLocaleString()}km・${rvHM(km/T.kmh+.4)}のフライト。Channel を乗せて、空の上を飛んでいます…</p><div class="rvh-btns rvx-tko"><button class="rv-btn rv-sub" type="button" data-shot="takeoff">📸 離陸の写真をとる</button></div><div class="rvx-arr"></div>`;
+  const go=(to,toName,id,tz)=>{ const km=rvDist(from,to);
+    const box=m.querySelector('.rvx-mbox');
     leg={ from, to, toName, fromTz:rvPlaceTz(), tz };
     const loc={ code:to.code, name:to.name, la:to.la, lo:to.lo, city:id||null, cityName:toName, tz:tz||null, at:Date.now() }; rvSet(K_LOC,id?loc:null);
     const t=rvGet(K_TRIP,[]); t.unshift({ d:rvToday(), from:from.code, fromN:from.name, to:to.code, toN:to.name, km, type:T.id }); rvSet(K_TRIP,t.slice(0,30)); rvRender();
-    setTimeout(()=>{ if(!document.body.contains(m)) return;
-      const arr=m.querySelector('.rvx-arr'); if(!arr) return; arr.innerHTML=`<div class="rvx-from" style="text-align:center">🛬 <b>${esc2(to.name)}</b>に着きました！${to.kw?`<br><small>空港から${esc2(toName)}までは、${esc2(to.kw)}。</small>`:''}</div><div class="rvh-btns"><button class="rv-btn" type="button" data-shot="landing">📸 着陸の写真をとる</button><button class="rv-btn" type="button" data-trav="1">🧳 ${esc2(toName)}の旅を楽しむ</button>${id?`<button class="rv-btn rv-sub" type="button" data-mb="${id}">🟡 ${esc2(toName)}を街ブラする</button>`:''}</div>`; }, dur*1000+200); };
+    rvInFlight(box,{ r, T, C:rvCat(r.cat), from, to, km, me:me||{}, fromTz:leg.fromTz, tz, onArrive:()=>{ if(!document.body.contains(m)) return;
+      const sk=m.querySelector('[data-skip]'); if(sk) sk.remove();
+      const arr=m.querySelector('.rvx-arr'); if(!arr) return; arr.innerHTML=`<div class="rvx-from" style="text-align:center">🛬 <b>${esc2(to.name)}</b>に着きました！${to.kw?`<br><small>空港から${esc2(toName)}までは、${esc2(to.kw)}。</small>`:''}</div><div class="rvh-btns"><button class="rv-btn" type="button" data-shot="landing">📸 着陸の写真をとる</button><button class="rv-btn" type="button" data-trav="1">🧳 ${esc2(toName)}の旅を楽しむ</button>${id?`<button class="rv-btn rv-sub" type="button" data-mb="${id}">🟡 ${esc2(toName)}を街ブラする</button>`:''}</div>`; } }); };
   const m=rvModal(step1(),(e,mm)=>{ const t=e.target;
     const ab=t.closest('[data-area]'); if(ab){ area=ab.dataset.area||null; mm.querySelector('.rvx-mbox').innerHTML=`<button class="rvx-x" type="button" aria-label="とじる">✕</button>`+step1(); return; }
     const db=t.closest('[data-d]'); if(db&&!db.disabled){ const d=RV_DEST.find(x=>x.id===db.dataset.d); let tz=null; const mbc=RV_MBC(); if(mbc){ const c=mbc.find(x=>x.id===d.id); if(c) tz=c.tz; } go(d,RV_CITYN[d.id]||d.id,d.id,tz||RV_TZI[d.id]||null); return; }
@@ -23388,7 +23716,7 @@ function ridesOpen(tab){ try{ rvCss(); const gone=rvSweep(); if(rvEl) return; if
   rvQ('.rvx-grid').addEventListener('click',e=>{ const b=e.target.closest('[data-t]'); if(b) rvDetail(rvTab,b.dataset.t); });
   rvQ('.rvx-own').addEventListener('click',e=>{ const b=e.target.closest('[data-a]'); if(!b) return; const a=rvRides(), r=a[+b.dataset.i]; if(!r) return;
     if(b.dataset.a==='photo') rvShoot(r); if(b.dataset.a==='fly') rvFly(r); if(b.dataset.a==='trav') rvTravel(r);
-    if(b.dataset.a==='ret'){ const T=rvType(r.cat,r.type); rvModal(`<h2>${esc2(T.n)}を返しますか？</h2><p class="rvx-p">まだ ${rvLeft(r)} 借りていられます。返すと、あずかっている乗り物からなくなります（写真はのこります）。</p><div class="rvh-btns"><button class="rv-btn rv-sub" type="button" data-n="1">やめる</button><button class="rv-btn" type="button" data-y="1">返す</button></div>`,(e2,m2)=>{ if(e2.target.closest('[data-n]')) m2.remove(); if(e2.target.closest('[data-y]')){ const aa=rvRides(); const k=aa.findIndex(x=>x.start===r.start&&x.type===r.type); if(k>=0) aa.splice(k,1); rvSet(K_RIDES,aa); if(!aa.some(x=>x.cat==='plane')) rvSet(K_LOC,null); m2.remove(); rvRender(); rvToast(`🔑 ${T.n}を返しました`); } }); } });
+    if(b.dataset.a==='ret'){ const T=rvType(r.cat,r.type); rvModal(`<h2>${esc2(T.n)}を返しますか？</h2><p class="rvx-p">まだ ${rvLeft(r)} 借りていられます。返すと、あずかっている乗り物からなくなります（写真はのこります）。</p><div class="rvh-btns"><button class="rv-btn rv-sub" type="button" data-n="1">やめる</button><button class="rv-btn" type="button" data-y="1">返す</button></div>`,(e2,m2)=>{ if(e2.target.closest('[data-n]')) m2.remove(); if(e2.target.closest('[data-y]')){ const aa=rvRides(); const k=aa.findIndex(x=>x.start===r.start&&x.type===r.type); if(k>=0) aa.splice(k,1); rvSet(K_RIDES,aa); if(!aa.some(x=>x.cat==='plane'||x.cat==='ufo')) rvSet(K_LOC,null); m2.remove(); rvRender(); rvToast(`🔑 ${T.n}を返しました`); } }); } });
   rvQ('.rvx-alb').addEventListener('click',e=>{ const b=e.target.closest('[data-al]'); if(!b) return; const x=rvGet(K_ALB,[]).filter(x=>x&&rvType(x.cat,x.type))[+b.dataset.al]; if(x) rvShoot(x,x); });
   rvTabs(); rvRender(); if(gone.length) rvToast(`🔑 ${gone.map(r=>rvType(r.cat,r.type).n).join('・')}は1週間たったので返しました`);
 }catch(e){ try{ console.warn('[乗り物]',e); }catch(_){} } }
@@ -23397,12 +23725,12 @@ document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; const m=do
 // ===== Life Home の「Higher Self のガレージ」 =====
 function rvHomeHTML(){ const a=rvRides(); let sl=a.map((r,i)=>{ const T=rvType(r.cat,r.type), C=rvCat(r.cat); return `<button type="button" class="rvh-slot" data-i="${i}">${rvCardSVG(r.cat,r.type,r.col)}<b>${C.e} ${esc2(T.n)}</b><small>${rvColName(r)}・${rvLeft(r)}</small></button>`; }).join('');
   for(let i=a.length;i<RV_MAX;i++) sl+=`<button type="button" class="rvh-slot rvh-empty" data-new="1">＋ 乗り物を借りる</button>`;
-  const plane=a.find(r=>r.cat==='plane');
+  const plane=a.find(r=>(r.cat==='plane'||r.cat==='ufo'));
   return `<p class="rvh-t">🔑 Higher Self のガレージ</p><p class="rvh-s">Higher Self が Channel のかわりに借りて、あずかっています（試作版は2台まで・1週間）</p><div class="rvh-slots">${sl}</div><div class="rvh-btns"><button type="button" class="rv-btn" data-go="1">🔑 乗り物をえらぶ</button>${plane?'<button type="button" class="rv-btn" data-fly="1">✈️ 飛行機で旅に出る</button>':''}</div>`; }
 let rvHomeEl=null;
 function rvHomeBuild(){ const s=document.createElement('section'); s.className='rvh'; s.setAttribute('aria-label','Higher Self のガレージ');
   s.addEventListener('click',e=>{ const t=e.target; if(t.closest('[data-go]')||t.closest('[data-new]')){ ridesOpen(); return; }
-    if(t.closest('[data-fly]')){ const p=rvRides().find(r=>r.cat==='plane'); ridesOpen(); if(p) rvFly(p); return; }
+    if(t.closest('[data-fly]')){ const p=rvRides().find(r=>(r.cat==='plane'||r.cat==='ufo')); ridesOpen(); if(p) rvFly(p); return; }
     const sl=t.closest('[data-i]'); if(sl){ const r=rvRides()[+sl.dataset.i]; ridesOpen(); if(r) rvShoot(r); } }); return s; }
 function rvHomePlace(refresh){ if(window.LB_RENTAL_OFF) return; try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home'||(typeof viewing!=='undefined'&&viewing)) return; const home=app.querySelector('.home'); if(!home) return;
   rvCss(); const gone=rvSweep(); if(!rvHomeEl) rvHomeEl=rvHomeBuild(); rvHomeEl.innerHTML=rvHomeHTML();
@@ -23421,7 +23749,8 @@ setInterval(()=>{ if(rvHomeEl&&document.body.contains(rvHomeEl)) rvHomePlace(tru
 // window.lbVehicles.svg(cat,type,col,o) … それだけで表示できる <svg>（o.w で幅px）。
 // window.lbVehicles.pick(where,seed)  … その場所に合う乗り物をランダムに1つ { cat, type, col }（seed で毎回同じにできる）。
 // 動き（タイヤ・プロペラが回る等）は CSS クラス rv-spin / rv-prop / rv-rotor / rv-blink。止めたい時は親に class="rv-still"。
-function lbVList(){ const a=[]; RV_CATS.forEach(C=>C.types.forEach(T=>a.push({ cat:C.id, catName:C.n, e:C.e, where:C.where, type:T.id, name:T.n, group:T.g||'', cols:C.cols.slice() }))); return a; }
+const RV_NEWV=new Set(["stealth1", "stealthv", "navyf", "delta", "vg", "heavyf", "seaf", "attack", "vetf", "fwdf", "aegis", "ffm", "sdd", "cg", "pg", "msc", "aoe", "bb", "agb", "pl", "lst", "aos", "tv", "cvn", "cvski", "cvtwin", "ddh", "lhd", "cvl", "cvold", "cvd", "cvcat", "avp", "lhdt", "subx", "subtear", "subssbn", "subwide", "subrescue", "subold", "subaip", "subdeep", "submini"]); // 11-17 にふやした軍用の乗り物。MITSUさんのOKまで、街には出さない（window.LB_NEWV=1 で出す）
+function lbVList(){ const a=[]; RV_CATS.forEach(C=>C.types.forEach(T=>{ if(RV_NEWV.has(T.id)&&(C.id==='plane'||C.id==='ship')&&!window.LB_NEWV) return; a.push({ cat:C.id, catName:C.n, e:C.e, where:C.where, type:T.id, name:T.n, group:T.g||'', paid:!!C.paid, cols:C.cols.slice() }); })); return a; }
 function lbVG(cat,type,col,o){ o=o||{}; try{ rvCss(); }catch(e){} const C=rvCat(cat), T=rvType(cat,type); if(!C||!T) return '';
   const hex=typeof col==='string'&&col.charAt(0)==='#'?col:(C.cols[+col||0]||C.cols[0])[1]; let R=null;
   if(o.people){ if(o.look) R=rvRiders(T,o.look,o.age??30).R; else { const sd=o.seed==null?Math.floor(Math.random()*1e9):o.seed; const d=rvRandLook(sd,{ adult:1 }), p=rvRandLook(sd+7919);
@@ -23429,8 +23758,75 @@ function lbVG(cat,type,col,o){ o=o||{}; try{ rvCss(); }catch(e){} const C=rvCat(
   try{ return (T.f||C.draw)(hex,Object.assign({},T.o,o.gear?{ gearDown:1, gear:1 }:{}),R); }catch(e){ return ''; } }
 function lbVSvg(cat,type,col,o){ o=o||{}; const C=rvCat(cat); if(!C) return ''; const vb=C.where==='sky'?'0 10 240 120':C.where==='water'?'0 0 240 130':'4 30 232 100';
   return `<svg viewBox="${vb}"${o.w?` width="${o.w}"`:''} aria-hidden="true" overflow="visible">${lbVG(cat,type,col,o)}</svg>`; }
-function lbVPick(where,seed){ const L=lbVList().filter(v=>!where||v.where===where); if(!L.length) return null; let r=seed==null?Math.random():((Math.sin(seed*9301+49297)*233280)%1+1)%1; const v=L[Math.floor(r*L.length)]; return { cat:v.cat, type:v.type, col:Math.floor(((r*7919)%1)*10) }; }
+function lbVPick(where,seed){ const L=lbVList().filter(v=>(!where||v.where===where)&&!v.paid); if(!L.length) return null; let r=seed==null?Math.random():((Math.sin(seed*9301+49297)*233280)%1+1)%1; const v=L[Math.floor(r*L.length)]; return { cat:v.cat, type:v.type, col:Math.floor(((r*7919)%1)*10) }; }
 function lbVRented(){ try{ rvSweep(); }catch(e){} return rvRides().map(r=>{ const C=rvCat(r.cat), T=rvType(r.cat,r.type), c=C.cols[r.col]||C.cols[0]; return { cat:r.cat, type:r.type, col:r.col, hex:c[1], colName:c[0], name:T.n, where:C.where, start:r.start, end:r.end }; }); }
+// うちのペットも一緒に（写真では、横に並ぶ／抱っこ）
+function hsPetAny(){ try{ if(typeof mpGet!=='function') return null; const p=mpGet(); if(!p||!p.breed||(typeof mpGone==='function'&&mpGone(p))) return null; return p; }catch(e){ return null; } }
+function hsPet(){ try{ if(!window.LB_PET_TRIP) return null; if(typeof mpGet!=='function') return null; const p=mpGet(); if(!p||!p.breed||(typeof mpGone==='function'&&mpGone(p))) return null; return { breed:p.breed, kind:p.kind||'dog', name:p.name||'' }; }catch(e){ return null; } }
+function hsPetArt(pet,x,yb,w,mode){ try{ if(!pet||typeof prPetSVG!=='function') return ''; const A=(typeof PP_ACTS!=='undefined'&&(PP_ACTS[pet.kind]||PP_ACTS.dog))||[];
+    let pose=A.find(a=>a.b==='sit')||A.find(a=>a.b!=='sleep'&&a.b!=='swim'&&a.b!=='swim2'&&a.b!=='fly')||A[0]||null;
+    if(pet.kind==='fish'){ const r=w*.15, cy=yb-r; const art=prPetSVG(pet.breed,A[0]||null,'').replace(/<svg class="[^"]*" /,`<svg x="${F(x-r*.9)}" y="${F(cy-r*.5)}" width="${F(r*1.8)}" height="${F(r*.95)}" `);
+      return `<circle cx="${F(x)}" cy="${F(cy)}" r="${F(r)}" fill="#CFEAFB" opacity=".85" stroke="#FFFFFF" stroke-width="1.6"/>${art}<rect x="${F(x-r*.7)}" y="${F(cy-r-2)}" width="${F(r*1.4)}" height="3" rx="1.5" fill="#FFFFFF"/>`; }
+    const h=w*106/200; const art=prPetSVG(pet.breed,pose,'').replace(/<svg class="[^"]*" /,`<svg x="${F(x-w/2)}" y="${F(yb-h)}" width="${F(w)}" height="${F(h)}" overflow="visible" `);
+    return mode==='hold'?art+`<ellipse cx="${F(x)}" cy="${F(yb-h*.18)}" rx="${F(w*.26)}" ry="${F(h*.09)}" fill="#F2C9A0" opacity=".0"/>`:art; }catch(e){ return ''; } }
+// Higher Self（と ペット）が空港で写る写真
+function hsTripPhotoSVG(p){ const C=rvCat('plane'), T=rvType('plane','narrow'); const col=(C.cols[p.col]||C.cols[5])[1]; let v=''; try{ v=C.draw(col,Object.assign({},T.o,{ gearDown:1, gear:1 }),null); }catch(e){}
+  const sc=p.scene, tf=sc==='takeoff'?'translate(40 26) scale(.95) rotate(-12 120 70)':'translate(0 92) scale(1.05) rotate(-3 120 70)';
+  const hx=sc==='takeoff'?250:268, hy=226, hh=100; let s=rvAirportBg(p.bg||0,p.tod||'day',p.code)+`<g transform="${tf}">${v}</g>`;
+  const pet=p.pet&&p.pm!=='none'?p.pet:null;
+  if(pet&&p.pm==='side') s+=rvHS(hx-26,hy,hh,{ aura:true })+hsPetArt(pet,hx+44,hy-8,pet.kind==='dog'||pet.kind==='cat'?190:150,'side');
+  else if(pet&&p.pm==='hold') s+=rvHS(hx,hy,hh,{ aura:true })+hsPetArt(pet,hx+6,hy-hh*.14,pet.kind==='dog'||pet.kind==='cat'?124:110,'hold');
+  else s+=rvHS(hx,hy,hh,{ aura:true });
+  s+=`<text x="${hx+(pet&&p.pm==='side'?-22:0)-34}" y="${hy+2}" font-size="20">🧳</text>`;
+  return `<svg class="rv-photo${p.still?' rv-still':''}" viewBox="0 0 360 240" role="img" aria-label="Higher Self の旅の写真">${s}</svg>`; }
+// ===== Higher Self の旅（自分のアバターで、近くの本物の空港から日本の街へ） =====
+const HS_PREF=[['北海道','CTS|新千歳空港|42.78|141.69'],['青森','AOJ|青森空港|40.73|140.69'],['岩手','HNA|花巻空港|39.43|141.14'],['宮城','SDJ|仙台空港|38.14|140.92'],['秋田','AXT|秋田空港|39.62|140.22'],['山形','GAJ|山形空港|38.41|140.37'],['福島','FKS|福島空港|37.23|140.43'],
+ ['茨城','IBR|茨城空港|36.18|140.42'],['栃木','HND|羽田空港|35.55|139.78'],['群馬','HND|羽田空港|35.55|139.78'],['埼玉','HND|羽田空港|35.55|139.78'],['千葉','NRT|成田国際空港|35.77|140.39'],['東京','HND|羽田空港|35.55|139.78'],['神奈川','HND|羽田空港|35.55|139.78'],
+ ['新潟','KIJ|新潟空港|37.96|139.12'],['富山','TOY|富山空港|36.65|137.19'],['石川','KMQ|小松空港|36.39|136.41'],['福井','KMQ|小松空港|36.39|136.41'],['山梨','HND|羽田空港|35.55|139.78'],['長野','MMJ|松本空港|36.17|137.92'],['岐阜','NGO|中部国際空港セントレア|34.86|136.81'],['静岡','FSZ|富士山静岡空港|34.80|138.19'],['愛知','NGO|中部国際空港セントレア|34.86|136.81'],
+ ['三重','NGO|中部国際空港セントレア|34.86|136.81'],['滋賀','ITM|大阪国際空港（伊丹）|34.78|135.44'],['京都','ITM|大阪国際空港（伊丹）|34.78|135.44'],['大阪','ITM|大阪国際空港（伊丹）|34.78|135.44'],['兵庫','UKB|神戸空港|34.63|135.22'],['奈良','ITM|大阪国際空港（伊丹）|34.78|135.44'],['和歌山','KIX|関西国際空港|34.43|135.24'],
+ ['鳥取','TTJ|鳥取空港|35.53|134.17'],['島根','IZO|出雲空港|35.41|132.89'],['岡山','OKJ|岡山空港|34.76|133.86'],['広島','HIJ|広島空港|34.44|132.92'],['山口','UBJ|山口宇部空港|33.93|131.28'],
+ ['徳島','TKS|徳島空港|34.13|134.61'],['香川','TAK|高松空港|34.21|134.02'],['愛媛','MYJ|松山空港|33.83|132.70'],['高知','KCZ|高知空港|33.55|133.67'],
+ ['福岡','FUK|福岡空港|33.59|130.45'],['佐賀','HSG|佐賀空港|33.15|130.30'],['長崎','NGS|長崎空港|32.92|129.91'],['熊本','KMJ|阿蘇くまもと空港|32.84|130.86'],['大分','OIT|大分空港|33.48|131.74'],['宮崎','KMI|宮崎空港|31.88|131.45'],['鹿児島','KOJ|鹿児島空港|31.80|130.72'],['沖縄','OKA|那覇空港|26.20|127.65']];
+const HS_REG=[['北海道・東北',0,7],['関東',7,14],['中部',14,23],['近畿',23,30],['中国',30,35],['四国',35,39],['九州・沖縄',39,47]];
+const K_HSHOME='hitotsu.hsHome', K_HSLOC='hitotsu.hsLoc', K_HSTRIP='hitotsu.hsTrips', K_HSALB='hitotsu.hsAlbum';
+const HS_PLANE={ cat:'plane', type:'narrow', col:5 };
+function hsTripDests(){ let ids=null; try{ const m=RV_MBC(); if(m) ids=m.filter(c=>c.country==='jp'||c.cc==='jp'||c.jp).map(c=>c.id); }catch(e){} const jp=['tokyo','kanagawa','saitama','chiba','sapporo','hokkaido','miyagi','aichi','kyoto','shiga','osaka','wakayama','hiroshima','fukuoka','oita','tanegashima','okinawa','miyako'];
+  if(!ids||!ids.length) ids=jp; return ids.map(id=>{ const d=RV_DEST.find(x=>x.id===id); return d?Object.assign({},d,{ city:RV_CITYN[id]||id }):null; }).filter(Boolean); }
+function hsTripOpen(){ try{ rvCss(); }catch(e){} let home=rvGet(K_HSHOME,null), picking=!home;
+  const homeAp=()=>{ const p=HS_PREF.find(x=>x[0]===rvGet(K_HSHOME,null)); return p?Object.assign(rvApParse(p[1]),{ pref:p[0] }):null; };
+  const here=()=>{ const l=rvGet(K_HSLOC,null); return l&&l.code?l:null; };
+  const fromAp=()=>{ const l=here(); return l?Object.assign({},l,{ away:1 }):homeAp(); };
+  const prefHTML=()=>`<h2>🏠 Higher Self が住んでいる地域は？</h2><p class="rvx-p">いちばん近い本物の空港から出発するために、都道府県だけえらんでね（あとで変えられます）。</p>`+HS_REG.map(([n,a,b])=>`<h3 class="rvx-h3">${n}</h3><div class="hs-prefs">${HS_PREF.slice(a,b).map(p=>`<button class="rvx-tab" type="button" data-pref="${p[0]}">${p[0]}</button>`).join('')}</div>`).join('');
+  const mainHTML=()=>{ const f=fromAp(), hp=homeAp(); const L=hsTripDests().map(d=>Object.assign(d,{ km:rvDist(f,d) })).sort((a,b)=>a.km-b.km);
+    const trips=rvGet(K_HSTRIP,[]), alb=rvGet(K_HSALB,[]);
+    return `<h2>✈️ Higher Self の旅</h2><div class="rvx-from">🛫 出発：<b>${esc2(f.name)}</b>（${f.code}）<br><small>${f.away?`いま Higher Self がいる${esc2(f.cityName||'')}の近くの空港`:`住んでいる地域（${esc2(hp.pref)}）からいちばん近い空港`}</small></div>
+    <div class="rvh-btns">${f.away&&hp?`<button class="rv-btn rv-sub" type="button" data-gohome="1">🏠 ${esc2(hp.name)}へ帰る</button>`:''}<button class="rv-btn rv-sub rv-sm" type="button" data-chpref="1">住んでいる地域をかえる</button></div>
+    ${hsPet()?`<p class="rvx-p">🐾 うちのペットの<b>${esc2(hsPet().name)}</b>も、いっしょに旅をします。</p>`:`<div class="hs-opt"><span>🐾 ${hsPetAny()?`うちのペットの<b>${esc2(hsPetAny().name)}</b>も`:'ペットも'}いっしょに旅する</span><span class="hs-gem">💎 準備中</span></div>`}
+    <p class="rvx-p">行きたい街をえらんでね。着いたら、その街を観光できます。</p><div class="rvx-dests">${L.map(d=>{ const near=d.km<120; return `<button class="rvx-d" type="button" data-hd="${d.id}"><span><b>${esc2(d.city)}</b><small>${esc2(d.name)}（${d.code}）</small></span><span class="rvx-km">${near?'近いので<br>電車・車で':`${d.km.toLocaleString()}km<br>${rvHM(d.km/830+.4)}`}</span></button>`; }).join('')}</div>
+    ${alb.length?`<h3 class="rvx-h3">📸 旅の写真</h3><div class="hs-alb">${alb.slice(0,6).map(x=>`<div>${hsTripPhotoSVG(Object.assign({ still:1 },HS_PLANE,x))}<small>${esc2(x.place||'')} ${x.d||''}</small></div>`).join('')}</div>`:''}
+    ${trips.length?`<h3 class="rvx-h3">🧳 旅の記録</h3>${trips.slice(0,8).map(x=>`<p class="rvx-trip">${x.d}　${esc2(x.fromN)}（${x.from}）→ ${esc2(x.toN)}（${x.to}）　${esc2(x.city||'')}</p>`).join('')}`:''}`; };
+  const draw=()=>{ m.querySelector('.rvx-mbox').innerHTML=`<button class="rvx-x" type="button" aria-label="とじる">✕</button>`+(picking?prefHTML():mainHTML()); };
+  let leg=null;
+  const fly=(to,cityName,id)=>{ const from=fromAp(); const km=rvDist(from,to); const T=rvType('plane','narrow'), C=rvCat('plane');
+    leg={ from, to, cityName, id }; const box=m.querySelector('.rvx-mbox');
+    const t=rvGet(K_HSTRIP,[]); t.unshift({ d:rvToday(), from:from.code, fromN:from.name, to:to.code, toN:to.name, km, city:cityName }); rvSet(K_HSTRIP,t.slice(0,30));
+    rvSet(K_HSLOC,id?{ code:to.code, name:to.name, la:to.la, lo:to.lo, city:id, cityName, at:Date.now() }:null);
+    rvInFlight(box,{ r:Object.assign({},HS_PLANE), T, C, from, to, km, me:{}, hs:1, pet:hsPet(), fromTz:null, tz:'Asia/Tokyo', onArrive:()=>{ if(!document.body.contains(m)) return; const sk=m.querySelector('[data-skip]'); if(sk) sk.remove();
+      const arr=m.querySelector('.rvx-arr'); if(!arr) return; arr.innerHTML=`<div class="rvx-from" style="text-align:center">🛬 <b>${esc2(to.name)}</b>に着きました！${id&&to.kw?`<br><small>空港から${esc2(cityName)}までは、${esc2(to.kw)}。</small>`:''}</div><div class="rvh-btns"><button class="rv-btn" type="button" data-shot="landing">📸 着陸の写真をとる</button>${id?`<button class="rv-btn" type="button" data-mb="${id}">🟡 ${esc2(cityName)}を観光する</button>`:''}<button class="rv-btn rv-sub" type="button" data-back="1">← 旅のページへ</button></div>`; } }); };
+  const shot=(k)=>{ if(!leg) return; const ap=k==='takeoff'?leg.from:leg.to; const pet=hsPet(); let pm=pet?'side':'none'; const p=Object.assign({},HS_PLANE,{ scene:k, code:ap.code, place:ap.name, tod:rvTod('Asia/Tokyo'), pet });
+    const html=()=>`<h2>${k==='takeoff'?'🛫 離陸':'🛬 着陸'}の写真</h2><div class="rvx-stage">${hsTripPhotoSVG(Object.assign({},p,{ pm }))}</div><p class="rvx-cap">📍 ${esc2(ap.name)}${pet?`　🐾 ${esc2(pet.name)}もいっしょ`:''}</p><div class="rvh-btns">${pet?`<button class="rv-btn rv-sub" type="button" data-pm="side" aria-pressed="${pm==='side'}">🐾 横にならぶ</button><button class="rv-btn rv-sub" type="button" data-pm="hold" aria-pressed="${pm==='hold'}">🤗 抱っこする</button>`:''}<button class="rv-btn" type="button" data-snap="1">📸 写真をとる</button></div>`;
+    rvModal(html(),(e,mm)=>{ const b=e.target.closest('[data-pm]'); if(b){ pm=b.dataset.pm; mm.querySelector('.rvx-mbox').innerHTML=`<button class="rvx-x" type="button" aria-label="とじる">✕</button>`+html(); return; }
+      if(e.target.closest('[data-snap]')){ const a=rvGet(K_HSALB,[]); a.unshift(Object.assign({ d:rvToday() },p,{ pm })); rvSet(K_HSALB,a.slice(0,24)); mm.remove(); rvToast('📸 旅の写真に残しました'); } }); };
+  const m=rvModal('',(e,mm)=>{ const t=e.target;
+    const pf=t.closest('[data-pref]'); if(pf){ rvSet(K_HSHOME,pf.dataset.pref); picking=false; draw(); return; }
+    if(t.closest('[data-chpref]')){ picking=true; draw(); return; }
+    if(t.closest('[data-back]')){ draw(); return; }
+    if(t.closest('[data-gohome]')){ const hp=homeAp(); if(hp) fly(hp,hp.pref,null); return; }
+    const hd=t.closest('[data-hd]'); if(hd){ const d=hsTripDests().find(x=>x.id===hd.dataset.hd); if(!d) return; const from=fromAp(); if(rvDist(from,d)<120){ rvSet(K_HSLOC,{ code:d.code, name:d.name, la:d.la, lo:d.lo, city:d.id, cityName:d.city, at:Date.now() }); mm.remove(); try{ if(typeof window.machiBuraOpen==='function') window.machiBuraOpen(d.id); }catch(_){} return; } fly(d,d.city,d.id); return; }
+    const sh=t.closest('[data-shot]'); if(sh){ shot(sh.dataset.shot); return; }
+    const mb=t.closest('[data-mb]'); if(mb){ const id=mb.dataset.mb; mm.remove(); try{ if(typeof window.machiBuraOpen==='function') window.machiBuraOpen(id); }catch(_){} return; } });
+  draw(); return m; }
+window.hsTripOpen=hsTripOpen;
 window.lbVehicles={ list:lbVList, g:lbVG, svg:lbVSvg, pick:lbVPick, rented:lbVRented, look:rvRandLook, person:(x,y,look,o)=>rvPerson(x,y,look,o||{}), GROUND:G, WATER:W };
 window.ridesOpen=ridesOpen;
 
