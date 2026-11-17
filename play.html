@@ -20849,14 +20849,16 @@ let _pgL=false;
 function pgListen(){ if(_pgL||!pgOn()) return; _pgL=true; const { collection, onSnapshot, deleteDoc }=FB.D;
   onSnapshot(collection(FB.db,'ids',myId(),'gift'),snap=>{ const got=[];
     snap.forEach(d=>{ const x=d.data()||{}; if(x.k!=='love'&&x.k!=='food') return; got.push({ id:d.id, by:String(x.by||'友だち').slice(0,20), k:x.k, f:String(x.f||'').slice(0,20), t:+x.t||Date.now() }); });
-    if(!got.length) return; const p=typeof mpGet==='function'&&mpGet(); const seen=store.get('pg.seen',[]);
+    if(!got.length) return; const p=typeof mpGet==='function'&&mpGet(); if(!p) return; /* v178.12：ペットがまだいない時は、受けとらずに置いておく */ const seen=store.get('pg.seen',[]);
     const nu=got.filter(g=>!seen.includes(g.id)); if(nu.length){ store.set('pg.seen',seen.concat(nu.map(g=>g.id)).slice(-300));
       if(p){ if(typeof pmCounts==='function'){ const c0=pmCounts(p); p.gotL=c0.l; p.gotF=c0.f; } p.gifts=(Array.isArray(p.gifts)?p.gifts:[]).concat(nu).slice(-60); nu.forEach(g=>{ if(g.k==='food') p.gotF=(p.gotF||0)+1; else p.gotL=(p.gotL||0)+1; }); nu.forEach(g=>{ p.love=(p.love||0)+(g.k==='food'?2:1); if(typeof mpLog==='function') mpLog(p,g.k==='food'?`${g.by}さんから、${g.f}のプレゼントが届いた。`:g.f?`${g.by}さんから「可愛い！」と「${g.f}」が届いた。`:`${g.by}さんから「可愛い！」が届いた。`,'gift'); }); mpSet(p); }
       const g=nu[nu.length-1], nm=p?p.name:'うちのペット'; pgToast(nu.length>1?`${nm}に、${nu.length}つのプレゼントが届きました🎁`:g.k==='food'?`${g.by}さんから、${nm}に${g.f}が届きました🎁`:g.f?`${g.by}さんから、${nm}に「可愛い！」と「${g.f}」が届きました💗`:`${g.by}さんから、${nm}に「可愛い！」が届きました💗`);
       try{ const dl=document.getElementById('mpDlg'); if(dl&&!dl.hidden&&typeof mpOpen==='function') mpOpen(); else if(typeof render==='function'&&typeof page!=='undefined'&&page==='home') render(); }catch(_){} }
+      try{ if(p&&typeof fbPush==='function') setTimeout(()=>fbPush(),300); }catch(_){} /* v178.12：ふえた数を、すぐ友だちに知らせる */
     got.forEach(g=>{ try{ deleteDoc(FB.D.doc(FB.db,'ids',myId(),'gift',g.id)); }catch(_){} });
-  },e=>{ try{ console.warn('[petgift] 届いたプレゼントを読めませんでした',e&&e.code||e); }catch(_){} }); }
-{ let n=0; const iv=setInterval(()=>{ n++; try{ pgListen(); }catch(_){} if(_pgL||n>120) clearInterval(iv); },2000); }
+  },e=>{ _pgL=false; /* v178.12：読めなかった時は、あとでもう一度 */ try{ console.warn('[petgift] 届いたプレゼントを読めませんでした',e&&e.code||e); }catch(_){} }); }
+// v178.12：サーバーにつながるのがおそい時（4分より後）でも、届いたものを受けとれるように。ずっと見張る（つながったら1回だけ始める）
+setInterval(()=>{ try{ pgListen(); }catch(_){} },3000); setTimeout(()=>{ try{ pgListen(); }catch(_){} },1500);
 // ペットのつながりの木：贈るボタン
 if(typeof gsPetTreeHTML==='function'){ const G=gsPetTreeHTML; gsPetTreeHTML=function(fr){ const h=G.apply(this,arguments); try{ const n=gsFrPets(fr).filter(p=>!p.g).length; if(!n||!h) return h;
     return h.replace(/<\/div>\s*$/,'')+`<button type="button" class="pg-open" data-gspz="0">🎁 友だちのペットに「可愛い！」やごはんを贈る</button></div>`; }catch(e){ return h; } }; }
