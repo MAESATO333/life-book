@@ -19669,6 +19669,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v166: Life Home の上のほうに「✨ LIFE BOOKのニュース」。新しい機能・更新のお知らせ。
 // ゲームに入っているお知らせ（LBN_BUILTIN）＋ 管理者が Firebase の os/news に書いたお知らせ（{ n:[{ i, d:ミリ秒, t:題, b:説明 }] }）。新しい順に3つ、のこりは「これまでのお知らせ」。
 const LBN_BUILTIN=[
+  { i:'v178-gwphoto', d:Date.UTC(2026,10,17,10,50), t:'Gateway の海辺の街で撮った写真を、友だちに送れるようになりました📷', b:'Gateway の海辺の街で 📷 を押すと、その場面がアルバムに残ります。アルバムの「💌 Higher Self に送る」から、友だちの Higher Self に送れます。届いた写真は「💐 お花」の写真のところで見られます。' },
   { i:'v178-gwsea', d:Date.UTC(2026,10,17,10,20), t:'Gateway の海辺の街で、友だちとの偶然の出会いが見られます🌊', b:'Gateway の「海辺の街」を走る乗り物に、あなたの Higher Self と、友だちや友だちの友だちが、偶然いっしょに乗っている場面が見られるようになりました。どこで会えるかは、見てのお楽しみです。' },
   { i:'v178-nakama', d:Date.UTC(2026,10,17,9,56), t:'🎉 新しい仲間が、やってきました！', b:'カンガルー、パンダ、ライオン、キリン、ゾウ、ワシ、恐竜など、新しくペットにできる動物たちです。公園の右上の「🎉 新しい仲間」ボタンや、「うちのペット」の欄から、みんなの姿が見られます。公園の道にも、ときどき走ってきます。' },
   { i:'v175-flthx', d:Date.UTC(2026,10,17,6,15), t:'届いたお花から、すぐにお礼のお花を贈れるようになりました💌', b:'「💐 お花」の「届いたお花」で、お花の下の「💌 お礼のお花を贈る」を押すと、送ってくれた人あての「贈る」画面が開きます。どんな日は「ありがとう」になっています。' },
@@ -20131,6 +20132,60 @@ function npBig(id){ const b=PB_ALL[id]; if(!b) return; const K=npKinds().find(x=
 document.addEventListener('click',e=>{ const f=e.target.closest&&e.target.closest('[data-npz]'); if(!f) return; e.preventDefault(); e.stopPropagation(); npBig(f.dataset.npz); },true);
 document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return; const f=e.target.closest&&e.target.closest('[data-npz]'); if(f){ e.preventDefault(); npBig(f.dataset.npz); } });
 (function(){ const s=document.createElement('style'); s.textContent='.np-c{ cursor:zoom-in; transition:transform .15s; } .np-c:hover{ transform:translateY(-2px); } .np-zart{ cursor:pointer; max-width:520px; margin:0 auto; } .np-zart svg{ width:100%; height:auto; display:block; }'; document.head.appendChild(s); })();
+// v178.8: Gateway の海辺の街で撮った写真を、友だちの Higher Self に送る・受けとる
+// 写真は小さなメモ（{v,w,b,c,t}）。絵にするのは、サイトの parade/gwshot.js（GWShot.render）。
+// 送る：play.html#gwsend=<t> → 友だちを選ぶ → ids/{相手}/photo/{自分_日付_n} に p:'GW1:'+JSON（1000文字まで）
+const GW_ALB='hitotsu.gwAlbum', GW_GOT='gw.got', GW_SEEN='gw.seen';
+function gwAlbum(){ try{ const a=JSON.parse(localStorage.getItem(GW_ALB)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function gwGetRec(t){ return gwAlbum().find(r=>String(r.t)===String(t))||null; }
+let _gwLoadQ=null;
+function gwLoad(){ if(window.GWShot) return Promise.resolve(window.GWShot); if(_gwLoadQ) return _gwLoadQ;
+  _gwLoadQ=new Promise((ok,ng)=>{ const s=document.createElement('script'); s.src='parade/gwshot.js'; s.onload=()=>window.GWShot?ok(window.GWShot):ng(); s.onerror=()=>{ _gwLoadQ=null; ng(); }; document.head.appendChild(s); setTimeout(()=>{ if(!window.GWShot){ _gwLoadQ=null; ng(); } },15000); });
+  return _gwLoadQ; }
+// 箱の中に写真をかく（かけない時は、ことばで）
+function gwFill(root){ (root||document).querySelectorAll('.gw-ph[data-gwk]:not(.gw-done)').forEach(el=>{ el.classList.add('gw-done'); const k=el.dataset.gwk; let rec=null;
+  try{ if(k.startsWith('a:')) rec=gwGetRec(k.slice(2)); else { const g=(store.get(GW_GOT,[])||[]).find(x=>x.id===k.slice(2)); rec=g&&g.rec; } }catch(e){}
+  if(!rec){ el.innerHTML='<p class="tiny muted">写真が見つかりませんでした。</p>'; return; }
+  gwLoad().then(G=>G.render(rec,el)).catch(()=>{ el.innerHTML='<p class="tiny muted gw-nt">🌊 Gateway の写真です。LIFE BOOK のサイトで開くと、絵で見られます。</p>'; }); }); }
+function gwPhHTML(k){ return `<div class="gw-ph" data-gwk="${esc(k)}"><p class="tiny muted">写真を用意しています…</p></div>`; }
+// --- 送る ---
+let _gwTo=null;
+function gwSendOpen(t,msg){ const rec=gwGetRec(t); if(typeof gsZoomOpen!=='function') return;
+  if(!rec){ gsZoomOpen(`<h3 class="gsz-h">💌 Gateway の写真を送る</h3><p>この写真が、見つかりませんでした。Gateway のアルバムを、もう一度ひらいてみてください。</p>`); return; }
+  const fr=typeof flFriends==='function'?flFriends():[]; if(_gwTo==null||!fr.some(f=>f.id===_gwTo)) _gwTo=fr[0]?fr[0].id:null;
+  gsZoomOpen(`<div class="gw-send"><h3 class="gsz-h">💌 Gateway の写真を、Higher Self に送る</h3>${gwPhHTML('a:'+rec.t)}
+    ${fr.length?`<p class="tiny muted">だれに送りますか？</p><div class="gw-tos">${fr.map(f=>`<button type="button" class="mp-w${f.id===_gwTo?' on':''}" data-gwto="${esc(f.id)}">${esc(f.by||'友だち')}さん</button>`).join('')}</div><div class="np-row"><button type="button" class="mp-btn" data-gwgo="${esc(String(rec.t))}">💌 送る</button></div>`:'<p>まだ友だちがいません。「友だちに紹介」から、友だちとつながると送れます。</p>'}
+    ${msg?`<p class="gw-msg">${esc(msg)}</p>`:''}<p class="tiny muted">1人の友だちに送れる写真は、1日3枚までです（お花の写真とあわせて）。</p></div>`);
+  setTimeout(()=>gwFill(document.getElementById('gsZoom')),0); }
+async function gwSend(t){ const rec=gwGetRec(t); if(!rec) return gwSendOpen(t); const fr=(typeof flFriends==='function'?flFriends():[]).find(f=>f.id===_gwTo); if(!fr) return gwSendOpen(t,'だれに送るか、選んでください。');
+  const p='GW1:'+JSON.stringify(rec); if(p.length>1000) return gwSendOpen(t,'この写真は大きすぎて、送れませんでした。');
+  const b=document.querySelector('[data-gwgo]'); if(b){ b.disabled=true; b.textContent='おくっています…'; }
+  if(!(typeof flOn==='function'&&flOn())&&!(typeof fbWaitOn==='function'&&await fbWaitOn(15000))) return gwSendOpen(t,'いまサーバーにつながるのを待っています。少しあとで、もう一度押してください。');
+  const sent=store.get('fl.phSent',{}), key=fr.id+'|'+flDay(), n=(sent[key]||0)+1; if(n>3) return gwSendOpen(t,`${fr.by||'友だち'}さんには、きょうはもう3枚送りました。また明日ね。`);
+  const me=myId(), by=String(store.get(KEY_ME,'')||'').slice(0,20), id=me+'_'+flDay()+'_'+n;
+  try{ await Promise.race([FB.D.setDoc(FB.D.doc(FB.db,'ids',String(fr.id),'photo',id),{ from:me, by, p, m:'', t:Date.now() }),new Promise((_,ng)=>setTimeout(()=>ng(new Error('timeout')),15000))]);
+    const keep={}; Object.keys(sent).filter(x=>x.endsWith(flDay())).forEach(x=>keep[x]=sent[x]); keep[key]=n; store.set('fl.phSent',keep);
+    gwSendOpen(t,`${fr.by||'友だち'}さんに、Gateway の写真を送りました💌`); }
+  catch(err){ gwSendOpen(t,String(err&&err.code||'').includes('permission')?'まだ写真は送れません（サーバーの準備中です）。':'うまく送れませんでした。少しあとで、もう一度ためしてね。'); } }
+document.addEventListener('click',e=>{ const a=e.target.closest&&e.target.closest('[data-gwto],[data-gwgo],[data-gwsend]'); if(!a) return; e.preventDefault();
+  if(a.dataset.gwto){ _gwTo=a.dataset.gwto; document.querySelectorAll('[data-gwto]').forEach(x=>x.classList.toggle('on',x===a)); }
+  else if(a.dataset.gwgo) gwSend(a.dataset.gwgo); else if(a.dataset.gwsend) gwSendOpen(a.dataset.gwsend); });
+// サイトの Gateway アルバムの「💌 Higher Self に送る」から来た時
+function gwHash(){ const m=/[#&]gwsend=(\d+)/.exec(location.hash||''); if(!m) return; try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} setTimeout(()=>gwSendOpen(m[1]),600); }
+window.addEventListener('hashchange',gwHash); setTimeout(gwHash,900);
+// --- 受けとる（お花の写真と同じ場所に届く。p が 'GW1:' で始まるもの） ---
+function gwRecv(docId,x){ try{ const seen=store.get(GW_SEEN,[]); if(!seen.includes(docId)){ const rec=JSON.parse(String(x.p).slice(4)); if(rec&&typeof rec==='object'){
+      store.set(GW_SEEN,seen.concat([docId]).slice(-300)); store.set(GW_GOT,(store.get(GW_GOT,[])||[]).concat([{ id:docId, rec, fromBy:String(x.by||'友だち').slice(0,20), t:+x.t||Date.now() }]).slice(-60));
+      try{ if(typeof pgToast==='function') pgToast(`${String(x.by||'友だち').slice(0,20)}さんから、Gateway の写真が届きました💌（「💐 お花」の写真で見られます）`); }catch(_){}
+      try{ const dl=document.getElementById('flDlg'); if(dl&&!dl.hidden&&typeof flOpen==='function') flOpen(); }catch(_){} } }
+  }catch(e){} try{ FB.D.deleteDoc(FB.D.doc(FB.db,'ids',myId(),'photo',docId)); }catch(_){} }
+// お花のアルバムに「Gateway の写真」をならべる
+if(typeof flAlbumHTML==='function'){ const A=flAlbumHTML; flAlbumHTML=function(){ let h=A.apply(this,arguments); try{
+  const G=(store.get(GW_GOT,[])||[]).slice().reverse(), M=gwAlbum().slice(0,12);
+  if(G.length) h+=`<p class="fl-lb">🌊 友だちから届いた Gateway の写真（${G.length}枚）</p><ul class="fl-alb">${G.map(g=>`<li><figure>${gwPhHTML('g:'+g.id)}<figcaption><b>${esc(g.fromBy)}さん</b>から・${typeof flPhDate==='function'?flPhDate(g.t):''}</figcaption></figure></li>`).join('')}</ul>`;
+  if(M.length) h+=`<p class="fl-lb">🌊 わたしの Gateway の写真</p><ul class="fl-alb">${M.map(r=>`<li><figure>${gwPhHTML('a:'+r.t)}<figcaption>${typeof flPhDate==='function'?flPhDate(r.t):''}</figcaption></figure><button type="button" class="mp-btn fl-b2 fl-phbtn" data-gwsend="${esc(String(r.t))}">💌 Higher Self に送る</button></li>`).join('')}</ul>`;
+  if(G.length||M.length) setTimeout(()=>gwFill(document.getElementById('flDlg')),0); }catch(e){} return h; }; }
+(function(){ const s=document.createElement('style'); s.textContent='.gw-ph{ min-height:60px; border-radius:12px; overflow:hidden; background:#EAF6FB; } .gw-ph svg,.gw-ph img,.gw-ph canvas{ display:block; width:100%; height:auto; } .gw-ph .tiny{ margin:0; padding:18px 10px; text-align:center; } .gw-send .gw-ph{ margin:6px 0 10px; } .gw-tos{ display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 6px; } .gw-msg{ margin:10px 0 4px; padding:8px 12px; border-radius:12px; background:#FFF3D6; color:#8A5A10; font-weight:700; font-size:14px; }'; document.head.appendChild(s); })();
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
@@ -20860,7 +20915,7 @@ async function flPhSend(to,ph,msg,many){ const fr=flFriends().find(f=>f.id===to)
   flOpen(); }
 let _flPL=false;
 function flPhListen(){ if(_flPL||!flOn()) return; _flPL=true; const { collection, onSnapshot, deleteDoc }=FB.D;
-  onSnapshot(collection(FB.db,'ids',myId(),'photo'),snap=>{ const got=[]; snap.forEach(d=>{ const x=d.data()||{}; if(typeof x.p!=='string') return; got.push(Object.assign(flPhDecode(x.p),{ id:d.id, fromBy:String(x.by||'友だち').slice(0,20), m:String(x.m||'').slice(0,30), t:+x.t||Date.now() })); });
+  onSnapshot(collection(FB.db,'ids',myId(),'photo'),snap=>{ const got=[]; snap.forEach(d=>{ const x=d.data()||{}; if(typeof x.p!=='string') return; if(x.p.startsWith('GW1:')){ if(typeof gwRecv==='function') gwRecv(d.id,x); return; } got.push(Object.assign(flPhDecode(x.p),{ id:d.id, fromBy:String(x.by||'友だち').slice(0,20), m:String(x.m||'').slice(0,30), t:+x.t||Date.now() })); });
     if(!got.length) return; const seen=store.get('fl.phSeen',[]); const nu=got.filter(g=>!seen.includes(g.id)&&(g.items.length||g.sh.length||g.bg.length));
     if(nu.length){ store.set('fl.phSeen',seen.concat(nu.map(g=>g.id)).slice(-300)); store.set(KEY_FLPHGOT,store.get(KEY_FLPHGOT,[]).concat(nu).slice(-60));
       try{ if(typeof pgToast==='function') pgToast(`${nu[0].fromBy}さんから、お花の写真が届きました💌`); }catch(_){}
