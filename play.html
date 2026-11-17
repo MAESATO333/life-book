@@ -17451,8 +17451,8 @@ function gsSVG(fr,full){ const s0=gsShort; if(full) gsShort=(s)=>String(s||''); 
 function gsChunks(a,n){ const out=[]; for(let i=0;i<a.length;i+=n) out.push(a.slice(i,i+n)); return out; }
 let _gsFr=[];
 gsTreeHTML=function(fr){ fr=fr||[]; _gsFr=fr; const ch=gsChunks(fr,GS_PER);
-  if(ch.length<=1) return `<figure class="gs-tree gs-one"><p class="gs-forest-h gs-one-h">🌲 友だちの木${fr.length?`　${fr.length}人`:''}</p><button type="button" class="gs-zb" data-gsz="0" aria-label="友だちの木を、大きく見る">${gsSVG(fr)}<span class="gs-zoom" aria-hidden="true">🔍 押すと大きく見られます</span></button><figcaption>あなたの Channel を幹に、紹介でつながった人が枝の先に。点線の先は、その人とつながっている人です。</figcaption></figure>`;
-  return `<div class="gs-forest-w"><p class="gs-forest-h">🌳 友だちの森　木${ch.length}本・${fr.length}人</p><div class="gs-forest">${ch.map((c,i)=>`<figure class="gs-tree gs-mini"><button type="button" class="gs-zb" data-gsz="${i}" aria-label="${i+1}本目の木（${c.length}人）を、大きく見る">${gsSVG(c)}</button><figcaption>${i+1}本目の木・${c.length}人</figcaption></figure>`).join('')}</div><p class="tiny muted gs-forest-n">友だちが${GS_PER}人ふえるごとに、木が1本ふえて、森になっていきます。木を押すと、アップで全員の名前が見られます。</p></div>`; };
+  if(ch.length<=1) return `<figure class="gs-tree gs-one"><p class="gs-forest-h gs-one-h">🌲 友だちの木${fr.length?`　${fr.length}人`:''}</p><button type="button" class="gs-zb" data-gsz="0" aria-label="友だちの木を、大きく見る">${gsSVG(fr)}<span class="gs-zoom gs-zoom-fr" aria-hidden="true">🔍 押すと大きく見られます</span></button><figcaption>あなたの Channel を幹に、紹介でつながった人が枝の先に。点線の先は、その人とつながっている人です。</figcaption></figure>`;
+  return `<div class="gs-forest-w"><p class="gs-forest-h">🌳 友だちの森　木${ch.length}本・${fr.length}人<span class="gs-zoom gs-zoom-h" aria-hidden="true">🔍 押すと大きく見られます</span></p><div class="gs-forest">${ch.map((c,i)=>`<figure class="gs-tree gs-mini"><button type="button" class="gs-zb" data-gsz="${i}" aria-label="${i+1}本目の木（${c.length}人）を、大きく見る">${gsSVG(c)}</button><figcaption>${i+1}本目の木・${c.length}人</figcaption></figure>`).join('')}</div><p class="tiny muted gs-forest-n">友だちが${GS_PER}人ふえるごとに、木が1本ふえて、森になっていきます。木を押すと、アップで全員の名前が見られます。</p></div>`; };
 // ---- ペットのつながりの木 ----
 function gsFrPets(fr){ const fof=(typeof store!=='undefined'&&store.get('hitotsu.fof',{}))||{}; return (fr||[]).map(f=>{ const e=fof[f.id]; return e&&e.pet&&typeof PB_ALL!=='undefined'&&PB_ALL[e.pet.p]?Object.assign({ owner:f.by||'友だち', oid:f.id },e.pet):null; }).filter(Boolean); }
 function gsPetArt(id,kind,seed,x,y,w){ let pose=''; try{ const A=PP_ACTS[kind]||PP_ACTS.dog; const c=A.filter(a=>a.b!=='sleep'); pose=c[gsHash(seed+'|'+Math.floor(Date.now()/(15*60e3)))%c.length]; }catch(e){}
@@ -17474,7 +17474,7 @@ function gsPetSVG(list,full){ const n=list.length, W=n>12?560:n>8?480:360, cx=W/
   return `<svg viewBox="0 0 ${W} ${H+12}" role="img" aria-label="ペットのつながりの木。${n}匹">${back}${br}${art}${lab}</svg>`; }
 const GS_PPER=30;
 function gsPetTreeHTML(fr){ const list=gsFrPets(fr); const me=typeof mpGet==='function'?mpGet():null; if(!list.length&&!me) return ''; const ch=gsChunks(list,GS_PPER); if(!ch.length) ch.push([]);
-  return `<div class="gs-pet-w"><p class="gs-forest-h">🐾 ペットのつながりの木${list.length?`　${list.length}匹`:''}${ch.length>1?`・木${ch.length}本`:''}</p><div class="${ch.length>1?'gs-forest':''}">${ch.map((c,i)=>`<figure class="gs-tree gs-pet ${ch.length>1?'gs-mini':'gs-one'}"><button type="button" class="gs-zb" data-gspz="${i}" aria-label="ペットの木を、大きく見る">${gsPetSVG(c)}${ch.length>1?'':'<span class="gs-zoom" aria-hidden="true">🔍 押すと大きく見られます</span>'}</button>${ch.length>1?`<figcaption>${i+1}本目の木・${c.length}匹</figcaption>`:'<figcaption>うちのペットを幹に、友だちのペットが枝の先に。</figcaption>'}</figure>`).join('')}</div></div>`; }
+  return `<div class="gs-pet-w"><p class="gs-forest-h">🐾 ペットのつながりの木${list.length?`　${list.length}匹`:''}${ch.length>1?`・木${ch.length}本<span class="gs-zoom gs-zoom-h" aria-hidden="true">🔍 押すと大きく見られます</span>`:''}</p><div class="${ch.length>1?'gs-forest':''}">${ch.map((c,i)=>`<figure class="gs-tree gs-pet ${ch.length>1?'gs-mini':'gs-one'}"><button type="button" class="gs-zb" data-gspz="${i}" aria-label="ペットの木を、大きく見る">${gsPetSVG(c)}${ch.length>1?'':'<span class="gs-zoom" aria-hidden="true">🔍 押すと大きく見られます</span>'}</button>${ch.length>1?`<figcaption>${i+1}本目の木・${c.length}匹</figcaption>`:'<figcaption>うちのペットを幹に、友だちのペットが枝の先に。</figcaption>'}</figure>`).join('')}</div></div>`; }
 // ---- アップで見る ----
 function gsZoomOpen(html){ let d=document.getElementById('gsZoom'); if(!d){ d=document.createElement('div'); d.id='gsZoom'; d.className='gsz'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); document.body.appendChild(d); }
   d.innerHTML=`<div class="gsz-in"><button type="button" class="gsz-x" aria-label="閉じる">×</button>${html}<button type="button" class="gsz-x gsz-back">← もどる</button></div>`; d.hidden=false; document.body.classList.add('gsz-open'); try{ d.querySelector('.gsz-x').focus(); }catch(e){} }
@@ -17488,7 +17488,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const d=document.
 document.head.insertAdjacentHTML('beforeend',`<style>
 .gs-zb{ display:block; width:100%; padding:0; border:0; background:none; cursor:zoom-in; position:relative; font:inherit; }
 .gs-zb:focus-visible{ outline:3px solid #E86A88; outline-offset:2px; border-radius:14px; }
-.gs-zoom{ position:absolute; right:8px; top:6px; font-size:11px; font-weight:700; color:#C2476B; background:#fff; border-radius:999px; padding:2px 9px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.gs-zoom{ position:absolute; right:8px; top:6px; font-size:11px; font-weight:700; color:#C2476B; background:#fff; border-radius:999px; padding:2px 9px; box-shadow:0 1px 3px rgba(0,0,0,.08); } .gs-zoom.gs-zoom-fr{ right:auto; left:50%; top:9%; transform:translateX(-50%); font-size:14px; padding:4px 14px; white-space:nowrap; } .gs-zoom.gs-zoom-h{ position:static; display:inline-block; margin-left:8px; vertical-align:middle; white-space:nowrap; }
 .gs-forest-h{ margin:4px 2px 8px; font-weight:800; color:#3F7F3A; font-size:15px; }
 .gs-forest{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; }
 .gs-tree.gs-mini{ margin:0; padding:4px 3px 3px; } .gs-tree.gs-mini figcaption{ font-size:11px; font-weight:700; color:#6A4A58; }
@@ -19877,17 +19877,18 @@ function pgOn(){ return typeof fbOnline==='function'&&fbOnline()&&typeof FB!=='u
 function pgSent(oid,k){ return !!(store.get('pg.sent',{})[oid+'|'+k+'|'+pgDay()]); }
 function pgBtns(p){ if(!p||p.g||!p.oid) return ''; const L=pgSent(p.oid,'love'), F=pgSent(p.oid,'food');
   return `<span class="pg-btns"><button type="button" class="pg-b" data-pg="${esc(p.oid)}|love" ${L?'disabled':''}>${L?'💗 贈りました':'💗 可愛い！'}</button><button type="button" class="pg-b pg-f" data-pg="${esc(p.oid)}|food" ${F?'disabled':''}>${F?'🎁 贈りました':'🎁 ごはん'}</button></span>`; }
-async function pgSend(oid,k,btn){ const fof=store.get('hitotsu.fof',{}), e=fof[oid], pet=e&&e.pet; if(!pet) return;
+function pgNote(btn,t){ try{ const w=btn&&btn.closest('.pg-btns'); if(!w) return; let n=w.parentNode.querySelector('.pg-note'); if(!n){ n=document.createElement('small'); n.className='pg-note'; w.insertAdjacentElement('afterend',n); } n.textContent=t; }catch(_){} }
+async function pgSend(oid,k,btn){ const fof=store.get('hitotsu.fof',{}), e=fof[oid], pet=e&&e.pet; if(!pet){ pgNote(btn,'このペットの情報がまだ届いていません。少しあとで、もう一度押してください。'); pgToast('このペットの情報がまだ届いていません。'); return; }
   if(!pgOn()){ if(btn){ btn.disabled=true; btn.textContent='つないでいます…'; } try{ if(typeof fbStart==='function') fbStart(); }catch(_){}
     for(let i=0;i<20&&!pgOn();i++) await new Promise(r=>setTimeout(r,500));
-    if(!pgOn()){ if(btn){ btn.disabled=false; btn.textContent=k==='food'?'🎁 ごはん':'💗 可愛い！'; } pgToast('いまはサーバーにつながっていません。少しあとで、もう一度押してください。'); return; } }
+    if(!pgOn()){ if(btn){ btn.disabled=false; btn.textContent=k==='food'?'🎁 ごはん':'💗 可愛い！'; } const m='いまはサーバーにつながっていません。少しあとで、もう一度押してください。'+(typeof FB_ERR!=='undefined'&&FB_ERR?'（'+String(FB_ERR).slice(0,40)+'）':''); pgNote(btn,m); pgToast(m); return; } }
   const me=myId(), by=String(store.get(KEY_ME,'')||'').slice(0,20), f=k==='food'?pgFood(pet.k):'', id=me+'_'+pgDay()+'_'+k;
   if(btn){ btn.disabled=true; btn.textContent='おくっています…'; }
-  try{ await FB.D.setDoc(FB.D.doc(FB.db,'ids',String(oid),'gift',id),{ from:me, by, k, f, pn:String(pet.b||'').slice(0,20), t:Date.now() });
+  try{ await Promise.race([FB.D.setDoc(FB.D.doc(FB.db,'ids',String(oid),'gift',id),{ from:me, by, k, f, pn:String(pet.b||'').slice(0,20), t:Date.now() }), new Promise((_,rj)=>setTimeout(()=>rj({ code:'timeout' }),15000))]); pgNote(btn,'');
     const s=store.get('pg.sent',{}); s[oid+'|'+k+'|'+pgDay()]=1; const keep={}; Object.keys(s).filter(x=>x.endsWith(pgDay())).forEach(x=>keep[x]=1); store.set('pg.sent',keep);
     if(btn) btn.textContent=k==='food'?'🎁 贈りました':'💗 贈りました';
     pgToast(k==='food'?`${pet.b}に、${f}を贈りました！`:`${pet.b}に「可愛い！」を贈りました💗`);
-  }catch(err){ if(btn){ btn.disabled=false; btn.textContent=k==='food'?'🎁 ごはん':'💗 可愛い！'; } pgToast(String(err&&err.code||'').includes('permission')?'まだ贈れません（サーバーの準備中です）。':'うまく送れませんでした。少しあとで、もう一度押してください。'); } }
+  }catch(err){ if(btn){ btn.disabled=false; btn.textContent=k==='food'?'🎁 ごはん':'💗 可愛い！'; } const code=String(err&&(err.code||err.message)||err||'').slice(0,40); const m=code.includes('permission')?'まだ贈れません（サーバーの許可がありません）。':'うまく送れませんでした。少しあとで、もう一度押してください。'; pgNote(btn,m+'（'+code+'）'); pgToast(m); try{ console.warn('[petgift]',code); }catch(_){} } }
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-pg]'); if(!b) return; e.preventDefault(); e.stopPropagation(); const [oid,k]=b.dataset.pg.split('|'); pgSend(oid,k,b); },true);
 function pgToast(t){ let d=document.getElementById('pgToast'); if(!d){ d=document.createElement('div'); d.id='pgToast'; d.className='pg-toast'; d.setAttribute('role','status'); document.body.appendChild(d); } d.textContent=t; d.classList.add('on'); clearTimeout(d._t); d._t=setTimeout(()=>d.classList.remove('on'),4200); }
 // 届いたものを受けとる
@@ -19914,7 +19915,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .pg-btns{ display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; } .pg-b{ border:0; background:#FFE3EC; color:#C2476B; border-radius:999px; padding:7px 12px; font-weight:700; font-size:13px; cursor:pointer; } .pg-b.pg-f{ background:#FFF1D6; color:#B86A1E; } .pg-b:disabled{ opacity:.55; cursor:default; }
 .pg-open{ display:block; margin:10px auto 0; border:0; background:#FF8FAB; color:#fff; border-radius:999px; padding:9px 16px; font-weight:700; font-size:13px; cursor:pointer; }
 .pg-got{ list-style:none; margin:0 0 12px; padding:0; display:grid; gap:6px; } .pg-got li{ background:#FFF6F9; border-radius:10px; padding:8px 12px; display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; } .pg-got span{ font-size:12px; color:#8A7A84; }
-.pg-toast{ position:fixed; left:50%; bottom:24px; transform:translate(-50%,40px); opacity:0; z-index:120; background:#C2476B; color:#fff; padding:12px 18px; border-radius:14px; font-weight:700; box-shadow:0 6px 24px rgba(0,0,0,.2); transition:.3s; max-width:calc(100% - 32px); text-align:center; pointer-events:none; z-index:9800; } .pg-toast.on{ opacity:1; transform:translate(-50%,0); }
+.pg-note{ display:block; margin-top:4px; font-size:12px; color:#C2476B; line-height:1.4; white-space:normal!important; } .pg-note:empty{ display:none; } .pg-toast{ position:fixed; left:50%; bottom:24px; transform:translate(-50%,40px); opacity:0; z-index:120; background:#C2476B; color:#fff; padding:12px 18px; border-radius:14px; font-weight:700; box-shadow:0 6px 24px rgba(0,0,0,.2); transition:.3s; max-width:calc(100% - 32px); text-align:center; pointer-events:none; z-index:9800; } .pg-toast.on{ opacity:1; transform:translate(-50%,0); }
 </style>`); }catch(e){}
 // v170: お花を贈る・受け取る（Firebase：ids/{相手}/flower/{自分_日付_1〜3}）
 function flOn(){ return typeof fbOnline==='function'&&fbOnline()&&typeof FB!=='undefined'&&FB&&FB.D; }
