@@ -533,6 +533,7 @@ var N=[], F=[], ME=-1, ON={}; // ON＝いま画面のどこかに乗っている
 function free(i){ return !ON[i]; }
 function link(a,b){ if(a!==b&&F[a]&&F[b]){ F[a][b]=1; F[b][a]=1; } }
 function fr(i){ return Object.keys(F[i]).map(Number); }
+function fof(i){ var s={}; fr(i).forEach(function(b){ fr(b).forEach(function(c){ if(c!==i&&!F[i][c]&&free(c)) s[c]=1; }); }); return Object.keys(s).map(Number); }
 function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(R()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 function ls(k){ try{ var v=localStorage.getItem(k); if(v==null) return null; try{ return JSON.parse(v); }catch(e){ return v; } }catch(e){ return null; } }
 // 1) このブラウザの自分と友だち
@@ -552,7 +553,7 @@ function group(k){ if(!N.length) return null;
     shuffle(fr(a).filter(function(b){ return b!==ME&&free(b); })).forEach(function(b){ if(m.length<k&&m.indexOf(b)<0) m.push(b); });
     shuffle(others).forEach(function(b){ if(m.length<k&&m.indexOf(b)<0&&R()<.5) m.push(b); }); return shuffle(m); }
   var c=[]; for(var i2=0;i2<N.length;i2++) if(Object.keys(F[i2]).length&&free(i2)) c.push(i2); if(!c.length) return null; var a2=pk(c);
-  if(k<=1) return [a2]; var m2=[a2]; shuffle(fr(a2)).forEach(function(b){ if(m2.length<k&&free(b)&&m2.every(function(x){ return F[x][b]; })) m2.push(b); });
+  if(k<=1) return [a2]; if(R()<.3){ var o2=fof(a2); if(o2.length) return [a2,pk(o2)]; } var m2=[a2]; shuffle(fr(a2)).forEach(function(b){ if(m2.length<k&&free(b)&&m2.every(function(x){ return F[x][b]; })) m2.push(b); });
   if(m2.length<k) shuffle(fr(a2)).forEach(function(b){ if(m2.length<k&&free(b)&&m2.indexOf(b)<0) m2.push(b); }); return m2; }
 var NS='http://www.w3.org/2000/svg';
 function esc(t){ return String(t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
@@ -566,10 +567,13 @@ var tag=function(e,fs){ if(!N.length) return; var rs=e.querySelectorAll('.rv-rid
   if(!H.length) return; H.sort(function(a,b){ return a.x-b.x; });
   var k=H.length<=2?H.length:Math.min(H.length,pk([1,2,2,3,3,4])); var G=group(k); if(!G||!G.length) return; k=Math.min(k,G.length);
   var st=Math.floor(R()*(H.length-k+1)); var seats=H.slice(st,st+k);
-  var s='', lv=[], base=Math.min.apply(null,seats.map(function(h){ return h.y-h.r*1.35-fs*.3; }));
+  var s='', lv=[], top=1e9, base=Math.min.apply(null,seats.map(function(h){ return h.y-h.r*1.35-fs*.3; }));
   seats.forEach(function(h,i){ var t=N[G[i]], w=tw(t,fs), L=0; // ふだが重ならないよう、段をずらす
     while((lv[L]||[]).some(function(o){ return Math.abs(o.x-h.x)<(o.w+w)/2+fs*.3; })) L++; (lv[L]=lv[L]||[]).push({x:h.x,w:w});
-    s+=pill(h.x,(seats.length>1?base:h.y-h.r*1.35-fs*.3)-L*fs*1.7,t,fs); });
+    var yy=(seats.length>1?base:h.y-h.r*1.35-fs*.3)-L*fs*1.7; s+=pill(h.x,yy,t,fs); top=Math.min(top,yy-fs*1.45); });
+  if(seats.length>=2){ var mm=G.slice(0,seats.length), all=true; for(var x=0;x<mm.length;x++) for(var y=x+1;y<mm.length;y++) if(!F[mm[x]][mm[y]]) all=false;
+    var minx=Math.min.apply(null,seats.map(function(h){ return h.x; })), maxx=Math.max.apply(null,seats.map(function(h){ return h.x; }));
+    s+='<text x="'+((minx+maxx)/2).toFixed(1)+'" y="'+(top-fs*.35).toFixed(1)+'" font-size="'+(fs*.9).toFixed(1)+'" text-anchor="middle" fill="#E0457B" font-weight="700" stroke="#FFFFFF" stroke-width="'+(fs*.28).toFixed(2)+'" paint-order="stroke">'+(all?'♡ 友だち':'友だちの友だち')+'</text>'; }
   var g=document.createElementNS(NS,'g'); g.innerHTML=s; e.appendChild(g); var used=G.slice(0,seats.length); used.forEach(function(i){ ON[i]=1; }); e._hs=used; };
 tag.on=ON; return tag;
 })();
