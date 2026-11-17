@@ -19819,7 +19819,7 @@ function prRunHTML(){ const L=prPets(); _prL=L; if(!L.length) return ''; const a
   // 画面の幅で、1本の道に走れる数を決める（ペットどうしが重ならないように、間を110px以上あける）
   const W=Math.max(320,Math.min(1400,(document.getElementById('app')||document.body).clientWidth||window.innerWidth||400)), per=Math.max(2,Math.floor((W+160)/115));
   const lanes=[[],[],[]]; all.forEach(p=>{ const fast=gsHash(p.s+'|sp')%5===0; const ln=fast?2:(lanes[0].length<=lanes[1].length?0:1); if(lanes[ln].length<per) lanes[ln].push(p); else if(lanes[1-Math.min(ln,1)].length<per) lanes[1-Math.min(ln,1)].push(p); });
-  const tot=lanes[0].length+lanes[1].length+lanes[2].length; _prF=Math.max(1,tot*(W/(W+140))/3.5); const base=Math.max(16,per*2.6)*_prF; let h=''; /* v175f：画面に一度に見えるのは3〜4匹。1周のうち 1/_prF の時間で走りぬけ、のこりは外で待つ（全員が順番に出る） */
+  const tot=lanes[0].length+lanes[1].length+lanes[2].length; _prF=Math.max(1,tot*(W/(W+140))/4.5); /* v178.5：もっと頻繁に出てくるように 3.5→4.5 */ const base=Math.max(16,per*2.6)*_prF; let h=''; /* v175f：画面に一度に見えるのは3〜4匹。1周のうち 1/_prF の時間で走りぬけ、のこりは外で待つ（全員が順番に出る） */
   lanes.forEach((A,ln)=>A.forEach((p,k)=>{ h+=prOne(p,ln,k,A.length,base); }));
   return `<div class="pr-run" aria-label="知り合いのペットたち">${prParkSVG()}${h}<span class="pr-tip">👆 ペットを押すと、そのペットのことが見られます</span></div>`; }
 // 電光掲示板：さいきんのおしゃべりを、つなげて流す（1周ごとに、新しいおしゃべりに入れかえる）
@@ -20103,12 +20103,14 @@ function npOpen(){ if(typeof gsZoomOpen==='function') gsZoomOpen(`<div class="np
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-np]'); if(!b) return; e.preventDefault(); e.stopPropagation();
   if(b.dataset.np==='open') npOpen(); else if(b.dataset.np==='adopt'){ try{ if(typeof gsZoomClose==='function') gsZoomClose(); else { const z=document.getElementById('gsZoom'); if(z) z.hidden=true; } }catch(_){} mpOpen('new'); } },true);
 // 公園：6時間ごとに、新しい仲間が2〜3匹まじる（クジラは海なので走らない）
-function npGuests(){ const ids=Object.keys(PB_ALL).filter(i=>PB_ALL[i].pw&&!/whale/.test(PB_ALL[i].kind)); if(!ids.length) return [];
-  const slot=Math.floor(Date.now()/(6*3600e3)); const n=2+slot%2; const out=[], used=new Set();
-  for(let j=0;out.length<n&&j<20;j++){ const id=ids[gsHash('np|'+slot+'|'+j)%ids.length], k=PB_ALL[id].kind; if(used.has(k)) continue; used.add(k);
+function npGuests(nf){ const ids=Object.keys(PB_ALL).filter(i=>PB_ALL[i].pw&&!/whale/.test(PB_ALL[i].kind)); if(!ids.length) return [];
+  // v178.5：1時間ごとに入れかわる。友だちのペットが少ない時ほど多めに（いろんな種類が出るように、同じ種類は1匹まで）
+  const slot=Math.floor(Date.now()/3600e3); const W=Math.max(320,Math.min(1400,(document.getElementById('app')||document.body).clientWidth||window.innerWidth||400)), per=Math.max(2,Math.floor((W+160)/115));
+  const n=Math.max(4,Math.min(8,per*2-(nf||0))); const out=[], used=new Set();
+  for(let j=0;out.length<n&&j<60;j++){ const id=ids[gsHash('np|'+slot+'|'+j)%ids.length], k=PB_ALL[id].kind; if(used.has(k)) continue; used.add(k);
     const K=npKinds().find(x=>x.k===k)||{ n:'' }; out.push({ id, k, n:K.n, s:'np'+id+slot, guest:1 }); }
   return out; }
-if(typeof prPets==='function'){ const P=prPets; prPets=function(){ const L=P.apply(this,arguments); try{ const G=npGuests(); if(!G.length) return L;
+if(typeof prPets==='function'){ const P=prPets; prPets=function(){ const L=P.apply(this,arguments); try{ const G=npGuests(L.length); if(!G.length) return L;
   // 友だちのペットのあいだに、間をあけて入れる
   const step=Math.max(2,Math.floor(L.length/G.length)); G.forEach((g,i)=>L.splice(Math.min(L.length,(i+1)*step+i),0,g)); }catch(e){} return L; }; }
 if(typeof prOpen==='function'){ const O=prOpen; prOpen=function(p){ if(!p||!p.guest) return O.apply(this,arguments);
