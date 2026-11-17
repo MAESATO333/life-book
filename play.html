@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.21">
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.22">
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5af5f16575224c8c9596106067decbde"}'></script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#FF8FAB"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LIFE BOOK"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head><body>
@@ -674,7 +674,7 @@ a.nav-b{ text-decoration:none; }
 <button class="devbtn" id="devbtn" type="button" hidden>制作用</button>
 <div class="dev" id="dev" hidden></div>
 <script>
-/* LIFE BOOK game version: v178.21 (2026-11-17) */ var LB_VER='v178.21';
+/* LIFE BOOK game version: v178.22 (2026-11-17) */ var LB_VER='v178.22';
 // ===== データ1：国・名前 =====
 // 試作版の仮データ。出生数の比率（w）、5歳未満の死亡（u5, 1000人あたり）、成人の平均寿命の目安（life）、
 // 家庭の経済状況の割合（econ: 苦しい/中間/裕福）、宗教（葬儀の形）の割合、きょうだいの数の目安（tfr）、
@@ -16601,8 +16601,15 @@ let _skLastTouch=0; // スクロールそのもの（プログラムによる）
 ['wheel','touchmove','touchstart','keydown','mousedown'].forEach(e=>window.addEventListener(e,()=>{ _skLastTouch=Date.now(); },{ capture:true, passive:true }));
 function skKey(el){ if(el.id) return '#'+el.id; const c=(el.getAttribute('class')||'').trim(); if(!c) return null;
   const all=[...document.querySelectorAll('#app [class]')].filter(x=>(x.getAttribute('class')||'').trim()===c); return c+'#'+all.indexOf(el); }
-function skSave(){ const m={}; document.querySelectorAll('#app *').forEach(el=>{ if(el.scrollTop>0&&el.scrollHeight>el.clientHeight+2) { const k=skKey(el); if(k) m[k]=el.scrollTop; } }); return { m, y:window.scrollY }; }
-function skRestore(s){ if(!s||!s.m) return; const put=()=>{ document.querySelectorAll('#app *').forEach(el=>{ if(el.scrollHeight>el.clientHeight+2){ const k=skKey(el); const v=k&&s.m[k]; if(v!=null) el.scrollTop=v; } }); };
+// v178.22（スマホ優先）：前は、描き直すたびに #app の全部の部品（1万個以上）を3回見ていて重かった。
+// いまは「スクロールされた箱」だけを覚えておき、それだけを見る（動きは前と同じ）。
+const _skMoved=new Set();
+document.addEventListener('scroll',e=>{ const t=e.target; if(t&&t.nodeType===1&&t.closest&&t.closest('#app')) _skMoved.add(t); },{ capture:true, passive:true });
+function skSave(){ const m={}; for(const el of [..._skMoved]){ if(!el.isConnected){ _skMoved.delete(el); continue; } if(el.scrollTop>0&&el.scrollHeight>el.clientHeight+2){ const k=skKey(el); if(k) m[k]=el.scrollTop; } else if(el.scrollTop<=0) _skMoved.delete(el); } return { m, y:window.scrollY }; }
+function skFind(k){ if(k[0]==='#') return document.getElementById(k.slice(1)); const i=k.lastIndexOf('#'), c=k.slice(0,i), n=+k.slice(i+1);
+  const all=[...document.querySelectorAll('#app [class]')].filter(x=>(x.getAttribute('class')||'').trim()===c); return all[n]||null; }
+function skRestore(s){ if(!s||!s.m) return; const ks=Object.keys(s.m); if(!ks.length) return;
+  const put=()=>{ ks.forEach(k=>{ const el=skFind(k); if(el&&el.scrollHeight>el.clientHeight+2&&Math.abs(el.scrollTop-s.m[k])>1){ el.scrollTop=s.m[k]; _skMoved.add(el); } }); };
   const safe=()=>{ try{ put(); }catch(e){} }; safe(); requestAnimationFrame(safe); setTimeout(safe,120); }
 (function(){ if(typeof render!=='function') return; const _r=render;
   render=function(){ const auto=window._skAuto; if(auto&&Date.now()-_skLastTouch<20000) return; let s=null; try{ s=skSave(); }catch(e){} const y=window.scrollY; const r=_r.apply(this,arguments);
@@ -20196,6 +20203,15 @@ function gwPetsSave(){ try{ const out=[]; const meN=String(store.get(KEY_ME,'')|
   if(typeof gsFrPets==='function') gsFrPets(store.get(KEY_FRIEND,[])||[]).forEach(x=>{ if(x&&x.b&&!x.g) out.push({ n:String(x.b).slice(0,12), s:x.k||'dog', o:String(x.owner||'友だち').slice(0,20), me:0 }); });
   const v=JSON.stringify(out.slice(0,30)); if(localStorage.getItem('hitotsu.gwPets')!==v) localStorage.setItem('hitotsu.gwPets',v); }catch(e){} }
 setTimeout(gwPetsSave,2500); setInterval(gwPetsSave,20000);
+// v178.22（スマホ優先）：重い画面を開くボタンは、まず「押した」反応を画面に出してから、中身を作る（タップの反応 INP を軽く）
+// しくみ：押された瞬間はいったん止めて、次の1コマ（絵が出たあと）で、同じボタンをもう一度押したことにする。ボタンの中身・動きは前と同じ。
+const LB_FAST_SEL='[data-nav],[data-foftop],.fr-open,[data-np],[data-npz],#hmRead,[data-go],[data-gsz],[data-pr]';
+window.addEventListener('click',e=>{ if(e._lbRe||!e.isTrusted) return; const t=e.target; const b=t&&t.closest&&t.closest(LB_FAST_SEL); if(!b||b.closest('a[href]')||b.disabled) return;
+  e.stopImmediatePropagation(); e.preventDefault(); b.classList.add('lb-press');
+  requestAnimationFrame(()=>setTimeout(()=>{ b.classList.remove('lb-press'); const tg=t.isConnected?t:(b.isConnected?b:null); if(!tg) return;
+    const ev=new MouseEvent('click',{ bubbles:true, cancelable:true, view:window, clientX:e.clientX, clientY:e.clientY }); ev._lbRe=1; tg.dispatchEvent(ev); },0)); },true);
+// 押した時の小さな反応
+(function(){ const s=document.createElement('style'); s.textContent='.lb-press{ filter:brightness(.92); transform:scale(.97); transition:transform .08s; }'; document.head.appendChild(s); })();
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
