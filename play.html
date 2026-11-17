@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.16">
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.17">
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5af5f16575224c8c9596106067decbde"}'></script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#FF8FAB"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LIFE BOOK"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head><body>
@@ -674,7 +674,7 @@ a.nav-b{ text-decoration:none; }
 <button class="devbtn" id="devbtn" type="button" hidden>制作用</button>
 <div class="dev" id="dev" hidden></div>
 <script>
-/* LIFE BOOK game version: v178.16 (2026-11-17) */ var LB_VER='v178.16';
+/* LIFE BOOK game version: v178.17 (2026-11-17) */ var LB_VER='v178.17';
 // ===== データ1：国・名前 =====
 // 試作版の仮データ。出生数の比率（w）、5歳未満の死亡（u5, 1000人あたり）、成人の平均寿命の目安（life）、
 // 家庭の経済状況の割合（econ: 苦しい/中間/裕福）、宗教（葬儀の形）の割合、きょうだいの数の目安（tfr）、
@@ -22804,6 +22804,7 @@ const MBX_CSS=`
 .mbx-top b{ font-size:20px; }
 .mbx h1,.mbx h2{ font-family:inherit; font-weight:700; margin:0; line-height:1.4; } .mbx h1{ font-size:21px; } .mbx h2{ font-size:18px; }
 .mbx-sub{ color:#857A8A; font-size:13px; margin:0; }
+.mbx-credit{ margin:4px 0 0; font-size:10px; line-height:1.4; color:#A99CAB; }
 .mbx-panel{ scroll-margin-top:64px; background:#fff; border:1px solid #F3DCE3; border-radius:18px; padding:14px; display:flex; flex-direction:column; gap:12px; }
 .mbx-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; flex-wrap:wrap; }
 .mbx-crumbs{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-size:14px; }
@@ -22899,7 +22900,11 @@ const mbxV=(ci,vi)=>MB_CITIES[ci]&&MB_CITIES[ci].views[vi];
 const MBX_TODJ={ morning:'朝', day:'昼', evening:'夕方', night:'夜' };
 const mbxLt=ci=>mbLocal(MB_CITIES[ci].tz||'Asia/Tokyo');
 const mbxLtxt=ci=>{ const L=mbxLt(ci); return `🕐 現地 ${L.hm}（${MBX_TODJ[L.tod]}）`; };
-function mbxDraw(ci,vi,tod,seed){ MB_TOD=tod||mbxLt(ci).tod; mbRVSeed(seed); try{ return mbxV(ci,vi).f(); }catch(e){ try{ console.warn('[街ブラ]',e); }catch(_){} return ''; } finally{ MB_TOD=null; mbRVSeed(); } }
+// 本物の地図から描いた街の写真（日本 v178.16）。mb-photo/{id}-{番号}.webp を、見る時だけ読む
+const MB_PHOTO=new Set(["aichi-1", "aichi-2", "aichi-3", "chiba-1", "chiba-2", "chiba-3", "fukuoka-1", "fukuoka-2", "fukuoka-3", "hiroshima-1", "hiroshima-2", "hiroshima-3", "hokkaido-1", "hokkaido-2", "hokkaido-3", "kanagawa-1", "kanagawa-2", "kanagawa-3", "kyoto-1", "kyoto-2", "kyoto-3", "miyagi-1", "miyagi-2", "miyagi-3", "miyako-1", "miyako-2", "miyako-3", "oita-1", "oita-2", "oita-3", "okinawa-1", "okinawa-2", "okinawa-3", "osaka-1", "osaka-2", "osaka-3", "saitama-1", "saitama-2", "saitama-3", "sapporo-1", "sapporo-2", "sapporo-3", "shiga-1", "shiga-2", "shiga-3", "tanegashima-1", "tanegashima-2", "tanegashima-3", "tokyo-1", "tokyo-2", "tokyo-3", "wakayama-1", "wakayama-2", "wakayama-3"]);
+function mbxCred(ci){ const C=MB_CITIES[ci]; return C&&C.cc==='jp'?'地図データ：国土地理院・© OpenStreetMap contributors':'地図データ：© OpenStreetMap contributors・© OpenMapTiles'; }
+function mbxPhoto(ci,vi){ const C=MB_CITIES[ci]; const k=C&&(C.id+'-'+(vi+1)); return k&&MB_PHOTO.has(k)?k:''; }
+function mbxDraw(ci,vi,tod,seed){ const pk=mbxPhoto(ci,vi); if(pk) return `<img class="mb-scene mb-photo" src="mb-photo/${pk}.webp" alt="" loading="lazy" decoding="async" width="900" style="background:#CFEAF8">`; MB_TOD=tod||mbxLt(ci).tod; mbRVSeed(seed); try{ return mbxV(ci,vi).f(); }catch(e){ try{ console.warn('[街ブラ]',e); }catch(_){} return ''; } finally{ MB_TOD=null; mbRVSeed(); } }
 function mbxGet(){ try{ if(typeof store!=='undefined'&&store.get){ const a=store.get(MBX_KEY,[]); return Array.isArray(a)?a:[]; } const a=JSON.parse(localStorage.getItem(MBX_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
 function mbxSet(a){ try{ if(typeof store!=='undefined'&&store.set) store.set(MBX_KEY,a); else localStorage.setItem(MBX_KEY,JSON.stringify(a)); }catch(e){} }
 function mbxToast(t){ const d=document.createElement('div'); d.className='mbx-toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2200); }
@@ -22909,7 +22914,7 @@ let mbxEl=null, mbxLv={ reg:null, cty:null }, mbxCur=-1, mbxTimer=0;
 // 大きな写真（街の写真・Life Home の帯・アルバムから開く）
 function mbxModal(c,v,saved){ const vv=mbxV(c,v); if(!vv) return; mbxCss(); const tod=saved?(saved.tod||'day'):mbxLt(c).tod; let flip=saved?!!saved.f:false, big=false, rs=0;
   const m=document.createElement('div'); m.className='mbx-modal';
-  m.innerHTML=`<div class="mbx-mbox" role="dialog" aria-modal="true" aria-label="${vv.pl}"><button class="mbx-x" type="button" aria-label="とじる">✕</button><div class="mbx-stage${flip?' mbx-flip':''}">${mbxDraw(c,v,tod,saved?saved.s:(rs=(Math.random()*1e9)|0))}</div><div class="mbx-row"><div><h2>${vv.t}${saved?'':`<span class="mbx-ltime" data-mbxlt="${c}">${mbxLtxt(c)}</span>`}</h2><p class="mbx-sub">📍 ${vv.addr}</p></div><div class="mbx-btns">${saved?'':'<button class="mbx-pbtn mbx-sub2" type="button" data-a="flip">🔄 角度をかえる</button><button class="mbx-pbtn mbx-sub2" type="button" data-a="zoom">🔍 大きく</button><button class="mbx-pbtn" type="button" data-a="shot">📸 写真をとる</button>'}</div></div><p class="mbx-desc">${saved?`${saved.d} にとった写真`:vv.d}</p></div>`;
+  m.innerHTML=`<div class="mbx-mbox" role="dialog" aria-modal="true" aria-label="${vv.pl}"><button class="mbx-x" type="button" aria-label="とじる">✕</button><div class="mbx-stage${flip?' mbx-flip':''}">${mbxDraw(c,v,tod,saved?saved.s:(rs=(Math.random()*1e9)|0))}</div><div class="mbx-row"><div><h2>${vv.t}${saved||mbxPhoto(c,v)?'':`<span class="mbx-ltime" data-mbxlt="${c}">${mbxLtxt(c)}</span>`}</h2><p class="mbx-sub">📍 ${vv.addr}</p>${mbxPhoto(c,v)?`<p class="mbx-credit">${mbxCred(c)}</p>`:''}</div><div class="mbx-btns">${saved?'':(mbxPhoto(c,v)?'':'<button class="mbx-pbtn mbx-sub2" type="button" data-a="flip">🔄 角度をかえる</button>')+'<button class="mbx-pbtn mbx-sub2" type="button" data-a="zoom">🔍 大きく</button><button class="mbx-pbtn" type="button" data-a="shot">📸 写真をとる</button>'}</div></div><p class="mbx-desc">${saved?`${saved.d} にとった写真`:vv.d}</p></div>`;
   document.body.appendChild(m); const st=m.querySelector('.mbx-stage'); if(saved) mbxFreeze(st,saved.t);
   m.querySelector('.mbx-x').focus();
   m.addEventListener('click',e=>{ if(e.target===m||e.target.closest('.mbx-x')){ m.remove(); return; } const b=e.target.closest('[data-a]'); if(!b) return; const a=b.dataset.a;
@@ -22926,6 +22931,7 @@ function mbxMapAct(t){ const g=t.closest('[data-reg],[data-cty],[data-city]'); i
   if(g.dataset.reg){ mbxLv.reg=g.dataset.reg; mbxLv.cty=null; mbxMap(); } else if(g.dataset.cty){ if(!mbmHasCity(g.dataset.cty)) return; mbxLv.cty=g.dataset.cty; mbxMap(); } }
 function mbxCity(ci){ if(ci<0) return; mbxCur=ci; const C=MB_CITIES[ci]; mbxQ('.mbx-cname').textContent=C.name; mbxQ('.mbx-carea').textContent=C.area; mbxQ('.mbx-ctime').textContent=mbxLtxt(ci); mbxQ('.mbx-city').hidden=false;
   mbxQ('.mbx-photos').innerHTML=C.views.map((v,i)=>`<button class="mbx-pc" type="button" data-v="${i}" style="--rot:${[-2,1.5,-1][i]}deg;--dl:${i*.12}s"><span class="mbx-new">NEW</span>${mbxDraw(ci,i)}<span class="mbx-cap">${v.t}</span><span class="mbx-ad">${v.addr}</span></button>`).join('');
+  { const cr=mbxQ('.mbx-ccred'); if(cr) cr.textContent=C.views.some((v,i)=>mbxPhoto(ci,i))?mbxCred(ci):''; }
   mbxQ('.mbx-city').scrollIntoView({ behavior:'smooth' }); }
 function mbxAlbum(){ if(!mbxEl) return; const al=mbxGet(); const list=al.map((a,i)=>({ a, i, ci:mbxCI(a.c) })).filter(x=>x.ci>=0&&mbxV(x.ci,x.a.v)).slice(0,12); const box=mbxQ('.mbx-album');
   if(!list.length){ box.innerHTML='<p class="mbx-empty">まだ写真がありません。街の写真を開いて「📸 写真をとる」を押してみてね。</p>'; return; }
@@ -22939,7 +22945,7 @@ function machiBuraOpen(cityId){ try{ mbxCss(); const goId=typeof cityId==='strin
   el.innerHTML=`<div class="mbx-wrap">
   <div class="mbx-top"><b>🟡 街ブラ</b><button class="mbx-pbtn mbx-sub2 mbx-close" type="button">✕ とじる</button></div>
   <section class="mbx-panel"><div><h1>どこへ行く？</h1><p class="mbx-sub">地図をタップして、行きたい街をえらんでね</p></div><nav class="mbx-crumbs" aria-label="いまの場所"></nav><div class="mbx-map"></div><p class="mbx-legend">ピンのほかに、下のボタンからもえらべます</p></section>
-  <section class="mbx-panel mbx-city" hidden><div class="mbx-row"><div><h1 class="mbx-cname"></h1><p class="mbx-sub"><span class="mbx-carea"></span><span class="mbx-ltime mbx-ctime"></span></p></div><button class="mbx-pbtn mbx-sub2 mbx-back" type="button">◀ 地図にもどる</button></div><p class="mbx-sub">この街の写真は3枚。押すと大きくなります。</p><div class="mbx-photos"></div></section>
+  <section class="mbx-panel mbx-city" hidden><div class="mbx-row"><div><h1 class="mbx-cname"></h1><p class="mbx-sub"><span class="mbx-carea"></span><span class="mbx-ltime mbx-ctime"></span></p></div><button class="mbx-pbtn mbx-sub2 mbx-back" type="button">◀ 地図にもどる</button></div><p class="mbx-sub">この街の写真は3枚。押すと大きくなります。</p><div class="mbx-photos"></div><p class="mbx-credit mbx-ccred"></p></section>
   <section class="mbx-panel"><div><h1>📔 観光アルバム</h1><p class="mbx-sub">📸でとった写真が、ここにたまっていきます。</p></div><div class="mbx-album"></div></section>
   <button class="mbx-pbtn mbx-sub2 mbx-close" type="button" style="align-self:center">← Life Home にもどる</button></div>`;
   document.body.appendChild(el); mbxEl=el; document.documentElement.style.overflow='hidden';
@@ -22967,7 +22973,7 @@ function mbxStripKeys(){ const keys=MB_STRIP.filter(k=>MB_THUMB2[k]); let last=[
 // 流れている街を押した時：帯と同じ「本物の地図から描いた絵」を大きく見せる（MITSUさん 11-17）。大きい絵は mb-big/〇〇.webp（押した時だけ読む）、無い時は帯の絵
 function mbxStripModal(c,v){ const C=MB_CITIES[c], vv=mbxV(c,v); if(!C||!vv) return; mbxCss(); const key=C.id+'-'+(v+1), th=MB_THUMB2[key]||'';
   const m=document.createElement('div'); m.className='mbx-modal';
-  m.innerHTML=`<div class="mbx-mbox" role="dialog" aria-modal="true" aria-label="${C.name}"><button class="mbx-x" type="button" aria-label="とじる">✕</button><div class="mbx-stage" style="background:#BFE6F7"><img src="mb-big/${C.id}.webp" alt="${C.name}の街の絵" style="display:block;width:100%;height:auto;aspect-ratio:900/630;object-fit:contain"></div><div class="mbx-row"><div><h2>${C.name}</h2><p class="mbx-sub">📍 ${vv.addr}</p></div><div class="mbx-btns"><button class="mbx-pbtn" type="button" data-a="go">🟡 街ブラへ行く</button></div></div></div>`;
+  m.innerHTML=`<div class="mbx-mbox" role="dialog" aria-modal="true" aria-label="${C.name}"><button class="mbx-x" type="button" aria-label="とじる">✕</button><div class="mbx-stage" style="background:#BFE6F7"><img src="mb-big/${C.id}.webp" alt="${C.name}の街の絵" style="display:block;width:100%;height:auto;aspect-ratio:900/630;object-fit:contain"></div><div class="mbx-row"><div><h2>${C.name}</h2><p class="mbx-sub">📍 ${vv.addr}</p><p class="mbx-credit">${mbxCred(c)}</p></div><div class="mbx-btns"><button class="mbx-pbtn" type="button" data-a="go">🟡 街ブラへ行く</button></div></div></div>`;
   const im=m.querySelector('.mbx-stage img'); im.addEventListener('error',()=>{ if(th&&im.src!==th) im.src=th; },{ once:true });
   document.body.appendChild(m); m.querySelector('.mbx-x').focus();
   m.addEventListener('click',e=>{ if(e.target===m||e.target.closest('.mbx-x')){ m.remove(); return; } const b=e.target.closest('[data-a="go"]'); if(b){ m.remove(); machiBuraOpen(C.id); } }); }
@@ -22977,7 +22983,7 @@ function mbxUnivModal(){ if(typeof MB_UNIV==='undefined') return; mbxCss(); cons
 function mbxStripBuild(){ const isl=mbxStripKeys().map(key=>{ if(key==='univ') return `<button type="button" class="mbx-isle" data-u="1" aria-label="LIFE BOOK大学の絵をひらく"><img src="${MB_UNIV.thumb}" alt="" width="320" height="220" loading="lazy" decoding="async"><span class="mbx-fc"><b>LIFE BOOK大学</b><span>月の裏側</span></span></button>`; const k=key.lastIndexOf('-'), id=key.slice(0,k), vi=+key.slice(k+1)-1, ci=mbxCI(id); if(ci<0||!MB_THUMB2[key]) return ''; const C=MB_CITIES[ci], v=mbxV(ci,vi);
     return `<button type="button" class="mbx-isle" data-c="${ci}" data-v="${vi}" aria-label="${v.pl}の写真をひらく"><img src="${MB_THUMB2[key]}" alt="" width="320" height="220" loading="lazy" decoding="async"><span class="mbx-fc"><b>${C.name.replace(/^.*・/,'')}</b><span>${C.area.split('・')[0]}</span></span></button>`; }).join('');
   const s=document.createElement('section'); s.className='mbx-strip'; s.setAttribute('aria-label','いろんな街');
-  s.innerHTML=`<p class="mbx-st">いろんな街が、空に浮かんでいます</p><p class="mbx-sn">街は、その国の本当の時間に合わせて、朝・昼・夕方・夜で見え方が変わります</p><div class="mbx-view"><div class="mbx-track">${isl}${isl.replace(/<button /g,'<button tabindex="-1" aria-hidden="true" ')}</div></div><button type="button" class="mbx-pbtn mbx-go">🟡 街ブラへ行く</button>`;
+  s.innerHTML=`<p class="mbx-st">いろんな街が、空に浮かんでいます</p><p class="mbx-sn">街は、その国の本当の時間に合わせて、朝・昼・夕方・夜で見え方が変わります</p><div class="mbx-view"><div class="mbx-track">${isl}${isl.replace(/<button /g,'<button tabindex="-1" aria-hidden="true" ')}</div></div><button type="button" class="mbx-pbtn mbx-go">🟡 街ブラへ行く</button><p class="mbx-credit">地図データ：国土地理院・© OpenStreetMap contributors・© OpenMapTiles</p>`;
   s.querySelector('.mbx-track').addEventListener('click',e=>{ const b=e.target.closest('.mbx-isle'); if(!b) return; if(b.dataset.u) mbxUnivModal(); else mbxStripModal(+b.dataset.c,+b.dataset.v); });
   s.querySelector('.mbx-go').addEventListener('click',machiBuraOpen); return s; }
 let mbxAway=false;
