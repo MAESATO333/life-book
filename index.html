@@ -635,12 +635,56 @@ var tag=function(e,fs,force,want){ if(!force&&!N.length) return; var rs=e.queryS
     s+='<text x="'+((minx+maxx)/2).toFixed(1)+'" y="'+(top-fs*.35).toFixed(1)+'" font-size="'+(fs*.9).toFixed(1)+'" text-anchor="middle" fill="#E0457B" font-weight="700" stroke="#FFFFFF" stroke-width="'+(fs*.28).toFixed(2)+'" paint-order="stroke">'+(all?'♡ 友だち':'友だちの友だち')+'</text>'; }
   var g=document.createElementNS(NS,'g'); g.innerHTML=s; e.appendChild(g); e._tag=[st,NM,seats.length>=2?LB:0]; if(!force){ var used=G.slice(0,seats.length); used.forEach(function(i){ ON[i]=1; }); e._hs=used; } };
 tag.on=ON; tag.nm=function(i){ return N[i]; };
+// ---- 友だちのペット（ゲームが 'hitotsu.gwPets' に、名前・種類・飼い主のHigher Self名だけを入れている）。乗り物に、だれかと一緒に乗る ----
+var PETS=[], PON={};
+(function(){ var L=ls('hitotsu.gwPets'); if(Array.isArray(L)) L.forEach(function(p){ if(p&&p.n&&p.s&&!/fish|whale|gold/.test(p.s)) PETS.push({n:String(p.n).slice(0,12),s:String(p.s),o:String(p.o||'').slice(0,20)}); }); })();
+tag.pets=function(){ return PETS.filter(function(p){ return !PON[p.n+'|'+p.o]; }); };
+tag.find=function(nm){ var i=N.indexOf(nm); return i>=0&&free(i)?i:-1; };
+tag.petFree=function(e){ if(e&&e._pk) delete PON[e._pk]; };
+function hsh(t){ var h=0; for(var i=0;i<t.length;i++) h=(h*31+t.charCodeAt(i))>>>0; return h; }
+function petSVG(sp,nm,body){ var h=hsh(nm), q=function(a){ return a[h%a.length]; }, o='', E='<circle cx="3.6" cy="-2.6" r="1.4" fill="#1E1A1C"/><circle cx="4" cy="-3" r=".45" fill="#fff"/>';
+  var c={dog:q(['#C98A4B','#FFFFFF','#E8C77A','#34363C','#B07A4A']),cat:q(['#F2A65A','#FFFFFF','#9AA1AA','#34363C','#E8C77A']),rabbit:q(['#FFFFFF','#B8A089','#E9E6E2']),hamster:q(['#F2C08A','#FFFFFF','#E8C77A']),bird:q(['#7FB8E0','#F2C230','#8CCB7E','#FFFFFF']),panda:'#FFFFFF',polarbear:'#F7F3EA',goat:'#F2EEE6',sheep:'#FFF8EC',lion:'#E8B04A',cheetah:'#E9B85A',giraffe:'#F2C45A',elephant:'#A9B0BA',eagle:'#FFFFFF',hawk:'#9A6B45',kangaroo:'#B9835A',dino:'#7CCB6E'}[sp]||'#C98A4B';
+  var dk=c==='#FFFFFF'||c==='#F7F3EA'||c==='#FFF8EC'?'#C9BFB2':'rgba(0,0,0,.25)';
+  if(body) o+='<ellipse cx="-9" cy="12" rx="11" ry="8" fill="'+c+'"/><ellipse cx="-9" cy="12" rx="11" ry="8" fill="none" stroke="'+dk+'" stroke-width=".8"/>';
+  if(sp==='lion') o+='<circle cx="-1" cy="0" r="14.5" fill="#B5652B"/>';
+  if(sp==='elephant') o+='<ellipse cx="-5" cy="1" rx="7.5" ry="10" fill="#8E96A2"/>';
+  if(sp==='dog') o+='<ellipse cx="-6" cy="-1" rx="3.6" ry="7.5" fill="'+(c==='#FFFFFF'?'#E9D9A6':'#7A5236')+'" transform="rotate(18 -6 -1)"/>';
+  if(sp==='cat') o+='<path d="M-9 -4 L-6 -15 L-1 -8 Z M1 -8 L6 -15 L8 -4 Z" fill="'+c+'"/><path d="M-7 -6 L-5.6 -12 L-3 -8 Z" fill="#F7B2C4"/>';
+  if(sp==='rabbit'||sp==='kangaroo') o+='<ellipse cx="-4" cy="-13" rx="2.8" ry="8" fill="'+c+'"/><ellipse cx="1.5" cy="-14" rx="2.8" ry="8" fill="'+c+'"/><ellipse cx="1.5" cy="-14" rx="1.2" ry="5.5" fill="#F7B2C4"/>';
+  if(sp==='hamster'||sp==='polarbear') o+='<circle cx="-6" cy="-8" r="3.4" fill="'+c+'"/><circle cx="4" cy="-9" r="3.4" fill="'+c+'"/><circle cx="4" cy="-9" r="1.6" fill="'+dk+'"/>';
+  if(sp==='panda') o+='<circle cx="-6" cy="-8" r="3.6" fill="#1E1A1C"/><circle cx="4" cy="-9" r="3.6" fill="#1E1A1C"/>';
+  if(sp==='goat') o+='<path d="M-3 -8 q-6 -10 -12 -6 q6 -1 9 7 Z M2 -9 q-2 -10 -8 -10 q5 3 5 10 Z" fill="#8E8A86"/>';
+  if(sp==='giraffe') o+='<line x1="-3" y1="-8" x2="-4" y2="-15" stroke="#C9A23A" stroke-width="1.8"/><line x1="2" y1="-8" x2="2" y2="-15" stroke="#C9A23A" stroke-width="1.8"/><circle cx="-4" cy="-15.5" r="1.8" fill="#8B5A3C"/><circle cx="2" cy="-15.5" r="1.8" fill="#8B5A3C"/>';
+  if(sp==='dino') o+='<path d="M-12 -2 l-2 -6 l4 2 l0 -7 l4 4 l2 -7 l3 6 Z" fill="#4E9C46"/>';
+  if(sp==='cheetah'||sp==='bird'||sp==='eagle'||sp==='hawk') o+='';
+  o+=(sp==='dino'?'<ellipse cx="2" cy="0" rx="12" ry="8.5" fill="'+c+'"/>':'<circle cx="0" cy="0" r="10" fill="'+c+'"/>')+'<circle cx="0" cy="0" r="10" fill="none" stroke="'+dk+'" stroke-width=".7"'+(sp==='dino'?' opacity="0"':'')+'/>';
+  if(sp==='sheep') o+=[[-7,-7],[-2,-10],[4,-9],[-9,-1],[8,-5]].map(function(p){ return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="4.2" fill="#FFFFFF" stroke="#E9DFCF" stroke-width=".6"/>'; }).join('')+'<ellipse cx="4" cy="1" rx="5.5" ry="6" fill="#5A4A42"/>';
+  if(sp==='panda') o+='<ellipse cx="3.8" cy="-2.2" rx="3" ry="3.8" fill="#1E1A1C"/>';
+  if(sp==='giraffe') o+='<circle cx="-5" cy="2" r="2.4" fill="#B5652B"/><circle cx="-1" cy="-5" r="1.8" fill="#B5652B"/><circle cx="-6" cy="-5" r="1.4" fill="#B5652B"/>';
+  if(sp==='cheetah') o+=[[-6,-3],[-3,-7],[-7,3],[-2,5],[1,-6]].map(function(p){ return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="1" fill="#5A3A22"/>'; }).join('')+'<path d="M3.4 -1 Q4 4 7 6" stroke="#1E1A1C" stroke-width=".9" fill="none"/>';
+  o+=sp==='sheep'?'<circle cx="5.6" cy="-1" r="1.1" fill="#fff"/>':sp==='panda'?'<circle cx="4" cy="-2.6" r="1.1" fill="#fff"/>':E;
+  if(sp==='bird'||sp==='eagle'||sp==='hawk'){ o+='<path d="M8 -3 L'+(sp==='bird'?'15 0':'15 1 Q14 5 11 3')+' L8 3 Z" fill="'+(sp==='hawk'?'#3A3340':'#F2B02E')+'"/>'; if(sp==='hawk') o+='<path d="M0 -3 q5 -3 9 1 q-2 6 -8 6 Z" fill="#F3E3B5" opacity=".9"/>'+E; }
+  else if(sp==='elephant') o+='<path d="M8 0 q6 4 4 12 q-1 2 -3 0 q1 -6 -4 -8 Z" fill="'+c+'"/>';
+  else if(sp==='dino') o+='<path d="M7 4 q4 2 7 -1" stroke="#2E5E2A" stroke-width="1" fill="none"/>';
+  else if(sp!=='sheep'){ o+='<ellipse cx="7" cy="3" rx="5" ry="3.8" fill="'+(sp==='lion'||sp==='cheetah'||sp==='giraffe'||sp==='kangaroo'?'#F7E3B5':'rgba(255,255,255,.55)')+'"/><circle cx="10.6" cy="2" r="1.7" fill="'+(sp==='cat'||sp==='rabbit'||sp==='hamster'?'#E8607A':'#1E1A1C')+'"/>'; if(sp==='cat') o+='<path d="M9 5 l6 1 M9 6 l6 3" stroke="#8E8A86" stroke-width=".5"/>'; if(sp==='goat') o+='<path d="M6 8 l2 7 l3 -7 Z" fill="#D9D6D2"/>'; }
+  if(sp==='polarbear'||sp==='lion'||sp==='hamster'||sp==='panda'||sp==='dog'||sp==='rabbit'||sp==='cat') o+='<circle cx="-1" cy="4" r="2" fill="#F7B2C4" opacity=".55"/>';
+  return o; }
+// ペット e（乗り物）に乗せる。force＝写真から作り直す時の [席, 種類, 名前]
+tag.pet=function(e,fs,p,force){ var rs=e.querySelectorAll('.rv-rider'); if(!rs.length) return; var inv=e.getCTM(); if(!inv) return; inv=inv.inverse(); var H=[];
+  for(var q=0;q<rs.length;q++){ var r=rs[q], c=null; if(r.getAttribute('data-al')) continue; for(var i=0;i<r.children.length;i++){ var ch=r.children[i]; if(ch.tagName==='circle'&&+ch.getAttribute('r')>5){ c=ch; break; } } if(!c) continue; var M=c.getCTM(); if(!M) continue; M=inv.multiply(M);
+    var cx=+c.getAttribute('cx'), cy=+c.getAttribute('cy'), rr=+c.getAttribute('r'); H.push({el:r,x:M.a*cx+M.c*cy+M.e, y:M.b*cx+M.d*cy+M.f, r:Math.abs(M.d)*rr}); }
+  if(!H.length) return; H.sort(function(a,b){ return a.x-b.x; }); var fc=e.firstChild, flip=!!(fc&&fc.getAttribute&&/scale\(-1/.test(fc.getAttribute('transform')||'')), sg=flip?-1:1, front=flip?0:H.length-1, s0;
+  if(force) s0=force[0]; else { var used={}; if(e._tag) for(var u=e._tag[0];u<e._tag[0]+e._tag[1].length;u++) used[u]=1; var cand=[]; H.forEach(function(h,i){ if(!used[i]&&i!==front) cand.push(i); }); s0=cand.length?pk(cand):-1; }
+  var h, body=false, cx2, cy2, rr2; if(s0>=0&&H[s0]){ h=H[s0]; h.el.style.display='none'; cx2=h.x; cy2=h.y; rr2=h.r*1.05; } else { h=H[front]; cx2=h.x-sg*h.r*2.1; cy2=h.y+h.r*1.15; rr2=h.r*.95; body=true; s0=-1; }
+  var sp=force?force[1]:p.s, nm=force?force[2]:p.n, k=rr2/10;
+  var t='🐾 '+nm, s='<g transform="translate('+cx2.toFixed(1)+' '+cy2.toFixed(1)+') scale('+(sg*k).toFixed(3)+' '+k.toFixed(3)+')">'+petSVG(sp,nm,body)+'</g>'+pill(cx2,cy2-rr2*(sp==='rabbit'||sp==='kangaroo'||sp==='giraffe'?2.4:1.5)-fs*.3,t,fs*.92);
+  var g=document.createElementNS(NS,'g'); g.innerHTML=s; e.appendChild(g); e._pet=[s0,sp,nm]; if(!force){ e._pk=p.n+'|'+p.o; PON[e._pk]=1; } };
 // 歩いて話すふたり：友だち同士（1）か、友だちの友だち（2）
 tag.pair=function(){ var c=[]; for(var i=0;i<N.length;i++) if(free(i)&&Object.keys(F[i]).length) c.push(i); if(!c.length) return null; var a=pk(c), f=fr(a).filter(free), o=fof(a);
   if(f.length&&(R()<.65||!o.length)) return [a,pk(f),1]; if(o.length) return [a,pk(o),2]; return null; };
 return tag;
 })();
-function hsFree(e){ try{ (e._hs||[]).forEach(function(i){ delete HS.on[i]; }); }catch(er){} }
+function hsFree(e){ try{ (e._hs||[]).forEach(function(i){ delete HS.on[i]; }); HS.petFree(e); }catch(er){} }
 // 吹き出し（cx＝頭のまん中、by＝吹き出しの下のはし）
 function sayG(cx,by,tx,fs){ function e2(t){ return String(t).replace(/[&<>]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); } var w=tx.length*fs+fs*1.6, h=fs*1.7, y0=by-h, sw=(fs*.1).toFixed(2);
   return '<path d="M'+(cx-fs*.5).toFixed(1)+' '+by.toFixed(1)+' L'+cx.toFixed(1)+' '+(by+fs*.6).toFixed(1)+' L'+(cx+fs*.5).toFixed(1)+' '+by.toFixed(1)+'Z" fill="#FFF7FB" stroke="#F06C9B" stroke-width="'+sw+'"/><rect x="'+(cx-w/2).toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="'+(h*.45).toFixed(1)+'" fill="#FFF7FB" stroke="#F06C9B" stroke-width="'+sw+'"/><text x="'+cx.toFixed(1)+'" y="'+(y0+h*.68).toFixed(1)+'" font-size="'+fs.toFixed(1)+'" text-anchor="middle" fill="#4A3B47" font-weight="700">'+e2(tx)+'</text>'; }
@@ -649,7 +693,7 @@ function gwRender(rec,D,host){ var wide=!!rec.w, bg=wide?D.bgW:D.bgN, v=bg.vb.sp
   var tr='<rect x="'+X0+'" y="118" width="'+W+'" height="4" fill="#9AA3AE"/>'; for(var px=X0+14;px<X0+W;px+=46) tr+='<rect x="'+px+'" y="122" width="5" height="48" fill="#B4BCC6" opacity=".85"/>';
   var cars=''; rec.c.forEach(function(c){ var sp=D.spr[c[0]]; if(!sp) return; var g=PP(sp.g,c[4]); cars+='<g class="gw-car" transform="translate('+c[1]+' '+c[2]+')'+(c[6]?' scale('+c[6]+')':'')+'">'+(c[3]<0?'<g transform="translate('+sp.w+' 0) scale(-1 1)">'+g+'</g>':g)+'</g>'; });
   host.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" class="gw-photo" viewBox="'+(rec.z?rec.z.join(' '):bg.vb)+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="海辺の街の写真">'+PDEFS+'<g>'+PP(bg.inner,rec.b)+'</g>'+tr+cars+'</svg>';
-  var gs=host.querySelectorAll('.gw-car'), j=0; rec.c.forEach(function(c){ if(!D.spr[c[0]]) return; var e=gs[j++]; if(c[5]&&e) try{ HS(e,wide?4.4:6.6,c[5]); }catch(er){} });
+  var gs=host.querySelectorAll('.gw-car'), j=0; rec.c.forEach(function(c){ if(!D.spr[c[0]]) return; var e=gs[j++]; if(c[5]&&e) try{ HS(e,wide?4.4:6.6,c[5]); }catch(er){} if(c[7]&&e) try{ HS.pet(e,wide?4.4:6.6,null,c[7]); }catch(er){} });
   if(rec.q&&gs[rec.q[1]]) try{ var se=gs[rec.q[1]], bb=se.getBBox(), fs=rec.z?Math.max(3,rec.z[3]/22):(wide?4.6:6.8), g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.innerHTML=sayG(bb.x+bb.width/2,bb.y-fs*.7,String(rec.q[0]).slice(0,24),fs); se.appendChild(g); }catch(er){}
   return host.firstChild; }
 /*PDSHARED-END*/
@@ -673,7 +717,8 @@ function mk(l,s,dir,y,sp,x,want,k){ var e=document.createElementNS(NS,'g'); var 
 function spawn(l){ var s=pick(l.list); if(!s) return; var dir=l.o.dir||(Math.random()<.5?1:-1); var y=rnd(l.o.y[0],l.o.y[1]); var sp=rnd(l.o.sp[0],l.o.sp[1])*SLOW;
   var x=dir>0?X0-s.w-40:X0+W+40, p=null, ex=0; if(l.o.lane==='walk'&&HS.pair&&Math.random()<.5) try{ p=HS.pair(); }catch(er){}
   var wk=l.o.lane==='walk', K=function(){ return wk?+(Math.random()<.1&&!p?rnd(.6,.72):rnd(.84,1.12)).toFixed(2):0; }, k1=K(); /* 背の高さもいろいろ（たまに子ども） */
-  var c=mk(l,s,dir,y,sp,x,p?[p[0]]:null,k1);
+  var pp=null, oi=-1; if((l.o.lane==='road'||l.o.lane==='lane2')&&HS.pets&&Math.random()<.28){ var PL=HS.pets(); if(PL.length){ pp=PL[Math.floor(Math.random()*PL.length)]; oi=HS.find(pp.o); } } /* 友だちのペットが、ときどき（飼い主と）乗っている */
+  var c=mk(l,s,dir,y,sp,x,p?[p[0]]:oi>=0?[oi]:null,k1); if(pp) try{ HS.pet(c.e,wideNow?4.4:6.6,pp); }catch(er){}
   if(p&&c.e._hs){ var s2=pick(l.list), k2=K(), w2=s2.w*(k2||1), c2=mk(l,s2,dir,y,sp,dir>0?x-w2-9:x+c.w+9,[p[1]],k2); ex=w2+9; if(c2.e._hs) talk(c,c2,p); }
   l.wait=(c.w+ex+rnd(l.o.gap[0],l.o.gap[1]))/sp; }
 // ---- 💬 歩いている知り合い同士の会話（用意した文だけ。本当のメッセージではありません） ----
@@ -696,9 +741,10 @@ if(window.IntersectionObserver) new IntersectionObserver(function(es){ vis=es[es
 var AK='hitotsu.gwAlbum';
 function alb(){ try{ var a=JSON.parse(localStorage.getItem(AK)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
 function albSet(a){ try{ localStorage.setItem(AK,JSON.stringify(a.slice(0,60))); return true; }catch(e){ return false; } }
-function shot(){ if(!S) return null; var c=[]; lanes.forEach(function(l){ l.cars.forEach(function(k){ if(k.x>X0+W+2||k.x+k.w<X0-2||k.si==null) return; var r=[k.si,+k.x.toFixed(1),+k.y.toFixed(1),k.dir,k.seed]; if(k.e._tag||k.k) r.push(k.e._tag||0); if(k.k) r.push(k.k); c.push(r); }); });
+function rc(k){ var r=[k.si,+k.x.toFixed(1),+k.y.toFixed(1),k.dir,k.seed], x=[k.e._tag||0,k.k||0,k.e._pet||0]; while(x.length&&!x[x.length-1]) x.pop(); return r.concat(x); }
+function shot(){ if(!S) return null; var c=[]; lanes.forEach(function(l){ l.cars.forEach(function(k){ if(k.x>X0+W+2||k.x+k.w<X0-2||k.si==null) return; c.push(rc(k)); }); });
   var rec={v:1,w:wideNow?1:0,b:BGS,c:c,t:Date.now()};
-  while(JSON.stringify(rec).length>990&&rec.c.length){ var i=-1; for(var q=0;q<rec.c.length;q++) if(!rec.c[q][5]){ i=q; break; } rec.c.splice(i<0?rec.c.length-1:i,1); } // 友だちに送れる大きさ（1000文字まで）
+  while(JSON.stringify(rec).length>990&&rec.c.length){ var i=-1; for(var q=0;q<rec.c.length;q++) if(!rec.c[q][5]&&!rec.c[q][7]){ i=q; break; } rec.c.splice(i<0?rec.c.length-1:i,1); } // 友だちに送れる大きさ（1000文字まで）
   return rec; }
 var cam=document.getElementById('pdShot'), albB=document.getElementById('pdAlb'), msg=document.getElementById('pdMsg'), dlg=document.getElementById('pdAlbum'), grid=document.getElementById('pdGrid'), more=document.getElementById('pdMore'), flash=document.getElementById('pdFlash'), shown=0, mt=0;
 function albCount(){ var n=alb().length; if(albB) albB.querySelector('span').textContent=n?'（'+n+'）':''; }
@@ -722,7 +768,7 @@ function pickMode(on){ picking=on; box.classList.toggle('pick',on); if(pickB){ p
 if(pickB) pickB.addEventListener('click',function(){ pickMode(!picking); });
 function bbOf(c){ var b=c.e.getBBox(), k=c.k||1; return {x:c.x+b.x*k,y:c.y+b.y*k,w:b.width*k,h:b.height*k}; }
 function closeShot(c){ var set=[c], tk=null; TK.forEach(function(t){ if(t.a===c||t.b===c) tk=t; }); if(tk) set=[tk.a,tk.b];
-  var cs=[], x1=1e9,y1=1e9,x2=-1e9,y2=-1e9, q=null; set.forEach(function(k){ var r=[k.si,+k.x.toFixed(1),+k.y.toFixed(1),k.dir,k.seed]; if(k.e._tag||k.k) r.push(k.e._tag||0); if(k.k) r.push(k.k); cs.push(r);
+  var cs=[], x1=1e9,y1=1e9,x2=-1e9,y2=-1e9, q=null; set.forEach(function(k){ cs.push(rc(k));
     var b=bbOf(k); x1=Math.min(x1,b.x); y1=Math.min(y1,b.y); x2=Math.max(x2,b.x+b.w); y2=Math.max(y2,b.y+b.h); });
   if(tk){ var ii=tk.i<0?0:tk.i, sp=ii%2; q=[TL[tk.cv][ii],sp]; y1-=14; var tx=TL[tk.cv][ii]; x1=Math.min(x1,(x1+x2)/2-tx.length*2.5); x2=Math.max(x2,(x1+x2)/2+tx.length*2.5); }
   var pad=10, w=x2-x1+pad*2, h=y2-y1+pad*2, A=360/250; if(w/h>A) h=w/A; else w=h*A; var cx=(x1+x2)/2, cy=(y1+y2)/2; if(h>250){ h=250; w=h*A; } if(w>W){ w=W; h=w/A; } cx=Math.min(Math.max(cx,X0+w/2),X0+W-w/2); cy=Math.min(Math.max(cy,h/2),250-h/2); /* 絵の外の、何もない所が写らないように */
