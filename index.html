@@ -526,6 +526,51 @@ return function(str){ return str.replace(/<g class="rv-rider"([^>]*)>([\s\S]*?)<
     return '<g class="rv-rider"'+at+'>'+body+'</g>'; }); };
 })();
 
+/* Higher Self の名前（見本）と、友だちのつながり。乗り物に、友だち同士や「友だちの友だち」が偶然いっしょに乗る */
+var HS=(function(){
+var R=Math.random, pk=function(a){ return a[Math.floor(R()*a.length)]; };
+var JP=['ゆい','はると','さくら','そうた','ひな','れん','あおい','ゆうと','めい','そら','こはる','いつき','りん','はるか','かえで','ゆな','みお','たける','あかり','つむぎ','ひなた','ことね','しずく','まひろ','なぎさ','ゆずき','けい','みのり','ちひろ','あゆむ','ほのか','ゆうき','まこと','すみれ','ひかる','のぞみ','ももか','りく','あやね','かなた','ミナ','ユウ','ハル','リコ','ナオ','カイ','モモ','サラ','ルナ','ココ','マリ','アン','ソウ','ヒロ','ユキ','レイ','ナナ','トモ','アミ','ケン','ちぃ','まめ','ぽぽ','こむぎ','うたこ','はなこ','たろう','じろう','さち','あい'];
+var WD=['Leo','Mia','Ana','Kai','Noah','Lina','Sofia','Arjun','Mei','Minh','Emma','Luca','Zoe','Omar','Aiko','Nora','Ivan','Maya','Liam','Ella','Sami','Rosa','Tom','Lily','Yuna','Jin','Hana','Ravi','Iris','Diego','Amara','Felix','Chloe','Kofi','Lea','Max','Nina','Theo','Aya','Ben'];
+var N=[], used={}; JP.forEach(function(n){ N.push(n); }); WD.forEach(function(n){ N.push(n); });
+// 友だちの輪：ひとりにつき 3〜7人の友だち（おたがいに）
+var F=N.map(function(){ return {}; });
+function link(a,b){ if(a!==b){ F[a][b]=1; F[b][a]=1; } }
+N.forEach(function(_,i){ var k=3+Math.floor(R()*4); for(var j=0;j<k;j++){ var b=R()<.6?(i+1+Math.floor(R()*8))%N.length:Math.floor(R()*N.length); link(i,b); } });
+function fr(i){ return Object.keys(F[i]).map(Number); }
+function fof(i){ var s={}; fr(i).forEach(function(b){ fr(b).forEach(function(c){ if(c!==i&&!F[i][c]) s[c]=1; }); }); return Object.keys(s).map(Number); }
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(R()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+// k人の組を作る：kind は 'fr'（みんな友だち）か 'fof'（友だちの友だち）か 'one'
+function group(k){ var a=pickA();
+  if(k<=1) return {kind:'one',m:[a]};
+  if(R()<.25){ var o=fof(a); if(o.length){ var b=pk(o); var mid=fr(a).filter(function(x){ return F[b][x]; }); return {kind:'fof',m:[a,b],via:mid.length?mid[0]:null}; } }
+  var m=[a]; shuffle(fr(a)).forEach(function(b){ if(m.length<k&&m.every(function(x){ return F[x][b]; })) m.push(b); });
+  if(m.length<k) shuffle(fr(a)).forEach(function(b){ if(m.length<k&&m.indexOf(b)<0) m.push(b); });
+  return {kind:'fr',m:m}; }
+var NS='http://www.w3.org/2000/svg';
+function esc(t){ return String(t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function pill(x,y,t,fs,friend){ var w=t.length*fs*(/^[\x00-\x7F]+$/.test(t)?.62:1)+fs*1.1, h=fs*1.45;
+  return '<g class="hs-tag"><rect x="'+(x-w/2).toFixed(1)+'" y="'+(y-h).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="'+(h/2).toFixed(1)+'" fill="#FFFFFF" fill-opacity=".92" stroke="'+(friend?'#F06C9B':'#B9C3CF')+'" stroke-width="'+(fs*.12).toFixed(2)+'"/><text x="'+x.toFixed(1)+'" y="'+(y-h*.3).toFixed(1)+'" font-size="'+fs.toFixed(1)+'" text-anchor="middle" fill="#4A3B47" font-weight="700">'+esc(t)+'</text></g>'; }
+// 乗り物 e（ページに入れたあと）に、名前のふだを付ける
+// 本当の友だちのつながり（運営者ページが os/parade に、Higher Self名と「だれとだれが友だちか」だけを書く）。読めないときは見本の名前
+function useReal(n,e){ if(!n||n.length<2||!e||!e.length) return; N=n.slice(); F=N.map(function(){ return {}; }); e.forEach(function(p){ if(N[p[0]]!=null&&N[p[1]]!=null) link(p[0],p[1]); });
+  var keep=N.map(function(_,i){ return Object.keys(F[i]).length>0; }); REAL=keep.some(Boolean); }
+var REAL=false;
+try{ fetch('https://firestore.googleapis.com/v1/projects/lifebook-dcae9/databases/(default)/documents/os/parade').then(function(r){ return r.ok?r.json():null; }).then(function(d){ try{ var j=JSON.parse(d.fields.j.stringValue); useReal(j.n,j.e); }catch(er){} }).catch(function(){}); }catch(er){}
+function pickA(){ if(!REAL) return Math.floor(R()*N.length); var c=[]; for(var i=0;i<N.length;i++) if(Object.keys(F[i]).length) c.push(i); return pk(c); }
+return function(e,fs){ var rs=e.querySelectorAll('.rv-rider'); if(!rs.length||R()<.12) return; var inv=e.getCTM(); if(!inv) return; inv=inv.inverse(); var H=[];
+  for(var q=0;q<rs.length;q++){ var r=rs[q], c=null; for(var i=0;i<r.children.length;i++){ var ch=r.children[i]; if(ch.tagName==='circle'&&+ch.getAttribute('r')>5){ c=ch; break; } } if(!c) continue; var M=c.getCTM(); if(!M) continue; M=inv.multiply(M);
+    var cx=+c.getAttribute('cx'), cy=+c.getAttribute('cy'), rr=+c.getAttribute('r'); H.push({x:M.a*cx+M.c*cy+M.e, y:M.b*cx+M.d*cy+M.f, r:Math.abs(M.d)*rr}); }
+  if(!H.length) return; H.sort(function(a,b){ return a.x-b.x; });
+  var k=H.length<=2?H.length:Math.min(H.length,pk([2,2,3,3,3,4])); var st=Math.floor(R()*(H.length-k+1)); var seats=H.slice(st,st+k); var G=group(k); if(G.m.length<seats.length) seats=seats.slice(0,G.m.length);
+  var s='', top=1e9, minx=1e9, maxx=-1e9, friend=G.kind!=='one';
+  var lv=[], base=Math.min.apply(null,seats.map(function(h){ return h.y-h.r*1.35-fs*.3; }));
+  seats.forEach(function(h,i){ var t=N[G.m[i]], w=t.length*fs*(/^[\x00-\x7F]+$/.test(t)?.62:1)+fs*1.1, L=0; // ふだが重ならないよう、段をずらす
+    while((lv[L]||[]).some(function(o){ return Math.abs(o.x-h.x)<(o.w+w)/2+fs*.3; })) L++; (lv[L]=lv[L]||[]).push({x:h.x,w:w});
+    var y=(seats.length>1?base:h.y-h.r*1.35-fs*.3)-L*fs*1.7; s+=pill(h.x,y,t,fs,friend); top=Math.min(top,y-fs*1.45); minx=Math.min(minx,h.x); maxx=Math.max(maxx,h.x); });
+  if(seats.length>=2){ var lab=G.kind==='fof'?'友だちの友だち':'♡ 友だち'; s+='<text x="'+((minx+maxx)/2).toFixed(1)+'" y="'+(top-fs*.35).toFixed(1)+'" font-size="'+(fs*.9).toFixed(1)+'" text-anchor="middle" fill="#E0457B" font-weight="700" stroke="#FFFFFF" stroke-width="'+(fs*.28).toFixed(2)+'" paint-order="stroke">'+lab+'</text>'; }
+  var g=document.createElementNS(NS,'g'); g.innerHTML=s; e.appendChild(g); };
+})();
+
 var box=document.getElementById('parade'); if(!box||!window.fetch) return;
 var NS='http://www.w3.org/2000/svg', D=null, S=null, lanes=[], X0=0, W=360, wideNow=null, last=0, raf=0;
 var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches; var SLOW=reduce?.5:1;
@@ -542,12 +587,12 @@ function build(){ var wide=(window.innerWidth||1000)>=600; if(wide===wideNow) re
     if(o.lane==='rail'){ var v='<rect x="'+X0+'" y="118" width="'+W+'" height="4" fill="#9AA3AE"/>'; for(var px=X0+14;px<X0+W;px+=46) v+='<rect x="'+px+'" y="122" width="5" height="48" fill="#B4BCC6" opacity=".85"/>'; g.innerHTML=v; var tg=document.createElementNS(NS,'g'); S.appendChild(tg); g=tg; } return {o:o,g:g,list:D.spr.filter(function(s){ return s.lane===o.lane; }),cars:[],wait:rnd(0,2)}; }); }
 function spawn(l){ var s=pick(l.list); if(!s) return; var dir=l.o.dir||(Math.random()<.5?1:-1); var y=rnd(l.o.y[0],l.o.y[1]); var sp=rnd(l.o.sp[0],l.o.sp[1])*SLOW;
   var e=document.createElementNS(NS,'g'); var sg=PP(s.g); e.innerHTML=dir<0?'<g transform="translate('+s.w+' 0) scale(-1 1)">'+sg+'</g>':sg;
-  var x=dir>0?X0-s.w-6:X0+W+6; l.g.appendChild(e); var c={e:e,x:x,y:y,w:s.w,dir:dir,sp:sp}; l.cars.push(c); place(c);
+  var x=dir>0?X0-s.w-40:X0+W+40; l.g.appendChild(e); try{ HS(e,wideNow?4.4:6.6); }catch(er){} var c={e:e,x:x,y:y,w:s.w,dir:dir,sp:sp}; l.cars.push(c); place(c);
   l.wait=(s.w+rnd(l.o.gap[0],l.o.gap[1]))/sp; }
 function place(c){ c.e.setAttribute('transform','translate('+c.x.toFixed(1)+' '+c.y.toFixed(1)+')'); }
 function tick(t){ raf=requestAnimationFrame(tick); var dt=last?Math.min(.1,(t-last)/1000):0; last=t; if(!S) return;
   lanes.forEach(function(l){ l.wait-=dt; if(l.wait<=0) spawn(l);
-    for(var i=l.cars.length-1;i>=0;i--){ var c=l.cars[i]; c.x+=c.dir*c.sp*dt; place(c); if((c.dir>0&&c.x>X0+W+8)||(c.dir<0&&c.x+c.w<X0-8)){ c.e.remove(); l.cars.splice(i,1); } } }); }
+    for(var i=l.cars.length-1;i>=0;i--){ var c=l.cars[i]; c.x+=c.dir*c.sp*dt; place(c); if((c.dir>0&&c.x>X0+W+40)||(c.dir<0&&c.x+c.w<X0-40)){ c.e.remove(); l.cars.splice(i,1); } } }); }
 // 見えている時だけ動かす（画面の外・ほかのタブの時は止めて、軽くする）
 var vis=true; function go(){ if(!raf&&D&&vis&&!document.hidden){ last=0; raf=requestAnimationFrame(tick); } } function stop(){ if(raf){ cancelAnimationFrame(raf); raf=0; } }
 if(window.IntersectionObserver) new IntersectionObserver(function(es){ vis=es[es.length-1].isIntersecting; vis?go():stop(); },{rootMargin:'80px'}).observe(box);

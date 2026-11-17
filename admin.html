@@ -279,6 +279,11 @@ async function loadAll(){
     if(d.by) names[from]=d.by; const key=[from,to].sort().join('|'); const t=+d.t||0; const p=pairs[key];
     if(!p) pairs[key]={ a:from, b:to, t }; else if(t&&(!p.t||t<p.t)) p.t=t; });
   FR={ pairs:Object.values(pairs), names };
+  // Gateway の乗り物の帯：友だち同士が一緒に乗る絵のために、Higher Self名と「だれとだれが友だちか」だけを os/parade に（記号は入れない）
+  try{ const idx={}, n=[], e=[]; const at=id=>{ if(!(id in idx)){ idx[id]=n.length; n.push(String(names[id]).slice(0,20)); } return idx[id]; };
+    for(const p of Object.values(pairs)){ if(!names[p.a]||!names[p.b]) continue; e.push([at(p.a),at(p.b)]); }
+    if(e.length) await setDoc(doc(db,'os','parade'),{ j:JSON.stringify({ n, e }), t:Date.now() });
+  }catch(err){ console.warn('乗り物の帯の友だちを保存できませんでした',err); }
   loadedAt=Date.now();
 }
 
