@@ -186,11 +186,11 @@ tag.pet=function(e,fs,p,force,behind){ var rs=e.querySelectorAll('.rv-rider'); i
     var cx=+c.getAttribute('cx'), cy=+c.getAttribute('cy'), rr=+c.getAttribute('r'); H.push({el:r,x:M.a*cx+M.c*cy+M.e, y:M.b*cx+M.d*cy+M.f, r:Math.abs(M.d)*rr}); }
   if(!H.length) return; H.sort(function(a,b){ return a.x-b.x; }); var fc=e.firstChild, flip=!!(fc&&fc.getAttribute&&/scale\(-1/.test(fc.getAttribute('transform')||'')), sg=flip?-1:1, front=flip?0:H.length-1, s0;
   if(force) s0=force[0]; else { var used={}; if(e._tag) for(var u=e._tag[0];u<e._tag[0]+e._tag[1].length;u++) used[u]=1; var cand=[]; H.forEach(function(h,i){ if(!used[i]&&i!==front) cand.push(i); }); s0=cand.length?pk(cand):-1; if(s0<0&&!behind) return; }
-  var h, body=false, cx2, cy2, rr2; if(s0>=0&&H[s0]){ h=H[s0]; h.el.style.display='none'; cx2=h.x; cy2=h.y; rr2=h.r*1.05; } else { h=H[front]; cx2=h.x-sg*h.r*2.1; cy2=h.y+h.r*1.15; rr2=h.r*.95; body=true; s0=-1; }
+  var h, body=false, cx2, cy2, rr2; if(s0>=0&&H[s0]){ h=H[s0]; h.el.style.display='none'; cx2=h.x; cy2=h.y; rr2=h.r*1.05; } else { h=H[front]; cx2=h.x-sg*h.r*2.1; cy2=h.y+h.r*2.0; rr2=h.r*.95; body=true; s0=-1; }
   var sp=force?force[1]:p.s, nm=force?force[2]:p.n, k=rr2/10;
-  var t='🐾 '+nm, s=(s0>=0?'':'<g transform="translate('+cx2.toFixed(1)+' '+cy2.toFixed(1)+') scale('+(sg*k).toFixed(3)+' '+k.toFixed(3)+')">'+petSVG(sp,nm,body)+'</g>')+pill(cx2,cy2-rr2*(sp==='rabbit'||sp==='kangaroo'||sp==='giraffe'?2.4:1.5)-fs*.3,t,fs*.92);
+  var t='🐾 '+nm, s=(s0>=0?'':'<g transform="translate('+cx2.toFixed(1)+' '+cy2.toFixed(1)+') scale('+(sg*k).toFixed(3)+' '+k.toFixed(3)+')">'+petSVG(sp,nm,body)+'</g>')+pill(cx2,cy2-rr2*(sp==='rabbit'||sp==='kangaroo'||sp==='giraffe'?2.4:1.5)-fs*.3-(body?h.r*.85:0),t,fs*.92);
   if(s0>=0){ /* 窓の中の席：その人の代わりに、窓の中（窓の形で切りぬかれる所）にペットの顔を入れる */ var rd=h.el, dh=(rd.getAttribute('data-h')||'').split(',').map(Number), w2=document.createElementNS(NS,'g'); if(rd.getAttribute('transform')) w2.setAttribute('transform',rd.getAttribute('transform')); var kk=dh[2]*.95/10;
-    w2.innerHTML='<g transform="translate('+dh[0]+' '+dh[1]+') scale('+kk.toFixed(3)+')">'+petSVG(sp,nm,false)+'</g>'; rd.parentNode.insertBefore(w2,rd.nextSibling); }
+    var open=!rd.closest('[clip-path]'); /* 窓のない席（自転車・バイクなど）は、体ごとすわらせる */ w2.innerHTML='<g transform="translate('+dh[0]+' '+(open?dh[1]+dh[2]*1.8:dh[1])+') scale('+kk.toFixed(3)+')">'+petSVG(sp,nm,open)+'</g>'; rd.parentNode.insertBefore(w2,rd.nextSibling); }
   var g=document.createElementNS(NS,'g'); g.innerHTML=s; e.appendChild(g); e._pet=[s0,sp,nm]; if(!force){ e._pk=p.n+'|'+p.o; PON[e._pk]=1; } };
 // 歩いて話すふたり：友だち同士（1）か、友だちの友だち（2）
 tag.pair=function(){ var c=[]; for(var i=0;i<N.length;i++) if(free(i)&&Object.keys(F[i]).length) c.push(i); if(!c.length) return null; var a=pk(c), f=fr(a).filter(free), o=fof(a);
