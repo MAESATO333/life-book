@@ -16675,7 +16675,7 @@ function mpNewHTML(){ const k=_mpPick.kind, list=mpBreeds(k), loc=list.filter(x=
   <p class="tiny muted">2. 種類を選んでください（本当にいる種類です）${pl&&far.length?`<br>Channel の国${pl.country?'（'+esc(pl.country)+'）':''}で、ふつうに見かける種類を先に出しています。`:''}</p><select id="mpBreed" class="mp-sel">${(o=>pl&&far.length?`<optgroup label="Channel の国でよく見かける種類">${loc.map(o).join('')}</optgroup><optgroup label="ほかの国の種類（Channel の人生の記録には、種類は書かれません）">${far.map(o).join('')}</optgroup>`:list.map(o).join(''))(x=>`<option value="${x.id}"${x.id===_mpPick.breed?' selected':''}>${esc(x.name)}</option>`)}</select>
   <div id="mpColBox">${mpColHTML()}</div>
   <p class="tiny muted">4. 名前をつけてください</p><input id="mpName" class="mp-in" maxlength="12" placeholder="名前を入力してください。" value=""><p id="mpNameErr" class="tiny mp-nm-err" hidden>名前を入力してください。</p>
-  <div class="mp-row"><button type="button" class="mp-btn" data-mp="adopt">家族に迎える</button><button type="button" class="linkish" data-mp="close">やめる</button></div>`; }
+  <p class="tiny muted">※ 一度お迎えしたら、ペットの動物・種類は変えられません。（名前は、あとで1回だけ直せます）</p><div class="mp-row"><button type="button" class="mp-btn" data-mp="adopt">家族に迎える</button><button type="button" class="linkish" data-mp="close">やめる</button></div>`; }
 function mpPageHTML(){ const p=mpGet(); if(mpStageLog(p)) mpSet(p); if(p.per==null){ mpPer(p); mpSet(p); } const per=mpPer(p); const gone=mpGone(p), st=mpStage(p), b={ name:mpBreedName(p) }, a=Math.min(mpAge(p),p.life), done=mpToday(p);
   const days=[]; const t=new Date(); for(let i=13;i>=0;i--){ const x=new Date(t); x.setDate(t.getDate()-i); days.push(x); } const S=new Set(Object.keys(p.acts||{}));
   const W='日月火水木金土'; const ph=(p.photos||[]).slice().reverse();
@@ -16954,7 +16954,8 @@ const MP_CRY_MORE={
 for(const k in MP_CRY_MORE) for(const m in MP_CRY_MORE[k]) MP_CRY[k][m]=(MP_CRY[k][m]||[]).concat(MP_CRY_MORE[k][m]);
 // ===== 飼えるペットは1匹だけ。元気なあいだは、新しい子を迎えられない（虹の橋のあとだけ） =====
 { const O=mpOpen; mpOpen=function(view){ const p=mpGet(); if(view==='new'&&p&&!mpGone(p)) view=undefined; return O(view); };
-  const Ad=mpAdopt; mpAdopt=function(){ const p=mpGet(); if(p&&!mpGone(p)){ mpOpen(); return; } return Ad(); }; }
+  const Ad=mpAdopt; mpAdopt=function(){ const p=mpGet(); if(p&&!mpGone(p)){ mpOpen(); return; } return Ad(); };
+  const Ag=mpAgain; mpAgain=function(){ const p=mpGet(); if(p&&!mpGone(p)){ mpOpen(); return; } return Ag(); }; }
 // ===== トイレ：ボタンはなし。ペットが自分ですませて、知らせてくれる（1日に数回まで。金魚はなし） =====
 const MP_WC={
   dog:['{p}が、トイレシートで、ちゃんとトイレをすませたよ。','{p}が、トイレのあと「見て見て！」という顔で、こっちを見ている。','{p}が、さんぽの途中で、いつもの電柱の前でトイレをすませたよ。','{p}が、トイレをすませて、ごほうびを待っている。','{p}が、トイレのあと、うれしくて家の中を一周走った。','{p}が、トイレシートのまんなかに、ぴったりできた。'],
