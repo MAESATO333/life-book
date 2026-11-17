@@ -19117,7 +19117,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // ===== v174: Life Home の「LIFE BOOKのニュース」の上に =====
 // 1) 知り合いになったペットたちが、小さな島にのって、横に走って流れていく帯
 // 2) その下に、電光掲示板のように、ペットたちのおしゃべりが流れていく帯
-function prPets(){ const out=[]; try{ const fr=store.get(KEY_FRIEND,[])||[]; gsFrPets(fr).forEach(p=>{ if(!p.g) out.push({ id:p.p, k:p.k, n:p.b, s:(p.oid||'')+p.b, hs:p.owner||'友だち', a:p.a }); }); }catch(e){}
+function prPets(){ const out=[]; try{ const fr=store.get(KEY_FRIEND,[])||[]; gsFrPets(fr).forEach(p=>{ if(!p.g) out.push({ id:p.p, k:p.k, n:p.b, s:(p.oid||'')+p.b, hs:p.owner||'友だち', a:p.a, oid:p.oid }); }); }catch(e){}
   try{ const me=typeof mpGet==='function'?mpGet():null; if(me&&PB_ALL[me.breed]&&!(typeof mpGone==='function'&&mpGone(me))) out.unshift({ id:me.breed, k:me.kind, n:me.name, s:'me'+me.name, mine:1, hs:(store.get(KEY_ME,'')||'Higher Self') }); }catch(e){}
   return out; }
 function prPose(p){ try{ const A=PP_ACTS[p.k]||PP_ACTS.dog; let c=A.filter(a=>a.b==='walk'||a.b==='swim'||a.b==='swim2'); if(!c.length) c=A.filter(a=>a.b!=='sleep'); return c[gsHash(p.s+'|run')%c.length]; }catch(e){ return null; } }
@@ -19184,7 +19184,7 @@ function prParkSVG(){ const W=1200; let sd=7; const R=()=>{ sd=(sd*16807)%214748
     <g id="prTile"><circle cx="980" cy="20" r="34" fill="url(#prSun)"/><circle cx="980" cy="20" r="9" fill="#FFF1A8"/>${t}</g><use href="#prTile" x="${W}"/></svg>`; }
 // v175b: 3本の道（手前・まんなか・おく）。おなじ道のペットは同じ速さで、間をあけて走る（重ならない）。速い子は「おくの道」
 const PR_LANE=[{ b:7, sp:1.1 },{ b:19, sp:.8 },{ b:31, sp:.42 }];
-function prOne(p,lane,k,cnt,base){ const kinds=['dash','jump','nap','dash','jump','dash']; let beh=kinds[gsHash(p.s+'|beh')%kinds.length]; if(lane===2&&beh==='nap') beh='dash';
+function prOne(p,lane,k,cnt,base){ const kinds=['dash','jump','nap','dash','jump','dash','kang']; let beh=kinds[gsHash(p.s+'|beh')%kinds.length]; if(lane===2&&beh==='nap') beh='dash';
   // v175.5：1匹ずつ、速さ・足のテンポ・ゆれの大きさ・ジャンプ・走る高さを変える（画面の中に、まったく同じ動きの子を作らない）
   const r1=gsHash(p.s+'|i1'), r2=gsHash(p.s+'|i2'), r3=gsHash(p.s+'|i3'); const spI=.78+(r1%47)/100, legI=.8+(r2%41)/100, bh=(2.5+(r3%35)/10).toFixed(1), jh=(9+(r1>>>4)%9), jd=(1.4+((r2>>>4)%9)/10).toFixed(2), dy=((r3>>>4)%7)-3;
   const sp=PR_LANE[lane].sp, D=base*sp*spI, del=k*base*sp/cnt; // 出番が来るまでは右の外で待つ（見えない）
@@ -19192,15 +19192,16 @@ function prOne(p,lane,k,cnt,base){ const kinds=['dash','jump','nap','dash','jump
   try{ if(quad){ art='<span class="pr-aw">'+prPetSVG(p.id,{ b:'walk', st:1.6, an:'x' },'pr-art pr-fa')+prPetSVG(p.id,{ b:'walk', st:-1.6, an:'x' },'pr-art pr-fb')+'</span>'; } else art=prPetSVG(p.id,prPose(p)); }catch(e){}
   let zz=''; if(beh==='nap'){ try{ zz=prPetSVG(p.id,prSleepPose(p),'pr-art pr-zz'); }catch(e){} }
   const lt=Math.max(.11,.26*sp*spI*legI).toFixed(3);
-  const hop=beh==='nap'?`animation-duration:${D.toFixed(1)}s;animation-delay:${del.toFixed(1)}s;--prLt:${lt}s`:`animation-delay:${(-((r2>>>8)%100)/100*2).toFixed(2)}s;--prLt:${lt}s;--prBt:${(Math.max(.2,.42*sp*legI*(.85+(r3>>>9)%30/100))).toFixed(3)}s;--prBh:${bh}px;--prJh:${jh}px${beh==='jump'?`;animation-duration:${jd}s`:''}`;
-  return `<button type="button" class="pr-p pr-${beh} pr-l${lane}${quad?' pr-q':''}${lane===2?' pr-fast':''}" data-pr="${_prL.indexOf(p)}" style="bottom:${PR_LANE[lane].b+dy}px;animation-duration:${D.toFixed(1)}s;animation-delay:${del.toFixed(1)}s" aria-label="${esc(p.n)}を大きく見る"><span class="pr-n">${p.mine?'🏠 ':''}${esc(p.n)}</span><span class="pr-hop" style="${hop}">${art}${zz?zz+'<i class="pr-z" aria-hidden="true">z<b>z</b></i>':''}<span class="pr-sh" aria-hidden="true"></span></span></button>`; }
+  const hop=`animation-delay:${(-((r2>>>8)%100)/100*2).toFixed(2)}s;--prLt:${lt}s;--prBt:${(Math.max(.2,.42*sp*legI*(.85+(r3>>>9)%30/100))).toFixed(3)}s;--prBh:${bh}px;--prJh:${jh}px;--prJd:${jd}s;--prKt:${(.42+((r3>>>12)%25)/100).toFixed(2)}s`;
+  if(beh!=='nap'&&gsHash(p.s+'|kg')%4===0) beh='kang'; const v0=beh==='nap'?0:gsHash(p.s+'|v')%PR_VN;
+  return `<button type="button" class="pr-p pr-${beh} pr-v${v0} pr-l${lane}${quad?' pr-q':''}${lane===2?' pr-fast':''}" data-pr="${_prL.indexOf(p)}" style="bottom:${PR_LANE[lane].b+dy}px;animation-duration:${D.toFixed(1)}s;animation-delay:${del.toFixed(1)}s" aria-label="${esc(p.n)}を大きく見る"><span class="pr-n">${p.mine?'🏠 ':''}${esc(p.n)}</span><span class="pr-hop" style="${hop}">${art}${zz?zz+'<i class="pr-z" aria-hidden="true">z<b>z</b></i>':''}<span class="pr-sh" aria-hidden="true"></span></span></button>`; }
 function prRunHTML(){ const L=prPets(); _prL=L; if(!L.length) return ''; const all=L.filter(p=>!/fish|goldfish/.test(p.k)); if(!all.length) return '';
   // 画面の幅で、1本の道に走れる数を決める（ペットどうしが重ならないように、間を110px以上あける）
   const W=Math.max(320,Math.min(1400,(document.getElementById('app')||document.body).clientWidth||window.innerWidth||400)), per=Math.max(2,Math.floor((W+160)/115));
   const lanes=[[],[],[]]; all.forEach(p=>{ const fast=gsHash(p.s+'|sp')%5===0; const ln=fast?2:(lanes[0].length<=lanes[1].length?0:1); if(lanes[ln].length<per) lanes[ln].push(p); else if(lanes[1-Math.min(ln,1)].length<per) lanes[1-Math.min(ln,1)].push(p); });
   const tot=lanes[0].length+lanes[1].length+lanes[2].length; _prF=Math.max(1,tot*(W/(W+140))/3.5); const base=Math.max(16,per*2.6)*_prF; let h=''; /* v175f：画面に一度に見えるのは3〜4匹。1周のうち 1/_prF の時間で走りぬけ、のこりは外で待つ（全員が順番に出る） */
   lanes.forEach((A,ln)=>A.forEach((p,k)=>{ h+=prOne(p,ln,k,A.length,base); }));
-  return `<div class="pr-run" aria-label="知り合いのペットたち">${prParkSVG()}${h}</div>`; }
+  return `<div class="pr-run" aria-label="知り合いのペットたち">${prParkSVG()}${h}<span class="pr-tip">👆 ペットを押すと、そのペットのことが見られます</span></div>`; }
 // 電光掲示板：さいきんのおしゃべりを、つなげて流す（1周ごとに、新しいおしゃべりに入れかえる）
 function prTickText(){ try{ if(typeof pcEnsure==='function') pcEnsure(); if((!_pcLog||!_pcLog.length)&&typeof pcHTML==='function') pcHTML(); }catch(e){}
   const L=(typeof _pcLog!=='undefined'&&_pcLog||[]).slice(0,10); return L.map(x=>`<span class="pr-m"><i>${(typeof PC_EMO!=='undefined'&&PC_EMO[x.p.k])||'🐾'}</i><b>${esc(x.p.n)}</b>「${esc(x.t)}」</span>`).join(''); }
@@ -19219,8 +19220,23 @@ function prFit(root,tries){ let miss=0; root.querySelectorAll('.pr-hop').forEach
   S.forEach(s=>s.setAttribute('viewBox',`${vx.toFixed(1)} ${vy.toFixed(1)} ${W.toFixed(1)} ${H.toFixed(1)}`)); h.dataset.fit=1; });
   if(miss&&(tries||0)<8) setTimeout(()=>prFit(root,(tries||0)+1),300); }
 var _prF=1;
+// v177.6：MITSUさん「どの子も、ランダムに変化のある走り方に」。1周ごと（画面の右の外で待っている時）に、走り方を入れかえる
+//  v0=ふつう、v1=まん中でダッシュ（5倍速）、v2=最初にダッシュ、v3=最後にダッシュ、v4=とちゅうで少し立ち止まってから走る。はね方も dash/jump/kang（カンガルー跳び）/nap から
+var PR_VN=5;
+function prRnd(n){ try{ const a=new Uint32Array(1); crypto.getRandomValues(a); return a[0]%n; }catch(e){ return Math.floor(performance.now()*7.13)%n; } }
+function prVary(el){ try{ const cl=el.classList; const hasZ=!!(el.querySelector('.pr-zz')||(el.dataset.z==='1')); if(hasZ) el.dataset.z='1';
+    const B=['dash','dash','jump','kang','kang']; if(hasZ&&!cl.contains('pr-l2')) B.push('nap','nap'); const beh=B[prRnd(B.length)];
+    const r=prRnd(100), v=beh==='nap'?0:r<30?0:r<48?1:r<64?2:r<80?3:4;
+    ['dash','jump','kang','nap'].forEach(b=>cl.remove('pr-'+b)); for(let i=0;i<PR_VN;i++) cl.remove('pr-v'+i); cl.add('pr-'+beh,'pr-v'+v);
+    el.style.animationDelay='0s'; if(_prC) el.dataset.d0=((performance.now()-_prC.t0)/1000).toFixed(2);
+    cl.add('pr-rs'); void el.offsetWidth; cl.remove('pr-rs'); }catch(e){} }
+document.addEventListener('animationiteration',e=>{ const el=e.target; if(!el||!el.classList||!el.classList.contains('pr-p')||!/^prWalk/.test(e.animationName||'')) return; prVary(el); },true);
 function prKf(){ const X=100/_prF, P=v=>(v*X/100).toFixed(2)+'%'; const r=document.querySelector('.pr-run'), W=Math.round((r&&r.clientWidth)||(document.getElementById('app')||document.body).clientWidth||400); /* v175.7：left ではなく transform で動かす（Safari でも軽く、なめらかに） */ const T=x=>`transform:translateX(${x}px)`; let st=document.getElementById('prKf'); if(!st){ st=document.createElement('style'); st.id='prKf'; document.head.appendChild(st); }
   st.textContent=`@keyframes prWalk{ 0%{ ${T(W)} } ${P(100)}{ ${T(-140)} } 100%{ ${T(-140)} } }
+@keyframes prWalk1{ 0%{ ${T(W)} } ${P(42)}{ ${T(Math.round(W-(W+140)*.25))} } ${P(58)}{ ${T(Math.round(W-(W+140)*.75))} } ${P(100)}{ ${T(-140)} } 100%{ ${T(-140)} } }
+@keyframes prWalk2{ 0%{ ${T(W)} } ${P(20)}{ ${T(Math.round(W-(W+140)*.12))} } ${P(36)}{ ${T(Math.round(W-(W+140)*.62))} } ${P(100)}{ ${T(-140)} } 100%{ ${T(-140)} } }
+@keyframes prWalk3{ 0%{ ${T(W)} } ${P(64)}{ ${T(Math.round(W-(W+140)*.38))} } ${P(80)}{ ${T(Math.round(W-(W+140)*.88))} } ${P(100)}{ ${T(-140)} } 100%{ ${T(-140)} } }
+@keyframes prWalk4{ 0%{ ${T(W)} } ${P(30)}{ ${T(Math.round(W-(W+140)*.35))} } ${P(50)}{ ${T(Math.round(W-(W+140)*.4))} } ${P(100)}{ ${T(-140)} } 100%{ ${T(-140)} } }
 @keyframes prWalkNap{ 0%{ ${T(W)} } ${P(38)}{ ${T(Math.round(W*.45))} } ${P(62)}{ ${T(Math.round(W*.45))} } ${P(100)}{ ${T(-140)} } 100%{ ${T(-140)} } }
 @keyframes prNapA{ 0%{ visibility:visible } ${P(40)}{ visibility:hidden } ${P(60)}{ visibility:visible } 100%{ visibility:visible } }
 @keyframes prNapZ{ 0%{ opacity:0 } ${P(40)}{ opacity:1 } ${P(60)}{ opacity:0 } 100%{ opacity:0 } }`; }
@@ -19247,12 +19263,15 @@ function prOpen(p){ let art=''; try{ art=petPortraitSVG(p.id,'',prPose(p)).repla
   const tm=x=>typeof pcTime==='function'&&x.ts?`<small class="pc-tm">${pcTime(x.ts)}</small>`:'';
   gsZoomOpen(`<h3 class="gsz-h">${(typeof PC_EMO!=='undefined'&&PC_EMO[p.k])||'🐾'} ${esc(p.n)}</h3><div class="pr-dl">${art}<p class="pr-own">🌟 Higher Self：<b>${esc(p.hs)}さん</b>${b.name?`<br><small>${esc(b.name)}${p.a!=null?`・${p.a}歳`:''}</small>`:''}</p></div>
     ${ap.length?`<div class="pr-ap"><p class="pr-st">💗 ${esc(p.n)}から、${esc(p.hs)}さんのじまん</p><ul>${ap.map(t=>`<li>${esc(t)}</li>`).join('')}</ul><p class="pr-nt">じまんは、ときどき新しいものに入れかわります</p></div>`:''}
+    ${p.oid&&!p.mine&&typeof pgBtns==='function'?`<div class="pr-gift"><p class="pr-st">🎁 ${esc(p.n)}に贈る</p>${typeof pgMsgHTML==='function'?pgMsgHTML(p.oid):''}${pgBtns({ oid:p.oid })}</div>`:''}
     <p class="pr-st">💬 ${esc(p.n)}の、さいきんのおしゃべり</p><ul class="pc-al pr-al">${mine.map(x=>`<li><span class="pc-b">${esc(x.t)}${tm(x)}</span></li>`).join('')||'<li>まだ、おしゃべりはありません。</li>'}</ul>`); }
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-pr]'); if(!b) return; const p=_prL[+b.dataset.pr]; if(p) prOpen(p); });
 (function(){ if(typeof render1!=='function') return; const _r=render1; render1=function(){ const r=_r.apply(this,arguments); prPlace(); return r; }; })();
 setTimeout(prPlace,0);
 document.head.insertAdjacentHTML('beforeend',`<style>
 .pr-w{ margin:10px 0 8px; }
+.pr-tip{ position:absolute; left:8px; top:6px; z-index:4; font-size:12px; font-weight:700; color:#6A4A58; background:rgba(255,255,255,.88); border-radius:999px; padding:2px 10px; pointer-events:none; }
+.pr-gift{ background:#FFF6F9; border-radius:12px; padding:8px 12px 10px; margin:8px 0; }
 .pr-run{ position:relative; overflow:hidden; height:150px; border-radius:18px; border:1px solid #DDEBF6; background:#EAF7FF; }
 .pr-bg{ position:absolute; left:0; bottom:0; height:100%; width:auto; min-width:200%; animation:prBg 90s linear infinite; }
 @keyframes prBg{ from{ transform:translateX(0) } to{ transform:translateX(-50%) } }
@@ -19268,6 +19287,14 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .pr-jump .pr-hop{ animation:prJump 1.8s cubic-bezier(.3,0,.4,1) infinite; }
 @keyframes prJump{ 0%,55%,100%{ transform:translateY(0) } 70%{ transform:translateY(calc(var(--prJh,14px) * -1)) rotate(-6deg) } 85%{ transform:translateY(calc(var(--prJh,14px) * -.42)) } }
 .pr-nap{ animation-name:prWalkNap!important; }
+.pr-p.pr-v1{ animation-name:prWalk1; } .pr-p.pr-v2{ animation-name:prWalk2; } .pr-p.pr-v3{ animation-name:prWalk3; } .pr-p.pr-v4{ animation-name:prWalk4; }
+.pr-p.pr-v1,.pr-p.pr-v2,.pr-p.pr-v3{ z-index:5; }
+.pr-rs,.pr-rs *{ animation:none!important; }
+.pr-nap .pr-hop{ animation-duration:inherit; animation-delay:inherit; }
+.pr-jump .pr-hop{ animation-duration:var(--prJd,1.8s)!important; }
+.pr-kang .pr-hop{ animation:prKang var(--prKt,.55s) cubic-bezier(.3,0,.5,1) infinite!important; transform-origin:50% 100%; }
+@keyframes prKang{ 0%{ transform:translateY(0) scale(1.06,.9) } 12%{ transform:translateY(-2px) scale(.95,1.06) } 50%{ transform:translateY(calc(var(--prJh,14px) * -1.5)) rotate(-7deg) } 86%{ transform:translateY(0) scale(1,1) } 100%{ transform:translateY(0) scale(1.06,.9) } }
+.pr-kang .pr-fa{ animation:none!important; visibility:visible!important; } .pr-kang .pr-fb{ animation:none!important; visibility:hidden!important; }
 .pr-nap .pr-hop{ animation:none; }
 .pr-nap .pr-hop>.pr-art:first-child,.pr-nap .pr-hop>.pr-aw{ animation-name:prNapA; animation-timing-function:linear; animation-iteration-count:infinite; animation-duration:inherit; animation-delay:inherit; }
 .pr-zz{ position:absolute; left:0; top:0; opacity:0; } .pr-nap .pr-zz,.pr-nap .pr-z,.pr-nap .pr-hop>.pr-aw,.pr-nap .pr-hop>.pr-art:first-child{ animation-timing-function:steps(1,end)!important; }
@@ -19972,31 +19999,38 @@ function pgBtns(p){ if(!p||p.g||!p.oid) return ''; const st=k=>pgSent(p.oid,k)?'
   return `<span class="pg-btns"><button type="button" class="pg-b" data-pg="${esc(p.oid)}|love" ${L?'disabled':''}>${pgLabel('love',L)}</button><button type="button" class="pg-b pg-f" data-pg="${esc(p.oid)}|food" ${F?'disabled':''}>${pgLabel('food',F)}</button></span>`; }
 function pgNote(btn,t){ try{ const w=btn&&btn.closest('.pg-btns'); if(!w) return; let n=w.parentNode.querySelector('.pg-note'); if(!n){ n=document.createElement('small'); n.className='pg-note'; w.insertAdjacentElement('afterend',n); } n.textContent=t; }catch(_){} }
 function pgBtnSet(oid,k,st){ try{ document.querySelectorAll('[data-pg]').forEach(b=>{ if(b.dataset.pg===oid+'|'+k){ b.textContent=pgLabel(k,st); b.disabled=!!st; } }); }catch(_){} }
-function pgEnqueue(oid,k,btn){ const q=pgQ(); q[oid+'|'+k+'|'+pgDay()]=1; store.set('pg.queue',q); pgBtnSet(oid,k,'q');
+function pgEnqueue(oid,k,btn){ const q=pgQ(); q[oid+'|'+k+'|'+pgDay()]=(k==='love'&&pgMsgOf(oid))||1; store.set('pg.queue',q); pgBtnSet(oid,k,'q');
   pgNote(btn,'いまはサーバーにつながるのを待っています。つながったら、自動で贈ります。');
   const now=Date.now(); if(!window._pgQT||now-window._pgQT>60000){ window._pgQT=now; pgToast('つながったら、自動で贈ります⏳'); }
   try{ if(typeof fbStart==='function') fbStart(); }catch(_){} }
+// v177.6：ペットの画面で、「可愛い！」にそえる ひとこと（えらぶだけ。自由に書くことはできない）
+const PG_MSGS=['いつも元気をありがとう','今日もかわいいね','また公園で会おうね','いっしょに走ろうね','ゆっくり休んでね','だいすきだよ','なかよくしてね','すてきな毛並みだね','がんばってるね','おなかいっぱい食べてね'];
+const _pgMsg={};
+function pgMsgOf(oid){ return _pgMsg[oid]||''; }
+function pgMsgHTML(oid){ return `<div class="pg-msgs" data-pgm-box="${esc(oid)}"><small class="pg-mh">ひとことを えらんで「💗 可愛い！」を押すと、いっしょに届きます（えらばなくても大丈夫）</small>${PG_MSGS.map((m,i)=>`<button type="button" class="pg-m" data-pgm="${esc(oid)}|${i}">${esc(m)}</button>`).join('')}</div>`; }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-pgm]'); if(!b) return; e.preventDefault(); e.stopPropagation(); const [oid,i]=b.dataset.pgm.split('|'); const m=PG_MSGS[+i]||''; _pgMsg[oid]=_pgMsg[oid]===m?'':m;
+  const box=b.closest('.pg-msgs'); if(box) box.querySelectorAll('.pg-m').forEach(x=>x.classList.toggle('on',x===b&&!!_pgMsg[oid])); },true);
 // 実際に書く。うまくいけば true。通信の問題なら 'retry'
-async function pgWrite(oid,k){ const fof=store.get('hitotsu.fof',{}), e=fof[oid], pet=e&&e.pet; if(!pet) return 'retry';
-  const me=myId(), by=String(store.get(KEY_ME,'')||'').slice(0,20), f=k==='food'?pgFood(pet.k):'', id=me+'_'+pgDay()+'_'+k;
+async function pgWrite(oid,k,msg){ const fof=store.get('hitotsu.fof',{}), e=fof[oid], pet=e&&e.pet; if(!pet) return 'retry';
+  const me=myId(), by=String(store.get(KEY_ME,'')||'').slice(0,20), f=k==='food'?pgFood(pet.k):String(msg||'').slice(0,20), id=me+'_'+pgDay()+'_'+k;
   try{ await Promise.race([FB.D.setDoc(FB.D.doc(FB.db,'ids',String(oid),'gift',id),{ from:me, by, k, f, pn:String(pet.b||'').slice(0,20), t:Date.now() }), new Promise((_,rj)=>setTimeout(()=>rj({ code:'timeout' }),15000))]);
     const s=store.get('pg.sent',{}); s[oid+'|'+k+'|'+pgDay()]=1; const keep={}; Object.keys(s).filter(x=>x.endsWith(pgDay())).forEach(x=>keep[x]=1); store.set('pg.sent',keep);
     const q=pgQ(); delete q[oid+'|'+k+'|'+pgDay()]; store.set('pg.queue',q);
-    pgBtnSet(oid,k,'sent'); pgToast(k==='food'?`${pet.b}に、${f}を贈りました！`:`${pet.b}に「可愛い！」を贈りました💗`); return true;
+    pgBtnSet(oid,k,'sent'); pgToast(k==='food'?`${pet.b}に、${f}を贈りました！`:f?`${pet.b}に「可愛い！」と「${f}」を贈りました💗`:`${pet.b}に「可愛い！」を贈りました💗`); return true;
   }catch(err){ const code=String(err&&(err.code||err.message)||err||''); try{ console.warn('[petgift]',code); }catch(_){}
     if(code.includes('permission')){ const q=pgQ(); delete q[oid+'|'+k+'|'+pgDay()]; store.set('pg.queue',q); pgBtnSet(oid,k,''); return 'perm'; }
     return 'retry'; } }
 async function pgSend(oid,k,btn){ const fof=store.get('hitotsu.fof',{}), e=fof[oid], pet=e&&e.pet; if(!pet){ pgNote(btn,'このペットの情報がまだ届いていません。少しあとで、もう一度押してください。'); return; }
   if(!pgOn()){ pgEnqueue(oid,k,btn); return; }
   if(btn){ btn.disabled=true; btn.textContent='おくっています…'; }
-  const r=await pgWrite(oid,k);
+  const r=await pgWrite(oid,k,k==='love'?pgMsgOf(oid):'');
   if(r===true){ pgNote(btn,''); return; }
   if(r==='perm'){ pgNote(btn,'まだ贈れません（サーバーの許可がありません）。'); pgToast('まだ贈れません。'); return; }
   pgEnqueue(oid,k,btn); }
 // ためた分を、つながっている時に順に贈る
 let _pgFl=false;
 async function pgFlush(){ if(_pgFl||!pgOn()) return; const keys=Object.keys(pgQ()); if(!keys.length) return; _pgFl=true;
-  try{ for(const x of keys){ const [oid,k]=x.split('|'); if(pgSent(oid,k)){ const q=pgQ(); delete q[x]; store.set('pg.queue',q); continue; } const r=await pgWrite(oid,k); if(r==='retry') break; } }finally{ _pgFl=false; } }
+  try{ for(const x of keys){ const [oid,k]=x.split('|'); if(pgSent(oid,k)){ const q=pgQ(); delete q[x]; store.set('pg.queue',q); continue; } const v=pgQ()[x]; const r=await pgWrite(oid,k,typeof v==='string'?v:''); if(r==='retry') break; } }finally{ _pgFl=false; } }
 setInterval(pgFlush,8000);
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-pg]'); if(!b) return; e.preventDefault(); e.stopPropagation(); const [oid,k]=b.dataset.pg.split('|'); pgSend(oid,k,b); },true);
 function pgToast(t){ let d=document.getElementById('pgToast'); if(!d){ d=document.createElement('div'); d.id='pgToast'; d.className='pg-toast'; d.setAttribute('role','status'); document.body.appendChild(d); } d.textContent=t; d.classList.add('on'); clearTimeout(d._t); d._t=setTimeout(()=>d.classList.remove('on'),4200); }
@@ -20007,8 +20041,8 @@ function pgListen(){ if(_pgL||!pgOn()) return; _pgL=true; const { collection, on
     snap.forEach(d=>{ const x=d.data()||{}; if(x.k!=='love'&&x.k!=='food') return; got.push({ id:d.id, by:String(x.by||'友だち').slice(0,20), k:x.k, f:String(x.f||'').slice(0,20), t:+x.t||Date.now() }); });
     if(!got.length) return; const p=typeof mpGet==='function'&&mpGet(); const seen=store.get('pg.seen',[]);
     const nu=got.filter(g=>!seen.includes(g.id)); if(nu.length){ store.set('pg.seen',seen.concat(nu.map(g=>g.id)).slice(-300));
-      if(p){ if(typeof pmCounts==='function'){ const c0=pmCounts(p); p.gotL=c0.l; p.gotF=c0.f; } p.gifts=(Array.isArray(p.gifts)?p.gifts:[]).concat(nu).slice(-60); nu.forEach(g=>{ if(g.k==='food') p.gotF=(p.gotF||0)+1; else p.gotL=(p.gotL||0)+1; }); nu.forEach(g=>{ p.love=(p.love||0)+(g.k==='food'?2:1); if(typeof mpLog==='function') mpLog(p,g.k==='food'?`${g.by}さんから、${g.f}のプレゼントが届いた。`:`${g.by}さんから「可愛い！」が届いた。`,'gift'); }); mpSet(p); }
-      const g=nu[nu.length-1], nm=p?p.name:'うちのペット'; pgToast(nu.length>1?`${nm}に、${nu.length}つのプレゼントが届きました🎁`:g.k==='food'?`${g.by}さんから、${nm}に${g.f}が届きました🎁`:`${g.by}さんから、${nm}に「可愛い！」が届きました💗`);
+      if(p){ if(typeof pmCounts==='function'){ const c0=pmCounts(p); p.gotL=c0.l; p.gotF=c0.f; } p.gifts=(Array.isArray(p.gifts)?p.gifts:[]).concat(nu).slice(-60); nu.forEach(g=>{ if(g.k==='food') p.gotF=(p.gotF||0)+1; else p.gotL=(p.gotL||0)+1; }); nu.forEach(g=>{ p.love=(p.love||0)+(g.k==='food'?2:1); if(typeof mpLog==='function') mpLog(p,g.k==='food'?`${g.by}さんから、${g.f}のプレゼントが届いた。`:g.f?`${g.by}さんから「可愛い！」と「${g.f}」が届いた。`:`${g.by}さんから「可愛い！」が届いた。`,'gift'); }); mpSet(p); }
+      const g=nu[nu.length-1], nm=p?p.name:'うちのペット'; pgToast(nu.length>1?`${nm}に、${nu.length}つのプレゼントが届きました🎁`:g.k==='food'?`${g.by}さんから、${nm}に${g.f}が届きました🎁`:g.f?`${g.by}さんから、${nm}に「可愛い！」と「${g.f}」が届きました💗`:`${g.by}さんから、${nm}に「可愛い！」が届きました💗`);
       try{ const dl=document.getElementById('mpDlg'); if(dl&&!dl.hidden&&typeof mpOpen==='function') mpOpen(); else if(typeof render==='function'&&typeof page!=='undefined'&&page==='home') render(); }catch(_){} }
     got.forEach(g=>{ try{ deleteDoc(FB.D.doc(FB.db,'ids',myId(),'gift',g.id)); }catch(_){} });
   },e=>{ try{ console.warn('[petgift] 届いたプレゼントを読めませんでした',e&&e.code||e); }catch(_){} }); }
@@ -20018,10 +20052,12 @@ if(typeof gsPetTreeHTML==='function'){ const G=gsPetTreeHTML; gsPetTreeHTML=func
     return h.replace(/<\/div>\s*$/,'')+`<button type="button" class="pg-open" data-gspz="0">🎁 友だちのペットに「可愛い！」やごはんを贈る</button></div>`; }catch(e){ return h; } }; }
 // うちのペットのページ：届いたプレゼント
 if(typeof mpPageHTML==='function'){ const MP=mpPageHTML; mpPageHTML=function(){ let h=MP.apply(this,arguments); try{ const p=mpGet(); const g=(p&&Array.isArray(p.gifts)?p.gifts:[]).slice(-12).reverse(); if(!g.length) return h;
-    const box=`<h4 class="mp-h4">💌 届いたプレゼント</h4><ul class="pg-got">${g.map(x=>`<li>${x.k==='food'?`<b>${esc(x.f||'🎁 ごはん')}</b>`:'<b>💗 可愛い！</b>'}<span>${esc(x.by)}さんから・${new Date(x.t).getMonth()+1}月${new Date(x.t).getDate()}日</span></li>`).join('')}</ul>`;
+    const box=`<h4 class="mp-h4">💌 届いたプレゼント</h4><ul class="pg-got">${g.map(x=>`<li>${x.k==='food'?`<b>${esc(x.f||'🎁 ごはん')}</b>`:'<b>💗 可愛い！</b>'+(x.f?` <q>${esc(x.f)}</q>`:'')}<span>${esc(x.by)}さんから・${new Date(x.t).getMonth()+1}月${new Date(x.t).getDate()}日</span></li>`).join('')}</ul>`;
     const i=h.indexOf('<h4 class="mp-h4">📷'); return i>=0?h.slice(0,i)+box+h.slice(i):h+box; }catch(e){ return h; } }; }
 try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .pg-btns{ display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; } .pg-b{ border:0; background:#FFE3EC; color:#C2476B; border-radius:999px; padding:7px 12px; font-weight:700; font-size:13px; cursor:pointer; } .pg-b.pg-f{ background:#FFF1D6; color:#B86A1E; } .pg-b:disabled{ opacity:.55; cursor:default; }
+.pg-msgs{ display:flex; flex-wrap:wrap; gap:5px; margin:6px 0 2px; } .pg-mh{ flex-basis:100%; font-size:12px; color:#8A7A84; } .pg-m{ border:1px solid #F4C6D4; background:#fff; color:#8A4A60; border-radius:999px; padding:4px 10px; font-size:12px; cursor:pointer; } .pg-m.on{ background:#FF8FAB; border-color:#FF8FAB; color:#fff; font-weight:700; }
+.pg-got q{ color:#8A4A60; font-size:13px; }
 .pg-open{ display:block; margin:10px auto 0; border:0; background:#FF8FAB; color:#fff; border-radius:999px; padding:9px 16px; font-weight:700; font-size:13px; cursor:pointer; }
 .pg-got{ list-style:none; margin:0 0 12px; padding:0; display:grid; gap:6px; } .pg-got li{ background:#FFF6F9; border-radius:10px; padding:8px 12px; display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; } .pg-got span{ font-size:12px; color:#8A7A84; }
 .pg-note{ display:block; margin-top:4px; font-size:12px; color:#C2476B; line-height:1.4; white-space:normal!important; } .pg-note:empty{ display:none; } .pg-toast{ position:fixed; left:50%; bottom:24px; transform:translate(-50%,40px); opacity:0; z-index:120; background:#C2476B; color:#fff; padding:12px 18px; border-radius:14px; font-weight:700; box-shadow:0 6px 24px rgba(0,0,0,.2); transition:.3s; max-width:calc(100% - 32px); text-align:center; pointer-events:none; z-index:9800; } .pg-toast.on{ opacity:1; transform:translate(-50%,0); }
