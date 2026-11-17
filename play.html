@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.20">
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.21">
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5af5f16575224c8c9596106067decbde"}'></script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#FF8FAB"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LIFE BOOK"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head><body>
@@ -674,7 +674,7 @@ a.nav-b{ text-decoration:none; }
 <button class="devbtn" id="devbtn" type="button" hidden>制作用</button>
 <div class="dev" id="dev" hidden></div>
 <script>
-/* LIFE BOOK game version: v178.20 (2026-11-17) */ var LB_VER='v178.20';
+/* LIFE BOOK game version: v178.21 (2026-11-17) */ var LB_VER='v178.21';
 // ===== データ1：国・名前 =====
 // 試作版の仮データ。出生数の比率（w）、5歳未満の死亡（u5, 1000人あたり）、成人の平均寿命の目安（life）、
 // 家庭の経済状況の割合（econ: 苦しい/中間/裕福）、宗教（葬儀の形）の割合、きょうだいの数の目安（tfr）、
@@ -20379,6 +20379,8 @@ function fbFofHTML(){ const on=fbOnline(); const reqs=on?FB_REQS:[], cands=fbCan
       return `<li><span class="fof-n"><small>${v}の友だち</small><b>${esc(c.by||'友だち')}さん</b></span><span class="fof-b">${asked.includes(c.id)?'<span class="fof-wait">申しこみました<small>相手がOKすると、つながります</small></span>':store.get('fof.askq',[]).includes(c.id)?'<span class="fof-wait">申しこみ予定<small>サーバーにつながったら、自動で申しこみます</small></span>':`<button type="button" class="fof-ok" data-ask="${esc(c.id)}"${myHero()?'':' disabled'}>つながる</button>`}</span></li>${fofRes(c.id)}`; }).join('')}</ul>${myHero()?'':'<p class="tiny muted">Channel が生まれると、「つながりたい」を送れます。</p>'}`;
   if(!cands.length&&!reqs.length) h+=`<h3 class="fof-h">友だちの友だち</h3><p class="tiny muted">${joined.length?'いまは、新しい「友だちの友だち」はいません。':'いまは、まだ「友だちの友だち」はいません。友だちが、ほかの人ともつながると、ここに出ます。'}</p>`;
   h+='<p class="fof-note">つながっても、メッセージのやり取りは出来ません。</p>';
+  // v178.21：いま動いている版がわかるように（小さく）
+  if(typeof LB_VER!=='undefined') h+=`<p class="tiny muted" style="text-align:right;margin:6px 0 0;font-size:11px">LIFE BOOK ${esc(LB_VER)}</p>`;
   return h+'</div>'; }
 function fofRes(id){ const m=_fofMsg; if(!m||m.id!==id||Date.now()-m.at>120000) return ''; return `<li class="fof-res ${m.ok?'is-ok':'is-ng'}" role="status">${esc(m.t)}</li>`; }
 function fofShow(id,t,ok){ _fofMsg={ id, t, ok, at:Date.now() }; fbDlgRefresh(); setTimeout(()=>{ const e=document.querySelector('.fof-res'); if(e) try{ e.scrollIntoView({ block:'nearest', behavior:'smooth' }); }catch(_){} },80); }
