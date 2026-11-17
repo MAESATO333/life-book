@@ -518,7 +518,7 @@ function pdefs(){ var o='<defs>'; for(var i=0;i<16;i++){ var c=SHIRTS[i], d=shad
    +'<pattern id="pdPc'+i+'" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="'+c+'"/><rect width="2" height="2" fill="'+d+'" opacity=".55"/><rect x="2" y="2" width="2" height="2" fill="'+d+'" opacity=".55"/></pattern>'; }
   return o+'</defs>'; }
 var ALS=['#9BE58A','#B7A6F2','#8FD8F0','#F7A8D0','#C8F07A','#7FE0C8'];
-function look(){ if(R()<.04) return { al:1, f:R()<.5, st:'adult', skin:pk(ALS), hair:'#000', hs:0, shirt:pk(['#C0C8D8','#E9E6F7','#A9B8D9','#FFFFFF','#D7F0FF']), pants:pk(['#8E95A8','#6C7389','#B9C0D2']), hat:'', hatc:'#fff', gl:'', beard:0, must:0, ear:0, earc:'#fff', band:'#fff', anc:pk(['#F2C230','#E85D75','#7FB8E0','#FFFFFF']) };
+function look(){ if(R()<0) return { al:1, f:R()<.5, st:'adult', skin:pk(ALS), hair:'#000', hs:0, shirt:pk(['#C0C8D8','#E9E6F7','#A9B8D9','#FFFFFF','#D7F0FF']), pants:pk(['#8E95A8','#6C7389','#B9C0D2']), hat:'', hatc:'#fff', gl:'', beard:0, must:0, ear:0, earc:'#fff', band:'#fff', anc:pk(['#F2C230','#E85D75','#7FB8E0','#FFFFFF']) };
   var f=R()<.6, jp=R()<.6, u=R(), st=u<.8?'adult':u<.94?'elder':'teen';
   var hair=st==='elder'?(R()<.25?pk(HJ):pk(HOLD)):jp?(R()<.1?pk(['#7A5236','#B07A4A','#9B6BD6','#F49AB5']):pk(HJ)):(R()<.12?pk(HFUN):pk(HW));
   var hs=f?pk(HSF):pk(HSM); if(st==='elder'&&!f&&R()<.3) hs=6;
