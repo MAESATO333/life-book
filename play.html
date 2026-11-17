@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.14">
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.15">
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5af5f16575224c8c9596106067decbde"}'></script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#FF8FAB"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LIFE BOOK"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head><body>
@@ -674,7 +674,7 @@ a.nav-b{ text-decoration:none; }
 <button class="devbtn" id="devbtn" type="button" hidden>制作用</button>
 <div class="dev" id="dev" hidden></div>
 <script>
-/* LIFE BOOK game version: v178.14 (2026-11-17) */ var LB_VER='v178.14';
+/* LIFE BOOK game version: v178.15 (2026-11-17) */ var LB_VER='v178.15';
 // ===== データ1：国・名前 =====
 // 試作版の仮データ。出生数の比率（w）、5歳未満の死亡（u5, 1000人あたり）、成人の平均寿命の目安（life）、
 // 家庭の経済状況の割合（econ: 苦しい/中間/裕福）、宗教（葬儀の形）の割合、きょうだいの数の目安（tfr）、
@@ -22964,6 +22964,13 @@ function mbxStripKeys(){ const keys=MB_STRIP.filter(k=>MB_THUMB2[k]); let last=[
   // LIFE BOOK大学の島を、毎回かならず1つ（場所はランダム）
   if(typeof MB_UNIV!=='undefined') out.splice(1+((Math.random()*Math.max(1,out.length-1))|0),0,'univ'); return out; }
 // LIFE BOOK大学の大きい絵（見るだけ。朝昼夕夜の切りかえ・📸アルバムは無し）
+// 流れている街を押した時：帯と同じ「本物の地図から描いた絵」を大きく見せる（MITSUさん 11-17）。大きい絵は mb-big/〇〇.webp（押した時だけ読む）、無い時は帯の絵
+function mbxStripModal(c,v){ const C=MB_CITIES[c], vv=mbxV(c,v); if(!C||!vv) return; mbxCss(); const key=C.id+'-'+(v+1), th=MB_THUMB2[key]||'';
+  const m=document.createElement('div'); m.className='mbx-modal';
+  m.innerHTML=`<div class="mbx-mbox" role="dialog" aria-modal="true" aria-label="${C.name}"><button class="mbx-x" type="button" aria-label="とじる">✕</button><div class="mbx-stage" style="background:#BFE6F7"><img src="mb-big/${C.id}.webp" alt="${C.name}の街の絵" style="display:block;width:100%;height:auto;aspect-ratio:900/630;object-fit:contain"></div><div class="mbx-row"><div><h2>${C.name}</h2><p class="mbx-sub">📍 ${vv.addr}</p></div><div class="mbx-btns"><button class="mbx-pbtn" type="button" data-a="go">🟡 街ブラへ行く</button></div></div></div>`;
+  const im=m.querySelector('.mbx-stage img'); im.addEventListener('error',()=>{ if(th&&im.src!==th) im.src=th; },{ once:true });
+  document.body.appendChild(m); m.querySelector('.mbx-x').focus();
+  m.addEventListener('click',e=>{ if(e.target===m||e.target.closest('.mbx-x')){ m.remove(); return; } const b=e.target.closest('[data-a="go"]'); if(b){ m.remove(); machiBuraOpen(C.id); } }); }
 function mbxUnivModal(){ if(typeof MB_UNIV==='undefined') return; mbxCss(); const m=document.createElement('div'); m.className='mbx-modal';
   m.innerHTML=`<div class="mbx-mbox" role="dialog" aria-modal="true" aria-label="LIFE BOOK大学"><button class="mbx-x" type="button" aria-label="とじる">✕</button><style>.mbx-univ{position:relative;container-type:inline-size}.mbx-univ img{display:block;width:100%;height:auto}.mbx-unote{position:absolute;right:15.5%;top:11.8%;text-align:center;padding:.4em .9em .45em;border-radius:.8em;background:rgba(31,46,92,.62);border:1.5px solid #E9C46A;color:#fff;font-family:'Hiragino Maru Gothic ProN','M PLUS Rounded 1c','Noto Sans JP',sans-serif;font-size:max(8.5px,.6cqw);line-height:1.55;font-weight:700;white-space:nowrap;pointer-events:none}.mbx-unote b{display:block;color:#F7E3A3;font-weight:900;letter-spacing:.06em}.mbx-unote span{display:block}.mbx-unote .s{color:#E6E9F5;font-size:.95em}@container (max-width:700px){.mbx-unote{position:static;margin:.6em auto;width:fit-content;white-space:normal;font-size:10.5px}}</style><div class="mbx-stage mbx-univ" style="background:#1B2140"><img src="${MB_UNIV.full}" alt="月の裏側にあるLIFE BOOK大学の絵"><div class="mbx-unote"><b>開学準備中！</b><span>教授は、Over Soulたち</span><span class="s">非常勤講師に前里光秀の名簿もありました。</span></div></div><div class="mbx-row"><div><h2>LIFE BOOK大学</h2><p class="mbx-sub">🌙 月の裏側</p></div></div></div>`;
   document.body.appendChild(m); m.querySelector('.mbx-x').focus(); m.addEventListener('click',e=>{ if(e.target===m||e.target.closest('.mbx-x')) m.remove(); }); }
@@ -22971,7 +22978,7 @@ function mbxStripBuild(){ const isl=mbxStripKeys().map(key=>{ if(key==='univ') r
     return `<button type="button" class="mbx-isle" data-c="${ci}" data-v="${vi}" aria-label="${v.pl}の写真をひらく"><img src="${MB_THUMB2[key]}" alt="" width="320" height="220" loading="lazy" decoding="async"><span class="mbx-fc"><b>${C.name.replace(/^.*・/,'')}</b><span>${C.area.split('・')[0]}</span></span></button>`; }).join('');
   const s=document.createElement('section'); s.className='mbx-strip'; s.setAttribute('aria-label','いろんな街');
   s.innerHTML=`<p class="mbx-st">いろんな街が、空に浮かんでいます</p><p class="mbx-sn">街は、その国の本当の時間に合わせて、朝・昼・夕方・夜で見え方が変わります</p><div class="mbx-view"><div class="mbx-track">${isl}${isl.replace(/<button /g,'<button tabindex="-1" aria-hidden="true" ')}</div></div><button type="button" class="mbx-pbtn mbx-go">🟡 街ブラへ行く</button>`;
-  s.querySelector('.mbx-track').addEventListener('click',e=>{ const b=e.target.closest('.mbx-isle'); if(!b) return; if(b.dataset.u) mbxUnivModal(); else mbxModal(+b.dataset.c,+b.dataset.v); });
+  s.querySelector('.mbx-track').addEventListener('click',e=>{ const b=e.target.closest('.mbx-isle'); if(!b) return; if(b.dataset.u) mbxUnivModal(); else mbxStripModal(+b.dataset.c,+b.dataset.v); });
   s.querySelector('.mbx-go').addEventListener('click',machiBuraOpen); return s; }
 let mbxAway=false;
 function mbxPlace(){ try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home'||(typeof viewing!=='undefined'&&viewing)){ mbxAway=true; return; } const home=app.querySelector('.home'); if(!home) return;
@@ -22991,7 +22998,7 @@ function mbxTileBuild(){ const P=mbxPick(), al=mbxGet(); const C=MB_CITIES[P.ci]
   <div class="mbx-recent"><small>最近の観光アルバム</small>${list.length?`<div class="mbx-rg">${list.map(x=>`<button type="button" class="mbx-ra" data-i="${x.i}" aria-label="${mbxV(x.ci,x.a.v).pl}の写真"><span class="${x.a.f?'mbx-flip':''}" style="display:block">${mbxDraw(x.ci,x.a.v,x.a.tod||'day',x.a.s)}</span><b>${MB_CITIES[x.ci].name.replace(/^.*・/,'')}</b></button>`).join('')}</div>`:'<p class="mbx-empty">まだ写真がありません。街の写真を開いて「📸 写真をとる」を押すと、ここにたまります。</p>'}</div></div>
   <div class="hm-foot mbx-tf"><button type="button" class="mbx-pbtn mbx-goc" data-id="${C.id}">${C.name.replace(/^.*・/,'')}へ行く</button><button type="button" class="mbx-pbtn mbx-sub2 mbx-gow">🌏 地図から街をえらぶ</button></div>`;
   s.querySelectorAll('.mbx-ra').forEach(el=>mbxFreeze(el,al[+el.dataset.i].t));
-  s.addEventListener('click',e=>{ const t=e.target.closest('.mbx-today'); if(t){ mbxModal(+t.dataset.c,+t.dataset.v); return; }
+  s.addEventListener('click',e=>{ const t=e.target.closest('.mbx-today'); if(t){ mbxStripModal(+t.dataset.c,+t.dataset.v); return; }
     const a=e.target.closest('.mbx-ra'); if(a){ const x=mbxGet()[+a.dataset.i]; if(x) mbxModal(mbxCI(x.c),x.v,x); return; }
     const g=e.target.closest('.mbx-goc'); if(g){ machiBuraOpen(g.dataset.id); return; } if(e.target.closest('.mbx-gow')) machiBuraOpen(); });
   return s; }
