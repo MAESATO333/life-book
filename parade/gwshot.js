@@ -13,7 +13,7 @@ var SHIRTS=['#6C3483','#1ABC9C','#D35400','#F7DC6F','#AED6F1','#F5B7B1','#82E0AA
 var PANTS=['#5B4B8A','#8A3B4A','#2E6B5E','#2F3E5C','#3D5A80','#34363C','#C9B48A','#6B717A','#6E4630','#4A5A3C','#E6E1D6','#F49AB5','#FFFFFF'];
 var HELM=['#FFFFFF','#E85D75','#2F4F8F','#F2C230','#34363C','#3FA66B','#F08A24','#9AA1AA','#46A6E0','#C8283A','#F49AB5','#7E57C2'];
 var HATC=['#E85D75','#2F4F8F','#F2C230','#34363C','#3FA66B','#FFFFFF','#F08A24','#7FB8E0','#F49AB5'];
-var HSF=[0,1,1,2,2,3,7,7,8,4,9,11,12,13,14,15,18,19,21,22,12,13,1,7,24], HSM=[0,0,5,6,6,1,4,10,10,16,17,18,20,20,10,23,17,0,25];
+var HSF=[0,1,1,2,2,3,7,7,8,4,9,11,12,13,14,15,18,19,21,22,12,13,1,7,24], LONGH=[1,2,3,7,8,9,11,12,13,14,15,19,21,22,24], HSM=[0,0,5,6,6,23,4,10,10,16,17,18,20,20,10,23,17,0,25];
 var LONG={0:1,7:1,8:1,13:1,15:1,19:1,21:1,22:1,2:1,12:1};
 function shade(h,f){ var n=parseInt(h.slice(1),16); var r=Math.min(255,Math.round((n>>16)*f)), g=Math.min(255,Math.round(((n>>8)&255)*f)), b=Math.min(255,Math.round((n&255)*f)); return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1); }
 var PAT=['s','v','d','c']; // 服のがら：よこじま・たてじま・水玉・チェック（色はSHIRTSの先頭16色）
@@ -31,7 +31,7 @@ function look(){ if(R()<0) return { al:1, f:R()<.5, st:'adult', skin:pk(ALS), ha
   var hv=R(), hat=hv<.07?'cap':hv<.12?'beanie':hv<.16&&f?'sun':hv<.2?'brim':'';
   var si=Math.floor(R()*SHIRTS.length), sh=SHIRTS[si]; if(si<16&&R()<.38) sh='url(#pdP'+pk(PAT)+si+')';
   return { f:f, st:st, skin:jp?pk(SKJ):pk(SKA), hair:hair, hs:hs, shirt:sh, pants:pk(PANTS), hat:hat, hatc:pk(HATC), gl:R()<.18?pk(['#34363C','#8A5A3C','#C9A23A','#E85D75','#2F4F8F']):'',
-    beard:!f&&st!=='teen'&&R()<(jp?.08:.22), must:!f&&R()<.08, ear:f&&R()<.35, earc:pk(['#F2C230','#FFFFFF','#E85D75','#7FB8E0']), band:pk(['#E85D75','#FFFFFF','#F2C230','#7FB8E0','#3FA66B']) }; }
+    beard:!f&&st!=='teen'&&R()<(jp?.08:.22)&&LONGH.indexOf(hs)<0, must:!f&&R()<.08&&LONGH.indexOf(hs)<0, /* 髪が長い人は女性。ヒゲは付けない */ ear:f&&R()<.35, earc:pk(['#F2C230','#FFFFFF','#E85D75','#7FB8E0']), band:pk(['#E85D75','#FFFFFF','#F2C230','#7FB8E0','#3FA66B']) }; }
 function base(hx,hy,hr,k,len,c,ex){ return '<path d="M'+f1(hx-hr)+' '+f1(hy+len)+' Q'+f1(hx-hr-1.4*k)+' '+f1(hy-hr-1.5*k)+' '+f1(hx+2*k)+' '+f1(hy-hr-.6*k)+' Q'+f1(hx+hr+.6*k)+' '+f1(hy-hr*.5)+' '+f1(hx+hr*.55)+' '+f1(hy-hr*.42)+' Q'+f1(hx)+' '+f1(hy-hr*.55)+' '+f1(hx-hr*.25)+' '+f1(hy-hr*.1)+' Q'+f1(hx-hr*.5)+' '+f1(hy+hr*.4)+' '+f1(hx-hr*.45)+' '+f1(hy+len)+'Z" fill="'+c+'"'+(ex||'')+'/>'; }
 function C(x,y,r,c,ex){ return '<circle cx="'+f1(x)+'" cy="'+f1(y)+'" r="'+f1(r)+'" fill="'+c+'"'+(ex||'')+'/>'; }
 function P(d,c,ex){ return '<path d="'+d+'" fill="'+c+'"'+(ex||'')+'/>'; }
