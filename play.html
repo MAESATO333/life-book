@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.23">
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.24">
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5af5f16575224c8c9596106067decbde"}'></script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#FF8FAB"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LIFE BOOK"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head><body>
@@ -674,7 +674,7 @@ a.nav-b{ text-decoration:none; }
 <button class="devbtn" id="devbtn" type="button" hidden>制作用</button>
 <div class="dev" id="dev" hidden></div>
 <script>
-/* LIFE BOOK game version: v178.23 (2026-11-17) */ var LB_VER='v178.23';
+/* LIFE BOOK game version: v178.24 (2026-11-17) */ var LB_VER='v178.24';
 // ===== データ1：国・名前 =====
 // 試作版の仮データ。出生数の比率（w）、5歳未満の死亡（u5, 1000人あたり）、成人の平均寿命の目安（life）、
 // 家庭の経済状況の割合（econ: 苦しい/中間/裕福）、宗教（葬儀の形）の割合、きょうだいの数の目安（tfr）、
@@ -23006,7 +23006,7 @@ function mbxUnivModal(){ if(typeof MB_UNIV==='undefined') return; mbxCss(); cons
 function mbxStripBuild(){ const isl=mbxStripKeys().map(key=>{ if(key==='univ') return `<button type="button" class="mbx-isle" data-u="1" aria-label="LIFE BOOK大学の絵をひらく"><img src="${MB_UNIV.thumb}" alt="" width="320" height="220" loading="lazy" decoding="async"><span class="mbx-fc"><b>LIFE BOOK大学</b><span>月の裏側</span></span></button>`; const k=key.lastIndexOf('-'), id=key.slice(0,k), vi=+key.slice(k+1)-1, ci=mbxCI(id); if(ci<0||!MB_THUMB2[key]) return ''; const C=MB_CITIES[ci], v=mbxV(ci,vi);
     return `<button type="button" class="mbx-isle" data-c="${ci}" data-v="${vi}" aria-label="${v.pl}の写真をひらく"><img src="${MB_THUMB2[key]}" alt="" width="320" height="220" loading="lazy" decoding="async"><span class="mbx-fc"><b>${C.name.replace(/^.*・/,'')}</b><span>${C.area.split('・')[0]}</span></span></button>`; }).join('');
   const s=document.createElement('section'); s.className='mbx-strip'; s.setAttribute('aria-label','いろんな街');
-  s.innerHTML=`<p class="mbx-st">いろんな街が、空に浮かんでいます</p><p class="mbx-sn">街は、その国の本当の時間に合わせて、朝・昼・夕方・夜で見え方が変わります</p><div class="mbx-view"><div class="mbx-track">${isl}${isl.replace(/<button /g,'<button tabindex="-1" aria-hidden="true" ')}</div></div><button type="button" class="mbx-pbtn mbx-go">🟡 街ブラへ行く</button><p class="mbx-credit">地図データ：国土地理院・© OpenStreetMap contributors・© OpenMapTiles</p>`;
+  s.innerHTML=`<p class="mbx-st">いろんな街が、空に浮かんでいます</p><p class="mbx-sn">街は、その街の住所の地理情報をもとに、正確に作られています。</p><div class="mbx-view"><div class="mbx-track">${isl}${isl.replace(/<button /g,'<button tabindex="-1" aria-hidden="true" ')}</div></div><button type="button" class="mbx-pbtn mbx-go">🟡 街ブラへ行く</button><p class="mbx-credit">地図データ：国土地理院・© OpenStreetMap contributors・© OpenMapTiles</p>`;
   s.querySelector('.mbx-track').addEventListener('click',e=>{ const b=e.target.closest('.mbx-isle'); if(!b) return; if(b.dataset.u) mbxUnivModal(); else mbxStripModal(+b.dataset.c,+b.dataset.v); });
   s.querySelector('.mbx-go').addEventListener('click',machiBuraOpen); return s; }
 let mbxAway=false;
