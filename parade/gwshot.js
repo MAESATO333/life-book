@@ -175,15 +175,22 @@ function petSVG(sp,nm,body){ var h=hsh(nm), q=function(a){ return a[h%a.length];
   else if(sp!=='sheep'){ o+='<ellipse cx="7" cy="3" rx="5" ry="3.8" fill="'+(sp==='lion'||sp==='cheetah'||sp==='giraffe'||sp==='kangaroo'?'#F7E3B5':'rgba(255,255,255,.55)')+'"/><circle cx="10.6" cy="2" r="1.7" fill="'+(sp==='cat'||sp==='rabbit'||sp==='hamster'?'#E8607A':'#1E1A1C')+'"/>'; if(sp==='cat') o+='<path d="M9 5 l6 1 M9 6 l6 3" stroke="#8E8A86" stroke-width=".5"/>'; if(sp==='goat') o+='<path d="M6 8 l2 7 l3 -7 Z" fill="#D9D6D2"/>'; }
   if(sp==='polarbear'||sp==='lion'||sp==='hamster'||sp==='panda'||sp==='dog'||sp==='rabbit'||sp==='cat') o+='<circle cx="-1" cy="4" r="2" fill="#F7B2C4" opacity=".55"/>';
   return o; }
+// 歩く人が、友だちのペットをつれて散歩する（ペットは前を歩く）
+tag.walkPet=function(e,fs,p,force,sw){ var fc=e.firstChild, flip=!!(fc&&fc.getAttribute&&/scale\(-1/.test(fc.getAttribute('transform')||'')), sg=flip?-1:1;
+  var sp=force?force[1]:p.s, nm=force?force[2]:p.n, big=/elephant|giraffe|lion|polarbear|dino|kangaroo/.test(sp), r=big?4.2:3, k=r/10, hx=flip?-5-r:sw+5+r, hy=-20*k, handX=flip?sw-7.9:7.9;
+  var s='<line x1="'+handX.toFixed(1)+'" y1="-12.4" x2="'+(hx-sg*r*.6).toFixed(1)+'" y2="'+(hy+r*.6).toFixed(1)+'" stroke="#E85D75" stroke-width=".5"/><g transform="translate('+hx.toFixed(1)+' '+hy.toFixed(1)+') scale('+(sg*k).toFixed(3)+' '+k.toFixed(3)+')">'+petSVG(sp,nm,true)+'</g>'+pill(hx,hy-r*1.6-fs*.2,'🐾 '+nm,fs*.8);
+  var g=document.createElementNS(NS,'g'); g.innerHTML=s; e.appendChild(g); e._pet=[-2,sp,nm]; if(!force){ e._pk=p.n+'|'+p.o; PON[e._pk]=1; } };
 // ペット e（乗り物）に乗せる。force＝写真から作り直す時の [席, 種類, 名前]
-tag.pet=function(e,fs,p,force){ var rs=e.querySelectorAll('.rv-rider'); if(!rs.length) return; var inv=e.getCTM(); if(!inv) return; inv=inv.inverse(); var H=[];
+tag.pet=function(e,fs,p,force,behind){ var rs=e.querySelectorAll('.rv-rider'); if(!rs.length) return; var inv=e.getCTM(); if(!inv) return; inv=inv.inverse(); var H=[];
   for(var q=0;q<rs.length;q++){ var r=rs[q], c=null; if(r.getAttribute('data-al')) continue; for(var i=0;i<r.children.length;i++){ var ch=r.children[i]; if(ch.tagName==='circle'&&+ch.getAttribute('r')>5){ c=ch; break; } } if(!c) continue; var M=c.getCTM(); if(!M) continue; M=inv.multiply(M);
     var cx=+c.getAttribute('cx'), cy=+c.getAttribute('cy'), rr=+c.getAttribute('r'); H.push({el:r,x:M.a*cx+M.c*cy+M.e, y:M.b*cx+M.d*cy+M.f, r:Math.abs(M.d)*rr}); }
   if(!H.length) return; H.sort(function(a,b){ return a.x-b.x; }); var fc=e.firstChild, flip=!!(fc&&fc.getAttribute&&/scale\(-1/.test(fc.getAttribute('transform')||'')), sg=flip?-1:1, front=flip?0:H.length-1, s0;
-  if(force) s0=force[0]; else { var used={}; if(e._tag) for(var u=e._tag[0];u<e._tag[0]+e._tag[1].length;u++) used[u]=1; var cand=[]; H.forEach(function(h,i){ if(!used[i]&&i!==front) cand.push(i); }); s0=cand.length?pk(cand):-1; }
+  if(force) s0=force[0]; else { var used={}; if(e._tag) for(var u=e._tag[0];u<e._tag[0]+e._tag[1].length;u++) used[u]=1; var cand=[]; H.forEach(function(h,i){ if(!used[i]&&i!==front) cand.push(i); }); s0=cand.length?pk(cand):-1; if(s0<0&&!behind) return; }
   var h, body=false, cx2, cy2, rr2; if(s0>=0&&H[s0]){ h=H[s0]; h.el.style.display='none'; cx2=h.x; cy2=h.y; rr2=h.r*1.05; } else { h=H[front]; cx2=h.x-sg*h.r*2.1; cy2=h.y+h.r*1.15; rr2=h.r*.95; body=true; s0=-1; }
   var sp=force?force[1]:p.s, nm=force?force[2]:p.n, k=rr2/10;
-  var t='🐾 '+nm, s='<g transform="translate('+cx2.toFixed(1)+' '+cy2.toFixed(1)+') scale('+(sg*k).toFixed(3)+' '+k.toFixed(3)+')">'+petSVG(sp,nm,body)+'</g>'+pill(cx2,cy2-rr2*(sp==='rabbit'||sp==='kangaroo'||sp==='giraffe'?2.4:1.5)-fs*.3,t,fs*.92);
+  var t='🐾 '+nm, s=(s0>=0?'':'<g transform="translate('+cx2.toFixed(1)+' '+cy2.toFixed(1)+') scale('+(sg*k).toFixed(3)+' '+k.toFixed(3)+')">'+petSVG(sp,nm,body)+'</g>')+pill(cx2,cy2-rr2*(sp==='rabbit'||sp==='kangaroo'||sp==='giraffe'?2.4:1.5)-fs*.3,t,fs*.92);
+  if(s0>=0){ /* 窓の中の席：その人の代わりに、窓の中（窓の形で切りぬかれる所）にペットの顔を入れる */ var rd=h.el, dh=(rd.getAttribute('data-h')||'').split(',').map(Number), w2=document.createElementNS(NS,'g'); if(rd.getAttribute('transform')) w2.setAttribute('transform',rd.getAttribute('transform')); var kk=dh[2]*.95/10;
+    w2.innerHTML='<g transform="translate('+dh[0]+' '+dh[1]+') scale('+kk.toFixed(3)+')">'+petSVG(sp,nm,false)+'</g>'; rd.parentNode.insertBefore(w2,rd.nextSibling); }
   var g=document.createElementNS(NS,'g'); g.innerHTML=s; e.appendChild(g); e._pet=[s0,sp,nm]; if(!force){ e._pk=p.n+'|'+p.o; PON[e._pk]=1; } };
 // 歩いて話すふたり：友だち同士（1）か、友だちの友だち（2）
 tag.pair=function(){ var c=[]; for(var i=0;i<N.length;i++) if(free(i)&&Object.keys(F[i]).length) c.push(i); if(!c.length) return null; var a=pk(c), f=fr(a).filter(free), o=fof(a);
@@ -191,15 +198,22 @@ tag.pair=function(){ var c=[]; for(var i=0;i<N.length;i++) if(free(i)&&Object.ke
 return tag;
 })();
 function hsFree(e){ try{ (e._hs||[]).forEach(function(i){ delete HS.on[i]; }); HS.petFree(e); }catch(er){} }
+// 人や乗り物の絵の入れもの（向きを変えたり、すわったりできるように）
+function bodyWrap(g,w,dir){ return '<g class="pd-bd"'+(dir<0?' transform="translate('+w+' 0) scale(-1 1)"':'')+'><g class="pd-up">'+g+'</g></g>'; }
+function pdPose(e,w,face,sit){ var bd=e.querySelector('.pd-bd'), up=e.querySelector('.pd-up'); if(!bd||!up) return; if(face<0) bd.setAttribute('transform','translate('+w+' 0) scale(-1 1)'); else bd.removeAttribute('transform');
+  var old=bd.querySelector('.pd-seat'); if(old) old.remove(); var cl=(e.getAttribute('class')||'').replace(/ ?pd-sit/g,'');
+  if(sit){ e.setAttribute('class',cl+' pd-sit'); up.setAttribute('transform','translate(0 4.7)'); var ln=up.querySelector('.pd-sa'), col=ln?ln.getAttribute('stroke'):'#2F3E5C', g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','pd-seat');
+    g.innerHTML='<path d="M5 -6 L10.4 -6 L10.4 -0.6" stroke="'+col+'" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="10.4" y1="-0.4" x2="12.4" y2="-0.4" stroke="#3A3340" stroke-width="1.9" stroke-linecap="round"/>'; bd.appendChild(g); }
+  else { e.setAttribute('class',cl); up.removeAttribute('transform'); } }
 // 吹き出し（cx＝頭のまん中、by＝吹き出しの下のはし）
 function sayG(cx,by,tx,fs){ function e2(t){ return String(t).replace(/[&<>]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); } var w=tx.length*fs+fs*1.6, h=fs*1.7, y0=by-h, sw=(fs*.1).toFixed(2);
   return '<path d="M'+(cx-fs*.5).toFixed(1)+' '+by.toFixed(1)+' L'+cx.toFixed(1)+' '+(by+fs*.6).toFixed(1)+' L'+(cx+fs*.5).toFixed(1)+' '+by.toFixed(1)+'Z" fill="#FFF7FB" stroke="#F06C9B" stroke-width="'+sw+'"/><rect x="'+(cx-w/2).toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="'+(h*.45).toFixed(1)+'" fill="#FFF7FB" stroke="#F06C9B" stroke-width="'+sw+'"/><text x="'+cx.toFixed(1)+'" y="'+(y0+h*.68).toFixed(1)+'" font-size="'+fs.toFixed(1)+'" text-anchor="middle" fill="#4A3B47" font-weight="700">'+e2(tx)+'</text>'; }
 // 写真（小さなメモ）から、その場面の絵をもう一度つくる。host はページの中にある箱（名前のふだの位置を測るため）
 function gwRender(rec,D,host){ var wide=!!rec.w, bg=wide?D.bgW:D.bgN, v=bg.vb.split(' ').map(Number), X0=v[0], W=v[2];
   var tr='<rect x="'+X0+'" y="118" width="'+W+'" height="4" fill="#9AA3AE"/>'; for(var px=X0+14;px<X0+W;px+=46) tr+='<rect x="'+px+'" y="122" width="5" height="48" fill="#B4BCC6" opacity=".85"/>';
-  var cars=''; rec.c.forEach(function(c){ var sp=D.spr[c[0]]; if(!sp) return; var g=PP(sp.g,c[4]); cars+='<g class="gw-car" transform="translate('+c[1]+' '+c[2]+')'+(c[6]?' scale('+c[6]+')':'')+'">'+(c[3]<0?'<g transform="translate('+sp.w+' 0) scale(-1 1)">'+g+'</g>':g)+'</g>'; });
+  var cars=''; rec.c.forEach(function(c){ var sp=D.spr[c[0]]; if(!sp) return; var g=PP(sp.g,c[4]); cars+='<g class="gw-car" transform="translate('+c[1]+' '+c[2]+')'+(c[6]?' scale('+c[6]+')':'')+'">'+bodyWrap(g,sp.w,c[3])+'</g>'; });
   host.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" class="gw-photo" viewBox="'+(rec.z?rec.z.join(' '):bg.vb)+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="海辺の街の写真">'+PDEFS+'<g>'+PP(bg.inner,rec.b)+'</g>'+tr+cars+'</svg>';
-  var gs=host.querySelectorAll('.gw-car'), j=0; rec.c.forEach(function(c){ if(!D.spr[c[0]]) return; var e=gs[j++]; if(c[5]&&e) try{ HS(e,wide?4.4:6.6,c[5]); }catch(er){} if(c[7]&&e) try{ HS.pet(e,wide?4.4:6.6,null,c[7]); }catch(er){} });
+  var gs=host.querySelectorAll('.gw-car'), j=0; rec.c.forEach(function(c){ if(!D.spr[c[0]]) return; var e=gs[j++]; if(c[8]&&e) try{ pdPose(e,D.spr[c[0]].w,(c[8]&1)?-c[3]:c[3],c[8]&2); }catch(er){} if(c[5]&&e) try{ HS(e,wide?4.4:6.6,c[5]); }catch(er){} if(c[7]&&e) try{ c[7][0]===-2?HS.walkPet(e,wide?4.4:6.6,null,c[7],D.spr[c[0]].w):HS.pet(e,wide?4.4:6.6,null,c[7]); }catch(er){} });
   if(rec.q&&gs[rec.q[1]]) try{ var se=gs[rec.q[1]], bb=se.getBBox(), fs=rec.z?Math.max(3,rec.z[3]/22):(wide?4.6:6.8), g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.innerHTML=sayG(bb.x+bb.width/2,bb.y-fs*.7,String(rec.q[0]).slice(0,24),fs); se.appendChild(g); }catch(er){}
   return host.firstChild; }
 
