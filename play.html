@@ -20188,6 +20188,13 @@ if(typeof flAlbumHTML==='function'){ const A=flAlbumHTML; flAlbumHTML=function()
   if(M.length) h+=`<p class="fl-lb">🌊 わたしの Gateway の写真</p><ul class="fl-alb">${M.map(r=>`<li><figure>${gwPhHTML('a:'+r.t)}<figcaption>${typeof flPhDate==='function'?flPhDate(r.t):''}</figcaption></figure><button type="button" class="mp-btn fl-b2 fl-phbtn" data-gwsend="${esc(String(r.t))}">💌 Higher Self に送る</button></li>`).join('')}</ul>`;
   if(G.length||M.length) setTimeout(()=>gwFill(document.getElementById('flDlg')),0); }catch(e){} return h; }; }
 (function(){ const s=document.createElement('style'); s.textContent='.gw-ph{ min-height:60px; border-radius:12px; overflow:hidden; background:#EAF6FB; } .gw-ph svg,.gw-ph img,.gw-ph canvas{ display:block; width:100%; height:auto; } .gw-ph .tiny{ margin:0; padding:18px 10px; text-align:center; } .gw-send .gw-ph{ margin:6px 0 10px; } .gw-tos{ display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 6px; } .gw-msg{ margin:10px 0 4px; padding:8px 12px; border-radius:12px; background:#FFF3D6; color:#8A5A10; font-weight:700; font-size:14px; }'; document.head.appendChild(s); })();
+// v178.11: Gateway の乗り物の帯に、ペットも乗れるように。自分と友だちのペット（名前・種類・飼い主の Higher Self 名）を小さく保存
+// 'hitotsu.gwPets' = [{ n:名前, s:'dog'などの種類, o:飼い主の Higher Self 名, me:1/0 }]（最大30。虹の橋をわたった子は入れない）
+function gwPetsSave(){ try{ const out=[]; const meN=String(store.get(KEY_ME,'')||'').slice(0,20);
+  const p=typeof mpGet==='function'?mpGet():null; if(p&&p.name&&!(typeof mpGone==='function'&&mpGone(p))) out.push({ n:String(p.name).slice(0,12), s:p.kind, o:meN, me:1 });
+  if(typeof gsFrPets==='function') gsFrPets(store.get(KEY_FRIEND,[])||[]).forEach(x=>{ if(x&&x.b&&!x.g) out.push({ n:String(x.b).slice(0,12), s:x.k||'dog', o:String(x.owner||'友だち').slice(0,20), me:0 }); });
+  const v=JSON.stringify(out.slice(0,30)); if(localStorage.getItem('hitotsu.gwPets')!==v) localStorage.setItem('hitotsu.gwPets',v); }catch(e){} }
+setTimeout(gwPetsSave,2500); setInterval(gwPetsSave,20000);
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
