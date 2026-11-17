@@ -19356,6 +19356,7 @@ setInterval(lbHsTripBtn,1000); setTimeout(lbHsTripBtn,300);
   if(window._lbPerf) return; window._lbPerf=true;
   const st=document.createElement('style'); st.id='lbPerfCss';
   st.textContent=`.lb-off *, .lb-gone *{ animation-play-state:paused!important; } .lb-gone{ visibility:hidden; }
+.mbx-isle img, .mbx-isle svg{ animation:none!important; } /* v177.4 浮かぶ街：島のふわふわを止めて、帯の流れだけにする（MITSUさん案A） */
 .home > .hm-pair, .home > .hm-grid, .home > .hm-tile, .home > section.hm-tile{ content-visibility:auto; contain-intrinsic-size:auto 520px; }
 body.lb-lite .pr-p:nth-of-type(2n){ display:none!important; }
 body.lb-lite .mbx-isle img, body.lb-lite .hmi-isle img{ animation:none!important; }`;
