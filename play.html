@@ -19995,7 +19995,8 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 body.lbst-only{ margin:0; background:transparent; } body.lbst-only .lbst-art{ border:0; border-radius:0; }
 </style>`); }catch(e){}
 // v177: Higher Self の旅の入口（街ブラのカードの中）。旅の本体は rental.js の hsTripOpen
-function lbHsTripBtn(){ try{ if(typeof hsTripOpen!=='function') return; const f=document.querySelector('.mbx-tile .mbx-tf'); if(!f||f.querySelector('.lb-hstrip')) return;
+var LB_HSTRIP_ON=false; // v178.9：MITSUさん「今は無し」→ ボタンを出さない（もどす時は true）
+function lbHsTripBtn(){ try{ if(!LB_HSTRIP_ON){ document.querySelectorAll('.lb-hstrip').forEach(x=>x.remove()); return; } if(typeof hsTripOpen!=='function') return; const f=document.querySelector('.mbx-tile .mbx-tf'); if(!f||f.querySelector('.lb-hstrip')) return;
   const b=document.createElement('button'); b.type='button'; b.className='mbx-pbtn lb-hstrip'; b.textContent='✈️ Higher Self で旅に行く'; f.appendChild(b); }catch(_){} }
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('.lb-hstrip'); if(!b) return; e.preventDefault(); e.stopPropagation(); try{ hsTripOpen(); }catch(err){ try{ console.warn('[hstrip]',err); }catch(_){} } },true);
 setInterval(lbHsTripBtn,1000); setTimeout(lbHsTripBtn,300);
