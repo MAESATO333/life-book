@@ -19446,9 +19446,21 @@ async function fbStart(){
     const base='https://www.gstatic.com/firebasejs/'+FB_VER+'/';
     const TO=(p,ms)=>Promise.race([p,new Promise((_,rj)=>setTimeout(()=>rj({ code:'timeout' }),ms))]); // v177.3：どこかで止まったままにならないように
     const [A,U,D]=await TO(Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]),25000);
-    const app=(A.getApps&&A.getApps().find(a=>a.name==='lifebook'))||A.initializeApp(FB_CONFIG,'lifebook'); const auth=U.getAuth(app); const db=D.getFirestore(app);
-    if(window.FB_EMU){ U.connectAuthEmulator(auth,'http://127.0.0.1:'+FB_EMU.auth,{ disableWarnings:true }); D.connectFirestoreEmulator(db,'127.0.0.1',FB_EMU.fs); }
-    step='auth'; const cred=(auth.currentUser?{ user:auth.currentUser }:await TO(U.signInAnonymously(auth),20000));
+    // v177.5：Safari などで、ふつうのログイン（端末の保存場所 IndexedDB ＋ ログイン用の小窓）が止まったままになることがある。
+    //  その時は、保存場所を localStorage にした「予備のログイン」に切りかえる。一度切りかえた端末は、次から最初から予備を使う。
+    const LSK='lb.fbAuthLS'; let useLS=false; try{ useLS=localStorage.getItem(LSK)==='1'; }catch(_){}
+    const getApp=n=>(A.getApps&&A.getApps().find(a=>a.name===n))||A.initializeApp(FB_CONFIG,n);
+    const lsAuth=()=>{ const a2=getApp('lifebook-ls'); let au; try{ au=U.initializeAuth(a2,{ persistence:[U.browserLocalPersistence,U.inMemoryPersistence] }); }catch(_){ au=U.getAuth(a2); } return { au, db2:D.getFirestore(a2) }; };
+    const signIn=async(au,ms)=>{ try{ if(au.authStateReady) await TO(au.authStateReady(),ms); }catch(_){}
+      return au.currentUser?{ user:au.currentUser }:await TO(U.signInAnonymously(au),ms); };
+    let auth, db, cred;
+    if(window.FB_EMU) useLS=false;
+    step='auth';
+    if(!useLS){ const app=getApp('lifebook'); auth=U.getAuth(app); db=D.getFirestore(app);
+      if(window.FB_EMU){ U.connectAuthEmulator(auth,'http://127.0.0.1:'+FB_EMU.auth,{ disableWarnings:true }); D.connectFirestoreEmulator(db,'127.0.0.1',FB_EMU.fs); }
+      try{ cred=await signIn(auth,12000); }catch(e1){ if(window.FB_EMU) throw e1; try{ console.warn('[fbsync] ログインが止まったので、予備のログインにします',e1&&(e1.code||e1.message)); }catch(_){} useLS=true; } }
+    if(useLS){ step='auth2'; const r=lsAuth(); auth=r.au; db=r.db2; cred=await signIn(auth,20000); try{ localStorage.setItem(LSK,'1'); }catch(_){} }
+    step='auth';
     FB={ U, D, auth, db, uid:cred.user.uid, seenOnce:false };
     step='register'; await TO(fbMakeIv(),20000); await TO(fbRegister(),20000); step='listen'; FB_ST='ok'; FB_ERR=''; fbListen(); fbListenReq(); try{ fbDlgRefresh(); }catch(_){} await fbPush();
     setInterval(()=>fbPush(),60000);
@@ -19952,20 +19964,40 @@ function pgFood(k){ return PG_FOOD[k]||'🍎 おやつ'; }
 function pgDay(){ const d=new Date(); return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); }
 function pgOn(){ return typeof fbOnline==='function'&&fbOnline()&&typeof FB!=='undefined'&&FB&&FB.D; }
 function pgSent(oid,k){ return !!(store.get('pg.sent',{})[oid+'|'+k+'|'+pgDay()]); }
-function pgBtns(p){ if(!p||p.g||!p.oid) return ''; const L=pgSent(p.oid,'love'), F=pgSent(p.oid,'food');
-  return `<span class="pg-btns"><button type="button" class="pg-b" data-pg="${esc(p.oid)}|love" ${L?'disabled':''}>${L?'💗 贈りました':'💗 可愛い！'}</button><button type="button" class="pg-b pg-f" data-pg="${esc(p.oid)}|food" ${F?'disabled':''}>${F?'🎁 贈りました':'🎁 ごはん'}</button></span>`; }
+// v177.5：つながっていない時に押した分は「贈る予定」にためて、つながったら自動で贈る（エラーを何度も出さない）
+function pgQ(){ const q=store.get('pg.queue',{}), d=pgDay(), out={}; Object.keys(q).forEach(x=>{ if(x.endsWith('|'+d)) out[x]=q[x]; }); return out; }
+function pgQueued(oid,k){ return !!pgQ()[oid+'|'+k+'|'+pgDay()]; }
+function pgLabel(k,st){ const f=k==='food'; return st==='sent'?(f?'🎁 贈りました':'💗 贈りました'):st==='q'?'⏳ 贈る予定':(f?'🎁 ごはん':'💗 可愛い！'); }
+function pgBtns(p){ if(!p||p.g||!p.oid) return ''; const st=k=>pgSent(p.oid,k)?'sent':pgQueued(p.oid,k)?'q':''; const L=st('love'), F=st('food');
+  return `<span class="pg-btns"><button type="button" class="pg-b" data-pg="${esc(p.oid)}|love" ${L?'disabled':''}>${pgLabel('love',L)}</button><button type="button" class="pg-b pg-f" data-pg="${esc(p.oid)}|food" ${F?'disabled':''}>${pgLabel('food',F)}</button></span>`; }
 function pgNote(btn,t){ try{ const w=btn&&btn.closest('.pg-btns'); if(!w) return; let n=w.parentNode.querySelector('.pg-note'); if(!n){ n=document.createElement('small'); n.className='pg-note'; w.insertAdjacentElement('afterend',n); } n.textContent=t; }catch(_){} }
-async function pgSend(oid,k,btn){ const fof=store.get('hitotsu.fof',{}), e=fof[oid], pet=e&&e.pet; if(!pet){ pgNote(btn,'このペットの情報がまだ届いていません。少しあとで、もう一度押してください。'); pgToast('このペットの情報がまだ届いていません。'); return; }
-  if(!pgOn()){ if(btn){ btn.disabled=true; btn.textContent='つないでいます…'; } try{ if(typeof fbStart==='function') fbStart(); }catch(_){}
-    for(let i=0;i<20&&!pgOn();i++) await new Promise(r=>setTimeout(r,500));
-    if(!pgOn()){ if(btn){ btn.disabled=false; btn.textContent=k==='food'?'🎁 ごはん':'💗 可愛い！'; } const m='いまはサーバーにつながっていません。少しあとで、もう一度押してください。'+(typeof FB_ERR!=='undefined'&&FB_ERR?'（'+String(FB_ERR).slice(0,40)+'）':''); pgNote(btn,m); pgToast(m); return; } }
+function pgBtnSet(oid,k,st){ try{ document.querySelectorAll('[data-pg]').forEach(b=>{ if(b.dataset.pg===oid+'|'+k){ b.textContent=pgLabel(k,st); b.disabled=!!st; } }); }catch(_){} }
+function pgEnqueue(oid,k,btn){ const q=pgQ(); q[oid+'|'+k+'|'+pgDay()]=1; store.set('pg.queue',q); pgBtnSet(oid,k,'q');
+  pgNote(btn,'いまはサーバーにつながるのを待っています。つながったら、自動で贈ります。');
+  const now=Date.now(); if(!window._pgQT||now-window._pgQT>60000){ window._pgQT=now; pgToast('つながったら、自動で贈ります⏳'); }
+  try{ if(typeof fbStart==='function') fbStart(); }catch(_){} }
+// 実際に書く。うまくいけば true。通信の問題なら 'retry'
+async function pgWrite(oid,k){ const fof=store.get('hitotsu.fof',{}), e=fof[oid], pet=e&&e.pet; if(!pet) return 'retry';
   const me=myId(), by=String(store.get(KEY_ME,'')||'').slice(0,20), f=k==='food'?pgFood(pet.k):'', id=me+'_'+pgDay()+'_'+k;
-  if(btn){ btn.disabled=true; btn.textContent='おくっています…'; }
-  try{ await Promise.race([FB.D.setDoc(FB.D.doc(FB.db,'ids',String(oid),'gift',id),{ from:me, by, k, f, pn:String(pet.b||'').slice(0,20), t:Date.now() }), new Promise((_,rj)=>setTimeout(()=>rj({ code:'timeout' }),15000))]); pgNote(btn,'');
+  try{ await Promise.race([FB.D.setDoc(FB.D.doc(FB.db,'ids',String(oid),'gift',id),{ from:me, by, k, f, pn:String(pet.b||'').slice(0,20), t:Date.now() }), new Promise((_,rj)=>setTimeout(()=>rj({ code:'timeout' }),15000))]);
     const s=store.get('pg.sent',{}); s[oid+'|'+k+'|'+pgDay()]=1; const keep={}; Object.keys(s).filter(x=>x.endsWith(pgDay())).forEach(x=>keep[x]=1); store.set('pg.sent',keep);
-    if(btn) btn.textContent=k==='food'?'🎁 贈りました':'💗 贈りました';
-    pgToast(k==='food'?`${pet.b}に、${f}を贈りました！`:`${pet.b}に「可愛い！」を贈りました💗`);
-  }catch(err){ if(btn){ btn.disabled=false; btn.textContent=k==='food'?'🎁 ごはん':'💗 可愛い！'; } const code=String(err&&(err.code||err.message)||err||'').slice(0,40); const m=code.includes('permission')?'まだ贈れません（サーバーの許可がありません）。':'うまく送れませんでした。少しあとで、もう一度押してください。'; pgNote(btn,m+'（'+code+'）'); pgToast(m); try{ console.warn('[petgift]',code); }catch(_){} } }
+    const q=pgQ(); delete q[oid+'|'+k+'|'+pgDay()]; store.set('pg.queue',q);
+    pgBtnSet(oid,k,'sent'); pgToast(k==='food'?`${pet.b}に、${f}を贈りました！`:`${pet.b}に「可愛い！」を贈りました💗`); return true;
+  }catch(err){ const code=String(err&&(err.code||err.message)||err||''); try{ console.warn('[petgift]',code); }catch(_){}
+    if(code.includes('permission')){ const q=pgQ(); delete q[oid+'|'+k+'|'+pgDay()]; store.set('pg.queue',q); pgBtnSet(oid,k,''); return 'perm'; }
+    return 'retry'; } }
+async function pgSend(oid,k,btn){ const fof=store.get('hitotsu.fof',{}), e=fof[oid], pet=e&&e.pet; if(!pet){ pgNote(btn,'このペットの情報がまだ届いていません。少しあとで、もう一度押してください。'); return; }
+  if(!pgOn()){ pgEnqueue(oid,k,btn); return; }
+  if(btn){ btn.disabled=true; btn.textContent='おくっています…'; }
+  const r=await pgWrite(oid,k);
+  if(r===true){ pgNote(btn,''); return; }
+  if(r==='perm'){ pgNote(btn,'まだ贈れません（サーバーの許可がありません）。'); pgToast('まだ贈れません。'); return; }
+  pgEnqueue(oid,k,btn); }
+// ためた分を、つながっている時に順に贈る
+let _pgFl=false;
+async function pgFlush(){ if(_pgFl||!pgOn()) return; const keys=Object.keys(pgQ()); if(!keys.length) return; _pgFl=true;
+  try{ for(const x of keys){ const [oid,k]=x.split('|'); if(pgSent(oid,k)){ const q=pgQ(); delete q[x]; store.set('pg.queue',q); continue; } const r=await pgWrite(oid,k); if(r==='retry') break; } }finally{ _pgFl=false; } }
+setInterval(pgFlush,8000);
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-pg]'); if(!b) return; e.preventDefault(); e.stopPropagation(); const [oid,k]=b.dataset.pg.split('|'); pgSend(oid,k,b); },true);
 function pgToast(t){ let d=document.getElementById('pgToast'); if(!d){ d=document.createElement('div'); d.id='pgToast'; d.className='pg-toast'; d.setAttribute('role','status'); document.body.appendChild(d); } d.textContent=t; d.classList.add('on'); clearTimeout(d._t); d._t=setTimeout(()=>d.classList.remove('on'),4200); }
 // 届いたものを受けとる
@@ -20000,7 +20032,7 @@ function flDay(){ const d=new Date(); return d.getFullYear()+String(d.getMonth()
 async function flSend(to,pk,occ,h){ if(!to&&flFriends().length){ _flMsg='だれに贈るか、Higher Self名を選んでね。'; flOpen(); return; } const fr=flFriends().find(f=>f.id===to); if(!fr){ _flMsg='贈る友だちが、まだいません。'; flOpen(); return; }
   if(!pk.items.length){ _flMsg='お花をえらんでね。'; flOpen(); return; }
   if(!h||h.some(x=>!x)){ _flMsg='俳句を3行とも書いてね。'; flOpen(); return; }
-  if(!flOn()){ _flMsg='いまはサーバーにつながっていません。少しあとで、もう一度押してください。'; flOpen(); return; }
+  if(!flOn()){ _flMsg='いま、サーバーにつないでいます。10秒ほどしてから、もう一度押してください。'; try{ if(typeof fbStart==='function') fbStart(); }catch(_){} flOpen(); return; }
   const sent=store.get('fl.sent',{}), key=fr.id+'|'+flDay(), n=(sent[key]||0)+1; if(n>3){ _flMsg=`${fr.by||'友だち'}さんには、きょうはもう3回贈りました。また明日ね。`; flOpen(); return; }
   const me=myId(), by=String(store.get(KEY_ME,'')||'').slice(0,20), id=me+'_'+flDay()+'_'+n; const b=flCode(pk.items,pk.items.length===1&&pk.ves==='one'?'one':pk.ves).slice(0,80);
   const btn=document.querySelector('[data-fl-send]'); if(btn){ btn.disabled=true; btn.textContent='おくっています…'; }
@@ -20023,12 +20055,12 @@ function flPhBigCode(ph){ if(!ph.bg||!ph.bg.length) return ''; const seen=new Se
 function flPhCode(ph){ const bg=flPhBigCode(ph); const head=[flCode(ph.items||[],ph.ves||'vase')]; if(bg) head.push(bg); return head.concat((ph.sh||[]).slice(0,FL_SHELF_MAX).map(v=>flCode(v.items,v.ves))).join('~').slice(0,1000); }
 function flPhDecode(p){ const a=String(p||'').split('~'); const m=flDecode(a[0]); let bg=[]; const rest=a.slice(1).filter(x=>{ const mm=/\|big(\d{1,2})$/.exec(x); if(!mm) return true; const its=x.split('|')[0].split(',').map(y=>{ const [f,c]=y.split('.'); return { f:+f, c:c||'' }; }).filter(y=>FL[y.f]&&FL[y.f].c.includes(y.c)); const n=Math.max(1,Math.min(40,+mm[1]||1)); if(its.length) bg=Array.from({ length:n },(_,i)=>({ items:its.filter((_,j)=>j%n===i).concat(i>=its.length?[its[i%its.length]]:[]) })); return false; });
   return { items:m.items, ves:m.ves, sh:rest.slice(0,FL_SHELF_MAX).map(flDecode).filter(v=>v.items.length), bg }; }
-async function flPhSendMany(ids,ph,msg){ ids=[...new Set(ids)].slice(0,5); if(!ids.length) return; if(!flOn()){ _flMsg='いまはサーバーにつながっていません。少しあとで、もう一度押してください。'; flOpen(); return; }
+async function flPhSendMany(ids,ph,msg){ ids=[...new Set(ids)].slice(0,5); if(!ids.length) return; if(!flOn()){ _flMsg='いま、サーバーにつないでいます。10秒ほどしてから、もう一度押してください。'; try{ if(typeof fbStart==='function') fbStart(); }catch(_){} flOpen(); return; }
   const btn=document.querySelector('[data-fl-phgo]'); if(btn){ btn.disabled=true; btn.textContent='おくっています…'; }
   const ok=[], ng=[]; for(const to of ids){ const r=await flPhSend(to,ph,msg,1); const fr=flFriends().find(f=>f.id===to); (r===true?ok:ng).push((fr&&fr.by||'友だち')+'さん'+(typeof r==='string'?r:'')); }
   _flMsg=(ok.length?`${ok.join('・')}に、お礼の俳句と写真を送りました💌`:'')+(ng.length?(ok.length?'　':'')+`送れなかった人：${ng.join('・')}`:''); if(ok.length){ _flPhSend=-1; _flPhMsg=''; _flPhH=null; _flPhTos=null; } flOpen(); }
 async function flPhSend(to,ph,msg,many){ const fr=flFriends().find(f=>f.id===to); if(!fr){ if(many) return '（見つかりません）'; _flMsg='だれに送るか、Higher Self名を選んでね。'; flOpen(); return; }
-  if(!flOn()){ _flMsg='いまはサーバーにつながっていません。少しあとで、もう一度押してください。'; flOpen(); return; }
+  if(!flOn()){ _flMsg='いま、サーバーにつないでいます。10秒ほどしてから、もう一度押してください。'; try{ if(typeof fbStart==='function') fbStart(); }catch(_){} flOpen(); return; }
   const sent=store.get('fl.phSent',{}), key=fr.id+'|'+flDay(), n=(sent[key]||0)+1; if(n>3){ if(many) return '（きょうはもう3枚送りました）'; _flMsg=`${fr.by||'友だち'}さんには、きょうはもう3枚送りました。また明日ね。`; flOpen(); return; }
   const me=myId(), by=String(store.get(KEY_ME,'')||'').slice(0,20), id=me+'_'+flDay()+'_'+n;
   if(!many){ const btn=document.querySelector('[data-fl-phgo]'); if(btn){ btn.disabled=true; btn.textContent='おくっています…'; } }
