@@ -112,13 +112,13 @@ function tw(t,fs){ return t.length*fs*(/^[\x00-\x7F]+$/.test(t)?.62:1)+fs*1.1; }
 function pill(x,y,t,fs){ var w=tw(t,fs), h=fs*1.45;
   return '<g class="hs-tag"><rect x="'+(x-w/2).toFixed(1)+'" y="'+(y-h).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="'+(h/2).toFixed(1)+'" fill="#FFFFFF" fill-opacity=".92" stroke="#F06C9B" stroke-width="'+(fs*.12).toFixed(2)+'"/><text x="'+x.toFixed(1)+'" y="'+(y-h*.3).toFixed(1)+'" font-size="'+fs.toFixed(1)+'" text-anchor="middle" fill="#4A3B47" font-weight="700">'+esc(t)+'</text></g>'; }
 // 乗り物 e（ページに入れたあと）に、名前のふだを付ける
-var tag=function(e,fs,force){ if(!force&&!N.length) return; var rs=e.querySelectorAll('.rv-rider'); if(!rs.length||(!force&&R()<.12)) return; var inv=e.getCTM(); if(!inv) return; inv=inv.inverse(); var H=[];
+var tag=function(e,fs,force,want){ if(!force&&!N.length) return; var rs=e.querySelectorAll('.rv-rider'); if(!rs.length||(!force&&!want&&R()<.12)) return; if(!force&&!want){ var fc=0; for(var z=0;z<N.length;z++) if(free(z)) fc++; if(fc<=2&&(N.length>=4||R()<.6)) return; } /* 歩道で話すふたりのために、少しだけ空けておく */ var inv=e.getCTM(); if(!inv) return; inv=inv.inverse(); var H=[];
   for(var q=0;q<rs.length;q++){ var r=rs[q], c=null; for(var i=0;i<r.children.length;i++){ var ch=r.children[i]; if(ch.tagName==='circle'&&+ch.getAttribute('r')>5){ c=ch; break; } } if(!c) continue; var M=c.getCTM(); if(!M) continue; M=inv.multiply(M);
     var cx=+c.getAttribute('cx'), cy=+c.getAttribute('cy'), rr=+c.getAttribute('r'); H.push({x:M.a*cx+M.c*cy+M.e, y:M.b*cx+M.d*cy+M.f, r:Math.abs(M.d)*rr}); }
   if(!H.length) return; H.sort(function(a,b){ return a.x-b.x; });
   var G, st, NM, LB=0, seats;
   if(force){ st=force[0]; NM=force[1]; LB=force[2]; seats=H.slice(st,st+NM.length); if(!seats.length) return; NM=NM.slice(0,seats.length); }
-  else { var k=H.length<=2?H.length:Math.min(H.length,pk([1,2,2,3,3,4])); G=group(k); if(!G||!G.length) return; k=Math.min(k,G.length);
+  else { var k=H.length<=2?H.length:Math.min(H.length,pk([1,2,2,3,3,4])); G=want||group(k); if(!G||!G.length) return; k=Math.min(k,G.length);
   st=Math.floor(R()*(H.length-k+1)); seats=H.slice(st,st+k); NM=G.slice(0,seats.length).map(function(i){ return N[i]; }); }
   var s='', lv=[], top=1e9, base=Math.min.apply(null,seats.map(function(h){ return h.y-h.r*1.35-fs*.3; }));
   seats.forEach(function(h,i){ var t=NM[i], w=tw(t,fs), L=0; // ふだが重ならないよう、段をずらす
@@ -128,7 +128,11 @@ var tag=function(e,fs,force){ if(!force&&!N.length) return; var rs=e.querySelect
     var minx=Math.min.apply(null,seats.map(function(h){ return h.x; })), maxx=Math.max.apply(null,seats.map(function(h){ return h.x; }));
     s+='<text x="'+((minx+maxx)/2).toFixed(1)+'" y="'+(top-fs*.35).toFixed(1)+'" font-size="'+(fs*.9).toFixed(1)+'" text-anchor="middle" fill="#E0457B" font-weight="700" stroke="#FFFFFF" stroke-width="'+(fs*.28).toFixed(2)+'" paint-order="stroke">'+(all?'♡ 友だち':'友だちの友だち')+'</text>'; }
   var g=document.createElementNS(NS,'g'); g.innerHTML=s; e.appendChild(g); e._tag=[st,NM,seats.length>=2?LB:0]; if(!force){ var used=G.slice(0,seats.length); used.forEach(function(i){ ON[i]=1; }); e._hs=used; } };
-tag.on=ON; return tag;
+tag.on=ON; tag.nm=function(i){ return N[i]; };
+// 歩いて話すふたり：友だち同士（1）か、友だちの友だち（2）
+tag.pair=function(){ var c=[]; for(var i=0;i<N.length;i++) if(free(i)&&Object.keys(F[i]).length) c.push(i); if(!c.length) return null; var a=pk(c), f=fr(a).filter(free), o=fof(a);
+  if(f.length&&(R()<.65||!o.length)) return [a,pk(f),1]; if(o.length) return [a,pk(o),2]; return null; };
+return tag;
 })();
 function hsFree(e){ try{ (e._hs||[]).forEach(function(i){ delete HS.on[i]; }); }catch(er){} }
 // 写真（小さなメモ）から、その場面の絵をもう一度つくる。host はページの中にある箱（名前のふだの位置を測るため）
