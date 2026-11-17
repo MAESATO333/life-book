@@ -135,12 +135,17 @@ tag.pair=function(){ var c=[]; for(var i=0;i<N.length;i++) if(free(i)&&Object.ke
 return tag;
 })();
 function hsFree(e){ try{ (e._hs||[]).forEach(function(i){ delete HS.on[i]; }); }catch(er){} }
+// 吹き出し（cx＝頭のまん中、by＝吹き出しの下のはし）
+function sayG(cx,by,tx,fs){ function e2(t){ return String(t).replace(/[&<>]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); } var w=tx.length*fs+fs*1.6, h=fs*1.7, y0=by-h, sw=(fs*.1).toFixed(2);
+  return '<path d="M'+(cx-fs*.5).toFixed(1)+' '+by.toFixed(1)+' L'+cx.toFixed(1)+' '+(by+fs*.6).toFixed(1)+' L'+(cx+fs*.5).toFixed(1)+' '+by.toFixed(1)+'Z" fill="#FFF7FB" stroke="#F06C9B" stroke-width="'+sw+'"/><rect x="'+(cx-w/2).toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="'+(h*.45).toFixed(1)+'" fill="#FFF7FB" stroke="#F06C9B" stroke-width="'+sw+'"/><text x="'+cx.toFixed(1)+'" y="'+(y0+h*.68).toFixed(1)+'" font-size="'+fs.toFixed(1)+'" text-anchor="middle" fill="#4A3B47" font-weight="700">'+e2(tx)+'</text>'; }
 // 写真（小さなメモ）から、その場面の絵をもう一度つくる。host はページの中にある箱（名前のふだの位置を測るため）
 function gwRender(rec,D,host){ var wide=!!rec.w, bg=wide?D.bgW:D.bgN, v=bg.vb.split(' ').map(Number), X0=v[0], W=v[2];
   var tr='<rect x="'+X0+'" y="118" width="'+W+'" height="4" fill="#9AA3AE"/>'; for(var px=X0+14;px<X0+W;px+=46) tr+='<rect x="'+px+'" y="122" width="5" height="48" fill="#B4BCC6" opacity=".85"/>';
   var cars=''; rec.c.forEach(function(c){ var sp=D.spr[c[0]]; if(!sp) return; var g=PP(sp.g,c[4]); cars+='<g class="gw-car" transform="translate('+c[1]+' '+c[2]+')">'+(c[3]<0?'<g transform="translate('+sp.w+' 0) scale(-1 1)">'+g+'</g>':g)+'</g>'; });
-  host.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" class="gw-photo" viewBox="'+bg.vb+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="海辺の街の写真"><g>'+PP(bg.inner,rec.b)+'</g>'+tr+cars+'</svg>';
-  var gs=host.querySelectorAll('.gw-car'), j=0; rec.c.forEach(function(c){ if(!D.spr[c[0]]) return; var e=gs[j++]; if(c[5]&&e) try{ HS(e,wide?4.4:6.6,c[5]); }catch(er){} }); return host.firstChild; }
+  host.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" class="gw-photo" viewBox="'+(rec.z?rec.z.join(' '):bg.vb)+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="海辺の街の写真"><g>'+PP(bg.inner,rec.b)+'</g>'+tr+cars+'</svg>';
+  var gs=host.querySelectorAll('.gw-car'), j=0; rec.c.forEach(function(c){ if(!D.spr[c[0]]) return; var e=gs[j++]; if(c[5]&&e) try{ HS(e,wide?4.4:6.6,c[5]); }catch(er){} });
+  if(rec.q&&gs[rec.q[1]]) try{ var se=gs[rec.q[1]], bb=se.getBBox(), fs=rec.z?Math.max(3,rec.z[3]/22):(wide?4.6:6.8), g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.innerHTML=sayG(bb.x+bb.width/2,bb.y-fs*.7,String(rec.q[0]).slice(0,24),fs); se.appendChild(g); }catch(er){}
+  return host.firstChild; }
 
 var DD=null, Q=null; function data(){ if(DD) return Promise.resolve(DD); if(!Q) Q=fetch(BASE+'parade.json').then(function(r){ return r.json(); }).then(function(d){ DD=d; return d; }); return Q; }
 try{ var st=document.createElement('style'); st.textContent='.gw-photo{display:block;width:100%;height:auto}.gw-photo .pd-sb{display:none}'; document.head.appendChild(st); }catch(e){}
