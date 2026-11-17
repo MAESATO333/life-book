@@ -417,7 +417,9 @@ requestAnimationFrame(step);
     <div class="parade" aria-label="街を走る乗り物">
       <p class="worlds-title">街の中を、いろんな乗り物が走っています</p>
       <p class="worlds-sub">バスも車も、電車も船も、飛行機もヘリコプターも</p>
-      <div class="pd-frame"><div id="parade" class="pd-view"></div></div>
+      <div class="pd-frame"><div id="parade" class="pd-view"></div><div id="pdFlash" class="pd-flash" aria-hidden="true"></div></div>
+      <div class="pd-cam"><span id="pdMsg" class="pd-msg" role="status" aria-live="polite"></span><button type="button" id="pdShot" class="pd-btn">📷 写真を撮る</button><button type="button" id="pdAlb" class="pd-btn pd-btn2">📒 アルバム<span></span></button></div>
+      <div id="pdAlbum" class="pd-modal" hidden role="dialog" aria-modal="true" aria-label="Gateway アルバム"><div class="pd-box"><div class="pd-head"><b>📒 Gateway アルバム</b><button type="button" class="pd-btn" data-close>← もどる</button></div><p class="pd-note">海辺の街で撮った写真です。このブラウザの中にだけ入っています。</p><div id="pdGrid" class="pd-grid"></div><button type="button" id="pdMore" class="pd-btn pd-btn2" hidden>もっと見る</button></div></div>
     </div>
 <style>
 /* 乗り物が走る街（横はばいっぱい）。絵はゲームと同じ部品から作った parade/parade.json */
@@ -453,13 +455,42 @@ requestAnimationFrame(step);
   50% { opacity: 0.6; }
 }
 @media (prefers-reduced-motion: reduce){.pd-view *{animation:none !important}}
+.pd-frame{position:relative}
+.pd-flash{position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none}
+.pd-flash.on{animation:pdFl .45s ease-out}
+@keyframes pdFl{0%{opacity:.85}100%{opacity:0}}
+.pd-cam{display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:8px; padding:8px 16px 0; max-width:1100px; margin:0 auto}
+.pd-msg{flex:1 1 auto; text-align:right; font-size:13px; color:#C2457A; font-weight:700; min-height:1em}
+.pd-btn{appearance:none; border:0; border-radius:999px; background:#F06C9B; color:#fff; font:inherit; font-weight:700; font-size:14px; padding:8px 16px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:4px; line-height:1.3}
+.pd-btn:hover{background:#E0457B}
+.pd-btn2{background:#FFE3EE; color:#C2457A}
+.pd-btn2:hover{background:#FFD0E1}
+.pd-modal{position:fixed; inset:0; z-index:2000; background:rgba(40,30,40,.45); display:flex; align-items:flex-start; justify-content:center; overflow:auto; padding:24px 12px}
+.pd-modal[hidden]{display:none}
+.pd-box{background:#fff; border-radius:18px; width:min(980px,100%); padding:16px; box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.pd-head{display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:17px}
+.pd-note{font-size:12.5px; color:#7A6B76; margin:6px 0 12px}
+.pd-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,440px),1fr)); gap:14px}
+.pd-ph{margin:0; border-radius:12px; overflow:hidden; background:#F7F2F5}
+.pd-ph-img{aspect-ratio:720/250; background:#CFE8F7}
+.pd-ph-img.n{aspect-ratio:360/250}
+.pd-ph-img svg{display:block; width:100%; height:100%}
+.gw-photo .pd-sb{display:none}
+.pd-ph figcaption{display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px 10px; font-size:12.5px; color:#6B5A66}
+.pd-ph figcaption span{margin-right:auto}
+.pd-ph .pd-btn{font-size:12.5px; padding:6px 12px}
+.pd-empty{color:#7A6B76; font-size:14px}
+#pdMore{margin:14px auto 0; display:flex}
+#pdMore[hidden]{display:none}
 </style>
 <script>
 /* 乗り物は、かならず画面の外から入ってきて、反対側の外に出るまで走る。いろんな種類が次々に来る */
 (function(){
 /* 乗っている人は、走ってくるたびにちがう人。肌・髪の色・髪型・服・帽子・めがね・ヘルメットの色をそのつど決める */
+/*PDSHARED-START*/
 var PP=(function(){
 var R=Math.random, pk=function(a){ return a[Math.floor(R()*a.length)]; }, f1=function(v){ return (+v).toFixed(1); };
+function rng(sd){ var a=(sd>>>0)||1; return function(){ a=(a+0x6D2B79F5)>>>0; var t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
 var SKJ=['#FFE3CF','#F6D2B4','#F6D2B4','#F1CDA8','#F1CDA8','#E8BE98'], SKA=['#FFE3CF','#F6D2B4','#F1CDA8','#E8BE98','#D9A77E','#C99470','#A9764F','#8B5A3C','#6B4430'];
 var HJ=['#1E1A1C','#2B2320','#2B2320','#3A2A22','#4A3326','#4A3326','#7A5236','#B07A4A'], HW=['#2B2320','#3A2A22','#4A3326','#7A5236','#B07A4A','#E8C77A','#F3E3B5','#B8452F','#D9C08A','#1E1A1C'], HFUN=['#5A3A6E','#F49AB5','#7FB8E0','#B8452F','#9B6BD6','#E8C77A'], HOLD=['#D9D6D2','#BDB8B2','#E9E6E2','#8E8A86','#C9C4BE'];
 var SHIRTS=['#E85D75','#4E8FD9','#3FA66B','#F2C230','#F08A24','#7E57C2','#46A6E0','#FFFFFF','#34363C','#C8283A','#8CCB7E','#F49AB5','#B07A4A','#2F4F8F','#9AA1AA','#E9D9A6','#FF8FA3','#5BC0BE','#FFD166','#A0C4FF'];
@@ -524,10 +555,10 @@ function face(L,hx,hy,hr,helm){ var k=hr/9, s='';
   if(L.gl) s+=C(hx+4.9*k,hy-.8*k,2.3*k,'none',' stroke="'+L.gl+'" stroke-width="'+f1(.8*k)+'"')+Ln(hx+2.6*k,hy-1.2*k,hx-hr*.3,hy-1.6*k,L.gl,.7*k);
   return s; }
 function tail(L,hx,hy,hr){ return P('M'+f1(hx-hr*.7)+' '+f1(hy+hr*.1)+' Q'+f1(hx-hr*1.9)+' '+f1(hy+hr*.4)+' '+f1(hx-hr*1.5)+' '+f1(hy+hr*1.6)+' Q'+f1(hx-hr*1.1)+' '+f1(hy+hr*.7)+' '+f1(hx-hr*.5)+' '+f1(hy+hr*.5)+'Z',L.hair); }
-return function(str){ return str.replace(/<g class="rv-rider"([^>]*)>([\s\S]*?)<\/g>/g,function(m,at,body){ var h=/data-h="([^"]*)"/.exec(at); if(!h) return m; var a=h[1].split(',').map(Number), hx=a[0], hy=a[1], hr=a[2], helm=a[3], L=look();
+return function(str,seed){ var R0=R; if(seed!=null) R=rng(seed); try{ return str.replace(/<g class="rv-rider"([^>]*)>([\s\S]*?)<\/g>/g,function(m,at,body){ var h=/data-h="([^"]*)"/.exec(at); if(!h) return m; var a=h[1].split(',').map(Number), hx=a[0], hy=a[1], hr=a[2], helm=a[3], L=look();
     var hc=pk(HELM); body=body.split('#010101').join(L.skin).split('#030303').join(L.shirt).split('#040404').join(L.pants).split('#050505').join(hc);
     body=body.replace('<!--H-->',helm?face(L,hx,hy,hr,1):hair(L,hx,hy,hr)+hat(L,hx,hy,hr)+face(L,hx,hy,hr,0)).replace('<!--P-->',helm&&L.f&&LONG[L.hs]?tail(L,hx,hy,hr):'');
-    return '<g class="rv-rider"'+at+'>'+body+'</g>'; }); };
+    return '<g class="rv-rider"'+at+'>'+body+'</g>'; }); } finally { R=R0; } };
 })();
 
 /* Higher Self の名前：見ている人と、その友だち（このブラウザでLIFE BOOKを遊んでいるとき）。なければ、運営者ページが届けた本当の友だちのつながり。どちらもないときは名前を出さない */
@@ -565,30 +596,39 @@ function tw(t,fs){ return t.length*fs*(/^[\x00-\x7F]+$/.test(t)?.62:1)+fs*1.1; }
 function pill(x,y,t,fs){ var w=tw(t,fs), h=fs*1.45;
   return '<g class="hs-tag"><rect x="'+(x-w/2).toFixed(1)+'" y="'+(y-h).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="'+(h/2).toFixed(1)+'" fill="#FFFFFF" fill-opacity=".92" stroke="#F06C9B" stroke-width="'+(fs*.12).toFixed(2)+'"/><text x="'+x.toFixed(1)+'" y="'+(y-h*.3).toFixed(1)+'" font-size="'+fs.toFixed(1)+'" text-anchor="middle" fill="#4A3B47" font-weight="700">'+esc(t)+'</text></g>'; }
 // 乗り物 e（ページに入れたあと）に、名前のふだを付ける
-var tag=function(e,fs){ if(!N.length) return; var rs=e.querySelectorAll('.rv-rider'); if(!rs.length||R()<.12) return; var inv=e.getCTM(); if(!inv) return; inv=inv.inverse(); var H=[];
+var tag=function(e,fs,force){ if(!force&&!N.length) return; var rs=e.querySelectorAll('.rv-rider'); if(!rs.length||(!force&&R()<.12)) return; var inv=e.getCTM(); if(!inv) return; inv=inv.inverse(); var H=[];
   for(var q=0;q<rs.length;q++){ var r=rs[q], c=null; for(var i=0;i<r.children.length;i++){ var ch=r.children[i]; if(ch.tagName==='circle'&&+ch.getAttribute('r')>5){ c=ch; break; } } if(!c) continue; var M=c.getCTM(); if(!M) continue; M=inv.multiply(M);
     var cx=+c.getAttribute('cx'), cy=+c.getAttribute('cy'), rr=+c.getAttribute('r'); H.push({x:M.a*cx+M.c*cy+M.e, y:M.b*cx+M.d*cy+M.f, r:Math.abs(M.d)*rr}); }
   if(!H.length) return; H.sort(function(a,b){ return a.x-b.x; });
-  var k=H.length<=2?H.length:Math.min(H.length,pk([1,2,2,3,3,4])); var G=group(k); if(!G||!G.length) return; k=Math.min(k,G.length);
-  var st=Math.floor(R()*(H.length-k+1)); var seats=H.slice(st,st+k);
+  var G, st, NM, LB=0, seats;
+  if(force){ st=force[0]; NM=force[1]; LB=force[2]; seats=H.slice(st,st+NM.length); if(!seats.length) return; NM=NM.slice(0,seats.length); }
+  else { var k=H.length<=2?H.length:Math.min(H.length,pk([1,2,2,3,3,4])); G=group(k); if(!G||!G.length) return; k=Math.min(k,G.length);
+  st=Math.floor(R()*(H.length-k+1)); seats=H.slice(st,st+k); NM=G.slice(0,seats.length).map(function(i){ return N[i]; }); }
   var s='', lv=[], top=1e9, base=Math.min.apply(null,seats.map(function(h){ return h.y-h.r*1.35-fs*.3; }));
-  seats.forEach(function(h,i){ var t=N[G[i]], w=tw(t,fs), L=0; // ふだが重ならないよう、段をずらす
+  seats.forEach(function(h,i){ var t=NM[i], w=tw(t,fs), L=0; // ふだが重ならないよう、段をずらす
     while((lv[L]||[]).some(function(o){ return Math.abs(o.x-h.x)<(o.w+w)/2+fs*.3; })) L++; (lv[L]=lv[L]||[]).push({x:h.x,w:w});
     var yy=(seats.length>1?base:h.y-h.r*1.35-fs*.3)-L*fs*1.7; s+=pill(h.x,yy,t,fs); top=Math.min(top,yy-fs*1.45); });
-  if(seats.length>=2){ var mm=G.slice(0,seats.length), all=true; for(var x=0;x<mm.length;x++) for(var y=x+1;y<mm.length;y++) if(!F[mm[x]][mm[y]]) all=false;
+  if(seats.length>=2){ var all; if(force) all=LB!==2; else { var mm=G.slice(0,seats.length); all=true; for(var x=0;x<mm.length;x++) for(var y=x+1;y<mm.length;y++) if(!F[mm[x]][mm[y]]) all=false; } LB=all?1:2;
     var minx=Math.min.apply(null,seats.map(function(h){ return h.x; })), maxx=Math.max.apply(null,seats.map(function(h){ return h.x; }));
     s+='<text x="'+((minx+maxx)/2).toFixed(1)+'" y="'+(top-fs*.35).toFixed(1)+'" font-size="'+(fs*.9).toFixed(1)+'" text-anchor="middle" fill="#E0457B" font-weight="700" stroke="#FFFFFF" stroke-width="'+(fs*.28).toFixed(2)+'" paint-order="stroke">'+(all?'♡ 友だち':'友だちの友だち')+'</text>'; }
-  var g=document.createElementNS(NS,'g'); g.innerHTML=s; e.appendChild(g); var used=G.slice(0,seats.length); used.forEach(function(i){ ON[i]=1; }); e._hs=used; };
+  var g=document.createElementNS(NS,'g'); g.innerHTML=s; e.appendChild(g); e._tag=[st,NM,seats.length>=2?LB:0]; if(!force){ var used=G.slice(0,seats.length); used.forEach(function(i){ ON[i]=1; }); e._hs=used; } };
 tag.on=ON; return tag;
 })();
 function hsFree(e){ try{ (e._hs||[]).forEach(function(i){ delete HS.on[i]; }); }catch(er){} }
+// 写真（小さなメモ）から、その場面の絵をもう一度つくる。host はページの中にある箱（名前のふだの位置を測るため）
+function gwRender(rec,D,host){ var wide=!!rec.w, bg=wide?D.bgW:D.bgN, v=bg.vb.split(' ').map(Number), X0=v[0], W=v[2];
+  var tr='<rect x="'+X0+'" y="118" width="'+W+'" height="4" fill="#9AA3AE"/>'; for(var px=X0+14;px<X0+W;px+=46) tr+='<rect x="'+px+'" y="122" width="5" height="48" fill="#B4BCC6" opacity=".85"/>';
+  var cars=''; rec.c.forEach(function(c){ var sp=D.spr[c[0]]; if(!sp) return; var g=PP(sp.g,c[4]); cars+='<g class="gw-car" transform="translate('+c[1]+' '+c[2]+')">'+(c[3]<0?'<g transform="translate('+sp.w+' 0) scale(-1 1)">'+g+'</g>':g)+'</g>'; });
+  host.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" class="gw-photo" viewBox="'+bg.vb+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="海辺の街の写真"><g>'+PP(bg.inner,rec.b)+'</g>'+tr+cars+'</svg>';
+  var gs=host.querySelectorAll('.gw-car'), j=0; rec.c.forEach(function(c){ if(!D.spr[c[0]]) return; var e=gs[j++]; if(c[5]&&e) try{ HS(e,wide?4.4:6.6,c[5]); }catch(er){} }); return host.firstChild; }
+/*PDSHARED-END*/
 var box=document.getElementById('parade'); if(!box||!window.fetch) return;
-var NS='http://www.w3.org/2000/svg', D=null, S=null, lanes=[], X0=0, W=360, wideNow=null, last=0, raf=0;
+var BGS=Math.floor(Math.random()*1e6); var NS='http://www.w3.org/2000/svg', D=null, S=null, lanes=[], X0=0, W=360, wideNow=null, last=0, raf=0;
 var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches; var SLOW=reduce?.5:1;
 function rnd(a,b){ return a+Math.random()*(b-a); }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function build(){ var wide=(window.innerWidth||1000)>=600; if(wide===wideNow) return; wideNow=wide; var bg=wide?D.bgW:D.bgN; var vb=bg.vb.split(' ').map(Number); X0=vb[0]; W=vb[2];
-  box.className='pd-view'+(wide?'':' n'); box.innerHTML='<svg xmlns="'+NS+'" viewBox="'+bg.vb+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="街の中を、乗り物が走る絵"><g>'+PP(bg.inner)+'</g></svg>'; S=box.firstChild;
+  box.className='pd-view'+(wide?'':' n'); box.innerHTML='<svg xmlns="'+NS+'" viewBox="'+bg.vb+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="街の中を、乗り物が走る絵"><g>'+PP(bg.inner,BGS)+'</g></svg>'; S=box.firstChild;
   // 道・線路・海・空のレーン（y は地面の高さ。dir 1 は右へ、-1 は左へ）
   var L=[ {lane:'sky',y:[26,64],dir:0,sp:[16,22],gap:[60,220]}, {lane:'sky',y:[40,80],dir:0,sp:[14,20],gap:[120,320]},
     {lane:'rail',y:[118,118],dir:-1,sp:[34,42],gap:[200,500]},
@@ -598,8 +638,8 @@ function build(){ var wide=(window.innerWidth||1000)>=600; if(wide===wideNow) re
   lanes=L.map(function(o){ var g=document.createElementNS(NS,'g'); S.appendChild(g);
     if(o.lane==='rail'){ var v='<rect x="'+X0+'" y="118" width="'+W+'" height="4" fill="#9AA3AE"/>'; for(var px=X0+14;px<X0+W;px+=46) v+='<rect x="'+px+'" y="122" width="5" height="48" fill="#B4BCC6" opacity=".85"/>'; g.innerHTML=v; var tg=document.createElementNS(NS,'g'); S.appendChild(tg); g=tg; } return {o:o,g:g,list:D.spr.filter(function(s){ return s.lane===o.lane; }),cars:[],wait:rnd(0,2)}; }); }
 function spawn(l){ var s=pick(l.list); if(!s) return; var dir=l.o.dir||(Math.random()<.5?1:-1); var y=rnd(l.o.y[0],l.o.y[1]); var sp=rnd(l.o.sp[0],l.o.sp[1])*SLOW;
-  var e=document.createElementNS(NS,'g'); var sg=PP(s.g); e.innerHTML=dir<0?'<g transform="translate('+s.w+' 0) scale(-1 1)">'+sg+'</g>':sg;
-  var x=dir>0?X0-s.w-40:X0+W+40; l.g.appendChild(e); try{ HS(e,wideNow?4.4:6.6); }catch(er){} var c={e:e,x:x,y:y,w:s.w,dir:dir,sp:sp}; l.cars.push(c); place(c);
+  var e=document.createElementNS(NS,'g'); var sd=Math.floor(Math.random()*1e6); var sg=PP(s.g,sd); e.innerHTML=dir<0?'<g transform="translate('+s.w+' 0) scale(-1 1)">'+sg+'</g>':sg;
+  var x=dir>0?X0-s.w-40:X0+W+40; l.g.appendChild(e); try{ HS(e,wideNow?4.4:6.6); }catch(er){} var c={e:e,x:x,y:y,w:s.w,dir:dir,sp:sp,si:s._i,seed:sd}; l.cars.push(c); place(c);
   l.wait=(s.w+rnd(l.o.gap[0],l.o.gap[1]))/sp; }
 function place(c){ c.e.setAttribute('transform','translate('+c.x.toFixed(1)+' '+c.y.toFixed(1)+')'); }
 function tick(t){ raf=requestAnimationFrame(tick); var dt=last?Math.min(.1,(t-last)/1000):0; last=t; if(!S) return;
@@ -608,7 +648,32 @@ function tick(t){ raf=requestAnimationFrame(tick); var dt=last?Math.min(.1,(t-la
 // 見えている時だけ動かす（画面の外・ほかのタブの時は止めて、軽くする）
 var vis=true; function go(){ if(!raf&&D&&vis&&!document.hidden){ last=0; raf=requestAnimationFrame(tick); } } function stop(){ if(raf){ cancelAnimationFrame(raf); raf=0; } }
 if(window.IntersectionObserver) new IntersectionObserver(function(es){ vis=es[es.length-1].isIntersecting; vis?go():stop(); },{rootMargin:'80px'}).observe(box);
-fetch('parade/parade.json').then(function(r){ return r.ok?r.json():null; }).then(function(d){ if(!d) return; D=d; build(); go(); window.addEventListener('resize',build); }).catch(function(){});
+// ---- 📷 ベストショット：いまの場面を小さなメモ（どの乗り物がどこに・だれが乗っていたか）にして、このブラウザのアルバムへ ----
+var AK='hitotsu.gwAlbum';
+function alb(){ try{ var a=JSON.parse(localStorage.getItem(AK)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function albSet(a){ try{ localStorage.setItem(AK,JSON.stringify(a.slice(0,60))); return true; }catch(e){ return false; } }
+function shot(){ if(!S) return null; var c=[]; lanes.forEach(function(l){ l.cars.forEach(function(k){ if(k.x>X0+W+2||k.x+k.w<X0-2||k.si==null) return; var r=[k.si,+k.x.toFixed(1),+k.y.toFixed(1),k.dir,k.seed]; if(k.e._tag) r.push(k.e._tag); c.push(r); }); });
+  var rec={v:1,w:wideNow?1:0,b:BGS,c:c,t:Date.now()};
+  while(JSON.stringify(rec).length>990&&rec.c.length){ var i=-1; for(var q=0;q<rec.c.length;q++) if(!rec.c[q][5]){ i=q; break; } rec.c.splice(i<0?rec.c.length-1:i,1); } // 友だちに送れる大きさ（1000文字まで）
+  return rec; }
+var cam=document.getElementById('pdShot'), albB=document.getElementById('pdAlb'), msg=document.getElementById('pdMsg'), dlg=document.getElementById('pdAlbum'), grid=document.getElementById('pdGrid'), more=document.getElementById('pdMore'), flash=document.getElementById('pdFlash'), shown=0, mt=0;
+function albCount(){ var n=alb().length; if(albB) albB.querySelector('span').textContent=n?'（'+n+'）':''; }
+function say(t){ if(!msg) return; msg.textContent=t; clearTimeout(mt); mt=setTimeout(function(){ msg.textContent=''; },3500); }
+if(cam) cam.addEventListener('click',function(){ var r=shot(); if(!r||!r.c.length){ say('乗り物が来たら、もう一度押してください。'); return; } var a=alb(); a.unshift(r); if(!albSet(a)){ say('アルバムに入れられませんでした（保存する場所がいっぱいかもしれません）。'); return; }
+  if(flash){ flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); } say('📷 パシャ！ アルバムに入れました。'); albCount(); });
+function fmt(t){ var d=new Date(t); return d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()+' '+d.getHours()+':'+('0'+d.getMinutes()).slice(-2); }
+function page(){ var a=alb(), end=Math.min(a.length,shown+4);
+  for(var i=shown;i<end;i++){ var r=a[i], f=document.createElement('figure'); f.className='pd-ph'; f.innerHTML='<div class="pd-ph-img'+(r.w?'':' n')+'"></div><figcaption><span>'+fmt(r.t)+'</span><a class="pd-btn" href="play.html#gwsend='+r.t+'">💌 Higher Self に送る</a><button type="button" class="pd-btn pd-btn2" data-del="'+r.t+'">消す</button></figcaption>'; grid.appendChild(f); try{ gwRender(r,D,f.firstChild); }catch(e){} }
+  shown=end; more.hidden=shown>=a.length; if(!a.length) grid.innerHTML='<p class="pd-empty">まだ写真がありません。海辺の街で、いいなと思った場面で 📷 を押してください。</p>'; }
+function openAlb(){ if(!D||!dlg) return; if(dlg.parentNode!==document.body) document.body.appendChild(dlg); grid.innerHTML=''; shown=0; dlg.hidden=false; document.body.style.overflow='hidden'; page(); }
+function closeAlb(){ dlg.hidden=true; grid.innerHTML=''; document.body.style.overflow=''; }
+if(albB) albB.addEventListener('click',openAlb);
+if(dlg) dlg.addEventListener('click',function(ev){ var t=ev.target; if(t===dlg||t.closest('[data-close]')){ closeAlb(); return; } if(t.id==='pdMore'){ page(); return; }
+  var d=t.closest('[data-del]'); if(d){ if(d.dataset.arm!=='1'){ d.dataset.arm='1'; d.textContent='本当に消す'; setTimeout(function(){ d.dataset.arm=''; d.textContent='消す'; },4000); return; }
+    albSet(alb().filter(function(r){ return String(r.t)!==d.dataset.del; })); var f=d.closest('figure'); if(f) f.remove(); shown=Math.max(0,shown-1); albCount(); if(!alb().length) page(); } });
+document.addEventListener('keydown',function(ev){ if(ev.key==='Escape'&&dlg&&!dlg.hidden) closeAlb(); });
+albCount();
+fetch('parade/parade.json').then(function(r){ return r.ok?r.json():null; }).then(function(d){ if(!d) return; D=d; D.spr.forEach(function(s,i){ s._i=i; }); build(); go(); window.addEventListener('resize',build); }).catch(function(){});
 document.addEventListener('visibilitychange',function(){ document.hidden?stop():go(); });
 })();
 </script>
