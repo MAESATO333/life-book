@@ -17444,6 +17444,624 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 @keyframes pbRoamE{ 0%{ transform:translate(0,0) scaleX(1) } 8%{ transform:translate(calc(var(--rx)*.7),calc(var(--ry)*-.8 - 8px)) scaleX(1) } 16%{ transform:translate(calc(var(--rx)*1.4),calc(var(--ry)*-.4)) scaleX(1) } 24%{ transform:translate(calc(var(--rx)*1.6),calc(var(--ry)*.6 - 8px)) scaleX(1) } 25%{ transform:translate(calc(var(--rx)*1.6),calc(var(--ry)*.6 - 8px)) scaleX(-1) } 33%{ transform:translate(calc(var(--rx)*1.1),calc(var(--ry)*1.6)) scaleX(-1) } 42%{ transform:translate(calc(var(--rx)*.2),calc(var(--ry)*2 - 8px)) scaleX(-1) } 50%{ transform:translate(calc(var(--rx)*-.7),calc(var(--ry)*1.7)) scaleX(-1) } 58%{ transform:translate(calc(var(--rx)*-1.4),calc(var(--ry)*1 - 8px)) scaleX(-1) } 66%{ transform:translate(calc(var(--rx)*-1.6),calc(var(--ry)*0)) scaleX(-1) } 67%{ transform:translate(calc(var(--rx)*-1.6),calc(var(--ry)*0)) scaleX(1) } 76%{ transform:translate(calc(var(--rx)*-1.2),calc(var(--ry)*-1 - 8px)) scaleX(1) } 88%{ transform:translate(calc(var(--rx)*-.5),calc(var(--ry)*-1.2)) scaleX(1) } 100%{ transform:translate(0,0) scaleX(1) } }
 @media (prefers-reduced-motion:reduce){ .pb-roam{ animation-duration:20s !important; } }
 </style>`);
+// ===== v178: 新しく「うちのペット」にできる動物（MITSUさんの希望）=====
+// カンガルー（5種）・ハムスター・パンダ・ホッキョクグマ（白熊）・やぎ・ひつじ・ライオン・チーター・キリン・ゾウ・ワシ・タカ・クジラ・恐竜（ティラノサウルスほか）
+// Channel の人生（乱数）には関係なし。「うちのペット」で選べるだけ。絵は今のペットと同じブロック絵。
+const PW_KIND=[
+  ['kangaroo','カンガルー','🦘',[12,18]], ['hamster','ハムスター','🐹',[2,3]], ['panda','パンダ','🐼',[20,30]], ['polarbear','白熊','🐻‍❄️',[20,28]],
+  ['goat','やぎ','🐐',[12,16]], ['sheep','ひつじ','🐑',[10,13]], ['lion','ライオン','🦁',[15,20]], ['cheetah','チーター','🐆',[12,16]],
+  ['giraffe','キリン','🦒',[20,26]], ['elephant','ゾウ','🐘',[45,65]], ['eagle','ワシ','🦅',[20,30]], ['hawk','タカ','🦅',[12,20]],
+  ['whale','クジラ','🐋',[40,70]], ['dino','恐竜','🦖',[25,30]] ];
+// 種類：id, 名前, 色, 色2, そのほか（ps＝絵の大きさ、pz＝絵の中心の高さ、life＝寿命の目安）
+const PW_BREEDS={
+  kangaroo:[['k_red','アカカンガルー','#C4643E','#F1D9C2',{}],['k_egrey','オオカンガルー','#9C8E80','#E6DDD2',{}],['k_wgrey','クロカンガルー','#7A5E4C','#D9C6B4',{}],['k_wallaroo','ワラルー','#5E5450','#B8AEA6',{}],['k_tree','キノボリカンガルー','#A0522D','#F2C894',{ tree:1 }]],
+  hamster:[['h_golden','ゴールデンハムスター','#E3A25A','#FFF4E2',{}],['h_djung','ジャンガリアンハムスター','#A8A29A','#FFFFFF',{ stripe:1 }],['h_pearl','ジャンガリアン（パールホワイト）','#F6F3EE','#FFFFFF',{}],['h_robo','ロボロフスキーハムスター','#E2B98A','#FFFFFF',{ k:.8 }],['h_kinkuma','キンクマハムスター','#E8A55C','#F7D7A8',{}],['h_camp','キャンベルハムスター','#B49C82','#F4EEE6',{ stripe:1 }]],
+  panda:[['p_giant','ジャイアントパンダ','#F6F4EE','#2A2523',{}]],
+  polarbear:[['b_polar','ホッキョクグマ','#F3EFE4','#E2DACA',{}]],
+  goat:[['g_saanen','日本ザーネン','#F6F3EC','#F0D8C8',{ horn:0 }],['g_shiba','シバヤギ','#F2EEE6','#E8DCC8',{ horn:1 }],['g_tokara','トカラヤギ','#7A6A5A','#3A302A',{ horn:1 }],['g_pygmy','ピグミーゴート','#5A4A42','#C9B49A',{ horn:1, k:.85 }],['g_boer','ボーアゴート','#F6F1E6','#9A4A2E',{ horn:1, head:'#9A4A2E' }]],
+  sheep:[['s_suffolk','サフォーク','#F3EEE2','#2A2523',{ face:'#2A2523' }],['s_corrie','コリデール','#F4F0E6','#F2E6DA',{ face:'#F2E6DA' }],['s_merino','メリノ','#F1EADB','#F2E2D2',{ face:'#F2E2D2', horn:1 }],['s_jacob','ジャコブ','#F4F0E6','#3A302C',{ face:'#3A302C', horn:2, spots:1 }]],
+  lion:[['l_male','ライオン（オス）','#D9A55A','#8A4E24',{ mane:1 }],['l_female','ライオン（メス）','#D9AC68','#F2DDB8',{}],['l_white','ホワイトライオン','#F2E8D6','#E6D2B0',{ mane:1 }]],
+  cheetah:[['c_cheetah','チーター','#E2B464','#2A2523',{}],['c_king','キングチーター','#E2B464','#2A2523',{ king:1 }]],
+  giraffe:[['gi_retic','アミメキリン','#E8C38A','#A6552E',{}],['gi_masai','マサイキリン','#EAD2A8','#7A4A2A',{ masai:1 }]],
+  elephant:[['e_asian','アジアゾウ','#9AA0A6','#868C92',{ ear:.8, tusk:0 }],['e_african','アフリカゾウ','#A2A4A6','#8C8E90',{ ear:1.35, tusk:1 }],['e_forest','マルミミゾウ','#8E8C88','#7A7874',{ ear:1, tusk:1, k:.9 }]],
+  eagle:[['w_golden','イヌワシ','#6A4A32','#C9963E',{ c3:'#4A3424' }],['w_bald','ハクトウワシ','#4A3428','#FFFFFF',{ c3:'#3A2A20' }],['w_white','オジロワシ','#7A5A40','#C9B494',{ c3:'#5A4030', tailw:1 }],['w_steller','オオワシ','#3A302C','#4A3E38',{ c3:'#FFFFFF', big:1 }]],
+  hawk:[['t_goshawk','オオタカ','#5E6670','#F2EEE6',{ c3:'#4A525A', brow:1 }],['t_harris','ハリスホーク','#4A3428','#8A4A2A',{ c3:'#8A4A2A' }],['t_buzzard','ノスリ','#8A6A4A','#E8D8C0',{ c3:'#6A4E36' }],['t_hawkeagle','クマタカ','#6A5444','#E8DCC8',{ c3:'#5A4434', crest:1 }]],
+  whale:[['wh_humpback','ザトウクジラ','#3E4A5A','#E8ECF0',{ life:[45,60] }],['wh_blue','シロナガスクジラ','#6A86A6','#9AB0C8',{ life:[70,90], long:1 }],['wh_sperm','マッコウクジラ','#5A5A62','#7A7A82',{ life:[60,70], sperm:1 }],['wh_orca','シャチ','#2A2A30','#FFFFFF',{ life:[30,50], orca:1 }],['wh_beluga','シロイルカ（ベルーガ）','#F2F4F6','#E2E6EA',{ life:[35,50], beluga:1 }],['wh_minke','ミンククジラ','#4A5664','#E2E6EA',{ life:[30,50] }]],
+  dino:[['d_trex','ティラノサウルス','#5E7A4A','#C9B98A',{ biped:1, meat:1, life:[25,30] }],['d_tri','トリケラトプス','#A0724A','#E8C8A0',{ tri:1, life:[20,30] }],['d_brachio','ブラキオサウルス','#7A8A9A','#B8C4CE',{ brachio:1, life:[40,60] }],['d_stego','ステゴサウルス','#7A8A4A','#D96A3A',{ stego:1, life:[20,30] }],['d_anky','アンキロサウルス','#8A7A5A','#5A4E3A',{ anky:1, life:[20,30] }],['d_raptor','ヴェロキラプトル','#9A7A5A','#5A8AB0',{ biped:1, raptor:1, meat:1, life:[10,15] }]]
+};
+// 絵の大きさ（ps）と、中心の高さ（pz）
+const PW_PS={ kangaroo:[3.2,.6], hamster:[4.4,.25], panda:[3.1,.45], polarbear:[3,.45], goat:[3.3,.5], sheep:[3.3,.45], lion:[3.1,.5], cheetah:[3.2,.5], giraffe:[2.1,1.05], elephant:[2.5,.7], eagle:[3.4,.75], hawk:[3.4,.75], whale:[2.7,.25], dino:[2.6,.6] };
+(function(){ for(const kd in PW_BREEDS) PW_BREEDS[kd].forEach(([id,name,c,c2,o])=>{ MP_BASECOL[id]='この動物の色'; PB_ALL[id]=Object.assign({ kind:kd, id, name, w:1, home:'', yr:0, c, c2, k:1, fluff:0, pw:1, ps:PW_PS[kd][0]*(o.ps||1), pz:PW_PS[kd][1] },o); });
+  for(const id of ['d_brachio']) if(PB_ALL[id]){ PB_ALL[id].ps=1.9; PB_ALL[id].pz=1.1; }
+  for(const id of ['d_trex','d_raptor']) if(PB_ALL[id]){ PB_ALL[id].ps=2.7; PB_ALL[id].pz=.75; }
+  if(PB_ALL.d_raptor) PB_ALL.d_raptor.ps=3.1; })();
+function pwIs(b){ return !!(b&&b.pw); }
+// ---- 顔（左手前の面 y+hs にかく）----
+function pwFace(hx,hy,hz,hs,o){ o=o||{}; return p=>{ const q=(a,h)=>p(hx+a*hs,hy+hs,hz+h*hs); const Q=_pbPose; const e1=q(o.ex1!=null?o.ex1:.27,o.ey||.62), e2=q(o.ex2!=null?o.ex2:.7,o.ey||.62); let s='';
+  const r=o.er||1, ew=2.6*r, eh=3.2*r, ink=o.ink||'#2B2230';
+  if(o.patch) [e1,e2].forEach((e,i)=>{ s+=`<ellipse cx="${e[0].toFixed(1)}" cy="${(e[1]+.6).toFixed(1)}" rx="${(2.1*r).toFixed(1)}" ry="${(1.6*r).toFixed(1)}" fill="${o.patch}" transform="rotate(${i?25:-25} ${e[0].toFixed(1)} ${(e[1]+.6).toFixed(1)})"/>`; });
+  if(o.cheek) [q(.16,.32),q(.84,.32)].forEach(e=>{ s+=`<ellipse cx="${e[0].toFixed(1)}" cy="${e[1].toFixed(1)}" rx="${(2.6*r).toFixed(1)}" ry="${(1.9*r).toFixed(1)}" fill="${o.cheek}"/>`; });
+  const lt=o.patch?'#FFFFFF':ink;
+  if(Q==='sleep'||Q==='groom') s+=[e1,e2].map(e=>`<rect x="${(e[0]-ew/2-.3).toFixed(1)}" y="${(e[1]-.2).toFixed(1)}" width="${(ew+.6).toFixed(1)}" height="1.1" rx=".5" fill="${o.patch?'#F5E9C8':ink}"/>`).join('')+(Q==='sleep'?['z','z','Z'].map((t,i)=>{ const z=q(1.1+i*.35,1.25+i*.4); return `<text class="pb-z pb-z${i}" x="${z[0].toFixed(1)}" y="${z[1].toFixed(1)}" font-size="${5+i*1.5}" font-weight="700" fill="#8A94C8">${t}</text>`; }).join(''):'');
+  else { s+=[e1,e2].map(e=>`<rect x="${(e[0]-ew/2).toFixed(1)}" y="${(e[1]-eh/2-.1).toFixed(1)}" width="${ew.toFixed(1)}" height="${eh.toFixed(1)}" rx=".7" fill="${o.patch?'#2B2230':ink}"/>`).join('');
+    if(o.patch) s+=[e1,e2].map(e=>`<rect x="${(e[0]-.3).toFixed(1)}" y="${(e[1]-1.2).toFixed(1)}" width="1" height="1" fill="#FFFFFF"/>`).join(''); }
+  if(o.tear) [e1,e2].forEach(e=>{ s+=`<path d="M${(e[0]).toFixed(1)} ${(e[1]+1.6).toFixed(1)} l${(-.6*r).toFixed(1)} ${(4.2*r).toFixed(1)}" stroke="#2B2230" stroke-width="1" stroke-linecap="round"/>`; });
+  if(o.brow) [e1,e2].forEach(e=>{ s+=`<rect x="${(e[0]-2.2*r).toFixed(1)}" y="${(e[1]-3.4*r).toFixed(1)}" width="${(4.4*r).toFixed(1)}" height="1.1" fill="#F2EEE6"/>`; });
+  if(o.nose){ const n=q(.49,o.ny||.3); s+=`<rect x="${(n[0]-1.7*r).toFixed(1)}" y="${(n[1]-1.1*r).toFixed(1)}" width="${(3.4*r).toFixed(1)}" height="${(2.3*r).toFixed(1)}" rx="1" fill="${o.nose}"/>`; }
+  if(o.mouth){ const m=q(.49,.14); s+=`<path d="M${(m[0]-2*r).toFixed(1)} ${m[1].toFixed(1)} q${(2*r).toFixed(1)} ${(1.6*r).toFixed(1)} ${(4*r).toFixed(1)} 0" stroke="${o.mouth}" stroke-width="1" fill="none"/>`; }
+  if(o.extra) s+=o.extra(q);
+  return s; }; }
+// 体の手前の面に、ぶち・もようをかく（a,h は 0〜1）
+function pwSpots(x,y,z,L,D,H,col,list,w,h){ return p=>list.map(([a,c])=>{ const A=p(x+a*L,y+D,z+c*H), B=p(x+(a+w)*L,y+D,z+c*H), C=p(x+a*L,y+D,z+(c+h)*H); return `<polygon points="${A[0].toFixed(1)},${A[1].toFixed(1)} ${B[0].toFixed(1)},${B[1].toFixed(1)} ${(B[0]+C[0]-A[0]).toFixed(1)},${(B[1]+C[1]-A[1]).toFixed(1)} ${C[0].toFixed(1)},${C[1].toFixed(1)}" fill="${col}"/>`; }).join(''); }
+function pwJoin(...fs){ return p=>fs.filter(Boolean).map(f=>f(p)).join(''); }
+// ---- 4本足の動物（パンダ・白熊・やぎ・ひつじ・ライオン・チーター・キリン・ゾウ・草食の恐竜）----
+function pwQuad(S,x,y,b,o){ const Q=_pbPose, k=(b.k||1)*(o.k||1), lie=Q==='lie'||Q==='sleep', sit=Q==='sit';
+  const L=o.L*k, D=o.D*k, H=o.H*k, leg0=o.leg*k, leg=lie?.05*k:sit?leg0*.4:leg0, lw=(o.lw||.2)*k, legC=o.legC||o.c;
+  pbUnder(S,x-.25*k,y-.2*k,L+.5*k,D+.4*k);
+  if(o.tail) o.tail(S,{ x, y, z:leg, L, D, H, k, Q });
+  const wk=Q==='walk'?((_pbX&&typeof _pbX.st==='number')?_pbX.st:1)*.1*k:0;
+  [[x+.06*k-wk,y+.03*k,o.legB||legC],[x+L-lw-.06*k+wk,y+.03*k,legC],[x+.06*k+wk,y+D-lw-.03*k,o.legB||legC],[x+L-lw-.06*k-wk,y+D-lw-.03*k,legC]].forEach(([a,c0,cc])=>{ S.box(a,c0,0,lw,lw,leg+.02,cc); if(o.hoof&&!lie) S.box(a,c0,0,lw,lw,.06*k,o.hoof); });
+  if(lie) [y+.03*k,y+D-lw-.03*k].forEach(c0=>S.box(x+L-.08*k,c0,0,.34*k,lw*.9,.1*k,legC));
+  S.box(x,y,leg,L,D,H,o.c,o.bodyEx?o.bodyEx({ x, y, z:leg, L, D, H, k }):null);
+  if(sit) S.box(x+L-.5*k,y,leg+H-.01,.5*k,D,(leg0-leg)+H*.5,o.c);
+  if(o.onBody) o.onBody(S,{ x, y, z:leg, L, D, H, k, Q, sit, lie });
+  // 首と頭
+  const hs=o.hs*k, hd=(o.hd||1)*hs; let hx=x+L-hs*.62+(o.hdx||0)*k, hy=y+D-hd, hz=leg+H*(o.hzr||.55)+(sit?(leg0-leg)+H*.7:0);
+  if(o.neck){ const nw=o.nw*k, nh0=o.neck*k; let nh=nh0, nx=x+L-nw-.04*k;
+    if(Q==='eat'){ nh=nh0*.35; hx+=nh0*.45; } else if(Q==='sleep'||Q==='lie'){ nh=nh0*(Q==='sleep'?.25:.7); } else if(Q==='look') nh=nh0*1.08;
+    const nz=leg+H*.55+(sit?(leg0-leg)+H*.5:0); S.box(nx,y+(D-nw)/2,nz,nw,nw,nh,o.nc||o.c,o.neckEx?o.neckEx({ x:nx, y:y+(D-nw)/2, z:nz, w:nw, h:nh }):null);
+    if(o.mane2) S.box(nx-.03*k,y+(D-nw)/2+nw*.3,nz+nh*.15,.04*k,nw*.4,nh*.85,o.mane2);
+    hz=nz+nh-hs*.25; hx=nx+(Q==='eat'?nh0*.4:0)-hs*.15; hy=y+(D-hd)/2+hd*.5-(hd-nw)/2; hy=y+(D+nw)/2-hd; }
+  else { if(Q==='eat') hz-=leg0*.45+H*.5; else if(Q==='look') hz+=.14*k; else if(Q==='sleep') hz-=H*.4; if(Q==='eat') hx+=.12*k; }
+  hz=Math.max(0,hz);
+  if(o.preHead) o.preHead(S,{ hx, hy, hz, hs, hd, k, Q });
+  S.box(hx,hy,hz,hs,hd,hs,o.hc||o.c,pwFace(hx,hy+hd-hs,hz,hs,o.face||{}));
+  if(o.postHead) o.postHead(S,{ hx, hy, hz, hs, hd, k, Q });
+  pbProp(S,Q,hx,hy+hd,k,b,hz); }
+function pwEarsTop(S,h,w,d,t,c,inner){ const { hx, hy, hz, hs, hd, k }=h; [hx+.03*k,hx+hs-w*k-.03*k].forEach(ex=>{ S.box(ex,hy+hd*.3,hz+hs,w*k,d*k,t*k,c); }); }
+// 動物ごとの形
+function pwPanda(S,x,y,b){ const K='#2A2523';
+  pwQuad(S,x,y,b,{ L:1.1, D:.62, H:.56, leg:.28, lw:.26, c:b.c, legC:K, hs:.56, hzr:.45,
+    tail:(S,g)=>S.box(g.x-.08*g.k,g.y+g.D*.4,g.z+g.H*.6,.12*g.k,.14*g.k,.12*g.k,b.c),
+    onBody:(S,g)=>{ S.box(g.x+g.L*.55,g.y-.005,g.z+g.H*.3,g.L*.2,g.D+.01,g.H*.71,K); },
+    preHead:(S,h)=>pwEarsTop(S,h,.16,.14,.14,K),
+    face:{ patch:K, nose:K, ny:.3, er:.75, ex1:.22, ex2:.76, mouth:'#2B2230' } }); }
+function pwPolar(S,x,y,b){ pwQuad(S,x,y,b,{ L:1.25, D:.6, H:.55, leg:.34, lw:.25, c:b.c, legC:bkShade(b.c,.96), hs:.44, hd:.44, hzr:.42, hdx:.08,
+    tail:(S,g)=>S.box(g.x-.06*g.k,g.y+g.D*.4,g.z+g.H*.55,.1*g.k,.12*g.k,.1*g.k,b.c),
+    onBody:(S,g)=>{ if(!g.lie) S.box(g.x+g.L*.15,g.y,g.z+g.H,g.L*.5,g.D,.06*g.k,b.c); },
+    preHead:(S,h)=>pwEarsTop(S,h,.11,.08,.08,b.c),
+    postHead:(S,h)=>{ const sl=.2*h.k; S.box(h.hx+h.hs*.28,h.hy+h.hd,h.hz+h.hs*.02,h.hs*.44,sl,h.hs*.36,bkShade(b.c,1.02),p=>{ const n=p(h.hx+h.hs*.5,h.hy+h.hd+sl,h.hz+h.hs*.3); return `<rect x="${(n[0]-2).toFixed(1)}" y="${(n[1]-1.4).toFixed(1)}" width="4" height="2.6" rx="1" fill="#2B2230"/>`; }); },
+    face:{ ey:.66 } }); }
+function pwGoat(S,x,y,b){ const hc=b.head||b.c;
+  pwQuad(S,x,y,b,{ L:.95, D:.42, H:.42, leg:.46, lw:.12, c:b.c, hs:.36, hd:.36, hzr:.75, hoof:'#4A3A30', k:b.k,
+    tail:(S,g)=>S.box(g.x-.04*g.k,g.y+g.D*.4,g.z+g.H*.85,.08*g.k,.08*g.k,.18*g.k,b.c),
+    preHead:(S,h)=>{ if(b.horn){ [h.hx+.04*h.k,h.hx+h.hs-.12*h.k].forEach(ex=>{ S.box(ex-.06*h.k,h.hy+h.hd*.35,h.hz+h.hs,.08*h.k,.08*h.k,.2*h.k,'#8A7A62'); S.box(ex-.16*h.k,h.hy+h.hd*.35,h.hz+h.hs+.16*h.k,.12*h.k,.08*h.k,.07*h.k,'#8A7A62'); }); }
+      S.box(h.hx-.05*h.k,h.hy+h.hd*.3,h.hz+h.hs*.55,.06*h.k,.2*h.k,.1*h.k,bkShade(hc,.9)); },
+    hc,
+    postHead:(S,h)=>{ S.box(h.hx+h.hs*.3,h.hy+h.hd,h.hz,h.hs*.4,.12*h.k,h.hs*.36,bkShade(hc,1.05),p=>{ const n=p(h.hx+h.hs*.5,h.hy+h.hd+.12*h.k,h.hz+h.hs*.28); return `<rect x="${(n[0]-1.4).toFixed(1)}" y="${(n[1]-1).toFixed(1)}" width="2.8" height="1.8" rx=".8" fill="#B07A6A"/>`; });
+      S.box(h.hx+h.hs*.38,h.hy+h.hd+.04*h.k,h.hz-.16*h.k,h.hs*.24,.06*h.k,.18*h.k,b.c2==='#3A302A'?'#3A302A':'#E8E2D6');
+      S.box(h.hx+h.hs,h.hy+h.hd*.3,h.hz+h.hs*.55,.06*h.k,.2*h.k,.1*h.k,bkShade(hc,.9)); },
+    face:{ ey:.66, er:.9 } }); }
+function pwSheep(S,x,y,b){ const face=b.face||'#F2E6DA';
+  pwQuad(S,x,y,b,{ L:1.0, D:.56, H:.52, leg:.32, lw:.12, c:b.c, legC:face, hs:.34, hd:.34, hzr:.62, hdx:.06,
+    bodyEx:g=>p=>{ let s=''; for(let i=0;i<6;i++) for(let j=0;j<3;j++){ const q=p(g.x+(.08+i*.16)*g.L,g.y+g.D,g.z+(.2+j*.3)*g.H); s+=`<circle cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="1.3" fill="${bkShade(b.c,.93)}"/>`; }
+      if(b.spots) [[.2,.4],[.55,.2],[.7,.55]].forEach(([a,h])=>{ const q=p(g.x+a*g.L,g.y+g.D,g.z+h*g.H); s+=`<ellipse cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" rx="1.5" ry="1.1" fill="#3A302C"/>`; }); return s; },
+    onBody:(S,g)=>{ S.box(g.x+.04*g.k,g.y+.04*g.k,g.z+g.H,g.L-.08*g.k,g.D-.08*g.k,.08*g.k,b.c); },
+    tail:(S,g)=>S.box(g.x-.06*g.k,g.y+g.D*.38,g.z+g.H*.5,.1*g.k,.12*g.k,.16*g.k,b.c),
+    preHead:(S,h)=>{ S.box(h.hx-.05*h.k,h.hy+h.hd*.3,h.hz+h.hs*.5,.06*h.k,.24*h.k,.09*h.k,face);
+      if(b.horn===1){ [0,1].forEach(i=>S.box(h.hx+(i?h.hs-.1*h.k:-.02*h.k),h.hy+h.hd*.1,h.hz+h.hs*.55,.12*h.k,.12*h.k,.14*h.k,'#C9B48A')); } if(b.horn===2){ [0,1].forEach(i=>S.box(h.hx+(i?h.hs-.08*h.k:0),h.hy+h.hd*.45,h.hz+h.hs,.08*h.k,.08*h.k,.2*h.k,'#4A3E36')); }
+      S.box(h.hx+.04*h.k,h.hy+.02*h.k,h.hz+h.hs*.72,h.hs-.08*h.k,h.hd-.04*h.k,h.hs*.36,b.c); },
+    hc:face,
+    postHead:(S,h)=>{ S.box(h.hx+h.hs,h.hy+h.hd*.3,h.hz+h.hs*.5,.06*h.k,.24*h.k,.09*h.k,face); },
+    face:{ ey:.55, ink:face==='#2A2523'||face==='#3A302C'?'#F5E9C8':'#2B2230', nose:face==='#2A2523'||face==='#3A302C'?'#6A5A52':'#C98A8A', ny:.2, er:.9 } }); }
+function pwLion(S,x,y,b){ const tuft=b.c2==='#F2DDB8'?'#6A4A30':b.mane?b.c2:'#6A4A30';
+  pwQuad(S,x,y,b,{ L:1.15, D:.5, H:.46, leg:.38, lw:.17, c:b.c, hs:.46, hd:.46, hzr:.62,
+    tail:(S,g)=>{ const up=g.Q==='play'||g.Q==='walk'; if(up){ S.box(g.x-.12*g.k,g.y+g.D*.4,g.z+g.H*.7,.08*g.k,.08*g.k,.5*g.k,b.c); S.box(g.x-.14*g.k,g.y+g.D*.36,g.z+g.H*.7+.48*g.k,.12*g.k,.12*g.k,.12*g.k,tuft); } else { S.box(g.x-.5*g.k,g.y+g.D*.42,g.z+g.H*.3,.5*g.k,.08*g.k,.08*g.k,b.c); S.box(g.x-.6*g.k,g.y+g.D*.38,g.z+g.H*.28,.12*g.k,.12*g.k,.12*g.k,tuft); } },
+    preHead:(S,h)=>{ if(b.mane) S.box(h.hx-.1*h.k,h.hy-.06*h.k,h.hz-.14*h.k,h.hs+.2*h.k,h.hd+.04*h.k,h.hs+.26*h.k,b.c2); pwEarsTop(S,h,.12,.08,.09,b.mane?b.c2:bkShade(b.c,.85)); },
+    postHead:(S,h)=>{ S.box(h.hx+h.hs*.26,h.hy+h.hd,h.hz+h.hs*.02,h.hs*.48,.1*h.k,h.hs*.34,'#F4E2C2',p=>{ const n=p(h.hx+h.hs*.5,h.hy+h.hd+.1*h.k,h.hz+h.hs*.3); return `<rect x="${(n[0]-1.8).toFixed(1)}" y="${(n[1]-1.2).toFixed(1)}" width="3.6" height="2.2" rx="1" fill="#8A5A4A"/>`; }); },
+    face:{ ey:.66, er:1 } }); }
+function pwCheetah(S,x,y,b){ const sp=[[.08,.6],[.2,.3],[.32,.7],[.42,.38],[.55,.66],[.66,.28],[.78,.6],[.14,.05],[.5,.08],[.86,.2]];
+  pwQuad(S,x,y,b,{ L:1.12, D:.4, H:.36, leg:.5, lw:.13, c:b.c, hs:.36, hd:.36, hzr:.7,
+    bodyEx:g=>b.king?pwSpots(g.x,g.y,g.z,g.L,g.D,g.H,'#2A2523',[[.1,.5],[.3,.55],[.5,.5],[.7,.55],[.2,.1],[.6,.12]],.14,.3):pwSpots(g.x,g.y,g.z,g.L,g.D,g.H,'#2A2523',sp,.045,.13),
+    tail:(S,g)=>{ S.box(g.x-.6*g.k,g.y+g.D*.42,g.z+g.H*.35,.6*g.k,.07*g.k,.07*g.k,b.c,p=>{ let s=''; for(let i=0;i<4;i++){ const a=p(g.x-.58*g.k+i*.08*g.k,g.y+g.D*.42+.07*g.k,g.z+g.H*.35), c=p(g.x-.58*g.k+i*.08*g.k,g.y+g.D*.42+.07*g.k,g.z+g.H*.35+.07*g.k); s+=`<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${c[0].toFixed(1)}" y2="${c[1].toFixed(1)}" stroke="#2A2523" stroke-width="1.6"/>`; } return s; }); S.box(g.x-.68*g.k,g.y+g.D*.4,g.z+g.H*.33,.1*g.k,.09*g.k,.09*g.k,'#FFFFFF'); },
+    preHead:(S,h)=>pwEarsTop(S,h,.1,.07,.07,bkShade(b.c,.85)),
+    postHead:(S,h)=>{ S.box(h.hx+h.hs*.28,h.hy+h.hd,h.hz+h.hs*.02,h.hs*.44,.07*h.k,h.hs*.3,'#F4E2C2',p=>{ const n=p(h.hx+h.hs*.5,h.hy+h.hd+.07*h.k,h.hz+h.hs*.28); return `<rect x="${(n[0]-1.4).toFixed(1)}" y="${(n[1]-1).toFixed(1)}" width="2.8" height="1.8" rx=".8" fill="#2B2230"/>`; }); },
+    face:{ ey:.66, tear:1, er:.9 } }); }
+function pwGiraffe(S,x,y,b){ const sp=b.masai?[[.05,.2],[.25,.55],[.45,.15],[.62,.6],[.8,.25],[.15,.75],[.7,.05]]:[[.04,.08],[.27,.08],[.5,.08],[.73,.08],[.04,.55],[.27,.55],[.5,.55],[.73,.55]];
+  pwQuad(S,x,y,b,{ L:.95, D:.4, H:.44, leg:.8, lw:.12, c:b.c, hoof:'#4A3A30', hs:.28, hd:.24, neck:.85, nw:.17, mane2:b.c2,
+    bodyEx:g=>pwSpots(g.x,g.y,g.z,g.L,g.D,g.H,b.c2,sp,b.masai?.14:.19,b.masai?.3:.38),
+    neckEx:n=>p=>{ let s=''; for(let i=0;i<4;i++){ const A=p(n.x+.02,n.y+n.w,n.z+(.08+i*.24)*n.h), B=p(n.x+n.w-.02,n.y+n.w,n.z+(.08+i*.24)*n.h); s+=`<rect x="${Math.min(A[0],B[0]).toFixed(1)}" y="${(A[1]-3).toFixed(1)}" width="${Math.abs(B[0]-A[0]).toFixed(1)}" height="${(n.h*7).toFixed(1)}" fill="${b.c2}" opacity=".9"/>`; } return s; },
+    tail:(S,g)=>{ S.box(g.x-.04*g.k,g.y+g.D*.42,g.z+g.H*.1,.06*g.k,.06*g.k,.4*g.k,b.c); S.box(g.x-.05*g.k,g.y+g.D*.4,g.z+g.H*.1-.12*g.k,.08*g.k,.08*g.k,.14*g.k,'#3A2A20'); },
+    preHead:(S,h)=>{ [h.hx+.03*h.k,h.hx+h.hs-.09*h.k].forEach(ex=>{ S.box(ex,h.hy+h.hd*.3,h.hz+h.hs,.06*h.k,.06*h.k,.14*h.k,b.c); S.box(ex-.01*h.k,h.hy+h.hd*.3-.01,h.hz+h.hs+.14*h.k,.08*h.k,.08*h.k,.05*h.k,'#3A2A20'); }); S.box(h.hx-.06*h.k,h.hy+h.hd*.3,h.hz+h.hs*.6,.08*h.k,.14*h.k,.06*h.k,b.c); },
+    postHead:(S,h)=>{ S.box(h.hx+h.hs*.1,h.hy+h.hd,h.hz,h.hs*.8,.14*h.k,h.hs*.42,bkShade(b.c,1.03),p=>{ const n=p(h.hx+h.hs*.5,h.hy+h.hd+.14*h.k,h.hz+h.hs*.3); return `<rect x="${(n[0]-1.6).toFixed(1)}" y="${(n[1]-.8).toFixed(1)}" width="1.2" height="1.4" fill="#5A3A2A"/><rect x="${(n[0]+.6).toFixed(1)}" y="${(n[1]-.8).toFixed(1)}" width="1.2" height="1.4" fill="#5A3A2A"/>`; }); S.box(h.hx+h.hs,h.hy+h.hd*.3,h.hz+h.hs*.6,.08*h.k,.14*h.k,.06*h.k,b.c); },
+    face:{ ey:.72, er:.8 } }); }
+function pwElephant(S,x,y,b){ const er=b.ear||1;
+  pwQuad(S,x,y,b,{ L:1.35, D:.72, H:.72, leg:.42, lw:.28, c:b.c, hs:.62, hd:.6, hzr:.5,
+    tail:(S,g)=>{ S.box(g.x-.04*g.k,g.y+g.D*.45,g.z+g.H*.15,.06*g.k,.06*g.k,.45*g.k,b.c); S.box(g.x-.05*g.k,g.y+g.D*.44,g.z+g.H*.15-.06*g.k,.08*g.k,.08*g.k,.08*g.k,'#4A4A4A'); },
+    onBody:(S,g)=>{ if(!g.lie) S.box(g.x+g.L*.2,g.y+.04*g.k,g.z+g.H,g.L*.45,g.D-.08*g.k,.08*g.k,b.c); },
+    preHead:(S,h)=>{ S.box(h.hx-.1*h.k,h.hy-.22*h.k*er,h.hz-.12*h.k*er,.06*h.k,h.hd+.44*h.k*er,h.hs+.18*h.k*er,b.c2,p=>{ const a=p(h.hx-.04*h.k,h.hy+h.hd*.2,h.hz+h.hs*.5); return ''; }); },
+    postHead:(S,h)=>{ const tz=h.Q==='eat'?0:h.hz-.38*h.k, th=h.hz+h.hs*.3-tz, up=h.Q==='play'||h.Q==='look';
+      if(b.tusk) [h.hx+h.hs*.08,h.hx+h.hs*.72].forEach(tx=>S.box(tx,h.hy+h.hd-.02,h.hz-.08*h.k,.1*h.k,.18*h.k,.1*h.k,'#F6F1E2'));
+      if(up){ S.box(h.hx+h.hs*.33,h.hy+h.hd,h.hz+h.hs*.1,h.hs*.34,.16*h.k,h.hs*.5,b.c); S.box(h.hx+h.hs*.36,h.hy+h.hd+.12*h.k,h.hz+h.hs*.55,h.hs*.28,.14*h.k,h.hs*.55,b.c); }
+      else { S.box(h.hx+h.hs*.33,h.hy+h.hd,tz,h.hs*.34,.16*h.k,th,b.c,p=>{ let s=''; for(let i=1;i<5;i++){ const a=p(h.hx+h.hs*.33,h.hy+h.hd+.16*h.k,tz+th*i/5), c=p(h.hx+h.hs*.67,h.hy+h.hd+.16*h.k,tz+th*i/5); s+=`<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${c[0].toFixed(1)}" y2="${c[1].toFixed(1)}" stroke="${bkShade(b.c,.8)}" stroke-width=".7"/>`; } return s; }); S.box(h.hx+h.hs*.33,h.hy+h.hd+.16*h.k,tz,h.hs*.34,.08*h.k,.1*h.k,b.c); } },
+    face:{ ey:.6, er:.9, ex1:.18, ex2:.8 } }); }
+// 草食の恐竜（4本足）
+function pwDinoQuad(S,x,y,b){ const c=b.c, c2=b.c2;
+  if(b.brachio) return pwQuad(S,x,y,b,{ L:1.2, D:.55, H:.55, leg:.55, lw:.22, c, hs:.28, hd:.26, neck:1.1, nw:.22, hzr:.6,
+    tail:(S,g)=>{ S.box(g.x-.5*g.k,g.y+g.D*.3,g.z+g.H*.35,.5*g.k,g.D*.4,g.H*.35,c); S.box(g.x-.85*g.k,g.y+g.D*.4,g.z+g.H*.2,.36*g.k,g.D*.2,g.H*.18,c); },
+    bodyEx:g=>pwSpots(g.x,g.y,g.z,g.L,g.D,g.H,bkShade(c,.88),[[.1,.6],[.35,.7],[.6,.62],[.82,.7]],.1,.16),
+    postHead:(S,h)=>{ S.box(h.hx+h.hs*.1,h.hy+h.hd,h.hz,h.hs*.8,.1*h.k,h.hs*.45,bkShade(c,1.04)); }, face:{ ey:.7, er:.8 } });
+  if(b.tri) return pwQuad(S,x,y,b,{ L:1.25, D:.62, H:.55, leg:.32, lw:.24, c, hs:.5, hd:.5, hzr:.35, hdx:.1,
+    tail:(S,g)=>S.box(g.x-.55*g.k,g.y+g.D*.32,g.z+g.H*.3,.55*g.k,g.D*.36,g.H*.35,c),
+    preHead:(S,h)=>{ S.box(h.hx-.12*h.k,h.hy-.18*h.k,h.hz+h.hs*.2,.1*h.k,h.hd+.36*h.k,h.hs+.36*h.k,c2,p=>{ let s=''; for(let i=0;i<5;i++){ const a=p(h.hx-.07*h.k,h.hy-.18*h.k+(h.hd+.36*h.k)*(i+.5)/5,h.hz+h.hs*1.2+.36*h.k); s+=`<circle cx="${a[0].toFixed(1)}" cy="${(a[1]+1).toFixed(1)}" r="1.6" fill="${bkShade(c2,.75)}"/>`; } return s; }); },
+    postHead:(S,h)=>{ [h.hx+h.hs*.1,h.hx+h.hs*.7].forEach(ex=>S.box(ex,h.hy+h.hd*.5,h.hz+h.hs,.08*h.k,.08*h.k,.36*h.k,'#F2E8D2')); S.box(h.hx+h.hs*.4,h.hy+h.hd,h.hz+h.hs*.3,.08*h.k,.16*h.k,.08*h.k,'#F2E8D2'); S.box(h.hx+h.hs*.25,h.hy+h.hd,h.hz,h.hs*.5,.12*h.k,h.hs*.3,bkShade(c,.9)); }, face:{ ey:.62, er:.9 } });
+  if(b.stego) return pwQuad(S,x,y,b,{ L:1.2, D:.5, H:.5, leg:.3, lw:.2, c, hs:.3, hd:.3, hzr:.2, hdx:.15,
+    tail:(S,g)=>{ S.box(g.x-.55*g.k,g.y+g.D*.32,g.z+g.H*.35,.55*g.k,g.D*.36,g.H*.3,c); [[-.5,.2],[-.4,.5]].forEach(([a,dz])=>{ S.box(g.x+a*g.k,g.y+g.D*.2,g.z+g.H*.6,.05*g.k,.05*g.k,.2*g.k,'#F2E8D2'); S.box(g.x+a*g.k,g.y+g.D*.75,g.z+g.H*.6,.05*g.k,.05*g.k,.2*g.k,'#F2E8D2'); }); },
+    onBody:(S,g)=>{ [.05,.25,.45,.65].forEach((a,i)=>{ const h=(i===1||i===2?.36:.26)*g.k; S.box(g.x+a*g.L,g.y+g.D*.45,g.z+g.H,.16*g.k,.04*g.k,h,c2); }); },
+    face:{ ey:.6, er:.8 } });
+  if(b.anky) return pwQuad(S,x,y,b,{ L:1.25, D:.7, H:.38, leg:.22, lw:.2, c, hs:.36, hd:.4, hzr:.3, hdx:.1,
+    tail:(S,g)=>{ S.box(g.x-.5*g.k,g.y+g.D*.38,g.z+g.H*.35,.5*g.k,g.D*.24,g.H*.4,c); S.box(g.x-.7*g.k,g.y+g.D*.28,g.z+g.H*.25,.22*g.k,g.D*.44,g.H*.6,c2); },
+    onBody:(S,g)=>{ for(let i=0;i<4;i++) for(let j=0;j<3;j++) S.box(g.x+(.08+i*.22)*g.L,g.y+(.1+j*.3)*g.D,g.z+g.H,.12*g.k,.12*g.k,.07*g.k,c2); [.15,.45,.75].forEach(a=>S.box(g.x+a*g.L,g.y+g.D,g.z+g.H*.3,.08*g.k,.08*g.k,.08*g.k,'#F2E8D2')); },
+    preHead:(S,h)=>{ S.box(h.hx+h.hs*.6,h.hy-.04*h.k,h.hz+h.hs*.6,.1*h.k,.08*h.k,.1*h.k,'#F2E8D2'); }, face:{ ey:.6, er:.85 } }); }
+// 2本足の恐竜（ティラノサウルス・ヴェロキラプトル）
+function pwBiped(S,x,y,b){ const Q=_pbPose, k=b.raptor?.75:1, c=b.c, c2=b.c2, lie=Q==='lie'||Q==='sleep';
+  pbUnder(S,x-.4*k,y-.2*k,2*k,1*k);
+  const leg=lie?.06*k:.55*k, wk=Q==='walk'?((_pbX&&typeof _pbX.st==='number')?_pbX.st:1)*.12*k:0;
+  // しっぽ
+  S.box(x-.6*k,y+.18*k,leg+.12*k-(lie?.06*k:0),.62*k,.24*k,.22*k,c); S.box(x-1.05*k,y+.24*k,leg+.04*k-(lie?.04*k:0),.48*k,.12*k,.12*k,c);
+  if(b.raptor) S.box(x-1.2*k,y+.2*k,leg+.02*k,.25*k,.2*k,.06*k,c2);
+  // 足
+  [[x+.12*k-wk,y+.05*k],[x+.12*k+wk,y+.4*k]].forEach(([a,c0])=>{ S.box(a,c0,0,.2*k,.15*k,leg+.06*k,bkShade(c,.92)); S.box(a+.12*k,c0,0,.16*k,.15*k,.06*k,bkShade(c,.85)); });
+  if(lie) [y+.05*k,y+.4*k].forEach(c0=>S.box(x+.35*k,c0,0,.28*k,.14*k,.1*k,bkShade(c,.92)));
+  // からだ
+  const bz=leg; S.box(x,y,bz,.75*k,.6*k,.5*k,c,p=>{ const A=p(x+.1*k,y+.6*k,bz), B=p(x+.7*k,y+.6*k,bz), C=p(x+.7*k,y+.6*k,bz+.18*k), D=p(x+.1*k,y+.6*k,bz+.18*k); let s=`<polygon points="${A[0].toFixed(1)},${A[1].toFixed(1)} ${B[0].toFixed(1)},${B[1].toFixed(1)} ${C[0].toFixed(1)},${C[1].toFixed(1)} ${D[0].toFixed(1)},${D[1].toFixed(1)}" fill="${bkShade(c,1.15)}" opacity=".7"/>`;
+    if(!b.raptor) for(let i=0;i<4;i++){ const q=p(x+(.15+i*.15)*k,y+.6*k,bz+.38*k); s+=`<rect x="${(q[0]-2).toFixed(1)}" y="${(q[1]-1).toFixed(1)}" width="4" height="1.4" fill="${bkShade(c,.8)}"/>`; } return s; });
+  if(b.raptor) S.box(x+.05*k,y+.15*k,bz+.5*k,.6*k,.3*k,.05*k,c2);
+  // 首と頭
+  const hs=(b.raptor?.36:.52)*k; let hx=x+.6*k, hy=y+.6*k-hs-.02*k, hz=bz+.45*k+(Q==='look'?.12*k:Q==='eat'?-.4*k:Q==='sleep'?-.35*k:0);
+  if(Q==='eat') hx+=.15*k; hz=Math.max(0,hz);
+  S.box(x+.55*k,y+.18*k,bz+.35*k,.22*k,.24*k,Math.max(.05,hz-bz-.25*k),c);
+  S.box(hx,hy,hz,hs*1.25,hs,hs,c,pwFace(hx,hy,hz,hs,{ ey:.7, ex1:.2, ex2:.55, er:b.raptor?.8:1, extra:q=>{ const a=q(.15,.28), m=q(1.15,.28); let s=`<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${m[0].toFixed(1)}" y2="${m[1].toFixed(1)}" stroke="#3A2A20" stroke-width="1"/>`;
+    if(Q!=='sleep') for(let i=0;i<4;i++){ const t=q(.3+i*.2,.28); s+=`<polygon points="${t[0].toFixed(1)},${(t[1]-.2).toFixed(1)} ${(t[0]+1.6).toFixed(1)},${(t[1]-.2).toFixed(1)} ${(t[0]+.8).toFixed(1)},${(t[1]+1.8).toFixed(1)}" fill="#FFFFFF"/>`; } return s; } }));
+  // 小さな前足
+  S.box(x+.62*k,y+.6*k-.02,bz+.12*k,.14*k,.06*k,.08*k,bkShade(c,.9)); S.box(x+.72*k,y+.6*k-.02,bz+.06*k,.05*k,.06*k,.08*k,bkShade(c,.9));
+  if(b.raptor) S.box(x+.1*k,y+.6*k,bz+.15*k,.4*k,.03*k,.25*k,c2);
+  pbProp(S,Q,hx,hy+hs,k,b,hz); }
+// カンガルー
+function pwRoo(S,x,y,b){ const Q=_pbPose, k=b.tree?.85:1, c=b.c, c2=b.c2, lie=Q==='lie'||Q==='sleep';
+  pbUnder(S,x-.4*k,y-.2*k,1.6*k,.9*k);
+  if(lie){ S.box(x-.65*k,y+.2*k,0,.7*k,.16*k,.14*k,c); S.box(x-.05*k,y+.05*k,.02*k,.5*k,.14*k,.1*k,bkShade(c,.85)); S.box(x,y+.05*k,.05*k,.95*k,.5*k,.38*k,c,pwSpots(x,y+.05*k,.05*k,.95*k,.5*k,.38*k,c2,[[.3,.05]],.5,.4));
+    S.box(x+.7*k,y+.4*k,0,.2*k,.12*k,.1*k,c);
+    const hs=.36*k, hx=x+.82*k, hy=y+.55*k-hs, hz=.12*k; S.box(hx+.05*k,hy+hs*.35,hz+hs,.08*k,.08*k,.26*k,c); S.box(hx+hs-.13*k,hy+hs*.35,hz+hs,.08*k,.08*k,.26*k,c);
+    S.box(hx,hy,hz,hs,hs,hs,c,pwFace(hx,hy,hz,hs,{ ey:.62, er:.9 })); S.box(hx+hs*.28,hy+hs,hz+hs*.02,hs*.44,.12*k,hs*.34,c2,p=>{ const n=p(hx+hs*.5,hy+hs+.12*k,hz+hs*.3); return `<rect x="${(n[0]-1.5).toFixed(1)}" y="${(n[1]-1).toFixed(1)}" width="3" height="1.8" rx=".8" fill="#2B2230"/>`; }); pbProp(S,Q,hx,hy+hs,k,b,hz); return; }
+  const tail=b.tree?(()=>{ S.box(x-.2*k,y+.24*k,0,.12*k,.12*k,.6*k,c); })():S.box(x-.65*k,y+.2*k,0,.72*k,.16*k,.15*k,c);
+  const ft=b.tree?.3:.5; [y+.04*k,y+.38*k].forEach(c0=>S.box(x+.08*k,c0,0,ft*k,.14*k,.1*k,bkShade(c,.85)));
+  const eat=Q==='eat', bh=eat?.6*k:.82*k, bx=x+(eat?.12*k:.04*k);
+  [y+.02*k,y+.4*k].forEach(c0=>S.box(x+.05*k,c0,.06*k,.38*k,.14*k,.34*k,c));
+  S.box(bx,y+.04*k,.12*k,.48*k,.5*k,bh,c,pwSpots(bx,y+.04*k,.12*k,.48*k,.5*k,bh,c2,[[.4,.08]],.55,.7));
+  const hs=.36*k; let hx=bx+.16*k+(eat?.25*k:0), hy=y+.56*k-hs, hz=.12*k+bh-.04*k+(Q==='look'?.08*k:0); if(eat) hz=.3*k;
+  [y+.08*k,y+.38*k].forEach(c0=>S.box(bx+.42*k+(eat?.1*k:0),c0,eat?.14*k:.46*k,.14*k,.1*k,.26*k,c));
+  S.box(hx+.05*k,hy+hs*.35,hz+hs,.08*k,.08*k,b.tree?.14*k:.3*k,c); S.box(hx+hs-.13*k,hy+hs*.35,hz+hs,.08*k,.08*k,b.tree?.14*k:.3*k,c);
+  S.box(hx,hy,hz,hs,hs,hs,c,pwFace(hx,hy,hz,hs,{ ey:.62, er:.9 }));
+  S.box(hx+hs*.28,hy+hs,hz+hs*.02,hs*.44,.12*k,hs*.34,c2,p=>{ const n=p(hx+hs*.5,hy+hs+.12*k,hz+hs*.3); return `<rect x="${(n[0]-1.5).toFixed(1)}" y="${(n[1]-1).toFixed(1)}" width="3" height="1.8" rx=".8" fill="#2B2230"/>`; });
+  pbProp(S,Q,hx,hy+hs,k,b,hz); }
+// ハムスター
+function pwHam(S,x,y,b){ const Q=_pbPose, k=(b.k||1)*.62, c=b.c, c2=b.c2, sl=Q==='sleep';
+  pbUnder(S,x-.2*k,y-.2*k,1.3*k,1.1*k);
+  [[x+.1*k,y+.05*k],[x+.6*k,y+.05*k],[x+.1*k,y+.6*k],[x+.6*k,y+.6*k]].forEach(([a,c0])=>S.box(a,c0,0,.14*k,.12*k,.06*k,'#F2B8B0'));
+  const H=sl?.42*k:.5*k; S.box(x,y,.05*k,.9*k,.78*k,H,c,p=>{ let s=''; const A=p(x+.1*k,y+.78*k,.05*k),B=p(x+.8*k,y+.78*k,.05*k),C=p(x+.8*k,y+.78*k,.05*k+H*.45),D=p(x+.1*k,y+.78*k,.05*k+H*.45); s+=`<polygon points="${A[0].toFixed(1)},${A[1].toFixed(1)} ${B[0].toFixed(1)},${B[1].toFixed(1)} ${C[0].toFixed(1)},${C[1].toFixed(1)} ${D[0].toFixed(1)},${D[1].toFixed(1)}" fill="${c2}"/>`; return s; });
+  if(b.stripe) S.box(x+.1*k,y+.33*k,.05*k+H,.7*k,.1*k,.02*k,'#5A5450');
+  const hs=.56*k, hx=x+.6*k+(Q==='eat'?.06*k:0), hy=y+.78*k-hs+.04*k, hz=(sl?.08:Q==='look'?.3:.2)*k;
+  [hx+.04*k,hx+hs-.18*k].forEach(ex=>S.box(ex,hy+hs*.4,hz+hs,.14*k,.08*k,.15*k,'#E8A0A0'));
+  S.box(hx,hy,hz,hs,hs,hs,c,pwFace(hx,hy,hz,hs,{ ey:.62, er:.6, cheek:Q==='eat'?'#F7C6C0':null, nose:'#E89AA6', ny:.38,
+    extra:q=>{ const m=q(.5,.18); return `<rect x="${(m[0]-1.6).toFixed(1)}" y="${(m[1]-1).toFixed(1)}" width="3.2" height="1.6" rx=".7" fill="${c2}"/>`; } }));
+  if(Q==='eat'||Q==='look') [y+.62*k].forEach(c0=>S.box(hx+.08*k,c0+.12*k,hz-.04*k,hs*.7,.08*k,.1*k,'#F2B8B0'));
+  pbProp(S,Q,hx,hy+hs,k,b,hz); }
+// ワシ・タカ（とまり木の鳥。くちばしは曲がった黄色）
+function pwRaptor(S,x,y,b){ const Q=_pbPose; const bb=Object.assign({},b,{ name:'', crest:b.crest?1:0, cheek:'' });
+  pbBird(S,x,y,bb);
+  const hx=x+.42, hy=y+.03, hz=1.18+(Q==='sing'?.06:Q==='sleep'?-.08:Q==='eat'?-.1:0), hs=.36;
+  S.box(hx+hs*.4,hy+hs,hz+hs*.06,hs*.42,.14,hs*.38,'#F2C230',p=>{ const t=p(hx+hs*.82,hy+hs+.14,hz+hs*.06); return `<rect x="${(t[0]-2.4).toFixed(1)}" y="${(t[1]-1.6).toFixed(1)}" width="2.4" height="2" fill="#3A302C"/>`; });
+  [y+.08,y+.28].forEach(c0=>S.box(x+.22,c0,.8,.14,.1,.06,'#F2C230'));
+  if(b.brow) S.box(hx+.02,hy+hs-.01,hz+hs*.72,hs*.8,.02,hs*.1,'#F2EEE6');
+  if(b.tailw) S.box(x-.3,y+.13,.83,.18,.14,.06,'#FFFFFF'); }
+// クジラ（水面に浮かぶ）
+function pwWhale(S,x,y,b){ const Q=_pbPose, X=_pbX||{}, c=b.c, c2=b.c2, k=b.long?1.1:1, rest=Q==='rest'||Q==='sleep';
+  S.box(x-.7,y-.3,-.02,2.6,1.3,.06,'#9FD3EE',p=>{ let s=''; for(let i=0;i<5;i++){ const a=p(x-.5+i*.5,y+1,.04); s+=`<path d="M${a[0].toFixed(1)} ${a[1].toFixed(1)} q2 -1.5 4 0 t4 0" stroke="#FFFFFF" stroke-width=".8" fill="none" opacity=".8"/>`; } return s; });
+  const z0=rest?-.05:.02, bl=(b.sperm?1.55:1.45)*k, bd=.56*k, bh=(b.beluga?.5:.46)*k;
+  S.box(x-.62*k,y+.06*k,z0+.3*k,.26*k,bd-.12*k,.06*k,b.orca?c:c,null); S.box(x-.75*k,y-.04*k,z0+.34*k,.18*k,bd+.08*k,.05*k,c);
+  S.box(x-.4*k,y+.12*k,z0+.08*k,.42*k,bd-.24*k,bh*.6,c);
+  S.box(x,y,z0,bl,bd,bh,c,p=>{ const fy=y+bd; let s='';
+    const A=p(x+.1*k,fy,z0), B=p(x+bl,fy,z0), C=p(x+bl,fy,z0+bh*.35), D=p(x+.1*k,fy,z0+bh*.3); if(!b.beluga) s+=`<polygon points="${A[0].toFixed(1)},${A[1].toFixed(1)} ${B[0].toFixed(1)},${B[1].toFixed(1)} ${C[0].toFixed(1)},${C[1].toFixed(1)} ${D[0].toFixed(1)},${D[1].toFixed(1)}" fill="${c2}"/>`;
+    if(!b.sperm&&!b.orca&&!b.beluga) for(let i=0;i<5;i++){ const a=p(x+bl*.55+i*.12*k,fy,z0), e=p(x+bl*.55+i*.12*k,fy,z0+bh*.3); s+=`<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${e[0].toFixed(1)}" y2="${e[1].toFixed(1)}" stroke="${bkShade(c2,.85)}" stroke-width=".8"/>`; }
+    if(b.orca){ const e=p(x+bl*.8,fy,z0+bh*.72); s+=`<ellipse cx="${e[0].toFixed(1)}" cy="${e[1].toFixed(1)}" rx="5" ry="2.4" fill="#FFFFFF"/>`; }
+    const ey=p(x+bl*.82,fy,z0+bh*(b.sperm?.4:.5)); s+=rest?`<rect x="${(ey[0]-2).toFixed(1)}" y="${ey[1].toFixed(1)}" width="4" height="1.1" rx=".5" fill="${b.orca?'#FFFFFF':'#2B2230'}"/>`:`<rect x="${(ey[0]-1.3).toFixed(1)}" y="${(ey[1]-1.6).toFixed(1)}" width="2.6" height="3" rx=".7" fill="${b.orca?'#FFFFFF':'#2B2230'}"/>`;
+    if(b.orca&&!rest) s=s.replace(/fill="#FFFFFF"\/>$/,'fill="#2B2230"/>');
+    const m1=p(x+bl*.7,fy,z0+bh*.3), m2=p(x+bl,fy,z0+bh*.32); s+=`<path d="M${m1[0].toFixed(1)} ${m1[1].toFixed(1)} Q${((m1[0]+m2[0])/2).toFixed(1)} ${(m1[1]+3).toFixed(1)} ${m2[0].toFixed(1)} ${m2[1].toFixed(1)}" stroke="${bkShade(c,.6)}" stroke-width="1" fill="none"/>`;
+    if(Q==='sleep') ['z','Z'].forEach((t,i)=>{ const z=p(x+bl+.1+i*.25,fy,z0+bh+.2+i*.3); s+=`<text class="pb-z pb-z${i}" x="${z[0].toFixed(1)}" y="${z[1].toFixed(1)}" font-size="${6+i*2}" font-weight="700" fill="#8A94C8">${t}</text>`; });
+    return s; });
+  if(b.beluga) S.box(x+bl-.38*k,y+.06*k,z0+bh,.3*k,bd-.12*k,.1*k,c);
+  if(b.orca) S.box(x+bl*.42,y+bd*.42,z0+bh,.12*k,.08*k,.42*k,c); else if(!b.beluga) S.box(x+bl*.3,y+bd*.42,z0+bh,.14*k,.06*k,.08*k,c);
+  S.box(x+bl*.55,y+bd,z0+.06*k,(b.long?.24:b.sperm?.18:.38)*k,.2*k,.05*k,b.orca?c:c);
+  if(Q==='swim2'||X.an==='bounce'||X.pr==='spout'){ const sx=x+bl*.75, sy=y+bd*.4; [[0,0,.5],[-.08,-.06,.62],[.08,.04,.6],[-.12,.08,.72],[.1,-.08,.74]].forEach(([dx,dy,dz])=>S.box(sx+dx,sy+dy,z0+bh+dz-.4,.07,.07,.07,'#D6F0FB')); }
+  pbProp(S,'',x+bl*.6,y+bd,k,b,z0+bh*.6); }
+// 絵の入口：新しい動物は、ここで描く
+{ const D0=pbDraw0; pbDraw0=function(S,x,y,b){ if(!pwIs(b)) return D0(S,x,y,b);
+  const f={ panda:pwPanda, polarbear:pwPolar, goat:pwGoat, sheep:pwSheep, lion:pwLion, cheetah:pwCheetah, giraffe:pwGiraffe, elephant:pwElephant, kangaroo:pwRoo, hamster:pwHam, eagle:pwRaptor, hawk:pwRaptor, whale:pwWhale }[b.kind];
+  if(f) return f(S,x,y,b); if(b.kind==='dino') return b.biped?pwBiped(S,x,y,b):pwDinoQuad(S,x,y,b); }; }
+// 肖像の大きさ（大きい動物は、小さめに）
+{ const P0=petPortraitSVG; petPortraitSVG=function(id,label,pose){ const b=PB_ALL[id]; if(!pwIs(b)) return P0(id,label,pose);
+  const S=bkScene(); const h=pbHash(id); const mats=['#F3D9C8','#D9E8C8','#CFE0F2','#EBD9F2','#F7E7B4']; const mat=b.kind==='whale'?'#CFE0F2':mats[h%mats.length];
+  if(b.kind!=='whale'){ S.box(-1.3,-.9,-.3,2.6,1.8,.3,mat); S.box(-1.3,-.9,-.4,2.6,1.8,.1,bkShade(mat,.85)); }
+  S.begin(5,pbAnim(pose,b)); pbDraw(S,-.5,-.3,b,pose); S.end();
+  const bgs=b.kind==='whale'?['#EEF7FC']:['#FFF4EC','#F1F8EC','#EEF5FC','#F7F0FB','#FFF9E6']; const c0=S.p(0,0,b.pz||.4);
+  return `<svg class="pet-art" viewBox="0 0 200 150" role="img" aria-label="${esc(label||b.name)}のブロック絵"><rect width="200" height="150" rx="14" fill="${bgs[h%bgs.length]}"/><g transform="translate(100 82) scale(${(b.ps||3).toFixed(2)}) translate(${(-c0[0]).toFixed(1)} ${(-c0[1]).toFixed(1)})">${S.render()}</g></svg>`; }; }
+// 新しい小物（竹・お肉・木の葉の枝・りんご・魚）
+{ const PR0=pbProp; pbProp=function(S,Q,hx,fy,k,b,hz,z0){ const X=_pbX||{}; let pr=X.pr;
+  if(pwIs(b)&&!pr&&Q==='eat') pr={ panda:'bamboo', polarbear:'fish', lion:'meat', cheetah:'meat', eagle:'fish', hawk:'meat', goat:'hay', sheep:'hay', giraffe:'branch', elephant:'hay', kangaroo:'greens', hamster:'seed', dino:b.meat?'meat':'branch', whale:'' }[b.kind]||'';
+  const NEW={ bamboo:1, meat:1, branch:1, apple:1, spout:1 }; z0=z0||0;
+  const B=(dx,dy,dz,w,d,h,c)=>S.box(hx+dx*k,fy+dy*k,z0+dz*k,w*k,d*k,h*k,c);
+  if(pr==='bamboo'){ B(-.1,.2,0,.6,.07,.07,'#6FA84A'); B(.1,.2,.0,.03,.08,.08,'#4E8A34'); B(.3,.18,.06,.16,.12,.03,'#8CC86A'); B(-.04,.3,.06,.14,.1,.03,'#8CC86A'); }
+  else if(pr==='meat'){ B(.04,.26,0,.32,.2,.14,'#B5533A'); B(.06,.28,.14,.28,.16,.02,'#D97A5A'); B(.34,.32,.04,.14,.07,.07,'#F6F1E2'); B(.46,.29,.03,.06,.13,.09,'#F6F1E2'); }
+  else if(pr==='branch'){ B(-.1,.24,0,.6,.05,.05,'#8A5A36'); B(.05,.2,.04,.18,.16,.08,'#5FAF6A'); B(.28,.26,.04,.16,.14,.07,'#7CC46A'); }
+  else if(pr==='apple'){ B(.1,.28,0,.18,.18,.16,'#E04A4A'); B(.18,.36,.16,.03,.03,.06,'#6A4A2A'); }
+  if(NEW[pr]||pr!==X.pr){ const keep=_pbX; _pbX=Object.assign({},X,{ pr:NEW[pr]?'none':pr }); try{ return PR0.apply(this,[S,Q,hx,fy,k,b,hz,z0]); } finally{ _pbX=keep; } }
+  return PR0.apply(this,arguments); }; }
+// ===== しぐさ（いまの姿勢と、ひとこと）=====
+const PW_RAW={
+kangaroo:`stand|||idle|しっぽで体をささえて、すっと立っています
+stand|||sniff|鼻をひくひくさせて、においをかいでいます
+stand||!|tilt|耳をくるっと動かして、物音を聞いています
+stand|||hop2|ぴょーん、ぴょーんと跳ねています
+stand||♪|bigjump|うれしくて、大きくジャンプしました
+stand|||hop|後ろ足で、ぴょんぴょん
+stand|||nod|前足で、顔をこすっています
+stand|sunbeam||idle|ひなたで、のんびり立っています
+stand||?|tilt|首をかしげて、こっちを見ています
+stand|||shake|ぶるぶるっと、体をふるわせています
+stand|||stretch|前足をなめて、体を冷やしています
+stand|flower||sniff|お花のにおいを、かいでいます
+walk|||walk|しっぽと前足を使って、ゆっくり歩いています
+walk|||hop2|まっすぐ、ぴょんぴょん進んでいます
+lie|||breath|横向きに、ごろんと寝そべっています
+lie|sunbeam||stretch|日かげで、足をのばしてくつろいでいます
+lie|||nod|ねころんだまま、おなかをかいています
+lie|blanket||roll|毛布の上で、ごろん
+sleep|||breath|すやすや眠っています
+sleep|cushion||breath|クッションで、ぐっすり
+sleep|||twitch|夢を見て、後ろ足がぴくぴく
+eat|greens||nod|草を、もぐもぐ食べています
+eat|hay||nod|牧草を、もぐもぐ
+eat|carrot||nod|にんじんを、ぽりぽり
+eat|water||nod|お水を飲んでいます
+look||♡|tilt|こっちを、じっと見つめています
+look||♪|idle|家族の帰りを、立って待っています
+look|butterfly||tilt|ちょうちょを、目で追っています`,
+hamster:`stand|||sniff|鼻をひくひくさせています
+stand|||idle|きょろきょろ、まわりを見ています
+stand||!|tilt|物音に、ぴたっと止まりました
+stand|||nod|前足で、顔を洗っています
+stand|||shake|ぶるぶるっと、毛をととのえています
+stand|||run|回し車で、ぐるぐる走っています
+stand|||zoom|おうちの中を、ちょこちょこ走っています
+stand|||dig|床材を、せっせとほっています
+stand||?|tilt|首をかしげています
+stand|||peek|後ろ足で立って、のぞいています
+stand|seed||sniff|ひまわりの種を、見つけました
+stand|||stretch|大きなあくびをしています
+lie|||breath|おなかを床につけて、のんびり
+lie|||nod|うとうとしています
+lie|cushion||breath|ふかふかの床材で、くつろいでいます
+sleep|||breath|まるくなって、すやすや
+sleep|blanket||breath|巣の中で、ぐっすり
+sleep|||twitch|夢を見て、ひげがぴくぴく
+eat|seed||nod|ほっぺたに、種をつめこんでいます
+eat|seed|♡|nod|ひまわりの種を、かりかり
+eat|greens||nod|小松菜を、もぐもぐ
+eat|bowl||nod|ペレットを、かじっています
+eat|water||nod|お水を飲んでいます
+look||♡|tilt|こっちを見上げています
+look||♪|peek|手のひらに、のりたそうです
+look|treat|!|hop|おやつに気づいて、とびつきました`,
+panda:`stand|||idle|のっしのっしと、あたりを見ています
+stand|||sniff|くんくん、においをかいでいます
+stand||?|tilt|首をかしげています
+stand|||shake|ぶるぶるっと、体をふるわせています
+walk|||walk|うちまたで、のんびり歩いています
+sit|||idle|ぺたんと、おすわりしています
+sit|bamboo||nod|おすわりして、竹をかじっています
+sit||♪|tilt|おすわりして、ごきげんです
+sit|sunbeam||breath|ひなたで、ぽかぽか
+lie|||breath|ごろんと寝そべっています
+lie|||roll|でんぐり返しを、しています
+lie||♡|roll|おなかを見せて、ごろごろ
+lie|blanket||stretch|毛布の上で、のびーっ
+sleep|||breath|大の字で、すやすや
+sleep|cushion||breath|クッションで、ぐっすり
+sleep|||twitch|夢を見て、足がぴくぴく
+eat|bamboo||nod|竹を、ばりばり食べています
+eat|bamboo|♡|nod|竹の葉っぱを、もぐもぐ
+eat|bamboo||shake|たけのこを、両手でかかえています
+eat|treat||nod|りんごを、しゃりしゃり
+eat|water||nod|お水を飲んでいます
+play|ball||roll|ボールにだきついて、ころころ
+play|||roll|ころんと転がって、遊んでいます
+look||♡|tilt|こっちを、じっと見ています
+look||!|idle|名前を呼ばれて、ふり向きました`,
+polarbear:`stand|||idle|のっしのっしと、あたりを見ています
+stand|||sniff|鼻を高くあげて、においをかいでいます
+stand||!|tilt|遠くの音に、耳をすましています
+stand|||shake|水しぶきをとばして、ぶるぶるっ
+walk|||walk|大きな足で、ゆっくり歩いています
+sit|||idle|どっしり、おすわりしています
+sit|||nod|前足で、顔をこすっています
+lie|||breath|おなかを床につけて、ひんやり
+lie|||stretch|手足をのばして、ぺたーっ
+lie||♡|roll|あおむけになって、ごろん
+lie|blanket||roll|毛布の上で、ごろごろ
+sleep|||breath|まるくなって、すやすや
+sleep|cushion||breath|クッションに顔をうずめて、ぐっすり
+sleep|||twitch|夢の中で、泳いでいるみたい
+eat|fish||nod|魚を、むしゃむしゃ
+eat|meat||nod|お肉を、かじっています
+eat|treat||nod|りんごを、しゃりしゃり
+eat|water||nod|お水を飲んでいます
+play|ball||roll|大きなボールで、遊んでいます
+play|||roll|ごろんごろん、転がっています
+look||♡|tilt|こっちを、じっと見ています
+look||?|tilt|「なあに？」と首をかしげています`,
+goat:`stand|||idle|きょろきょろ、まわりを見ています
+stand|||sniff|くんくん、においをかいでいます
+stand||!|tilt|耳をぴくっと動かしました
+stand||♪|hop|ぴょんと、はねました
+stand|||bigjump|高いところに、ひょいっとのぼりました
+stand|||shake|ぶるぶるっと、体をふるわせています
+stand|flower||sniff|お花のにおいを、かいでいます
+walk|||walk|ひづめを鳴らして、歩いています
+lie|||breath|足をおりたたんで、すわっています
+lie|||nod|すわったまま、もぐもぐ口を動かしています
+lie|sunbeam||breath|ひなたで、ぽかぽか
+sleep|||breath|すやすや眠っています
+sleep|blanket||breath|わらの上で、ぐっすり
+eat|hay||nod|牧草を、もぐもぐ
+eat|greens||nod|葉っぱを、むしゃむしゃ
+eat|carrot||nod|にんじんを、ぽりぽり
+eat|water||nod|お水を飲んでいます
+play|||hop|頭をふって、じゃれています
+play|ball||hop|ボールを、頭でつついています
+look||♡|tilt|こっちを見て、「メェ」
+look||?|tilt|首をかしげています
+look||♪|idle|家族の帰りを、待っています`,
+sheep:`stand|||idle|もこもこの毛で、のんびり立っています
+stand|||sniff|くんくん、においをかいでいます
+stand||!|tilt|物音に、顔をあげました
+stand|||shake|ぶるぶるっと、毛をゆらしています
+stand|flower||sniff|お花のにおいを、かいでいます
+walk|||walk|とことこ、歩いています
+lie|||breath|足をおりたたんで、すわっています
+lie|||nod|すわったまま、もぐもぐ口を動かしています
+lie|sunbeam||breath|ひなたで、もこもこ
+sleep|||breath|まるくなって、すやすや
+sleep|blanket||breath|わらの上で、ぐっすり
+eat|hay||nod|牧草を、もぐもぐ
+eat|greens||nod|草を、むしゃむしゃ
+eat|water||nod|お水を飲んでいます
+play|||hop|ぴょんと、とびはねました
+look||♡|tilt|こっちを見て、「メェ〜」
+look||?|tilt|首をかしげています
+look||♪|idle|家族のそばに、くっついています`,
+lion:`stand|||idle|堂々と、まわりを見わたしています
+stand|||sniff|くんくん、においをかいでいます
+stand||!|tilt|耳をぴんと立てています
+stand|||stretch|大きなあくびをしています
+stand|||shake|たてがみを、ぶるぶるっ
+walk|||walk|ゆっくり、ゆうゆうと歩いています
+sit|||idle|どっしり、おすわりしています
+sit|sunbeam||breath|ひなたで、目を細めています
+sit|||nod|前足を、ぺろぺろなめています
+lie|||breath|ごろんと寝そべっています
+lie|||stretch|手足をのばして、のびーっ
+lie||♡|roll|おなかを見せて、ごろごろ
+lie|blanket||roll|毛布の上で、ごろん
+sleep|||breath|すやすや眠っています（1日の大半は、寝ています）
+sleep|cushion||breath|クッションで、ぐっすり
+sleep|||twitch|夢を見て、しっぽがぴくぴく
+eat|meat||nod|お肉を、がぶり
+eat|water||nod|お水を、ぴちゃぴちゃ飲んでいます
+play|ball||hop|ボールに、とびかかりました
+play|||roll|ころころ転がって、じゃれています
+look||♡|tilt|こっちを、じっと見つめています
+look||♪|idle|しっぽをゆらして、ごきげんです`,
+cheetah:`stand|||idle|すらりと立って、遠くを見ています
+stand|||sniff|くんくん、においをかいでいます
+stand||!|tilt|耳をぴんと立てています
+stand|||stretch|大きなあくびをしています
+stand|||run|ものすごい速さで、ダッシュ！
+stand|||zoom|ぐるぐる走りまわっています
+walk|||walk|しなやかに、歩いています
+sit|||idle|すっと、おすわりしています
+sit|||nod|前足を、ぺろぺろなめています
+sit|sunbeam||breath|ひなたで、目を細めています
+lie|||breath|ごろんと寝そべっています
+lie|||stretch|手足をのばして、のびーっ
+lie||♡|roll|おなかを見せて、ごろごろ
+sleep|||breath|すやすや眠っています
+sleep|cushion||breath|クッションで、ぐっすり
+eat|meat||nod|お肉を、かじっています
+eat|water||nod|お水を、ぴちゃぴちゃ飲んでいます
+play|ball||hop|ボールを、追いかけています
+look||♡|tilt|こっちを見て、のどを鳴らしています
+look||?|tilt|首をかしげています`,
+giraffe:`stand|||idle|高いところから、まわりを見わたしています
+stand|||sniff|くんくん、においをかいでいます
+stand||!|tilt|耳をぴくっと動かしました
+stand|||shake|首を、ゆらゆらゆらしています
+walk|||walk|長い足で、ゆったり歩いています
+lie|||breath|足をおりたたんで、すわっています
+lie|||nod|すわったまま、もぐもぐ口を動かしています
+sleep|||breath|首を体にのせて、すやすや（キリンの眠りは、とても短い）
+sleep|||twitch|少しだけ、うとうとしています
+eat|branch||nod|長い舌で、葉っぱをくるっと
+eat|branch|♡|nod|木の葉を、もぐもぐ
+eat|hay||nod|ヘイキューブを、もぐもぐ
+eat|water||nod|足を広げて、お水を飲んでいます
+play|||walk|うれしくて、くるっとひと回り
+look||♡|tilt|首をのばして、こっちを見ています
+look||?|tilt|首をかしげています
+look||♪|idle|家族の帰りを、待っています`,
+elephant:`stand|||idle|大きな耳を、ぱたぱたさせています
+stand|||sniff|長い鼻で、においをかいでいます
+stand||!|tilt|耳を広げて、音を聞いています
+stand|||shake|体に砂をかけています
+stand|||nod|鼻を、ゆらゆらさせています
+walk|||walk|のっしのっしと、歩いています
+lie|||breath|横になって、のんびり
+lie|||roll|どろあびをしています
+sleep|||breath|立ったまま、うとうとしています
+sleep|blanket||breath|横になって、ぐっすり
+eat|hay||nod|干し草を、鼻でまとめて食べています
+eat|treat||nod|バナナを、鼻でつかんでいます
+eat|branch||nod|木の枝を、もぐもぐ
+eat|water||nod|鼻で水をすいあげて、飲んでいます
+play|||bounce|鼻を高くあげて、ごきげんです
+play|ball||nod|ボールを、鼻でころがしています
+look||♡|tilt|こっちを見て、鼻をのばしています
+look||♪|idle|家族のそばで、じっとしています`,
+eagle:`perch|||idle|とまり木で、遠くを見ています
+perch|||tilt|首をくるっとまわしています
+perch|||nod|くちばしで、羽をととのえています
+perch|sunbeam||idle|ひなたで、羽を広げています
+perch||!|tilt|遠くのものを、見つけました
+perch|||shake|ぶるぶるっと、羽をふるわせています
+flap|||flap|大きな翼を、ばさっと広げました
+flap||♪|flap|空にまいあがりたそう
+sing|||sing|「ピィーッ」と鳴いています
+sleep|||breath|片足で立って、すやすや
+sleep|||breath|羽をふくらませて、ぐっすり
+eat|fish||nod|魚を、くちばしでついばんでいます
+eat|meat||nod|お肉を、ついばんでいます
+eat|water||nod|お水を飲んでいます
+look||♡|tilt|こっちを、じっと見ています
+look||?|tilt|首をかしげています`,
+hawk:`perch|||idle|とまり木で、まわりを見ています
+perch|||tilt|首をくるっとまわしています
+perch|||nod|くちばしで、羽をととのえています
+perch||!|tilt|小さな動きも、見のがしません
+perch|||shake|ぶるぶるっと、羽をふるわせています
+perch|sunbeam||idle|ひなたで、ひと休み
+flap|||flap|翼を広げて、ばさばさ
+flap||♪|flap|手袋の上に、とびのりたそう
+sing|||sing|「キッキッ」と鳴いています
+sleep|||breath|羽をふくらませて、すやすや
+sleep|||breath|片足で立って、ぐっすり
+eat|meat||nod|お肉を、ついばんでいます
+eat|water||nod|お水を飲んでいます
+look||♡|tilt|こっちを、じっと見ています
+look||?|tilt|首をかしげています`,
+whale:`swim|||idle|ゆったり、浮かんでいます
+swim|||nod|ゆっくり、泳いでいます
+swim||♪|bounce|しおを、ぷしゅーっとふきました
+swim2|spout||bounce|しおふきを、しています
+swim|||tilt|こっちを見ています
+swim||!|bounce|大きくジャンプ！（ブリーチング）
+swim|||roll|ひれで、水面をぱしゃっ
+swim|||spin|くるっと、ひと回り
+swim|sunbeam||idle|水面のひかりの中で、ゆらゆら
+rest|||breath|水面で、じっと休んでいます
+sleep|||breath|水面で、うとうと眠っています
+sleep|||breath|ゆっくり、すやすや
+eat|||nod|口を大きくあけて、ごはんを食べています
+eat|||bounce|ごはんを、ぱくっ
+look||♡|tilt|こっちに、近づいてきました
+look||?|tilt|大きな目で、見つめています`,
+dino:`stand|||idle|のっしのっしと、あたりを見ています
+stand|||sniff|くんくん、においをかいでいます
+stand||!|tilt|遠くの音に、顔をあげました
+stand|||shake|しっぽを、ぶんぶんふっています
+stand|||stretch|大きなあくびをしています
+stand||?|tilt|首をかしげています
+walk|||walk|ずしん、ずしんと歩いています
+walk|||run|うれしくて、走っています
+lie|||breath|おなかを地面につけて、のんびり
+lie|sunbeam||breath|ひなたで、体をあたためています
+lie|||nod|うとうとしています
+sleep|||breath|すやすや眠っています
+sleep|||twitch|夢を見て、しっぽがぴくぴく
+eat|||nod|ごはんを、もぐもぐ
+eat|water||nod|お水を飲んでいます
+look||♡|tilt|こっちを、じっと見ています
+look||♪|idle|家族の帰りを、待っています`};
+for(const k in PW_RAW){ PP_ACTS[k]=PW_RAW[k].split('\n').map((l,i)=>{ const [b,pr,mk,an,t]=l.split('|'); return { id:k.slice(0,2)+i, b, pr, mk, an, t }; }); PP_POSES[k]=[...new Set(PP_ACTS[k].map(a=>a.b))]; }
+// ===== えらぶ・ごはん・声 =====
+PW_KIND.forEach(([k,n,e,life])=>{ if(!MP_KIND.some(x=>x[0]===k)) MP_KIND.push([k,n,e]); MP_LIFE[k]=life; });
+{ const B0=mpBreeds; mpBreeds=function(kind){ if(PW_BREEDS[kind]) return PW_BREEDS[kind].map(x=>({ id:x[0], name:x[1], loc:true })); return B0(kind); }; }
+{ const S0=mpStage; mpStage=function(p){ const k=p&&p.kind; if(!PW_BREEDS[k]) return S0(p); const a=mpAge(p), L=p.life||MP_LIFE[k][1];
+  const baby={ kangaroo:'子どものカンガルー（ジョーイ）', hamster:'子ハムスター', panda:'子パンダ', polarbear:'子グマ', goat:'子やぎ', sheep:'子ひつじ', lion:'子ライオン', cheetah:'子チーター', giraffe:'子キリン', elephant:'子ゾウ', eagle:'ひな', hawk:'ひな', whale:'子クジラ', dino:'子どもの恐竜' }[k];
+  const f=a/L; return f<.08?[baby,.62]:f<.18?['わかもの',.85]:f<.7?['おとな',1]:['シニア',1]; }; }
+{ const A0=mpAdopt; mpAdopt=function(){ const r=A0.apply(this,arguments); try{ const p=mpGet(); const b=p&&PB_ALL[p.breed]; if(b&&b.pw&&b.life&&!p._pwl){ p.life=b.life[0]+Math.floor(Math.random()*(b.life[1]-b.life[0]+1)); p._pwl=1; mpSet(p); } }catch(e){} return r; }; }
+Object.assign(MP_FOOD,{
+  kangaroo:[['牧草','いちばん大事'],['草食動物用ペレット',''],['にんじん','少しだけ'],['さつまいも','少しだけ'],['りんご','おやつ'],['木の葉','']],
+  hamster:[['ハムスター用ペレット','主食'],['ひまわりの種','おやつ。少しだけ'],['小松菜','よく洗って'],['にんじん','少しだけ'],['ゆでたささみ','少しだけ'],['かぼちゃの種','おやつ']],
+  panda:[['竹','いちばん大事'],['竹の葉',''],['たけのこ','ごちそう'],['パンダだんご','動物園の特製'],['りんご','おやつ'],['にんじん','']],
+  polarbear:[['魚（ほっけ・あじ）',''],['馬肉',''],['りんご','おやつ'],['にんじん',''],['氷のおやつ','暑い日に']],
+  goat:[['牧草',''],['木の葉','大好き'],['ヘイキューブ',''],['にんじん','少しだけ'],['りんご','少しだけ']],
+  sheep:[['牧草','いちばん大事'],['ヘイキューブ',''],['青草',''],['にんじん','少しだけ']],
+  lion:[['牛肉',''],['鶏肉',''],['馬肉',''],['骨つき肉','ごちそう']],
+  cheetah:[['鶏肉',''],['馬肉',''],['うさぎの肉',''],['骨つき肉','ごちそう']],
+  giraffe:[['アカシアの葉','大好き'],['木の葉',''],['ヘイキューブ',''],['りんご','少しだけ'],['にんじん','少しだけ']],
+  elephant:[['干し草','いちばん大事'],['バナナ','おやつ'],['りんご',''],['にんじん',''],['さつまいも',''],['竹','']],
+  eagle:[['魚',''],['鶏肉',''],['うずら','']],
+  hawk:[['鶏肉',''],['うずら',''],['冷凍マウス','']],
+  whale:[['オキアミ',''],['いわし',''],['いか','']] });
+const PW_MEAT=[['お肉',''],['骨つき肉','ごちそう'],['魚','']], PW_PLANT=[['シダの葉',''],['ソテツの葉',''],['針葉樹の葉',''],['木の実','おやつ']];
+try{ Object.defineProperty(MP_FOOD,'dino',{ get(){ const p=typeof mpGet==='function'&&mpGet(); const b=p&&PB_ALL[p.breed]; return b&&b.meat?PW_MEAT:PW_PLANT; }, configurable:true, enumerable:true }); }catch(e){ MP_FOOD.dino=PW_PLANT; }
+Object.assign(MP_VOICE,{
+  kangaroo:{ s:['（鼻をひくひく）','クック','（ぴょん）','（耳をくるっ）'], a:['しっぽで立って','耳をくるっと動かして','ぴょんと跳ねて','前足で顔をこすって'], e:['ぴょん','だぴょん'] },
+  hamster:{ s:['キュッ','ジジッ','（もぐもぐ）','キュ〜'], a:['ほっぺたをふくらませて','後ろ足で立って','ひげをぴくぴくさせて','前足で顔を洗いながら'], e:['キュ','だキュ'] },
+  panda:{ s:['メェ〜（パンダの声）','クゥ〜','（もぐもぐ）','ガウ'], a:['竹をかかえて','ころんと転がって','ぺたんとすわって','首をかしげて'], e:['パン','だパン'] },
+  polarbear:{ s:['グルル…','フンッ','（ぶるぶるっ）','グォ'], a:['大きな前足をそろえて','鼻を高くあげて','ごろんと転がって','首をかしげて'], e:['グマ','だグマ'] },
+  goat:{ s:['メェ〜','メェッ','ンメェ〜','（ぴょん）'], a:['しっぽをふって','ぴょんと跳ねて','頭をふって','首をかしげて'], e:['メェ','だメェ'] },
+  sheep:{ s:['メェ〜','メェ','ンメェ〜','（もこもこ）'], a:['もこもこの毛をゆらして','のんびり口を動かしながら','顔をあげて','首をかしげて'], e:['メェ','だメェ'] },
+  lion:{ s:['ガオー','グルル…','ウォーン','フンッ'], a:['たてがみをゆらして','大きなあくびをして','しっぽの先をふって','ごろんと寝ころんで'], e:['ガオ','だガオ'] },
+  cheetah:{ s:['チュルル','ゴロゴロ…','ミャウ','（ぴゅーん）'], a:['すらりと立って','のどを鳴らしながら','しっぽをふって','首をかしげて'], e:['チー','だチー'] },
+  giraffe:{ s:['フーン','（もぐもぐ）','ンー','（首をゆらゆら）'], a:['長い首をのばして','長い舌を出して','まつげをぱちぱちさせて','首をかしげて'], e:['リン','だリン'] },
+  elephant:{ s:['パオーン','ブフォ','（耳ぱたぱた）','パオ〜'], a:['長い鼻をあげて','大きな耳をぱたぱたさせて','鼻をくるっとまいて','のっしのっしと歩いて'], e:['パオ','だパオ'] },
+  eagle:{ s:['ピィーッ','キャッ','（ばさっ）','ピュイー'], a:['大きな翼を広げて','首をくるっとまわして','するどい目で見つめて','羽をととのえながら'], e:['ワシ','だワシ'] },
+  hawk:{ s:['キッキッ','ピィー','（ばさばさ）','キー'], a:['翼を広げて','首をくるっとまわして','じっと見つめて','羽をととのえながら'], e:['タカ','だタカ'] },
+  whale:{ s:['（ぷしゅーっ）','ウォーン…','（ぱしゃっ）','ンー…'], a:['しおをふいて','大きなひれをふって','ゆったり浮かんで','くるっとまわって'], e:['クジ','だクジ'] },
+  dino:{ s:['ガオー','グルル','（ずしん）','ギャオ'], a:['しっぽをふって','大きく口をあけて','ずしんと足ぶみして','首をかしげて'], e:['ザウ','だザウ'] } });
+Object.assign(MP_CRY,{
+  kangaroo:{ love:['クック♪','（鼻をすりすり）'], eat:['もぐもぐ…クック','（もぐもぐ）'], happy:['（ぴょーん！）','クック！'], photo:['（耳をくるっ）？'], no:['（ぷいっ）'] },
+  hamster:{ love:['キュ〜♪','（ほっぺすりすり）'], eat:['カリカリ…キュッ','（ほっぺぱんぱん）'], happy:['キュッ！','（回し車ぐるぐる）'], photo:['キュ？'], no:['ジジッ…'] },
+  panda:{ love:['クゥ〜ン','（ごろん）'], eat:['ばりばり…もぐもぐ','（竹をかかえて）もぐもぐ'], happy:['（ころころ）','クゥ！'], photo:['（首をかしげて）？'], no:['（ぷいっと背中）'] },
+  polarbear:{ love:['グルル…♪','（鼻をすりすり）'], eat:['むしゃむしゃ…','グルッ！'], happy:['（ざぶーん！）','グォッ！'], photo:['フン？'], no:['フンッ'] },
+  goat:{ love:['メェ〜♪','ンメェ〜'], eat:['もぐもぐ…メェ','メェッ！'], happy:['メェ！メェ！','（ぴょん！）メェ'], photo:['メェ？'], no:['…メェ。'] },
+  sheep:{ love:['メェ〜♪','ンメェ〜'], eat:['もぐもぐ…メェ','メェ〜！'], happy:['メェ！','（ぴょん）メェ〜'], photo:['メェ？'], no:['…メェ。'] },
+  lion:{ love:['グルル…♪','（頭をすりすり）'], eat:['ガブッ！','グルル…'], happy:['ガオー！','ウォーン！'], photo:['グル？'], no:['フンッ'] },
+  cheetah:{ love:['ゴロゴロ…','チュルル♪'], eat:['ガブッ…','チュルッ'], happy:['チュルル！','（ぴゅーん！）'], photo:['ミャウ？'], no:['フシュッ'] },
+  giraffe:{ love:['（首をすりすり）','フーン♪'], eat:['もぐもぐ…','（長い舌でくるっ）'], happy:['（首をゆらゆら）','フーン！'], photo:['（まつげぱちぱち）？'], no:['（ぷいっと上を向く）'] },
+  elephant:{ love:['パオ〜♪','（鼻でぎゅっ）'], eat:['もぐもぐ…パオ','（鼻でひょいっ）'], happy:['パオーン！','（耳ぱたぱた）パオ！'], photo:['パオ？'], no:['ブフォ…'] },
+  eagle:{ love:['ピュイ〜','（羽ふわっ）'], eat:['キャッ！','（ついばみ）'], happy:['ピィーッ！','（ばさっ！）'], photo:['ピ？'], no:['…'] },
+  hawk:{ love:['キッ♪','（羽ふわっ）'], eat:['キッ！','（ついばみ）'], happy:['キッキッ！','（ばさばさ）'], photo:['キ？'], no:['…'] },
+  whale:{ love:['ウォーン…♪','（ぷしゅー）'], eat:['（ごくん）','（ぱくっ）'], happy:['（ざっぱーん！）','（ぷしゅーっ！）'], photo:['（くるっ）？'], no:['…'] },
+  dino:{ love:['グルル…♪','（しっぽふりふり）'], eat:['ガブッ！','もぐもぐ…'], happy:['ガオー！','ギャオ！'], photo:['グル？'], no:['フンッ'] } });
+Object.assign(MP_WC,{
+  kangaroo:['{p}が、いつもの場所で、トイレをすませたよ。','{p}が、トイレのあと、ぴょんと跳ねた。'], hamster:['{p}が、トイレの砂で、ちゃんとトイレをすませたよ。','{p}が、トイレのすみっこを、ちゃんとおぼえている。'],
+  panda:['{p}が、トイレをすませて、また竹のところへもどっていった。'], polarbear:['{p}が、トイレをすませて、すっきりした顔をしている。'], goat:['{p}が、トイレをすませたよ。ころころのふんだった。'], sheep:['{p}が、トイレをすませたよ。'],
+  lion:['{p}が、トイレをすませて、ゆうゆうともどってきた。'], cheetah:['{p}が、トイレをすませたよ。'], giraffe:['{p}が、トイレをすませたよ。'], elephant:['{p}が、トイレをすませたよ。とても大きかった。'],
+  eagle:['{p}が、とまり木の上で、トイレをすませたよ。'], hawk:['{p}が、とまり木の上で、トイレをすませたよ。'], dino:['{p}が、トイレをすませたよ。ずしん、と満足そう。'] });
+Object.assign(MP_SICK_CRY,{ kangaroo:['…（耳をたらして）'], hamster:['…キュ…','（まるくなって）…'], panda:['…クゥ…'], polarbear:['…グル…'], goat:['…メェ…'], sheep:['…メェ…'], lion:['…グル…'], cheetah:['…ミャウ…'], giraffe:['…（首をさげて）'], elephant:['…パオ…'], eagle:['…ピ…'], hawk:['…キ…'], whale:['…（しずかに浮かんで）'], dino:['…グル…'] });
+// 表の中の、ほかの所（あとから読みこまれる表にも足す）
+setTimeout(function(){ try{
+  // 公園を走る絵：大きい動物は小さめに
+  if(typeof prPetSVG==='function'){ const R0=prPetSVG; prPetSVG=function(id,pose,cls){ const b=PB_ALL[id]; if(!pwIs(b)) return R0(id,pose,cls); const S=bkScene(); S.begin(5,typeof pbAnim==='function'?pbAnim(pose,b):''); pbDraw(S,0,0,b,pose); S.end();
+    const sc=2.9*(b.ps||3)/3.4, c0=S.p(0,0,b.pz||.4); return `<svg class="${cls||'pr-art'}" viewBox="0 0 200 106" overflow="visible" aria-hidden="true"><g transform="translate(78 ${(56-(b.pz||.4)*12).toFixed(0)}) scale(${sc.toFixed(2)}) translate(${(-c0[0]).toFixed(1)} ${(-c0[1]).toFixed(1)})">${S.render()}</g></svg>`; }; }
+  // 横から見たお部屋の絵：にた形の動物で描く
+  if(typeof ssPet==='function'){ const SP=ssPet; ssPet=function(S,x,z,id,pose){ const b=PB_ALL[id]; if(!pwIs(b)) return SP.apply(this,arguments); const k0=b.kind; b.kind={ whale:'fish', eagle:'bird', hawk:'bird', kangaroo:'rabbit', hamster:'rabbit' }[k0]||'dog'; try{ return SP.apply(this,arguments); } finally{ b.kind=k0; } }; }
+  if(typeof PC_EMO!=='undefined') Object.assign(PC_EMO,{ kangaroo:'🦘', hamster:'🐹', panda:'🐼', polarbear:'🐻‍❄️', goat:'🐐', sheep:'🐑', lion:'🦁', cheetah:'🐆', giraffe:'🦒', elephant:'🐘', eagle:'🦅', hawk:'🦅', whale:'🐋', dino:'🦖' });
+  if(typeof PM_FOODI!=='undefined') Object.assign(PM_FOODI,{ kangaroo:'🌿', hamster:'🌻', panda:'🎋', polarbear:'🐟', goat:'🌿', sheep:'🌾', lion:'🍖', cheetah:'🍖', giraffe:'🌿', elephant:'🍌', eagle:'🐟', hawk:'🍖', whale:'🦐', dino:'🍖' });
+  if(typeof PG_FOOD!=='undefined') Object.assign(PG_FOOD,{ kangaroo:'🌿 牧草', panda:'🎋 竹', polarbear:'🐟 おさかな', goat:'🌿 葉っぱ', sheep:'🌾 牧草', lion:'🍖 お肉', cheetah:'🍖 お肉', giraffe:'🌿 アカシアの葉', elephant:'🍌 バナナ', eagle:'🐟 おさかな', hawk:'🍖 お肉', whale:'🦐 オキアミ', dino:'🍖 ごちそう' });
+}catch(e){} },0);
 // ===== 友だちの木が、増えると森になる。木を押すと、アップで全員の名前が見える。友だちのペットのつながりの木も =====
 const GS_PER=30; // 1本の木に、30人まで
 const _gsTree1=gsTreeHTML;
@@ -19050,6 +19668,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v166: Life Home の上のほうに「✨ LIFE BOOKのニュース」。新しい機能・更新のお知らせ。
 // ゲームに入っているお知らせ（LBN_BUILTIN）＋ 管理者が Firebase の os/news に書いたお知らせ（{ n:[{ i, d:ミリ秒, t:題, b:説明 }] }）。新しい順に3つ、のこりは「これまでのお知らせ」。
 const LBN_BUILTIN=[
+  { i:'v178-newpets', d:Date.UTC(2026,10,17,9,0), t:'ペットにできる動物が、ふえました🦘🐼🦁', b:'カンガルー、ハムスター、パンダ、シロクマ、やぎ、羊、ライオン、チーター、キリン、ゾウ、鷲、鷹、クジラ、恐竜（ティラノサウルスなど）から、ペットをえらべるようになりました。それぞれ、いくつかの種類から選べます。' },
   { i:'v175-flthx', d:Date.UTC(2026,10,17,6,15), t:'届いたお花から、すぐにお礼のお花を贈れるようになりました💌', b:'「💐 お花」の「届いたお花」で、お花の下の「💌 お礼のお花を贈る」を押すと、送ってくれた人あての「贈る」画面が開きます。どんな日は「ありがとう」になっています。' },
   { i:'v175-petmove', d:Date.UTC(2026,10,16,15,37), t:'公園のペットが、1匹ずつちがう走り方になりました🐾', b:'走る速さ、足のテンポ、ぴょんぴょんのゆれ、ジャンプの高さが、ペットごとにちがいます。空に浮かぶ街の帯も、前よりゆっくり流れるようになりました。' },
   { i:'gw-parade', d:Date.UTC(2026,10,16,14,17), t:'Gateway に、乗り物が走る街ができました🚌✈️', b:'Gateway の「いろんな街が、空に浮かんでいます」の下で、バスや車、電車、船、飛行機、ヘリコプターなど、いろんな乗り物が次々に走っています。' },
@@ -19195,7 +19814,7 @@ function prOne(p,lane,k,cnt,base){ const kinds=['dash','jump','nap','dash','jump
   const hop=`animation-delay:${(-((r2>>>8)%100)/100*2).toFixed(2)}s;--prLt:${lt}s;--prBt:${(Math.max(.2,.42*sp*legI*(.85+(r3>>>9)%30/100))).toFixed(3)}s;--prBh:${bh}px;--prJh:${jh}px;--prJd:${jd}s;--prKt:${(.42+((r3>>>12)%25)/100).toFixed(2)}s`;
   if(beh!=='nap'&&gsHash(p.s+'|kg')%4===0) beh='kang'; const v0=beh==='nap'?0:prPickV(gsHash(p.s+'|v')%100); if(v0===5&&beh==='kang') beh='dash';
   return `<button type="button" class="pr-p pr-${beh} pr-v${v0} pr-l${lane}${quad?' pr-q':''}${lane===2?' pr-fast':''}" data-pr="${_prL.indexOf(p)}" style="bottom:${PR_LANE[lane].b+dy}px;animation-duration:${D.toFixed(1)}s;animation-delay:${del.toFixed(1)}s" aria-label="${esc(p.n)}を大きく見る"><span class="pr-n">${p.mine?'🏠 ':''}${esc(p.n)}</span><span class="pr-hop" style="${hop}">${art}${zz?zz+'<i class="pr-z" aria-hidden="true">z<b>z</b></i>':''}<span class="pr-sh" aria-hidden="true"></span></span></button>`; }
-function prRunHTML(){ const L=prPets(); _prL=L; if(!L.length) return ''; const all=L.filter(p=>!/fish|goldfish/.test(p.k)); if(!all.length) return '';
+function prRunHTML(){ const L=prPets(); _prL=L; if(!L.length) return ''; const all=L.filter(p=>!/fish|goldfish|whale/.test(p.k)); if(!all.length) return '';
   // 画面の幅で、1本の道に走れる数を決める（ペットどうしが重ならないように、間を110px以上あける）
   const W=Math.max(320,Math.min(1400,(document.getElementById('app')||document.body).clientWidth||window.innerWidth||400)), per=Math.max(2,Math.floor((W+160)/115));
   const lanes=[[],[],[]]; all.forEach(p=>{ const fast=gsHash(p.s+'|sp')%5===0; const ln=fast?2:(lanes[0].length<=lanes[1].length?0:1); if(lanes[ln].length<per) lanes[ln].push(p); else if(lanes[1-Math.min(ln,1)].length<per) lanes[1-Math.min(ln,1)].push(p); });
