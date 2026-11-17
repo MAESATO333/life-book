@@ -20147,6 +20147,7 @@ function gwLoad(){ if(window.GWShot) return Promise.resolve(window.GWShot); if(_
 function gwFill(root){ (root||document).querySelectorAll('.gw-ph[data-gwk]:not(.gw-done)').forEach(el=>{ el.classList.add('gw-done'); const k=el.dataset.gwk; let rec=null;
   try{ if(k.startsWith('a:')) rec=gwGetRec(k.slice(2)); else { const g=(store.get(GW_GOT,[])||[]).find(x=>x.id===k.slice(2)); rec=g&&g.rec; } }catch(e){}
   if(!rec){ el.innerHTML='<p class="tiny muted">写真が見つかりませんでした。</p>'; return; }
+  try{ if(rec.z) el.style.aspectRatio='360/250'; else if(rec.w) el.style.aspectRatio='720/250'; }catch(_){} // v178.10：アップ写真（z）は 360:250
   gwLoad().then(G=>G.render(rec,el)).catch(()=>{ el.innerHTML='<p class="tiny muted gw-nt">🌊 Gateway の写真です。LIFE BOOK のサイトで開くと、絵で見られます。</p>'; }); }); }
 function gwPhHTML(k){ return `<div class="gw-ph" data-gwk="${esc(k)}"><p class="tiny muted">写真を用意しています…</p></div>`; }
 // --- 送る ---
