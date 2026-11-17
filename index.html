@@ -116,14 +116,14 @@ img{max-width:100%; display:block}
 #lives .isle figcaption{max-width:96%; margin-top:-22px}
 #lives .isle figcaption b,#lives .isle figcaption span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; display:block}
 #lives .isle figcaption b{font-size:12px}
-#lives .isle img{width:100%; height:auto; aspect-ratio:320/220; display:block; animation:float 5s ease-in-out infinite}
+#lives .isle img{width:100%; height:auto; aspect-ratio:320/220; display:block}
 #lives .isle:nth-child(3n+1) img{animation-delay:-1.6s} #lives .isle:nth-child(3n+2) img{animation-delay:-3.1s}
 .worlds-title{font-weight:700; text-align:center; font-size:clamp(14px,3.8vw,17px); letter-spacing:.08em; margin:0 0 6px; padding-inline:16px; color:#22304D}
 .drift{display:flex; width:max-content; animation:slide 70s linear infinite}
 .drift:hover{animation-play-state:paused}
 @keyframes slide{from{transform:translateX(0)} to{transform:translateX(-50%)}}
 .isle{margin:0; width:clamp(150px,36vw,230px); flex:none; text-align:center}
-.isle svg{width:100%; height:auto; display:block; animation:float 5s ease-in-out infinite}
+.isle svg{width:100%; height:auto; display:block}
 .isle:nth-child(3n+1) svg{animation-delay:-1.6s} .isle:nth-child(3n+2) svg{animation-delay:-3.1s}
 .isle figcaption{display:inline-grid; justify-items:center; background:#fff; border-radius:14px; padding:4px 12px 3px; font-size:11px; line-height:1.5; color:#22304D; margin-top:-8px; position:relative; max-width:92%; box-shadow:0 3px 0 #D3E3F1}
 .isle figcaption b{font-size:13px; font-weight:700}
@@ -327,7 +327,7 @@ footer .wrap{padding-block:20px 28px; display:flex; flex-wrap:wrap; gap:8px 18px
 .cities{position:relative; z-index:1; margin:4px 0 14px; padding-block:12px 14px; overflow:hidden; background:linear-gradient(180deg,rgba(255,233,168,.9),rgba(255,246,218,.9)); border-radius:24px}
 .cities .worlds-sub{color:#B07A1E}
 #cities{display:flex; width:max-content; will-change:transform}
-#cities .isle img{width:100%; height:auto; aspect-ratio:320/220; display:block; animation:float 5s ease-in-out infinite}
+#cities .isle img{width:100%; height:auto; aspect-ratio:320/220; display:block}
 #cities .isle:nth-child(3n+1) img{animation-delay:-1.6s} #cities .isle:nth-child(3n+2) img{animation-delay:-3.1s}
 #cities .isle figcaption{max-width:96%; margin-top:-22px; box-shadow:0 3px 0 #F2DDA0}
 #cities .isle figcaption b,#cities .isle figcaption span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; display:block}
@@ -728,11 +728,11 @@ function build(){ var wide=(window.innerWidth||1000)>=600; if(wide===wideNow) re
     {lane:'road',y:[184.5,184.5],dir:1,sp:[22,30],gap:[20,90]}, {lane:'lane2',y:[193.6,193.6],dir:-1,sp:[14,20],gap:[20,90]},
     {lane:'walk',y:[236,238],dir:0,sp:[4,6.5],gap:[40,160]}, {lane:'walk',y:[245,247],dir:0,sp:[4,7],gap:[60,200]} ];
   lanes=L.map(function(o){ var g=document.createElementNS(NS,'g'); S.appendChild(g);
-    if(o.lane==='rail'){ var v='<rect x="'+X0+'" y="118" width="'+W+'" height="4" fill="#9AA3AE"/>'; for(var px=X0+14;px<X0+W;px+=46) v+='<rect x="'+px+'" y="122" width="5" height="48" fill="#B4BCC6" opacity=".85"/>'; g.innerHTML=v; var tg=document.createElementNS(NS,'g'); S.appendChild(tg); g=tg; } return {o:o,g:g,list:D.spr.filter(function(s){ return s.lane===o.lane; }),cars:[],wait:rnd(0,2)}; }); BUSY={}; ACT=null; }
+    if(o.lane==='rail'){ var v='<rect x="'+X0+'" y="118" width="'+W+'" height="4" fill="#9AA3AE"/>'; for(var px=X0+14;px<X0+W;px+=46) v+='<rect x="'+px+'" y="122" width="5" height="48" fill="#B4BCC6" opacity=".85"/>'; g.innerHTML=v; var tg=document.createElementNS(NS,'g'); S.appendChild(tg); g=tg; } return {o:o,g:g,list:D.spr.filter(function(s){ return s.lane===o.lane; }),cars:[],wait:rnd(0,2)}; }); BUSY={}; ACT=[]; }
 function mk(l,s,dir,y,sp,x,want,k){ var e=document.createElementNS(NS,'g'); var sd=Math.floor(Math.random()*1e6); var sg=PP(s.g,sd); e.innerHTML=bodyWrap(sg,s.w,dir);
   l.g.appendChild(e); try{ HS(e,wideNow?4.4:6.6,null,want); }catch(er){} var c={e:e,x:x,y:y,w:s.w*(k||1),sw:s.w,dir:dir,sp:sp,si:s._i,seed:sd,k:k||0,st:0}; l.cars.push(c); place(c); return c; }
 function spawn(l){ var wk=l.o.lane==='walk', s=pick(l.list); if(!s) return; var dir=l.o.dir||(Math.random()<.5?1:-1); var y=rnd(l.o.y[0],l.o.y[1]); var sp=rnd(l.o.sp[0],l.o.sp[1])*SLOW;
-  var p=null, ex=0, run=false, wp=null; if(wk){ var r0=Math.random(); if(r0<.5&&HS.pair) try{ p=HS.pair(); }catch(er){} if(!p&&r0>.86) run=true; if(p||run) s=pick(SANPO)||s; if(!p&&!run&&HS.pets&&Math.random()<.4){ var WL=HS.pets(); if(WL.length){ wp=WL[Math.floor(Math.random()*WL.length)]; s=pick(SANPO)||s; } } }
+  var p=null, ex=0, run=false, wp=null; if(wk){ var r0=Math.random(); if(r0<.65&&HS.pair) try{ p=HS.pair(); }catch(er){} if(!p&&r0>.86) run=true; var an=!p&&!run&&r0<.6&&Math.random()<.5; if(p||run||an) s=pick(SANPO)||s; if(!p&&!run&&!an&&HS.pets&&Math.random()<.4){ var WL=HS.pets(); if(WL.length){ wp=WL[Math.floor(Math.random()*WL.length)]; s=pick(SANPO)||s; } } }
   var x=dir>0?X0-s.w-40:X0+W+40;
   var K=function(){ return wk?+(Math.random()<.1&&!p&&!run&&!wp?rnd(.6,.72):rnd(.84,1.12)).toFixed(2):0; }, k1=K(); /* 背の高さもいろいろ（たまに子ども） */
   var pp=null, oi=-1; if((l.o.lane==='road'||l.o.lane==='lane2')&&HS.pets&&Math.random()<.28){ var PL=HS.pets(); if(PL.length){ pp=PL[Math.floor(Math.random()*PL.length)]; oi=HS.find(pp.o); } } /* 友だちのペットが、ときどき（飼い主と）乗っている */
@@ -740,16 +740,16 @@ function spawn(l){ var wk=l.o.lane==='walk', s=pick(l.list); if(!s) return; var 
   if(run) sp*=3.2; /* ランニングの人 */
   var c=mk(l,s,dir,y,sp,x,p?[p[0]]:oi>=0?[oi]:null,k1); if(pp) try{ HS.pet(c.e,wideNow?4.4:6.6,pp,null,l.o.lane==='lane2'); }catch(er){} if(wp) try{ HS.walkPet(c.e,wideNow?4.4:6.6,wp,null,s.w); }catch(er){}
   if(run) c.e.setAttribute('class','pd-run');
-  if(p&&c.e._hs){ var s2=pick(SANPO)||pick(l.list), k2=K(), w2=s2.w*(k2||1), c2=mk(l,s2,dir,y,sp,dir>0?x-w2-9:x+c.w+9,[p[1]],k2); ex=w2+9; if(c2.e._hs) talk(c,c2,p); }
-  l.wait=(c.w+ex+rnd(l.o.gap[0],l.o.gap[1]))/(run?sp/3.2:sp); }
+  if(p&&c.e._hs){ var s2=pick(SANPO)||pick(l.list), k2=K(), w2=s2.w*(k2||1), c2=mk(l,s2,dir,y,sp,dir>0?x-w2-9:x+c.w+9,[p[1]],k2); ex=w2+9; if(c2.e._hs) talk(c,c2,p); } else if(an){ var s3=pick(SANPO)||pick(l.list), k3=K(), w3=s3.w*(k3||1), c3=mk(l,s3,dir,y,sp,dir>0?x-w3-9:x+c.w+9,null,k3); ex=w3+9; talk(c,c3,null); } /* 名前のない街の人どうしも、ときどき話す */
+  l.wait=(c.w+ex+rnd(l.o.gap[0],l.o.gap[1]))/(run?sp/3.2:sp)*2; } /* 乗り物や人の数は半分に（軽くするため） */
 // ---- 💬 歩いている知り合い同士の会話（用意した文だけ。本当のメッセージではありません）。会話のデータは、はじめて使う時に読む ----
-var TL=[["いい風だね！", "うん、海のにおいがする。", "こういう日は、ゆっくり歩きたくなるね。", "わかる。急がなくていい日って、うれしい。", "あとで、海の見えるベンチに座ろうか。", "いいね、そうしよう。"], ["あ、電車だ！", "ほんとだ、速いね〜。", "どこまで行くんだろうね。", "海の向こうの街かもね。", "いつか一緒に乗ってみたいな。", "うん、窓ぎわの席がいいな。"], ["空、きれい！", "雲がゆっくり流れてるね。", "あの雲、ちょっと動物みたいじゃない？", "ほんとだ、うさぎに見える！", "見る人で、ちがう形に見えるのが面白いね。", "ね。空って、毎日ちがうね。"], ["ひさしぶり〜！", "元気だった？", "うん、元気！会えてうれしいな。", "わたしも。偶然だね。", "この街、知ってる人によく会うね。", "ふしぎだけど、なんだか心強いね。"], ["船が出るみたい！", "汽笛の音、好きだな。", "どこへ向かうのかな。", "遠くの島かもしれないね。", "見送ってる人も、なんだかうれしそう。", "旅の始まりって、いいよね。"], ["おなかすいたね〜", "何か食べに行こうか？", "海の近くのお店がいいな。", "あったかいスープ、飲みたい！", "いいね。ゆっくり話しながら食べよう。", "うん、楽しみ！"], ["今日はどこ行くの？", "特に決めてないんだ。", "じゃあ、一緒に歩こうか。", "うん！気の向くままに。", "知らない道に入るの、わくわくするね。", "ね。何か見つかりそう。"], ["見て、飛行機！", "高いところを飛んでるね。", "乗ってる人、何を見てるかな。", "この街が、小さく見えてるかもね。", "わたしたちも、豆つぶみたいかな。", "ふふ、手をふってみようか。"], ["この道、好きなんだ。", "わかる、気持ちいいよね。", "海と街が、どっちも見えるから。", "朝も夕方も、ちがう色になるよね。", "また一緒に歩こうね。", "うん、約束！"], ["最近どう？", "ゆっくりだけど、いい感じ。", "それ、いちばんいいね。", "うん。あせらないことにしたんだ。", "すてきだな。わたしもまねしよう。", "一緒に、ゆっくりいこう。"], ["ヘリコプターだ！", "音がするね〜。", "空からだと、街はどう見えるかな。", "道がリボンみたいに見えそう。", "いつか上から見てみたいね。", "うん、きっと、きれいだろうね。"], ["この街、にぎやかだね。", "いろんな乗り物が通るね。", "見てるだけで、楽しくなる。", "ずっと見ていられるよね。", "あ、またバスが来た！", "手をふってみよう！"], ["会えてよかった！", "ほんとに。ちょうど話したかったんだ。", "どうしたの？", "ううん、ただ会いたかっただけ。", "それ、すごくうれしい。", "ふふ、ありがとう。"], ["夕方の海、いいね。", "オレンジ色になってきたね。", "一日って、あっという間だね。", "今日も、いい日だったな。", "明日も、いい日になるといいね。", "きっと、なるよ。"], ["ちょっと休もうか。", "うん、ベンチに座ろう。", "歩くのって、気持ちいいね。", "足は疲れたけどね（笑）", "がんばったね、わたしたち。", "ほんと、えらい！"], ["あの車、かわいい！", "色がきれいだね。", "ああいうの、乗ってみたいな。", "ドライブ、楽しそうだよね。", "海ぞいの道を走りたいね。", "窓をあけて、風を感じたいな。"], ["ありがとうね。", "え、何が？", "いつも、そばにいてくれて。", "こちらこそ、ありがとう。", "なんだか照れるね。", "ふふ、たまには言いたくなるね。"], ["きょうは晴れたね！", "洗たく日和だね。", "空気がすんでて、遠くまで見える。", "あの島、はっきり見えるね。", "いつか行ってみたいな。", "うん、一緒に行こう。"], ["次、どこ行く？", "海の方に行ってみない？", "いいね！波の音を聞きたい。", "貝がら、見つかるかな。", "見つけたら、見せあいっこしよう。", "うん、楽しみ！"], ["この前ね、", "うん？", "すごくきれいな夕日を見たんだ。", "いいなあ。どこで？", "この街の、坂の上だよ。", "今度、一緒に見に行こうよ。"]], TJ=null, TJL=0, TK=[], TKn=0, ACT=null, BUSY={};
+var TL=[["いい風だね！", "うん、海のにおいがする。", "こういう日は、ゆっくり歩きたくなるね。", "わかる。急がなくていい日って、うれしい。", "あとで、海の見えるベンチに座ろうか。", "いいね、そうしよう。"], ["あ、電車だ！", "ほんとだ、速いね〜。", "どこまで行くんだろうね。", "海の向こうの街かもね。", "いつか一緒に乗ってみたいな。", "うん、窓ぎわの席がいいな。"], ["空、きれい！", "雲がゆっくり流れてるね。", "あの雲、ちょっと動物みたいじゃない？", "ほんとだ、うさぎに見える！", "見る人で、ちがう形に見えるのが面白いね。", "ね。空って、毎日ちがうね。"], ["ひさしぶり〜！", "元気だった？", "うん、元気！会えてうれしいな。", "わたしも。偶然だね。", "この街、知ってる人によく会うね。", "ふしぎだけど、なんだか心強いね。"], ["船が出るみたい！", "汽笛の音、好きだな。", "どこへ向かうのかな。", "遠くの島かもしれないね。", "見送ってる人も、なんだかうれしそう。", "旅の始まりって、いいよね。"], ["おなかすいたね〜", "何か食べに行こうか？", "海の近くのお店がいいな。", "あったかいスープ、飲みたい！", "いいね。ゆっくり話しながら食べよう。", "うん、楽しみ！"], ["今日はどこ行くの？", "特に決めてないんだ。", "じゃあ、一緒に歩こうか。", "うん！気の向くままに。", "知らない道に入るの、わくわくするね。", "ね。何か見つかりそう。"], ["見て、飛行機！", "高いところを飛んでるね。", "乗ってる人、何を見てるかな。", "この街が、小さく見えてるかもね。", "わたしたちも、豆つぶみたいかな。", "ふふ、手をふってみようか。"], ["この道、好きなんだ。", "わかる、気持ちいいよね。", "海と街が、どっちも見えるから。", "朝も夕方も、ちがう色になるよね。", "また一緒に歩こうね。", "うん、約束！"], ["最近どう？", "ゆっくりだけど、いい感じ。", "それ、いちばんいいね。", "うん。あせらないことにしたんだ。", "すてきだな。わたしもまねしよう。", "一緒に、ゆっくりいこう。"], ["ヘリコプターだ！", "音がするね〜。", "空からだと、街はどう見えるかな。", "道がリボンみたいに見えそう。", "いつか上から見てみたいね。", "うん、きっと、きれいだろうね。"], ["この街、にぎやかだね。", "いろんな乗り物が通るね。", "見てるだけで、楽しくなる。", "ずっと見ていられるよね。", "あ、またバスが来た！", "手をふってみよう！"], ["会えてよかった！", "ほんとに。ちょうど話したかったんだ。", "どうしたの？", "ううん、ただ会いたかっただけ。", "それ、すごくうれしい。", "ふふ、ありがとう。"], ["夕方の海、いいね。", "オレンジ色になってきたね。", "一日って、あっという間だね。", "今日も、いい日だったな。", "明日も、いい日になるといいね。", "きっと、なるよ。"], ["ちょっと休もうか。", "うん、ベンチに座ろう。", "歩くのって、気持ちいいね。", "足は疲れたけどね（笑）", "がんばったね、わたしたち。", "ほんと、えらい！"], ["あの車、かわいい！", "色がきれいだね。", "ああいうの、乗ってみたいな。", "ドライブ、楽しそうだよね。", "海ぞいの道を走りたいね。", "窓をあけて、風を感じたいな。"], ["ありがとうね。", "え、何が？", "いつも、そばにいてくれて。", "こちらこそ、ありがとう。", "なんだか照れるね。", "ふふ、たまには言いたくなるね。"], ["きょうは晴れたね！", "洗たく日和だね。", "空気がすんでて、遠くまで見える。", "あの島、はっきり見えるね。", "いつか行ってみたいな。", "うん、一緒に行こう。"], ["次、どこ行く？", "海の方に行ってみない？", "いいね！波の音を聞きたい。", "貝がら、見つかるかな。", "見つけたら、見せあいっこしよう。", "うん、楽しみ！"], ["この前ね、", "うん？", "すごくきれいな夕日を見たんだ。", "いいなあ。どこで？", "この街の、坂の上だよ。", "今度、一緒に見に行こうよ。"]], TJ=null, TJL=0, TK=[], TKn=0, ACT=[], BUSY={};
 function loadTJ(){ if(TJL) return; TJL=1; fetch('parade/talks.json').then(function(r){ return r.ok?r.json():null; }).then(function(j){ if(j&&j.T&&j.I) TJ=j; }).catch(function(){}); }
 function convo(){ if(!TJ) return TL[Math.floor(Math.random()*TL.length)].slice();
   if(Math.random()<.18) return TJ.H[Math.floor(Math.random()*TJ.H.length)].slice();
   var ks=Object.keys(TJ.I), tot=0; ks.forEach(function(k){ tot+=Math.sqrt(TJ.I[k].length); }); var r=Math.random()*tot, k=ks[0]; for(var i=0;i<ks.length;i++){ r-=Math.sqrt(TJ.I[ks[i]].length); if(r<=0){ k=ks[i]; break; } }
   var it=pick(TJ.I[k]), tp=pick(TJ.T[k]); return tp.map(function(t){ return t.split('{n}').join(it[0]).split('{d}').join(it[1]); }); }
-function talk(a,b,p){ loadTJ(); var r=Math.random(); TK.push({k:++TKn,a:a,b:b,n:[HS.nm(p[0]),HS.nm(p[1])],lb:p[2],lines:null,i:-1,tm:0,bub:null,mode:r<.35?'stop':r<.6?'bench':'walk',ph:'go'}); }
+function talk(a,b,p){ loadTJ(); var r=Math.random(); TK.push({k:++TKn,a:a,b:b,n:p?[HS.nm(p[0]),HS.nm(p[1])]:['',''],lb:p?p[2]:0,lines:null,i:-1,tm:0,bub:null,mode:r<.35?'stop':r<.6?'bench':'walk',ph:'go'}); }
 function benches(){ var o=[]; for(var x=X0+110;x<X0+W;x+=300) o.push(x); return o; }
 function bubble(t){ if(t.bub){ t.bub.remove(); t.bub=null; } if(t.i<0) return; var c=t.i%2?t.b:t.a; if(!c.bb) try{ c.bb=c.e.getBBox(); }catch(er){ return; }
   var fs=wideNow?4.6:6.8, tx=t.lines[t.i]; if(tx.length>11) tx=tx.slice(0,10)+'…';
@@ -759,13 +759,13 @@ function cls(c,n,on){ var v=(c.e.getAttribute('class')||'').replace(new RegExp('
 function halt(t){ [t.a,t.b].forEach(function(c){ c.sp0=c.sp; c.sp=0; cls(c,'pd-stop',1); }); }
 function resume(t){ [t.a,t.b].forEach(function(c){ c.sp=c.sp0; cls(c,'pd-stop',0); pdPose(c.e,c.sw,c.dir,0); c.bb=null; c.st=0; }); }
 function onScr(c){ return c.x>X0+6&&c.x+c.w<X0+W-6; }
-function talkTick(dt){ for(var i=TK.length-1;i>=0;i--){ var t=TK[i], A=t.a, B=t.b; if(A.gone||B.gone){ if(ACT===t) ACT=null; if(t.bx!=null) delete BUSY[t.bx]; TK.splice(i,1); continue; }
+function talkTick(dt){ for(var i=TK.length-1;i>=0;i--){ var t=TK[i], A=t.a, B=t.b; if(A.gone||B.gone){ if(t.on){ t.on=0; ACT.splice(ACT.indexOf(t),1); } if(t.bx!=null) delete BUSY[t.bx]; TK.splice(i,1); continue; }
     var lead=A, dir=A.dir, cx=lead.x+lead.w/2;
-    if(t.ph==='go'){ if(t.done||ACT||!onScr(A)||!onScr(B)) continue;
-      if(t.mode==='walk'){ t.ph='talk'; ACT=t; t.lines=convo(); t.i=-1; t.tm=.3; continue; }
-      if(t.mode==='stop'&&cx>X0+W*.2&&cx<X0+W*.78){ halt(t); pdPose(lead.e,lead.sw,-dir,0); lead.st=1; lead.bb=null; t.ph='talk'; ACT=t; t.lines=convo(); t.i=-1; t.tm=.8; continue; }
+    if(t.ph==='go'){ if(t.done||!onScr(A)||!onScr(B)||ACT.length>=3||ACT.some(function(o){ return Math.abs(o.a.x-cx)<160; })) continue;
+      if(t.mode==='walk'){ t.ph='talk'; ACT.push(t); t.on=1; t.lines=convo(); t.i=-1; t.tm=.3; continue; }
+      if(t.mode==='stop'&&cx>X0+W*.2&&cx<X0+W*.78){ halt(t); pdPose(lead.e,lead.sw,-dir,0); lead.st=1; lead.bb=null; t.ph='talk'; ACT.push(t); t.on=1; t.lines=convo(); t.i=-1; t.tm=.8; continue; }
       if(t.mode==='bench'&&((dir>0&&cx>X0+W*.88)||(dir<0&&cx<X0+W*.12))){ t.mode='walk'; continue; } /* 前にベンチがない時は、歩きながら話す */
-      if(t.mode==='bench'){ var bs=benches(); for(var j=0;j<bs.length;j++){ var bx=bs[j], bc=bx+9; if(BUSY[bx]||bc<X0+W*.12||bc>X0+W*.88) continue; if((dir>0&&cx>=bc&&cx<bc+3)||(dir<0&&cx<=bc&&cx>bc-3)){ BUSY[bx]=1; t.bx=bx; halt(t); ACT=t; t.ph='sitdown'; t.tm=0;
+      if(t.mode==='bench'){ var bs=benches(); for(var j=0;j<bs.length;j++){ var bx=bs[j], bc=bx+9; if(BUSY[bx]||bc<X0+W*.12||bc>X0+W*.88) continue; if((dir>0&&cx>=bc&&cx<bc+3)||(dir<0&&cx<=bc&&cx>bc-3)){ BUSY[bx]=1; t.bx=bx; halt(t); ACT.push(t); t.on=1; t.ph='sitdown'; t.tm=0;
             var L1=dir>0?B:A, R1=dir>0?A:B; t.mv=[[L1,L1.x,L1.y,bx+0.5-L1.w/2,216.6+6*(L1.k||1)],[R1,R1.x,R1.y,bx+17.5-R1.w/2,216.6+6*(R1.k||1)]]; t.L1=L1; t.R1=R1; break; } } }
       continue; }
     if(t.ph==='sitdown'||t.ph==='standup'){ t.tm+=dt; var f=Math.min(1,t.tm/1.1), e2=f*f*(3-2*f), u=t.ph==='sitdown'; t.mv.forEach(function(m){ var c=m[0]; c.x=u?m[1]+(m[3]-m[1])*e2:m[3]+(m[1]-m[3])*e2; c.y=u?m[2]+(m[4]-m[2])*e2:m[4]+(m[2]-m[4])*e2; place(c); });
@@ -773,7 +773,7 @@ function talkTick(dt){ for(var i=TK.length-1;i>=0;i--){ var t=TK[i], A=t.a, B=t.
         else { resume(t); delete BUSY[t.bx]; t.bx=null; t.ph='go'; } }
       continue; }
     if(t.ph==='talk'){ t.tm-=dt; if(t.tm>0) continue;
-      if(t.bub){ t.bub.remove(); t.bub=null; t.tm=.5; if(t.i>=t.lines.length-1){ t.done=1; ACT=null; if(t.mode==='walk'){ t.ph='go'; } else if(t.mode==='stop'){ resume(t); t.ph='go'; } else { [t.a,t.b].forEach(function(c){ pdPose(c.e,c.sw,c.dir,0); c.st=0; c.bb=null; }); t.ph='standup'; t.tm=0; } } continue; }
+      if(t.bub){ t.bub.remove(); t.bub=null; t.tm=.5; if(t.i>=t.lines.length-1){ t.done=1; if(t.on){ t.on=0; ACT.splice(ACT.indexOf(t),1); } if(t.mode==='walk'){ t.ph='go'; } else if(t.mode==='stop'){ resume(t); t.ph='go'; } else { [t.a,t.b].forEach(function(c){ pdPose(c.e,c.sw,c.dir,0); c.st=0; c.bb=null; }); t.ph='standup'; t.tm=0; } } continue; }
       t.i++; bubble(t); t.tm=2.6+t.lines[t.i].length*.09; } } }
 function place(c){ c.e.setAttribute('transform','translate('+c.x.toFixed(1)+' '+c.y.toFixed(1)+')'+(c.k?' scale('+c.k+')':'')); }
 function tick(t){ raf=requestAnimationFrame(tick); var dt=last?Math.min(.1,(t-last)/1000):0; last=t; if(!S) return;
@@ -825,8 +825,8 @@ box.addEventListener('click',function(ev){ if(!picking||!S) return; ev.stopPropa
   if(flash){ flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); } pickMode(false); say('📷 パシャ！ アップの写真をアルバムに入れました。'); albCount(); },true);
 var tdl=document.getElementById('pdTalk');
 function openTalk(k){ var t=null; TK.forEach(function(x){ if(x.k===k) t=x; }); if(!t||!tdl) return; if(tdl.parentNode!==document.body) document.body.appendChild(tdl);
-  if(!t.lines) return; var L=tdl.querySelector('.pd-lines'); L.innerHTML=''; tdl.querySelector('.pd-lab').textContent=t.lb===1?'♡ 友だち':'友だちの友だち';
-  if(!t.lines) return; (t.lines).forEach(function(tx,i){ var d=document.createElement('div'); d.className='pd-ln'+(i%2?' r':''); var b=document.createElement('b'); b.textContent=t.n[i%2]; var sp=document.createElement('span'); sp.textContent=tx; d.appendChild(b); d.appendChild(sp); L.appendChild(d); });
+  if(!t.lines) return; var L=tdl.querySelector('.pd-lines'); L.innerHTML=''; tdl.querySelector('.pd-lab').textContent=t.lb===1?'♡ 友だち':t.lb===2?'友だちの友だち':'街の人たち';
+  if(!t.lines) return; (t.lines).forEach(function(tx,i){ var d=document.createElement('div'); d.className='pd-ln'+(i%2?' r':''); var b=document.createElement('b'); b.textContent=t.n[i%2]||(i%2?'🙂':'😊'); var sp=document.createElement('span'); sp.textContent=tx; d.appendChild(b); d.appendChild(sp); L.appendChild(d); });
   tdl.hidden=false; document.body.style.overflow='hidden'; }
 function closeTalk(){ tdl.hidden=true; document.body.style.overflow=''; }
 box.addEventListener('click',function(ev){ var g=ev.target.closest&&ev.target.closest('.pd-say'); if(g) openTalk(+g.getAttribute('data-k')); });
