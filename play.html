@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.24">
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.25">
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5af5f16575224c8c9596106067decbde"}'></script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#FF8FAB"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LIFE BOOK"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head><body>
@@ -674,7 +674,7 @@ a.nav-b{ text-decoration:none; }
 <button class="devbtn" id="devbtn" type="button" hidden>制作用</button>
 <div class="dev" id="dev" hidden></div>
 <script>
-/* LIFE BOOK game version: v178.24 (2026-11-17) */ var LB_VER='v178.24';
+/* LIFE BOOK game version: v178.25 (2026-11-17) */ var LB_VER='v178.25';
 // ===== データ1：国・名前 =====
 // 試作版の仮データ。出生数の比率（w）、5歳未満の死亡（u5, 1000人あたり）、成人の平均寿命の目安（life）、
 // 家庭の経済状況の割合（econ: 苦しい/中間/裕福）、宗教（葬儀の形）の割合、きょうだいの数の目安（tfr）、
@@ -15858,6 +15858,8 @@ function homeArt(P,L,age){ const o=sceneState(P,L,age); const v=1+Math.floor(Mat
   o.tod=(typeof localTod==='function'&&localTod(P))||['day','day','morning','evening','night'][Math.floor(Math.random()*5)];
   if(Math.random()<.25) o.mood=Math.max(40,o.mood);
   o.wide=1;
+  // v178.25（MITSUさん「部屋の絵だけにする」）：Life Home の Channel の絵は、いつも部屋の中。動くのはペット・Channel・家族だけ（スマホで軽く）
+  o.setting='room';
   return blockSceneSVG(P,o,`${P.given}、${age}歳のいまの一枚`); }
 // ===== ふたつの世界線：分かれ道ごとに、選んだ側と選ばなかった側の人生を読む =====
 // 選ばなかった側は、同じ生まれ・同じ乱数のまま、その分かれ道だけを反対にして最後まで生き直した人生（simulate の第3引数で指定）。
