@@ -12496,13 +12496,13 @@ function eaName(id){ try{ return (COUNTRIES.find(c=>c.id===id)||{}).name||EA_NAM
 function eaTileHTML(P){ const got=eaCollected(); const id=P&&P.countryId; const L=EA_LM[id]; const tod=(typeof localTod==='function'&&localTod(P))||'day';
   return `<div class="ea-tile">${L?`<figure class="ea-card ea-big ea-click" data-ea="${id}" tabindex="0" role="button" aria-label="${esc(L[0])}を大きく見る"><div class="ea-art">${eaCardSVG(id,{tod})}</div><figcaption><b>${esc(L[0])}</b>（${esc(eaName(id))}）<span>${esc(L[3]||'')}</span></figcaption></figure>`:''}
     <p class="ea-count">集めた絵はがき <b>${got.length}</b> 枚</p><p class="tiny muted ea-rule">新しい人生が生まれた国の絵はがきが、1枚ずつ集まります。</p>
-    <button type="button" class="ea-open" id="eaOpen">地球の名所（今日の名所30ヶ所）</button></div>`; }
+    <button type="button" class="ea-open" id="eaOpen">地球の名所（今日の名所10ヶ所）</button></div>`; }
 function eaAlbumHTML(){ const got=new Set(eaCollected()); const ids=Object.keys(EA_LM);
   const card=(id,mine)=>{ const L=EA_LM[id]; return `<figure class="ea-card ea-click${mine?' ea-mine':''}" data-ea="${id}" tabindex="0" role="button" aria-label="${esc(L[0])}を大きく見る"><div class="ea-art">${eaCardSVG(id)}</div><figcaption><b>${esc(L[0])}</b><small>${esc(eaName(id))}</small><span>${esc(L[3]||'')}</span></figcaption></figure>`; };
   const mine=ids.filter(id=>got.has(id));
-  // きょうの世界の名所：まだ集めていない国から、日ごとにちがう30か所
+  // きょうの世界の名所：まだ集めていない国から、日ごとにちがう10か所（v175.7 MITSUさん：30→10）
   const k=(typeof dayKey==='function'?dayKey():new Date().toDateString()); const h=x=>{ let v=2166136261>>>0; x=k+'|'+x; for(let i=0;i<x.length;i++){ v^=x.charCodeAt(i); v=Math.imul(v,16777619)>>>0; } return v; };
-  const today=ids.filter(id=>!got.has(id)).sort((a,b)=>h(a)-h(b)).slice(0,30);
+  const today=ids.filter(id=>!got.has(id)).sort((a,b)=>h(a)-h(b)).slice(0,10);
   return `<div class="ea-how"><h3>💌 絵はがきの集め方</h3><ol><li>新しい人生が生まれると、<b>その人が生まれた国の絵はがき</b>が1枚、自動でアルバムに入ります。</li><li>まだ持っていない国に生まれるたびに、1枚ずつふえていきます。</li><li>本棚にしまった人生の国の絵はがきも、ずっと残ります。</li></ol><p>いま持っている絵はがき：<b>${mine.length}枚</b>　・　絵はがきをタップすると、大きく見られます。</p></div>
     <h3 class="ea-sh">きょうの世界の名所（${today.length}か所）</h3><p class="tiny muted">世界の国々に実在する遺跡・名所・自然です。毎日、ちがう場所に入れかわります。</p><div class="ea-grid">${today.map(id=>card(id,false)).join('')}</div>
     <h3 class="ea-sh">集めた絵はがき（${mine.length}枚）</h3><div class="ea-grid">${mine.map(id=>card(id,true)).join('')}</div>`; }
@@ -16576,8 +16576,8 @@ function navFromHash(){ try{ const m=(location.hash||'').match(/^#(gateway|birth
 window.addEventListener('hashchange',navFromHash);
 function start(){ if(typeof inAppGuard==='function'&&inAppGuard()===true) return; load(); try{ render(); }catch(e){ try{ console.error(e); localStorage.setItem('lb.lastErr',String(e&&e.stack||e).slice(0,600)); }catch(_){} } navFromHash(); if(typeof friendFromHash==='function') friendFromHash(); if(typeof loanFromHash==='function') loanFromHash(); if(typeof moveFromHash==='function') moveFromHash(); }
 start();
-// v175f：Life Home は動く絵が多く、描きなおしのたびに一瞬かたまるので、自動の描きなおしは5分に1回（ほかのページは30秒のまま）
-setInterval(()=>{ if(st && st.stage==='life' && !viewing && !inspAnim && document.visibilityState==='visible' && !document.activeElement.matches('textarea')){ if(typeof page!=='undefined'&&page==='home'&&Date.now()-(window._lbAutoR||0)<300000) return; window._lbAutoR=Date.now(); window._skAuto=true; try{ render(); }finally{ window._skAuto=false; } } }, 30000);
+window._lbAutoR=Date.now(); // v175f：Life Home は動く絵が多く、描きなおしのたびに一瞬かたまるので、自動の描きなおしは5分に1回（ほかのページは30秒のまま）
+setInterval(()=>{ if(st && st.stage==='life' && !viewing && !inspAnim && document.visibilityState==='visible' && !document.activeElement.matches('textarea')){ if(typeof page!=='undefined'&&page==='home'&&Date.now()-(window._lbAutoR||0)<300000) return; if(typeof lbBusy==='function'&&lbBusy()) return; window._lbAutoR=Date.now(); window._skAuto=true; try{ render(); }finally{ window._skAuto=false; } } }, 30000);
 
 function refSecHTML(){
   return `<section class="chap"><details><summary class="tiny muted">この人生の心の動きと暮らしは、どんな研究をもとに計算しているか</summary>
@@ -19120,7 +19120,7 @@ let _prL=[];
 // v174b: ペットだけの絵（台やわくなし）
 function prPetSVG(id,pose,cls){ const b=PB_ALL[id]; if(!b) return ''; const S=bkScene(); S.begin(5,typeof pbAnim==='function'?pbAnim(pose,b):''); pbDraw(S,0,0,b,pose); S.end();
   const kk=b.k||1; const sc=b.kind==='dog'||b.kind==='cat'?Math.min(4.2,3/Math.max(.75,kk)):3.1; const c0=S.p(0,0,b.kind==='bird'?.75:.35);
-  return `<svg class="${cls||'pr-art'}" viewBox="0 0 200 106" aria-hidden="true"><g transform="translate(100 96) scale(${sc.toFixed(2)}) translate(${(-c0[0]).toFixed(1)} ${(-c0[1]).toFixed(1)})">${S.render()}</g></svg>`; }
+  return `<svg class="${cls||'pr-art'}" viewBox="0 0 200 106" overflow="visible" aria-hidden="true"><g transform="translate(78 50) scale(${sc.toFixed(2)}) translate(${(-c0[0]).toFixed(1)} ${(-c0[1]).toFixed(1)})">${S.render()}</g></svg>`; }
 function prSleepPose(p){ try{ const A=(PP_ACTS[p.k]||PP_ACTS.dog).filter(a=>a.b==='sleep'&&!a.p2); return A.length?A[gsHash(p.s+'|nap')%A.length]:null; }catch(e){ return null; } }
 // 公園の景色（ゆっくり流れる）
 // 公園の景色（ゆっくり流れる）。v174c：山・丘・いろいろな木・池・草花をこまかく。1200幅でつながる
@@ -19203,18 +19203,24 @@ function prBoardHTML(){ const t=prTickText(); if(!t) return ''; return `<div cla
 function prBoardFit(bd){ const t=bd.querySelector('.pr-bt'); if(!t) return; t.style.animationDuration=Math.max(30,t.scrollWidth/2/55)+'s';
   t.addEventListener('animationiteration',()=>{ const s=prTickText(); if(s){ t.innerHTML=s+s; t.style.animationDuration=Math.max(30,t.scrollWidth/2/55)+'s'; } }); }
 // v175c：ペットの絵の大きさを測って、からだ全部が見えて、足が下（道の上）にくるようにする
-function prFit(root){ root.querySelectorAll('.pr-hop').forEach(h=>{ const S=[...h.querySelectorAll('svg.pr-art')]; if(!S.length) return; let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
-  S.forEach(s=>{ try{ const b=s.getBBox(); if(b.width>0){ x0=Math.min(x0,b.x); y0=Math.min(y0,b.y); x1=Math.max(x1,b.x+b.width); y1=Math.max(y1,b.y+b.height); } }catch(e){} });
-  if(x1<=x0) return; const H=Math.max(106,(y1-y0)+4,((x1-x0)+6)*106/200), W=H*200/106, vx=(x0+x1)/2-W/2, vy=y1+2-H;
-  S.forEach(s=>s.setAttribute('viewBox',`${vx.toFixed(1)} ${vy.toFixed(1)} ${W.toFixed(1)} ${H.toFixed(1)}`)); }); }
+// v175.8：絵の大きさを測る。Safari でも測れるよう、中の <g> を測って、その変形（拡大・移動）をかけて計算する。測れない時は、ひと呼吸おいてもう一度
+function prBox(s){ const g=s.querySelector(':scope > g')||s.firstElementChild; if(!g||!g.getBBox) return null; const b=g.getBBox(); if(!(b.width>0)) return null;
+  let m=null; try{ const t=g.transform&&g.transform.baseVal; if(t&&t.numberOfItems){ const c=t.consolidate(); m=c&&c.matrix; } }catch(e){}
+  if(!m) return { x0:b.x, y0:b.y, x1:b.x+b.width, y1:b.y+b.height }; const P=[[b.x,b.y],[b.x+b.width,b.y],[b.x,b.y+b.height],[b.x+b.width,b.y+b.height]].map(([x,y])=>[m.a*x+m.c*y+m.e, m.b*x+m.d*y+m.f]);
+  return { x0:Math.min(...P.map(p=>p[0])), y0:Math.min(...P.map(p=>p[1])), x1:Math.max(...P.map(p=>p[0])), y1:Math.max(...P.map(p=>p[1])) }; }
+function prFit(root,tries){ let miss=0; root.querySelectorAll('.pr-hop').forEach(h=>{ const S=[...h.querySelectorAll('svg.pr-art')]; if(!S.length||h.dataset.fit) return; let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  S.forEach(s=>{ try{ const b=prBox(s); if(b){ x0=Math.min(x0,b.x0); y0=Math.min(y0,b.y0); x1=Math.max(x1,b.x1); y1=Math.max(y1,b.y1); } }catch(e){} });
+  if(x1<=x0){ miss++; return; } const H=Math.max(106,(y1-y0)+6,((x1-x0)+6)*106/200), W=H*200/106, vx=(x0+x1)/2-W/2, vy=y1+3-H;
+  S.forEach(s=>s.setAttribute('viewBox',`${vx.toFixed(1)} ${vy.toFixed(1)} ${W.toFixed(1)} ${H.toFixed(1)}`)); h.dataset.fit=1; });
+  if(miss&&(tries||0)<8) setTimeout(()=>prFit(root,(tries||0)+1),300); }
 var _prF=1;
-function prKf(){ const X=100/_prF, P=v=>(v*X/100).toFixed(2)+'%'; let st=document.getElementById('prKf'); if(!st){ st=document.createElement('style'); st.id='prKf'; document.head.appendChild(st); }
-  st.textContent=`@keyframes prWalk{ 0%{ left:100% } ${P(100)}{ left:-140px } 100%{ left:-140px } }
-@keyframes prWalkNap{ 0%{ left:100% } ${P(38)}{ left:45% } ${P(62)}{ left:45% } ${P(100)}{ left:-140px } 100%{ left:-140px } }
+function prKf(){ const X=100/_prF, P=v=>(v*X/100).toFixed(2)+'%'; const r=document.querySelector('.pr-run'), W=Math.round((r&&r.clientWidth)||(document.getElementById('app')||document.body).clientWidth||400); /* v175.7：left ではなく transform で動かす（Safari でも軽く、なめらかに） */ const T=x=>`transform:translateX(${x}px)`; let st=document.getElementById('prKf'); if(!st){ st=document.createElement('style'); st.id='prKf'; document.head.appendChild(st); }
+  st.textContent=`@keyframes prWalk{ 0%{ ${T(W)} } ${P(100)}{ ${T(-140)} } 100%{ ${T(-140)} } }
+@keyframes prWalkNap{ 0%{ ${T(W)} } ${P(38)}{ ${T(Math.round(W*.45))} } ${P(62)}{ ${T(Math.round(W*.45))} } ${P(100)}{ ${T(-140)} } 100%{ ${T(-140)} } }
 @keyframes prNapA{ 0%{ visibility:visible } ${P(40)}{ visibility:hidden } ${P(60)}{ visibility:visible } 100%{ visibility:visible } }
 @keyframes prNapZ{ 0%{ opacity:0 } ${P(40)}{ opacity:1 } ${P(60)}{ opacity:0 } 100%{ opacity:0 } }`; }
 function prSetW(){ document.querySelectorAll('.pr-run').forEach(r=>r.style.setProperty('--prW',(r.clientWidth||360)+'px')); }
-window.addEventListener('resize',prSetW);
+window.addEventListener('resize',()=>{ prSetW(); try{ if(document.querySelector('.pr-run')) prKf(); }catch(e){} });
 // v175d：Life Home は30秒ごとに描きなおされる。そのたびに動きが最初にもどって「止まった」ように見えないよう、
 // 同じ絵はそのまま使い、動きの時間を、最初に出した時からの続きに合わせる
 function lbAnimSync(root,t0){ const el=(performance.now()-t0)/1000; root.querySelectorAll('[style*="animation-delay"]').forEach(e=>{ try{ if(e.dataset.d0==null){ const m=/animation-delay:\s*(-?[\d.]+)s/.exec(e.getAttribute('style')||''); if(!m) return; e.dataset.d0=m[1]; } e.style.animationDelay=(+e.dataset.d0-el).toFixed(2)+'s'; }catch(_){} }); }
@@ -19223,10 +19229,10 @@ var _prC=null;
 var PR_BOARD_ON=false;
 function prPlace(){ try{ const app=document.getElementById('app'); if(!app||typeof page==='undefined'||page!=='home'||app.querySelector('.pr-w')) return;
   const run=prRunHTML(); if(!run) return; let el, fresh=false;
-  if(_prC&&_prC.key===run){ el=_prC.el; _prF=_prC.f; } else { const box=document.createElement('div'); box.innerHTML=`<section class="pr-w">${run}${PR_BOARD_ON?prBoardHTML():''}</section>`; el=box.firstElementChild; _prC={ key:run, el, t0:performance.now(), f:_prF }; fresh=true; } prKf();
+  if(_prC&&_prC.key===run){ el=_prC.el; _prF=_prC.f; } else { const box=document.createElement('div'); box.innerHTML=`<section class="pr-w">${run}${PR_BOARD_ON?prBoardHTML():''}</section>`; el=box.firstElementChild; _prC={ key:run, el, t0:performance.now(), f:_prF }; fresh=true; }
   const lbn=app.querySelector('.lbn'), cid=app.querySelector('.hm-cid'), osm=app.querySelector('.osm'), home=app.querySelector('.home');
   if(lbn) lbn.before(el); else if(cid) cid.after(el); else if(osm) osm.before(el); else if(home) home.prepend(el); else return;
-  if(fresh){ prFit(el); const bd=el.querySelector('.pr-bd'); if(bd) prBoardFit(bd); } lbAnimSync(el,_prC.t0); prSetW();
+  prFit(el); if(fresh){ const bd=el.querySelector('.pr-bd'); if(bd) prBoardFit(bd); } lbAnimSync(el,_prC.t0); prSetW(); prKf();
 }catch(e){ try{ console.warn('[petrun]',e); }catch(_){} } }
 // 走っているペットを押すと：大きな絵・Higher Self の名前・Higher Self のじまん・さいきんのおしゃべり
 function prOpen(p){ let art=''; try{ art=petPortraitSVG(p.id,'',prPose(p)).replace(/<svg class="pet-art"/,'<svg class="pr-big"'); }catch(e){}
@@ -19245,12 +19251,12 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .pr-run{ position:relative; overflow:hidden; height:150px; border-radius:18px; border:1px solid #DDEBF6; background:#EAF7FF; }
 .pr-bg{ position:absolute; left:0; bottom:0; height:100%; width:auto; min-width:200%; animation:prBg 90s linear infinite; }
 @keyframes prBg{ from{ transform:translateX(0) } to{ transform:translateX(-50%) } }
-.pr-p{ position:absolute; left:0; bottom:8px; border:0; background:none; padding:0; cursor:pointer; font:inherit; display:flex; flex-direction:column; align-items:center; animation:prWalk linear infinite backwards; left:100%; }
+.pr-p{ position:absolute; left:0; bottom:8px; border:0; background:none; padding:0; cursor:pointer; font:inherit; display:flex; flex-direction:column; align-items:center; animation:prWalk linear infinite backwards; left:0; transform:translateX(200vw); will-change:transform; }
 .pr-p.pr-l1{ z-index:2; } .pr-p.pr-l1 .pr-hop{ transform-origin:bottom; } .pr-p.pr-l2 .pr-art{ width:66px; height:35px; }
 .pr-p.pr-l0{ z-index:3; } .pr-p.pr-l2{ z-index:1; }
 .pr-run:hover .pr-p,.pr-run:hover .pr-bg,.pr-run:hover .pr-hop,.pr-run:hover .pr-art,.pr-run:hover .pr-z{ animation-play-state:paused; }
 .pr-hop{ position:relative; display:block; }
-.pr-art{ display:block; width:80px; height:42px; transform:scaleX(-1); } /* 左を向いて走る */
+.pr-art{ display:block; width:80px; height:42px; transform:scaleX(-1); overflow:visible; } /* 左を向いて走る */
 .pr-sh{ display:block; width:40px; height:6px; margin:-6px auto 0; border-radius:50%; background:rgba(60,90,40,.22); }
 .pr-dash .pr-hop{ animation:prBob .42s ease-in-out infinite; }
 @keyframes prBob{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(calc(var(--prBh,4px) * -1)) } }
@@ -19307,7 +19313,7 @@ function lbStreetFix(){ try{ const app=document.getElementById('app'); const el=
 var _lbStC=null;
 setInterval(lbStreetFix,1200);
 // v175.4：MITSUさん「今は消して」→ Life Home には出さない（true にすると、また出る）。?view=street はそのまま
-var LB_STREET_ON=false;
+var LB_STREET_ON=true;
 function lbStreetPlace(){ try{ const app=document.getElementById('app'); if(!LB_STREET_ON) return; if(!app||typeof page==='undefined'||page!=='home') return; if(app.querySelector('.lbst')){ lbStreetFix(); return; }
   // v175d：同じ時間帯・同じ年の間は、同じ絵をそのまま使い、動きを続きから（30秒ごとの描きなおしで止まって見えないように）
   let key=''; try{ key=cur.P.seed+'|'+clock().age+'|'+lbStTod(); }catch(_){}
@@ -19315,9 +19321,9 @@ function lbStreetPlace(){ try{ const app=document.getElementById('app'); if(!LB_
   // 上から3番目：人生の島 → 浮かぶ街の帯 → 海辺の道
   const anc=lbStreetAnchor(app), lbn=app.querySelector('.lbn'), home=app.querySelector('.home');
   if(anc) anc.after(el); else if(lbn) lbn.before(el); else if(home) home.prepend(el); if(typeof lbAnimSync==='function') lbAnimSync(el,_lbStC.t0); }catch(e){ try{ console.warn('[lbstreet]',e); }catch(_){} } }
-// v175.5：浮かぶ街の帯を、もっとゆっくり（300秒→480秒で半周）。描きなおしても、続きの位置から流れる
+// v175.5：浮かぶ街の帯。v176：MITSUさんの希望で元の速さ（300秒で半周）にもどした。描きなおしても、続きの位置から流れる
 var _mbxT0=performance.now();
-function lbMbxSlow(){ try{ document.querySelectorAll('.mbx-track').forEach(t=>{ t.style.setProperty('animation-duration','480s','important'); (t.getAnimations?t.getAnimations():[]).forEach(a=>{ if(a.animationName!=='mbxRun'||a.playState!=='running') return; const want=(performance.now()-_mbxT0)%480000, cur=(a.currentTime||0)%480000; if(Math.abs(want-cur)>1500&&Math.abs(want-cur)<478500) a.currentTime=want; }); }); }catch(e){} }
+function lbMbxSlow(){ try{ document.querySelectorAll('.mbx-track').forEach(t=>{ t.style.setProperty('animation-duration','300s','important'); (t.getAnimations?t.getAnimations():[]).forEach(a=>{ if(a.animationName!=='mbxRun'||a.playState!=='running') return; const want=(performance.now()-_mbxT0)%300000, cur=(a.currentTime||0)%300000; if(Math.abs(want-cur)>1500&&Math.abs(want-cur)<478500) a.currentTime=want; }); }); }catch(e){} }
 (function(){ if(typeof render1!=='function') return; const _r=render1; render1=function(){ const r=_r.apply(this,arguments); lbStreetPlace(); lbMbxSlow(); return r; }; })();
 setTimeout(lbMbxSlow,0); setInterval(lbMbxSlow,500);
 setTimeout(lbStreetPlace,0);
@@ -19328,9 +19334,53 @@ if(/[?&]view=street\b/.test(location.search)){ const go=()=>setTimeout(lbStreetV
 try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .lbst{ margin:0 0 14px; } .lbst-h{ margin:0 0 6px; font-size:15px; color:#C2476B; font-weight:800; } .lbst-h span{ font-size:11.5px; font-weight:600; color:#9A8A92; margin-left:6px; }
 .lbst-art{ border-radius:18px; overflow:hidden; border:1px solid #DDEBF6; background:#EAF7FF; } .lbst-art svg{ display:block; width:100%; height:auto; }
-.mbx-track{ animation-duration:480s!important; }
+.mbx-track{ animation-duration:300s!important; }
 body.lbst-only{ margin:0; background:transparent; } body.lbst-only .lbst-art{ border:0; border-radius:0; }
 </style>`); }catch(e){}
+// v176: 固まらない仕組み
+//  1) 画面の外にある動く絵は、中の動きを止める（見えたら、また動く）
+//  2) 窓を開いている時・さわっている最中は、自動の作り直しをしない（ui.js の自動 render を待たせる）
+//  3) 下の方のカードは、見えるまで描かない（content-visibility）
+//  4) 重い時が続いたら、自動で「かるい表示」にする（走るペット・浮かぶ島の数をへらす）
+(function(){
+  if(window._lbPerf) return; window._lbPerf=true;
+  const st=document.createElement('style'); st.id='lbPerfCss';
+  st.textContent=`.lb-off *{ animation-play-state:paused!important; }
+.home > .hm-pair, .home > .hm-grid, .home > .hm-tile, .home > section.hm-tile{ content-visibility:auto; contain-intrinsic-size:auto 520px; }
+body.lb-lite .pr-p:nth-of-type(2n){ display:none!important; }
+body.lb-lite .mbx-isle img, body.lb-lite .hmi-isle img{ animation:none!important; }`;
+  document.head.appendChild(st);
+  // ---- 1) 画面の外は止める ----
+  const SEL='.hmi-slot, .lbst, .pr-w, .hm-hero, .hm-daily, .hm-pair, .hm-grid, .hm-tile, .life-art, .mbx-isle, .hmi-isle, .pr-p, .gsz-art, .pa-art';
+  let io=null; const seen=new WeakSet();
+  function setOff(el,off){ if(el.classList.contains('lb-off')===off) return; el.classList.toggle('lb-off',off);
+    if(el.querySelectorAll) el.querySelectorAll('svg').forEach(s=>{ try{ if(s.pauseAnimations) off?s.pauseAnimations():s.unpauseAnimations(); }catch(_){} }); }
+  try{ io=new IntersectionObserver(es=>es.forEach(e=>setOff(e.target,!e.isIntersecting)),{ rootMargin:'120px 120px' }); }catch(_){ io=null; }
+  function scan(){ if(!io) return; try{ document.querySelectorAll(SEL).forEach(el=>{ if(!seen.has(el)){ seen.add(el); io.observe(el); } }); }catch(_){} }
+  let qd=0; function later(){ if(qd) return; qd=setTimeout(()=>{ qd=0; scan(); },250); }
+  try{ new MutationObserver(later).observe(document.body,{ childList:true, subtree:true }); }catch(_){}
+  scan();
+  // ---- 2) さわっている最中・窓を開いている時は、作り直さない ----
+  window._lbTouchAt=0;
+  ['pointerdown','wheel','touchstart','keydown','scroll'].forEach(ev=>window.addEventListener(ev,()=>{ window._lbTouchAt=Date.now(); },{ passive:true, capture:true }));
+  window.lbBusy=function(){
+    if(Date.now()-window._lbTouchAt<15000) return true;
+    const open=['gsZoom','gpZoom','flDlg','frDlg','mpDlg','paZoom','pgToast'].some(id=>{ const d=document.getElementById(id); return d&&!d.hidden&&id!=='pgToast'; });
+    if(open) return true;
+    try{ if(document.querySelector('.pa-ov:not([hidden]), .gsz:not([hidden]), .rvx, .rvx-modal')) return true; }catch(_){}
+    return false; };
+  // ---- 4) 重い時が続いたら、かるい表示 ----
+  let marks=[]; const LITE_KEY='lb.lite';
+  try{ const v=+sessionStorage.getItem(LITE_KEY)||0; if(v&&Date.now()-v<3*86400000) document.body.classList.add('lb-lite'); }catch(_){}
+  function goLite(){ if(document.body.classList.contains('lb-lite')) return; document.body.classList.add('lb-lite'); try{ sessionStorage.setItem(LITE_KEY,String(Date.now())); }catch(_){} try{ console.info('[lbperf] かるい表示にしました'); }catch(_){} }
+  try{ new PerformanceObserver(l=>{ const now=Date.now(); l.getEntries().forEach(e=>{ if(e.duration>=400) marks.push(now); }); marks=marks.filter(t=>now-t<20000); if(marks.length>=4&&document.visibilityState==='visible') goLite(); }).observe({ type:'longtask', buffered:false }); }catch(_){}
+  // 画面が止まった（1.5秒以上 描けなかった）ことが続いたら、かるい表示
+  let last=performance.now(), stalls=[];
+  function tick(t){ const gap=t-last; last=t; if(gap>1500&&document.visibilityState==='visible'&&!document.hidden){ const now=Date.now(); stalls.push(now); stalls=stalls.filter(x=>now-x<60000); if(stalls.length>=2) goLite(); } requestAnimationFrame(tick); }
+  document.addEventListener('visibilitychange',()=>{ last=performance.now(); });
+  requestAnimationFrame(tick);
+  window.lbLite=function(on){ if(on) goLite(); else { document.body.classList.remove('lb-lite'); try{ sessionStorage.removeItem(LITE_KEY); }catch(_){} } };
+})();
 </script>
 <script>
 // ===== サーバーで紹介を届ける（Firebase） =====
