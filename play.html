@@ -19529,6 +19529,8 @@ function fbSweep(){ if(typeof frReplies!=='function'||typeof frReplyDone!=='func
   for(const x of frReplies()) if(done[x.id]){ frReplyDone(x.id); n++; } if(n&&typeof render==='function'&&!document.getElementById('mtOv')) try{ const d=document.getElementById('frDlg'); if(!d||d.hidden) render(); }catch(_){} }
 // サーバーにつながっているか（画面の文を変えたいとき用）
 function fbOnline(){ return !!(FB&&FB.uid); }
+// v177.7：つながるまで少し待つ（つながったら true）
+async function fbWaitOn(ms){ if(fbOnline()) return true; try{ fbStart(); }catch(_){} const t0=Date.now(); while(Date.now()-t0<(ms||10000)){ await new Promise(r=>setTimeout(r,400)); if(fbOnline()) return true; } return false; }
 // 自分の受け箱を見張る
 function fbListen(){ const { collection, onSnapshot }=FB.D;
   onSnapshot(collection(FB.db,'ids',myId(),'inbox'),snap=>{
@@ -19579,6 +19581,14 @@ async function fbAsk(id){ const c=fbCandidates().find(x=>x.id===id), h=myHero();
     const a=store.get(KEY_FOFASK,[]); if(!a.includes(id)) store.set(KEY_FOFASK,a.concat([id]).slice(-50)); return true; }catch(e){ FB_LASTERR=(e&&e.code)||String(e).slice(0,40); try{ console.warn('[fbsync] つながりたいを送れませんでした',e); }catch(_){} } }
   return false; }
 let FB_LASTERR='', _fofMsg=null;
+// v177.7：つながっていない時に押した「つながる」は、ためておいて、つながったら自動で送る
+function fofQueue(id){ const q=store.get('fof.askq',[]); if(!q.includes(id)) store.set('fof.askq',q.concat([id]).slice(-30)); try{ fbStart(); }catch(_){} }
+let _fofFl=false;
+setInterval(async()=>{ if(_fofFl||!fbOnline()) return; const q=store.get('fof.askq',[]); if(!q.length) return; _fofFl=true;
+  try{ for(const id of q){ const asked=store.get(KEY_FOFASK,[]); let ok=asked.includes(id); if(!ok){ try{ ok=await fbAsk(id); }catch(_){ ok=false; } }
+      if(ok||/permission/.test(FB_LASTERR)||!fbCandidates().some(x=>x.id===id)){ store.set('fof.askq',store.get('fof.askq',[]).filter(x=>x!==id)); if(ok){ const c=null; try{ if(typeof pgToast==='function') pgToast('「つながりたい」を送りました💌'); }catch(_){} } }
+      else break; }
+    fbDlgRefresh(); }finally{ _fofFl=false; } },8000);
 // 申請に OK した：相手を友だちに入れて、相手の受け箱に書き、申請を消す
 async function fbAccept(from){ const x=FB_REQS.find(r=>r.from===from); if(!FB||!x) return false;
   const o={ id:from, by:x.by||'', s:x.s, c:x.c||null, f:x.f||null, ch:x.ch||null, t:x.t||Date.now() };
@@ -19593,10 +19603,10 @@ function fbFofJoined(){ const me=myId(), fr=fbFriends(), mine=new Map(fr.map(f=>
   return Object.values(out).slice(0,30); }
 function fbFofHTML(){ const on=fbOnline(); const reqs=on?FB_REQS:[], cands=fbCandidates(), asked=store.get(KEY_FOFASK,[]), can=!!myHero()&&on, joined=fbFofJoined(); if(!fbFriends().length) return '';
   let h='<div class="fof">';
-  if(!on) h+='<p class="tiny muted">サーバーにつながるのを待っています。つながると、「つながる」を押せます。</p>';
+  if(!on) h+='<p class="tiny muted">いま、サーバーにつないでいます。「つながる」を押しておくと、つながった時に自動で申しこみます。</p>';
   if(reqs.length) h+=`<h3 class="fof-h fof-h-in">💌 あなたに「つながりたい」が届いています</h3><p class="tiny muted">「つながる」を押すと、すぐにつながります。</p><ul class="fof-l">${reqs.map(x=>`<li><span class="fof-n"><b>${esc(x.by||'だれか')}さん</b><small>${esc(fbViaName(x.via))}さんの友だち</small></span><span class="fof-b"><button type="button" class="fof-ok" data-acc="${esc(x.from)}">つながる</button><button type="button" class="fof-no" data-dec="${esc(x.from)}">今はしない</button></span></li>${fofRes(x.from)}`).join('')}</ul>`;
   if(cands.length) h+=`<h3 class="fof-h">友だちの友だち</h3><p class="tiny muted">共通の友だちがいる人だけが出ます。「つながる」を押すと、相手に「つながりたい」が届きます。<b>相手がOKを押すと、つながります。</b></p><ul class="fof-l">${cands.map(c=>{ const v=c.via.map(x=>esc(x.by)+'さん').join('、');
-      return `<li><span class="fof-n"><small>${v}の友だち</small><b>${esc(c.by||'友だち')}さん</b></span><span class="fof-b">${asked.includes(c.id)?'<span class="fof-wait">申しこみました<small>相手がOKすると、つながります</small></span>':`<button type="button" class="fof-ok" data-ask="${esc(c.id)}"${can?'':' disabled'}>つながる</button>`}</span></li>${fofRes(c.id)}`; }).join('')}</ul>${myHero()?'':'<p class="tiny muted">Channel が生まれると、「つながりたい」を送れます。</p>'}`;
+      return `<li><span class="fof-n"><small>${v}の友だち</small><b>${esc(c.by||'友だち')}さん</b></span><span class="fof-b">${asked.includes(c.id)?'<span class="fof-wait">申しこみました<small>相手がOKすると、つながります</small></span>':store.get('fof.askq',[]).includes(c.id)?'<span class="fof-wait">申しこみ予定<small>サーバーにつながったら、自動で申しこみます</small></span>':`<button type="button" class="fof-ok" data-ask="${esc(c.id)}"${myHero()?'':' disabled'}>つながる</button>`}</span></li>${fofRes(c.id)}`; }).join('')}</ul>${myHero()?'':'<p class="tiny muted">Channel が生まれると、「つながりたい」を送れます。</p>'}`;
   if(!cands.length&&!reqs.length) h+=`<h3 class="fof-h">友だちの友だち</h3><p class="tiny muted">${joined.length?'いまは、新しい「友だちの友だち」はいません。':'いまは、まだ「友だちの友だち」はいません。友だちが、ほかの人ともつながると、ここに出ます。'}</p>`;
   h+='<p class="fof-note">つながっても、メッセージのやり取りは出来ません。</p>';
   return h+'</div>'; }
@@ -19619,7 +19629,10 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .fof-flash{ animation:fofFlash 1.4s ease; border-radius:14px; } @keyframes fofFlash{ 0%{ background:#FFE3EC; } 100%{ background:transparent; } }
 </style>`);
 (function(){ const _bf=bindFriend; bindFriend=function(){ const r=_bf.apply(this,arguments); const d=document.getElementById('frDlg'); if(!d||d.hidden) return r;
-  d.querySelectorAll('[data-ask]').forEach(b=>{ b.onclick=async()=>{ if(b.disabled) return; b.disabled=true; b.textContent='送っています…'; const id=b.dataset.ask; const c=fbCandidates().find(x=>x.id===id); FB_LASTERR=''; let ok=false; try{ ok=await fbAsk(id); }catch(e){ FB_LASTERR=(e&&e.code)||''; }
+  d.querySelectorAll('[data-ask]').forEach(b=>{ b.onclick=async()=>{ if(b.disabled) return; b.disabled=true; b.textContent='つないでいます…'; const id=b.dataset.ask; const c=fbCandidates().find(x=>x.id===id); FB_LASTERR=''; let ok=false;
+    if(!(await fbWaitOn(8000))){ fofQueue(id); fofShow(id,`いまサーバーにつながるのを待っています。つながったら、自動で${(c&&c.by)||'相手'}さんに「つながりたい」を送ります。このまま閉じても大丈夫です。`,true); return; }
+    b.textContent='送っています…'; try{ ok=await fbAsk(id); }catch(e){ FB_LASTERR=(e&&e.code)||''; }
+    if(!ok&&!/permission/.test(FB_LASTERR)){ fofQueue(id); fofShow(id,`通信が不安定なので、つながったら自動で${(c&&c.by)||'相手'}さんに「つながりたい」を送ります。`,true); return; }
     fofShow(id, ok?`${(c&&c.by)||'相手'}さんに「つながりたい」を送りました！ ${(c&&c.by)||'相手'}さんがOKを押すと、つながります。つながったら、お知らせします。`:`送れませんでした。通信のよいところで、もう一度押してください。${FB_LASTERR?'（'+FB_LASTERR+'）':''}`, ok); }; });
   d.querySelectorAll('[data-acc]').forEach(b=>{ b.onclick=async()=>{ if(b.disabled) return; b.disabled=true; b.textContent='つないでいます…'; const id=b.dataset.acc; const x=FB_REQS.find(r=>r.from===id); let ok=false; try{ ok=await fbAccept(id); }catch(e){}
     if(ok) fbDlgRefresh(`${(x&&x.by)||'相手'}さんと、つながりました！ ふたりの Channel は、人生のどこかで出会います。`); fofShow(id, ok?`${(x&&x.by)||'相手'}さんと、つながりました！`:'うまくつながれませんでした。通信のよいところで、もう一度押してください。', ok);
@@ -20065,18 +20078,25 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v170: お花を贈る・受け取る（Firebase：ids/{相手}/flower/{自分_日付_1〜3}）
 function flOn(){ return typeof fbOnline==='function'&&fbOnline()&&typeof FB!=='undefined'&&FB&&FB.D; }
 function flDay(){ const d=new Date(); return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); }
-async function flSend(to,pk,occ,h){ if(!to&&flFriends().length){ _flMsg='だれに贈るか、Higher Self名を選んでね。'; flOpen(); return; } const fr=flFriends().find(f=>f.id===to); if(!fr){ _flMsg='贈る友だちが、まだいません。'; flOpen(); return; }
+async function flSend(to,pk,occ,h,bg){ const say=m=>{ _flMsg=m; if(bg){ try{ if(typeof pgToast==='function') pgToast(m); }catch(_){} } else flOpen(); }; if(!to&&flFriends().length){ _flMsg='だれに贈るか、Higher Self名を選んでね。'; flOpen(); return; } const fr=flFriends().find(f=>f.id===to); if(!fr){ _flMsg='贈る友だちが、まだいません。'; flOpen(); return; }
   if(!pk.items.length){ _flMsg='お花をえらんでね。'; flOpen(); return; }
   if(!h||h.some(x=>!x)){ _flMsg='俳句を3行とも書いてね。'; flOpen(); return; }
-  if(!flOn()){ _flMsg='いま、サーバーにつないでいます。10秒ほどしてから、もう一度押してください。'; try{ if(typeof fbStart==='function') fbStart(); }catch(_){} flOpen(); return; }
-  const sent=store.get('fl.sent',{}), key=fr.id+'|'+flDay(), n=(sent[key]||0)+1; if(n>3){ _flMsg=`${fr.by||'友だち'}さんには、きょうはもう3回贈りました。また明日ね。`; flOpen(); return; }
+  if(!flOn()){ if(bg) return 'wait'; const btn0=document.querySelector('[data-fl-send]'); if(btn0){ btn0.disabled=true; btn0.textContent='つないでいます…'; }
+    if(!(await fbWaitOn(12000))){ flQueue({ to, pk, occ, h }); _flH=null; say(`いまサーバーにつながるのを待っています。つながったら、自動で${fr.by||'友だち'}さんにお花と俳句を贈ります💐 このまま閉じても大丈夫です。`); return; } }
+  const sent=store.get('fl.sent',{}), key=fr.id+'|'+flDay(), n=(sent[key]||0)+1; if(n>3){ say(`${fr.by||'友だち'}さんには、きょうはもう3回贈りました。また明日ね。`); return bg?'done':undefined; }
   const me=myId(), by=String(store.get(KEY_ME,'')||'').slice(0,20), id=me+'_'+flDay()+'_'+n; const b=flCode(pk.items,pk.items.length===1&&pk.ves==='one'?'one':pk.ves).slice(0,80);
-  const btn=document.querySelector('[data-fl-send]'); if(btn){ btn.disabled=true; btn.textContent='おくっています…'; }
-  try{ await FB.D.setDoc(FB.D.doc(FB.db,'ids',String(fr.id),'flower',id),{ from:me, by, b, o:String(occ||'').slice(0,20), h:h.map(x=>String(x).slice(0,16)).join('／').slice(0,60), t:Date.now() });
+  const btn=bg?null:document.querySelector('[data-fl-send]'); if(btn){ btn.disabled=true; btn.textContent='おくっています…'; }
+  try{ await Promise.race([FB.D.setDoc(FB.D.doc(FB.db,'ids',String(fr.id),'flower',id),{ from:me, by, b, o:String(occ||'').slice(0,20), h:h.map(x=>String(x).slice(0,16)).join('／').slice(0,60), t:Date.now() }),new Promise((_,rj)=>setTimeout(()=>rj({ code:'timeout' }),15000))]);
     const keep={}; Object.keys(sent).filter(x=>x.endsWith(flDay())).forEach(x=>keep[x]=sent[x]); keep[key]=n; store.set('fl.sent',keep);
-    _flMsg=`${fr.by||'友だち'}さんに、お花と俳句を贈りました💐`; _flH=null; }
-  catch(err){ if(many) return String(err&&err.code||'').includes('permission')?'（サーバーの準備中）':'（うまく送れませんでした）'; _flMsg=String(err&&err.code||'').includes('permission')?'まだ贈れません（サーバーの準備中です）。':'うまく送れませんでした。少しあとで、もう一度ためしてね。'; }
-  flOpen(); }
+    _flH=null; say(`${fr.by||'友だち'}さんに、お花と俳句を贈りました💐`); return 'done'; }
+  catch(err){ const code=String(err&&err.code||err&&err.message||''); try{ console.warn('[flgift]',code); }catch(_){}
+    if(code.includes('permission')){ say('まだ贈れません（サーバーの準備中です）。'); return 'done'; }
+    if(bg) return 'wait'; flQueue({ to, pk, occ, h }); _flH=null; say(`通信が不安定なので、つながったら自動で${fr.by||'友だち'}さんにお花と俳句を贈ります💐`); return; } }
+// v177.7：送れなかったお花は、ためておいて、つながったら自動で贈る
+function flQueue(x){ const q=store.get('fl.queue',[]); q.push(Object.assign({ at:Date.now() },x)); store.set('fl.queue',q.slice(-10)); try{ if(typeof fbStart==='function') fbStart(); }catch(_){} }
+let _flQF=false;
+setInterval(async()=>{ if(_flQF||!flOn()) return; const q=store.get('fl.queue',[]); if(!q.length) return; _flQF=true;
+  try{ const x=q[0]; const r=await flSend(x.to,x.pk,x.occ,x.h,true); if(r==='done'||Date.now()-(x.at||0)>3*864e5){ store.set('fl.queue',store.get('fl.queue',[]).slice(1)); } }catch(_){ } finally{ _flQF=false; } },8000);
 let _flL=false;
 function flListen(){ if(_flL||!flOn()) return; _flL=true; const { collection, onSnapshot, deleteDoc }=FB.D;
   onSnapshot(collection(FB.db,'ids',myId(),'flower'),snap=>{ const got=[]; snap.forEach(d=>{ const x=d.data()||{}; if(typeof x.b!=='string') return; got.push({ id:d.id, by:String(x.by||'友だち').slice(0,20), b:String(x.b).slice(0,80), o:String(x.o||'').slice(0,20), h:String(x.h||'').slice(0,60), t:+x.t||Date.now() }); });
@@ -20091,12 +20111,12 @@ function flPhBigCode(ph){ if(!ph.bg||!ph.bg.length) return ''; const seen=new Se
 function flPhCode(ph){ const bg=flPhBigCode(ph); const head=[flCode(ph.items||[],ph.ves||'vase')]; if(bg) head.push(bg); return head.concat((ph.sh||[]).slice(0,FL_SHELF_MAX).map(v=>flCode(v.items,v.ves))).join('~').slice(0,1000); }
 function flPhDecode(p){ const a=String(p||'').split('~'); const m=flDecode(a[0]); let bg=[]; const rest=a.slice(1).filter(x=>{ const mm=/\|big(\d{1,2})$/.exec(x); if(!mm) return true; const its=x.split('|')[0].split(',').map(y=>{ const [f,c]=y.split('.'); return { f:+f, c:c||'' }; }).filter(y=>FL[y.f]&&FL[y.f].c.includes(y.c)); const n=Math.max(1,Math.min(40,+mm[1]||1)); if(its.length) bg=Array.from({ length:n },(_,i)=>({ items:its.filter((_,j)=>j%n===i).concat(i>=its.length?[its[i%its.length]]:[]) })); return false; });
   return { items:m.items, ves:m.ves, sh:rest.slice(0,FL_SHELF_MAX).map(flDecode).filter(v=>v.items.length), bg }; }
-async function flPhSendMany(ids,ph,msg){ ids=[...new Set(ids)].slice(0,5); if(!ids.length) return; if(!flOn()){ _flMsg='いま、サーバーにつないでいます。10秒ほどしてから、もう一度押してください。'; try{ if(typeof fbStart==='function') fbStart(); }catch(_){} flOpen(); return; }
+async function flPhSendMany(ids,ph,msg){ ids=[...new Set(ids)].slice(0,5); if(!ids.length) return; if(!flOn()){ const b0=document.querySelector('[data-fl-phgo]'); if(b0){ b0.disabled=true; b0.textContent='つないでいます…'; } if(!(await fbWaitOn(15000))){ _flMsg='いまサーバーにつながるのを待っています。少しあとで、もう一度押してください。'; flOpen(); return; } }
   const btn=document.querySelector('[data-fl-phgo]'); if(btn){ btn.disabled=true; btn.textContent='おくっています…'; }
   const ok=[], ng=[]; for(const to of ids){ const r=await flPhSend(to,ph,msg,1); const fr=flFriends().find(f=>f.id===to); (r===true?ok:ng).push((fr&&fr.by||'友だち')+'さん'+(typeof r==='string'?r:'')); }
   _flMsg=(ok.length?`${ok.join('・')}に、お礼の俳句と写真を送りました💌`:'')+(ng.length?(ok.length?'　':'')+`送れなかった人：${ng.join('・')}`:''); if(ok.length){ _flPhSend=-1; _flPhMsg=''; _flPhH=null; _flPhTos=null; } flOpen(); }
 async function flPhSend(to,ph,msg,many){ const fr=flFriends().find(f=>f.id===to); if(!fr){ if(many) return '（見つかりません）'; _flMsg='だれに送るか、Higher Self名を選んでね。'; flOpen(); return; }
-  if(!flOn()){ _flMsg='いま、サーバーにつないでいます。10秒ほどしてから、もう一度押してください。'; try{ if(typeof fbStart==='function') fbStart(); }catch(_){} flOpen(); return; }
+  if(!flOn()&&!(await fbWaitOn(15000))){ if(many) return '（サーバーにつながっていません）'; _flMsg='いまサーバーにつながるのを待っています。少しあとで、もう一度押してください。'; flOpen(); return; }
   const sent=store.get('fl.phSent',{}), key=fr.id+'|'+flDay(), n=(sent[key]||0)+1; if(n>3){ if(many) return '（きょうはもう3枚送りました）'; _flMsg=`${fr.by||'友だち'}さんには、きょうはもう3枚送りました。また明日ね。`; flOpen(); return; }
   const me=myId(), by=String(store.get(KEY_ME,'')||'').slice(0,20), id=me+'_'+flDay()+'_'+n;
   if(!many){ const btn=document.querySelector('[data-fl-phgo]'); if(btn){ btn.disabled=true; btn.textContent='おくっています…'; } }
