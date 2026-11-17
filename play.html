@@ -18855,8 +18855,12 @@ function flStateBtn(kind,j,g){ const k=flGk(g), rm=store.get(KEY_FLROOM,null); c
   return `<button type="button" class="mp-btn fl-b2" data-fl-shgot="${j}">🪴 棚に飾る</button>`; }
 function flGotHTML(){ const got=store.get(KEY_FLGOT,[]); if(got.some(g=>!g.seen)){ got.forEach(g=>g.seen=1); store.set(KEY_FLGOT,got); }
   if(!got.length) return '<p class="tiny muted">まだ届いたお花はありません。友だちから花束や一輪のお花が届くと、ここに残ります。</p>';
-  return flGotCountHTML()+flBigPickHTML()+`<ul class="fl-got">${got.slice().reverse().map((g,i)=>{ const b=flDecode(g.b); const j=got.length-1-i; return `<li><div class="fl-got-art">${flArt(b.items,b.ves)}</div><div><p class="fl-got-by"><b>${esc(g.by)}さん</b>から・${esc(g.o||'')}・${esc(new Date(g.t).getMonth()+1+'月'+new Date(g.t).getDate()+'日')}</p><p class="fl-haiku">${(g.h||'').split('／').map(esc).join('<br>')}</p><p class="tiny muted">${esc(flNames(b.items))}</p><div class="fl-act">${flStateBtn('roomgot',j,g)}${flStateBtn('shgot',j,g)}</div></div></li>`; }).join('')}</ul>`; }
+  return flGotCountHTML()+flBigPickHTML()+`<ul class="fl-got">${got.slice().reverse().map((g,i)=>{ const b=flDecode(g.b); const j=got.length-1-i; return `<li><div class="fl-got-art">${flArt(b.items,b.ves)}</div><div><p class="fl-got-by"><b>${esc(g.by)}さん</b>から・${esc(g.o||'')}・${esc(new Date(g.t).getMonth()+1+'月'+new Date(g.t).getDate()+'日')}</p><p class="fl-haiku">${(g.h||'').split('／').map(esc).join('<br>')}</p><p class="tiny muted">${esc(flNames(b.items))}</p><div class="fl-act">${flStateBtn('roomgot',j,g)}${flStateBtn('shgot',j,g)}${flThxBtn(g)}</div></div></li>`; }).join('')}</ul>`; }
+// v175.13: 届いたお花から、送ってくれた人に すぐお礼のお花を贈る
+function flGotFrom(g){ const m=/^(.+)_\d{8}_\d+$/.exec(String(g&&g.id||'')); if(!m) return null; return flFriends().find(f=>f.id===m[1])||null; }
+function flThxBtn(g){ const f=flGotFrom(g); if(!f) return ''; return `<button type="button" class="mp-btn fl-thx" data-fl-thx="${esc(f.id)}">💌 ${esc(f.by||g.by||'友だち')}さんに お礼のお花を贈る</button>`; }
 function flClick(e){ const t=e.target; const d=document.getElementById('flDlg');
+  const th=t.closest&&t.closest('[data-fl-thx]'); if(th){ const f=flFriends().find(x=>x.id===th.dataset.flThx); if(f){ const nm=f.by||'友だち', has=flPick().items.length>0; _flTab=has?'send':'pick'; _flTo=f.id; _flOcc='ありがとう'; _flH=flHaikuIdea('ありがとう'); _flMsg=has?`💌 ${nm}さんへの お礼のお花です。お花と俳句を たしかめて「贈る」を押してね。`:`💌 ${nm}さんへの お礼：まず お花をえらんでね。そのあと「贈る」を開くと、${nm}さんが えらばれています。`; flOpen(); try{ const b=document.querySelector('#flDlg .fl-in'); if(b) b.scrollTop=0; }catch(_){} } return; }
   if(t===d||t.closest('[data-fl-x]')){ flClose(); return; }
   const tb=t.closest('[data-fl-tab]'); if(tb){ _flTab=tb.dataset.flTab; _flMsg=''; flOpen(); return; }
   const ad=t.closest('[data-fl-add]'); if(ad){ const [f,c]=ad.dataset.flAdd.split('.'); const pk=flPick(); const k=pk.items.findIndex(x=>x.f===+f&&x.c===c); if(k>=0) pk.items.splice(k,1); else { const k2=pk.items.findIndex(x=>x.f===+f); if(k2>=0) pk.items[k2].c=c; else if(pk.items.length<FL_MAX) pk.items.push({ f:+f, c }); else { _flMsg='花束は10種類までです。'; } } if(pk.items.length>1&&pk.ves==='one') pk.ves='vase'; flSavePick(); const sc=d.querySelector('.fl-list'), y=sc?sc.scrollTop:0, iy=d.querySelector('.fl-in').scrollTop; flOpen(); const sc2=d.querySelector('.fl-list'); if(sc2) sc2.scrollTop=y; d.querySelector('.fl-in').scrollTop=iy; return; }
@@ -18971,7 +18975,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .fl-sel-h{ margin:0 0 4px; font-weight:700; color:#6A4A58; } .fl-sel-l{ list-style:none; margin:0 0 8px; padding:0; display:flex; flex-wrap:wrap; gap:6px; } .fl-sel-l li{ background:#fff; border-radius:999px; padding:3px 6px 3px 10px; font-size:13px; display:flex; align-items:center; gap:4px; border:1px solid #F4C6D4; }
 .fl-dot{ width:12px; height:12px; border-radius:50%; display:inline-block; border:1px solid #ddd; } .fl-rm{ border:0; background:#FFE3EC; color:#C2476B; border-radius:50%; width:24px; height:24px; cursor:pointer; }
 .fl-ves{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; } .fl-vb{ border:1px solid #F4C6D4; background:#fff; border-radius:999px; padding:6px 12px; cursor:pointer; color:#6A4A58; font-size:14px; } .fl-vb.on{ background:#FF8FAB; color:#fff; border-color:#FF8FAB; }
-.fl-act{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.fl-act{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; } .fl-thx{ background:#FFF0F4!important; color:#C2476B!important; border:2px solid #F4B6C8!important; }
 .fl-done{ display:inline-flex; align-items:center; gap:4px; padding:9px 16px; border-radius:999px; background:#E3F6EA; color:#23794A; font-weight:700; font-size:15px; border:2px solid #9BD8B2; }
 .fl-warn{ display:inline-flex; align-items:center; padding:8px 14px; border-radius:999px; background:#FFF1D6; color:#8A5A00; font-weight:700; font-size:14px; border:2px solid #F2C46D; }
 .fl-mini{ font-size:13px; } .fl-pop{ animation:flPop .45s ease-out; } @keyframes flPop{ 0%{ transform:scale(.8); opacity:0 } 70%{ transform:scale(1.06); opacity:1 } 100%{ transform:scale(1) } }
@@ -19041,6 +19045,7 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v166: Life Home の上のほうに「✨ LIFE BOOKのニュース」。新しい機能・更新のお知らせ。
 // ゲームに入っているお知らせ（LBN_BUILTIN）＋ 管理者が Firebase の os/news に書いたお知らせ（{ n:[{ i, d:ミリ秒, t:題, b:説明 }] }）。新しい順に3つ、のこりは「これまでのお知らせ」。
 const LBN_BUILTIN=[
+  { i:'v175-flthx', d:Date.UTC(2026,10,17,6,15), t:'届いたお花から、すぐにお礼のお花を贈れるようになりました💌', b:'「💐 お花」の「届いたお花」で、お花の下の「💌 お礼のお花を贈る」を押すと、送ってくれた人あての「贈る」画面が開きます。どんな日は「ありがとう」になっています。' },
   { i:'v175-petmove', d:Date.UTC(2026,10,16,15,37), t:'公園のペットが、1匹ずつちがう走り方になりました🐾', b:'走る速さ、足のテンポ、ぴょんぴょんのゆれ、ジャンプの高さが、ペットごとにちがいます。空に浮かぶ街の帯も、前よりゆっくり流れるようになりました。' },
   { i:'gw-parade', d:Date.UTC(2026,10,16,14,17), t:'Gateway に、乗り物が走る街ができました🚌✈️', b:'Gateway の「いろんな街が、空に浮かんでいます」の下で、バスや車、電車、船、飛行機、ヘリコプターなど、いろんな乗り物が次々に走っています。' },
   { i:'v175-park', d:Date.UTC(2026,10,16,14,45), t:'公園のペットたちが、道の上を走るようになりました🐾', b:'公園の道を広くして、ペットたちが道の上を走るようにしました。左を向いて、右から左へ。足を動かして走る子、とても速い子、ひと休みする子もいます。' },
