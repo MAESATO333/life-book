@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.26">
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="lifebook-version" content="v178.27">
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5af5f16575224c8c9596106067decbde"}'></script>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#FF8FAB"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LIFE BOOK"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head><body>
@@ -674,7 +674,7 @@ a.nav-b{ text-decoration:none; }
 <button class="devbtn" id="devbtn" type="button" hidden>制作用</button>
 <div class="dev" id="dev" hidden></div>
 <script>
-/* LIFE BOOK game version: v178.26 (2026-11-17) */ var LB_VER='v178.26';
+/* LIFE BOOK game version: v178.27 (2026-11-17) */ var LB_VER='v178.27';
 // ===== データ1：国・名前 =====
 // 試作版の仮データ。出生数の比率（w）、5歳未満の死亡（u5, 1000人あたり）、成人の平均寿命の目安（life）、
 // 家庭の経済状況の割合（econ: 苦しい/中間/裕福）、宗教（葬儀の形）の割合、きょうだいの数の目安（tfr）、
@@ -18112,7 +18112,7 @@ function gsZoomOpen(html){ let d=document.getElementById('gsZoom'); if(!d){ d=do
 function gsZoomClose(){ const d=document.getElementById('gsZoom'); if(d){ d.hidden=true; d.innerHTML=''; } document.body.classList.remove('gsz-open'); }
 document.addEventListener('click',e=>{ const t=e.target; if(t.closest&&t.closest('.gsz-x')||(t.id==='gsZoom')){ gsZoomClose(); return; }
   const z=t.closest&&t.closest('[data-gsz]'); if(z){ const i=+z.dataset.gsz; const c=gsChunks(_gsFr,GS_PER)[i]||_gsFr; const fof=store.get('hitotsu.fof',{}); const many=_gsFr.length>GS_PER;
-    gsZoomOpen(`<h3 class="gsz-h">🌳 ${many?`${i+1}本目の木（${c.length}人）`:`友だちの木（${c.length}人）`}</h3><div class="gsz-art">${gsSVG(c,true)}</div><ul class="gsz-l">${c.map(f=>{ const e=fof[f.id]||{}; const sub=(e.fr||[]).map(x=>x.b).filter(Boolean); return `<li><b>${esc(f.by||'友だち')}さん</b>${sub.length?`<small>つながっている人：${sub.map(x=>esc(x)+'さん').join('、')}</small>`:''}${e.pet?`<small>🐾 ${esc(e.pet.b)}（${esc((PB_ALL[e.pet.p]||{}).name||'')}）</small>`:''}</li>`; }).join('')||'<li>まだ、つながった人はいません。</li>'}</ul>`); return; }
+    gsZoomOpen(`<h3 class="gsz-h">🌳 ${many?`${i+1}本目の木（${c.length}人）`:`友だちの木（${c.length}人）`}</h3><div class="gsz-art">${gsSVG(c,true)}</div>${c.length>6?`<p class="gsz-sc">↕ スクロールして、${c.length}人を見られます</p>`:''}<ul class="gsz-l">${c.map(f=>{ const e=fof[f.id]||{}; const sub=(e.fr||[]).map(x=>x.b).filter(Boolean); return `<li><b>${esc(f.by||'友だち')}さん</b>${sub.length?`<small>つながっている人：${sub.map(x=>esc(x)+'さん').join('、')}</small>`:''}${e.pet?`<small>🐾 ${esc(e.pet.b)}（${esc((PB_ALL[e.pet.p]||{}).name||'')}）</small>`:''}</li>`; }).join('')||'<li>まだ、つながった人はいません。</li>'}</ul>`); return; }
   const pz=t.closest&&t.closest('[data-gspz]'); if(pz){ const i=+pz.dataset.gspz; const list=gsFrPets(_gsFr); const c=gsChunks(list,GS_PPER)[i]||[];
     gsZoomOpen(`<h3 class="gsz-h">🐾 ペットのつながりの木（${c.length}匹）</h3><div class="gsz-art">${gsPetSVG(c,true)}</div><ul class="gsz-l">${c.map(p=>`<li><b>${p.g?'🌈 ':''}${esc(p.b)}</b><small title="Higher Self：${esc(p.owner)}さん・${esc((PB_ALL[p.p]||{}).name||'')}・${p.a}歳">🌟 ${esc(p.owner)}さん・${esc((PB_ALL[p.p]||{}).name||'')}・${p.a}歳</small>${typeof pgBtns==='function'?pgBtns(p):''}</li>`).join('')||'<li>友だちがペットを迎えると、ここに出ます。</li>'}</ul>`); } });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const d=document.getElementById('gsZoom'); if(d&&!d.hidden) gsZoomClose(); } });
@@ -18164,7 +18164,9 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .hm-cid{ display:block; margin:0 2px 6px; padding:0; text-align:right; font-size:10px; line-height:1.4; color:#A898A2; }
 .hm-cid-l{ font-weight:600; } .hm-cid-n{ font-weight:700; letter-spacing:.04em; font-variant-numeric:tabular-nums; margin-left:3px; } .hm-cid small{ display:none; }
 </style>`);
-// v148: ペットの名前を、1回だけ直せる
+
+// v178.27（MITSUさん）：友だちの一覧は、全部ならべずに、コンパクトな箱の中でスクロールして見る（スマホ優先）
+(function(){ const s=document.createElement('style'); s.textContent='.gsz-l{ max-height:min(46vh,380px); overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding:6px; border-radius:14px; background:#FFF8FA; box-shadow:inset 0 0 0 1.5px #F6D3DE; } .gsz-sc{ margin:10px 0 0; font-size:12.5px; color:#C2476B; font-weight:700; text-align:center; }'; document.head.appendChild(s); })();// v148: ペットの名前を、1回だけ直せる
 (function(){
   const P0=mpPageHTML; let open=false;
   mpPageHTML=function(){ let h=P0.apply(this,arguments); const p=mpGet(); if(!p) return h; const gone=mpGone(p);
@@ -20898,7 +20900,7 @@ if(typeof gsPetTreeHTML==='function'){ const G=gsPetTreeHTML; gsPetTreeHTML=func
 // うちのペットのページ：届いたプレゼント
 if(typeof mpPageHTML==='function'){ const MP=mpPageHTML; mpPageHTML=function(){ let h=MP.apply(this,arguments); try{ const p=mpGet(); const g=(p&&Array.isArray(p.gifts)?p.gifts:[]).slice(-12).reverse(); if(!g.length) return h;
     const vt=pgViewedT(), C=typeof pmCounts==='function'?pmCounts(p):{l:0,f:0}, nn=pgNewCount(p);
-    const box=`<h4 class="mp-h4">💌 届いたプレゼント</h4><p class="pg-sum">これまでに <b>💗 可愛い！ ${C.l}</b>・<b>🎁 ごはん ${C.f}</b>${nn?`<span class="pg-nb">🆕 新しく ${nn}件</span>`:''}</p><ul class="pg-got">${g.map(x=>`<li${(x.rt||x.t)>vt?' class="pg-new"':''}>${x.k==='food'?`<b>${esc(x.f||'🎁 ごはん')}</b>`:'<b>💗 可愛い！</b>'+(x.f?` <q>${esc(x.f)}</q>`:'')}<span>${esc(x.by)}さんから・${new Date(x.t).getMonth()+1}月${new Date(x.t).getDate()}日</span></li>`).join('')}</ul>`;
+    const box=`<h4 class="mp-h4">💌 届いたプレゼント</h4><p class="pg-sum">これまでに <b>💗 可愛い！ ${C.l}</b>・<b>🎁 ごはん ${C.f}</b>${nn?`<span class="pg-nb">🆕 新しく ${nn}件</span>`:''}</p><ul class="pg-got">${g.map(x=>`<li${(x.rt||x.t)>vt?' class="pg-new"':''}>${x.k==='food'?`<b>${esc(x.f||'🎁 ごはん')}</b>`:'<b>💗 可愛い！</b>'+(x.f?` <q>${esc(x.f)}</q>`:'')}<span>${esc(x.by)}さんから・${pgWhen(x.t)}</span></li>`).join('')}</ul>`;
     const i=h.indexOf('<h4 class="mp-h4">📷'); return i>=0?h.slice(0,i)+box+h.slice(i):h+box; }catch(e){ return h; } }; }
 try{ document.head.insertAdjacentHTML('beforeend',`<style>
 .pg-btns{ display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; } .pg-b{ border:0; background:#FFE3EC; color:#C2476B; border-radius:999px; padding:7px 12px; font-weight:700; font-size:13px; cursor:pointer; } .pg-b.pg-f{ background:#FFF1D6; color:#B86A1E; } .pg-b:disabled{ opacity:.55; cursor:default; }
@@ -20912,6 +20914,8 @@ try{ document.head.insertAdjacentHTML('beforeend',`<style>
 // v178.26（MITSUさん）：届いたプレゼントが、何件来たか すぐわかるように。Life Home の「うちのペット」の上と、ペットのページに数を出す
 // はじめての時は、この1日に届いた分を「新しい」に数える
 try{ if(store.get('pg.viewedT',null)==null) store.set('pg.viewedT',Date.now()-864e5); }catch(e){}
+// v178.27（MITSUさん）：日にちの横に時間も（例：11月18日 14:05）
+function pgWhen(t){ const d=new Date(+t||Date.now()); return `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`; }
 function pgViewedT(){ return +store.get('pg.viewedT',0)||0; }
 function pgNewCount(p){ p=p||(typeof mpGet==='function'?mpGet():null); if(!p||!Array.isArray(p.gifts)) return 0; const vt=pgViewedT(); return p.gifts.filter(x=>(x.rt||x.t||0)>vt).length; }
 if(typeof mpOpen==='function'){ const O=mpOpen; mpOpen=function(view){ const r=O.apply(this,arguments); try{ if(!view&&pgNewCount()){ setTimeout(()=>{ store.set('pg.viewedT',Date.now()); try{ if(typeof page!=='undefined'&&page==='home'){ document.querySelectorAll('.pg-hmb').forEach(e=>e.remove()); } }catch(_){} },1500); } }catch(e){} return r; }; }
