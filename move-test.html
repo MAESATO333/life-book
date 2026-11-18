@@ -1,0 +1,37 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LIFE BOOK 引っ越しのテスト</title><meta name="robots" content="noindex">
+<link rel="canonical" href="https://lifebookworld.com/play.html">
+<style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FFF5F8;font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;color:#2a2433;padding:16px;box-sizing:border-box}
+.c{background:#fff;border-radius:20px;max-width:380px;width:100%;padding:26px 22px;text-align:center;box-shadow:0 8px 24px rgba(255,120,160,.18)}
+h1{font-size:19px;margin:0 0 10px}p{font-size:14px;line-height:1.8;margin:0 0 14px}
+a.b{display:inline-block;padding:13px 22px;border-radius:14px;background:linear-gradient(#FF9EBB,#FF7AA2);color:#fff;font-weight:700;text-decoration:none;box-shadow:0 4px 0 #E0577F}
+.u{font-size:13px;color:#D9467A;font-weight:700}
+</style>
+<script>
+// 古い住所の案内ページ：この端末の LIFE BOOK の記録をまとめて、新しい住所へ運ぶ（サーバーには送らない）
+(function(){
+  var NEW='https://lifebookworld.com/', PAGE='play.html', SEND=true;
+  var DROP=/^(hitotsu\.fbreg|hitotsu\.fbpush|hitotsu\.pwaSet|lb\.lastErr|lb\.movedAt|hmiDeck|hitotsu\.sky\.|hitotsu\.nw\.|hitotsu\.stat)/;
+  function enc(s){ var u=new TextEncoder().encode(s), b='', i; for(i=0;i<u.length;i+=8192) b+=String.fromCharCode.apply(null,u.subarray(i,i+8192));
+    return btoa(b).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+  var hash=location.hash||'';
+  if(SEND){ try{
+    var ls={}, n=0; for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(!DROP.test(k)){ ls[k]=localStorage.getItem(k); n++; } }
+    if(n&&ls['hitotsu.myid']) hash='#lbmove='+enc(JSON.stringify({v:2,at:Date.now(),h:location.hash||'',ls:ls}));
+    localStorage.setItem('lb.movedAt',String(Date.now()));
+  }catch(e){} }
+  var to=NEW+PAGE+location.search+hash;
+  window.__lbTo=to;
+  // 古いホーム画面アプリの一時保存をかたづける（記録そのものは消さない）
+  try{ if(navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(function(r){ r.forEach(function(x){ x.unregister(); }); }); }catch(e){}
+  try{ if(window.caches) caches.keys().then(function(k){ k.forEach(function(x){ caches.delete(x); }); }); }catch(e){}
+  setTimeout(function(){ location.replace(to); },700);
+})();
+</script></head><body>
+<div class="c"><h1>LIFE BOOK は、新しい住所に<br>引っ越しました</h1>
+<p>記録もいっしょに運んでいます。<br>このまま少しお待ちください。</p>
+<p class="u">lifebookworld.com</p>
+<a class="b" id="go" href="https://lifebookworld.com/play.html">新しい LIFE BOOK をひらく</a>
+<script>try{ document.getElementById('go').href=window.__lbTo; }catch(e){}</script>
+</div></body></html>
